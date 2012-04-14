@@ -19,6 +19,7 @@
 #include <QPushButton>
 #include <QMenu>
 #include <QGraphicsDropShadowEffect>
+#include <QPixmapCache>
 
 #include "pixmapanimation.h"
 
@@ -729,16 +730,25 @@ void Photo::drawEquip(QPainter *painter, CardItem *equip, int order){
     bold_font.setBold(true);
     painter->setFont(bold_font);
 
-    QRect equip_rect(0, 119 + order * 17, 130, 18);
-    QPixmap small_equip = QPixmap(QString("image/small-equips/%1.png").arg(card->objectName()));
+    // draw image or name
+    QString path = QString("image/small-equips/%1.png").arg(card->objectName());
+    QPixmap small_equip;
+    if(!QPixmapCache::find(path, &small_equip)){
+        small_equip.load(path);
+        QPixmapCache::insert(path, small_equip);
+    }
+    QRect equip_rect(0, 119 + order * 17, small_equip.width(), small_equip.height());
+
     if(small_equip.isNull())
         painter->drawText(20, 115 + 15 + order * 17, card->label());
     else
         painter->drawPixmap(equip_rect, small_equip);
 
-    painter->setPen(card->isRed() ? Qt::red : Qt::black);
+    // draw the number of equip
+    // painter->setPen(card->isRed() ? Qt::red : Qt::black);
     painter->drawText(108, 115 + 15 + order * 17, card->getNumberString());
 
+    // draw the suit of equip
     QRect suit_rect(115, 117 + order * 17, 18, 19);
     painter->drawPixmap(suit_rect, equip->getSmallSuitPixmap());
 
