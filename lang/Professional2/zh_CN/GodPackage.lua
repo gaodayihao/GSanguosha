@@ -133,7 +133,7 @@ return {
 	["$greatyeyan"] = "让这熊熊业火，焚尽你的罪恶！",
 	["$mediumyeyan"] = "聆听吧，这首献给你的镇魂曲！",
 	["$smallyeyan"] = "琴声",
-	["~shenzhouyu"] = "琴断",
+	["~shenzhouyu"] = "逝者不死，浴火重生……",
 
 	["cv:shenzhugeliang"] = "官方",
 	["$qixing1"] = "伏望天恩，誓讨汉贼！",
@@ -142,7 +142,7 @@ return {
 	["$dawu2"] = "此非万全之策，惟惧天雷",
 	["$kuangfeng1"] = "万事俱备，只欠业火",
 	["$kuangfeng2"] = "风~~~~~起~~~~~~！",
-	["~shenzhugeliang"] = "出师未捷身先死啊……",
+	["~shenzhugeliang"] = "今当远离……临表涕零……不知所言……",
 
 	["cv:shencaocao"] = "官方",
 	["$guixin"] = "山不厌高，海不厌深\

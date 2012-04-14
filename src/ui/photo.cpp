@@ -76,6 +76,7 @@ Photo::Photo()
 
     emotion_item = new QGraphicsPixmapItem(this);
     emotion_item->moveBy(10, 0);
+    emotion_item->setZValue(2.0);
 
     avatar_area = new QGraphicsRectItem(0, 0, 122, 50, this);
     avatar_area->setPos(5, 15);
