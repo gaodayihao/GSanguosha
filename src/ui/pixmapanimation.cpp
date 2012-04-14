@@ -106,6 +106,7 @@ PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, co
             if(emotion == "fire_slash")pma->moveBy(75,-35);
         }
         pma->setParentItem(parent);
+        pma->setZValue(2.5);
         pma->startTimer(50);
         connect(pma,SIGNAL(finished()),pma,SLOT(deleteLater()));
         return pma;

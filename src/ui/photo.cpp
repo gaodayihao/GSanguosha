@@ -48,7 +48,7 @@ Photo::Photo()
     chain.setParentItem(this);
     chain.setPos(-11, 40);
     chain.hide();
-    chain.setZValue(2.0);
+    chain.setZValue(1.9);
 
     progress_bar = new QProgressBar;
     progress_bar->setMinimum(0);
