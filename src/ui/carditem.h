@@ -26,6 +26,7 @@ public:
     QPointF homePos() const;
     QAbstractAnimation* goBack(bool kieru = false,bool fadein = true,bool fadeout = true);
     const QPixmap &getSuitPixmap() const;
+    const QPixmap &getSmallSuitPixmap() const;
     const QPixmap &getNumberPixmap() const;
     const QPixmap &getIconPixmap() const;
     void setFrame(const QString &frame);
@@ -63,7 +64,7 @@ protected:
 
 private:
     const Card *card, *filtered_card;
-    QPixmap suit_pixmap, icon_pixmap, number_pixmap, cardsuit_pixmap, *owner_pixmap;
+    QPixmap suit_pixmap, small_suit_pixmap, icon_pixmap, number_pixmap, cardsuit_pixmap, *owner_pixmap;
     QPointF home_pos;
     QGraphicsPixmapItem *frame, *avatar;
     bool auto_back, frozen;

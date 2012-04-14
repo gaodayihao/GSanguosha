@@ -20,6 +20,7 @@ CardItem::CardItem(const Card *card)
     Q_ASSERT(card != NULL);
 
     suit_pixmap.load(QString("image/system/suit/%1.png").arg(card->getSuitString()));
+    small_suit_pixmap.load(QString("image/system/log/%1.png").arg(card->getSuitString()));
     cardsuit_pixmap.load(QString("image/system/cardsuit/%1.png").arg(card->getSuitString()));
     number_pixmap.load(QString("image/system/%1/%2.png").arg(card->isBlack()?"black":"red").arg(card->getNumberString()));
     icon_pixmap.load(card->getIconPath());
@@ -132,6 +133,10 @@ QAbstractAnimation* CardItem::goBack(bool kieru,bool fadein,bool fadeout){
 
 const QPixmap &CardItem::getSuitPixmap() const{
     return suit_pixmap;
+}
+
+const QPixmap &CardItem::getSmallSuitPixmap() const{
+    return small_suit_pixmap;
 }
 
 const QPixmap &CardItem::getNumberPixmap() const{

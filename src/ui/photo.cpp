@@ -724,17 +724,23 @@ void Photo::drawEquip(QPainter *painter, CardItem *equip, int order){
 
     const EquipCard *card = qobject_cast<const EquipCard *>(equip->getCard());
 
+    painter->setPen(Qt::black);
+    QFont bold_font;
+    bold_font.setBold(true);
+    painter->setFont(bold_font);
+
     QRect equip_rect(0, 119 + order * 17, 130, 18);
     QPixmap small_equip = QPixmap(QString("image/small-equips/%1.png").arg(card->objectName()));
-    painter->drawPixmap(equip_rect, small_equip);
+    if(small_equip.isNull())
+        painter->drawText(20, 115 + 15 + order * 17, card->label());
+    else
+        painter->drawPixmap(equip_rect, small_equip);
 
-    QRect number_rect(94, 112 + order * 17, 27, 28);
-    QString color = card->isRed() ? "red" : "black";
-    QPixmap number = QPixmap(QString("image/system/%2/%1.png").arg(card->getNumberString()).arg(color));
-    painter->drawPixmap(number_rect, number);
+    painter->setPen(card->isRed() ? Qt::red : Qt::black);
+    painter->drawText(108, 115 + 15 + order * 17, card->getNumberString());
 
-    QRect suit_rect(113, 119 + order * 17, 13, 13);
-    painter->drawPixmap(suit_rect, equip->getSuitPixmap());
+    QRect suit_rect(115, 117 + order * 17, 18, 19);
+    painter->drawPixmap(suit_rect, equip->getSmallSuitPixmap());
 
 }
 

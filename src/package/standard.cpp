@@ -68,7 +68,8 @@ void EquipCard::onUse(Room *room, const CardUseStruct &card_use) const{
         thread->trigger(CardUsed, player, data);
 
         thread->trigger(CardFinished, player, data);
-    }else
+    }
+    else
         Card::onUse(room, card_use);
 }
 
@@ -88,8 +89,7 @@ void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
         room->throwCard(equipped);
     }
 
-
-    if(room->getCardOwner(this->getEffectiveId()) == target){
+    if(room->getCardOwner(this->getEffectiveId()) == target || this->objectName() == "gale-shell"){
         LogMessage log;
         log.from = target;
         log.type = "$Install";
