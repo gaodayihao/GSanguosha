@@ -26,7 +26,7 @@ Photo::Photo()
     :Pixmap("image/system/photo-back.png"),
     player(NULL),
     handcard("image/system/handcard.png"),
-    chain("image/system/chain.png"), action_item(NULL), save_me_item(NULL), permanent(false),
+    chain("image/system/chain.png"), lord_frame("image/system/lordframe.png"), action_item(NULL), save_me_item(NULL), permanent(false),
     weapon(NULL), armor(NULL), defensive_horse(NULL), offensive_horse(NULL),
     order_item(NULL), hide_avatar(false)
 {
@@ -47,7 +47,7 @@ Photo::Photo()
     chain.setParentItem(this);
     chain.setPos(-11, 40);
     chain.hide();
-    chain.setZValue(1.0);
+    chain.setZValue(2.0);
 
     progress_bar = new QProgressBar;
     progress_bar->setMinimum(0);
@@ -100,6 +100,11 @@ Photo::Photo()
     ready_item->setPos(86, 132);
     ready_item->hide();
 
+    lord_frame.setParentItem(this);
+    lord_frame.setPos(-7, -6);
+    lord_frame.setZValue(1.5);
+    lord_frame.hide();
+
     QStringList names;
     names   << "round_start" << "start" << "judge" << "draw"
             << "play" << "discard" << "finish";
@@ -110,9 +115,9 @@ Photo::Photo()
     foreach(Pixmap *phase, phases){
         phase->setParentItem(this);
         phase->setPos(23, 183);
+        phase->setZValue(1.8);
         phase->hide();
     }
-
 
     mark_item = new QGraphicsTextItem(this);
     mark_item->setPos(2, 99);
@@ -317,6 +322,17 @@ void Photo::updateAvatar(){
             avatar = pixmap;
         }
 
+        if(player->getGameMode() == "06_3v3"){
+            if(player->getRole() == "renegade" || player->isLord())
+                lord_frame.show();
+            else
+                lord_frame.hide();
+        }else{
+            if(player->isLord())
+                lord_frame.show();
+            else
+                lord_frame.hide();
+        }
     }else{
         avatar = QPixmap();
         kingdom_frame = QPixmap();
@@ -325,6 +341,7 @@ void Photo::updateAvatar(){
         small_avatar_area->setToolTip(QString());
 
         ready_item->hide();
+        lord_frame.hide();
     }
 
     hide_avatar = false;

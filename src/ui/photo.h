@@ -74,6 +74,7 @@ private:
     QPixmap kingdom_frame;
     QPixmap handcard;
     Pixmap chain;
+    Pixmap lord_frame;
     RoleCombobox *role_combobox;
     QGraphicsProxyWidget  *pile_button;
     QGraphicsPixmapItem *action_item, *save_me_item;
