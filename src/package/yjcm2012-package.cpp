@@ -309,7 +309,7 @@ public:
 class Qianxi: public TriggerSkill{
 public:
     Qianxi():TriggerSkill("qianxi"){
-        events << Predamage;
+        events << DamagedProceed;
     }
 
     virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
@@ -551,7 +551,7 @@ public:
 class Jiefan : public TriggerSkill{
 public:
     Jiefan():TriggerSkill("jiefan"){
-        events << Dying << SlashHit << CardFinished;
+        events << Dying << DamagedProceed << CardFinished;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -583,32 +583,33 @@ public:
                 room->useCard(use);
             }
         }
-        else if(event == SlashHit){
-            SlashEffectStruct effect = data.value<SlashEffectStruct>();
+        else if(event == DamagedProceed){
+            DamageStruct damage = data.value<DamageStruct>();
             int id = room->getTag("JiefanSlash").toInt();
-            if(!player->hasSkill(objectName())
-                || room->getTag("JiefanTarget").isNull()
-                || id != effect.slash->getEffectiveId())
-                return false;
+            if(player->hasSkill(objectName()) && damage.card && damage.card->inherits("Slash")
+                && !room->getTag("JiefanTarget").isNull()
+                && id == damage.card->getEffectiveId()){
 
-            DyingStruct dying = room->getTag("JiefanTarget").value<DyingStruct>();
-            ServerPlayer *target = dying.who;
-            room->removeTag("JiefanTarget");
-            Peach *peach = new Peach(effect.slash->getSuit(), effect.slash->getNumber());
-            peach->setSkillName(objectName());
-            CardUseStruct use;
-            use.card = peach;
-            use.from = handang;
-            use.to << target;
-            room->useCard(use);
+                DyingStruct dying = room->getTag("JiefanTarget").value<DyingStruct>();
+                ServerPlayer *target = dying.who;
+                room->removeTag("JiefanTarget");
+                Peach *peach = new Peach(damage.card->getSuit(), damage.card->getNumber());
+                peach->setSkillName(objectName());
+                CardUseStruct use;
+                use.card = peach;
+                use.from = handang;
+                use.to << target;
+                room->useCard(use);
 
-            return true;
+                return true;
+            }
+            return false;
         }
         else{
-            if(room->getTag("JiefanTarget").isNull() && room->getTag("JiefanSlash").isNull())
-                return false;
-            room->removeTag("JiefanTarget");
-            room->removeTag("JiefanSlash");
+            if(!room->getTag("JiefanTarget").isNull() && !room->getTag("JiefanSlash").isNull()){
+                room->removeTag("JiefanTarget");
+                room->removeTag("JiefanSlash");
+            }
         }
 
         return false;
@@ -732,34 +733,23 @@ public:
 class Lihuo: public TriggerSkill{
 public:
     Lihuo():TriggerSkill("lihuo"){
-        events << Damage
-                << CardFinished;
+        events << DamagedProceed << CardFinished;
         view_as_skill = new LihuoViewAsSkill;
-    }
-
-    virtual int getPriority() const{
-        return -1;
     }
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
         Room *room = player->getRoom();
-
-        if(event == Damage){
+        if(event == DamagedProceed){
             DamageStruct damage = data.value<DamageStruct>();
-            if(damage.card && damage.card->getSkillName() == objectName() && !player->hasFlag("lihuolose"))
-                room->setPlayerFlag(player, "lihuolose");
+            if(damage.card && damage.card->inherits("Slash") && damage.card->getSkillName() == objectName())
+                player->tag["Invokelihuo"] = true;
         }
-
-        if(event == CardFinished){
-            CardUseStruct use = data.value<CardUseStruct>();
-            if(use.card->getSkillName() == objectName() && player->hasFlag("lihuolose")){
-                room->loseHp(player);
-                room->setPlayerFlag(player, "-lihuolose");
-            }
+        else if(player->tag.value("Invokelihuo", false).toBool()){
+            player->tag["Invokelihuo"] = false;
+            room->loseHp(player, 1);
         }
         return false;
     }
-
 };
 
 ChunlaoCard::ChunlaoCard(){

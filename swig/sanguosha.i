@@ -460,6 +460,8 @@ enum TriggerEvent{
     TurnedOver,
 
     Predamage,
+	DamageProceed,
+	DamagedProceed,
     Predamaged,
     DamageDone,
     Damage,

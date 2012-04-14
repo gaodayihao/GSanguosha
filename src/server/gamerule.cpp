@@ -7,7 +7,7 @@
 
 #include <QTime>
 
-GameRule::GameRule(QObject *parent)
+GameRule::GameRule(QObject *)
     :TriggerSkill("game_rule")
 {
     //@todo: this setParent is illegitimate in QT and is equivalent to calling
@@ -351,8 +351,6 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
                 // iron chain effect
                 QList<ServerPlayer *> chained_players = room->getAllPlayers();
                 foreach(ServerPlayer *chained_player, chained_players){
-                    if (chained_player == player)
-                        continue;
                     if(chained_player->isChained()){
                         room->getThread()->delay();
 
