@@ -116,7 +116,6 @@ public:
     }
 };
 
-
 Fan::Fan(Suit suit, int number):Weapon(suit, number, 4){
     setObjectName("fan");
     attach_skill = true;
@@ -462,8 +461,8 @@ ManeuveringPackage::ManeuveringPackage()
     foreach(Card *card, cards)
         card->setParent(this);
 
-    type = CardPack;
     skills << new FanSkill;
+    type = CardPack;
 
 }
 

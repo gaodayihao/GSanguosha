@@ -27,7 +27,7 @@ Photo::Photo()
     :Pixmap("image/system/photo-back.png"),
     player(NULL),
     handcard("image/system/handcard.png"),
-    chain("image/system/chain.png"), lord_frame("image/system/lordframe.png"), action_item(NULL), save_me_item(NULL), permanent(false),
+    chain("image/system/chain.png"), action_item(NULL), save_me_item(NULL), permanent(false),
     weapon(NULL), armor(NULL), defensive_horse(NULL), offensive_horse(NULL),
     order_item(NULL), hide_avatar(false)
 {
@@ -101,10 +101,10 @@ Photo::Photo()
     ready_item->setPos(86, 132);
     ready_item->hide();
 
-    lord_frame.setParentItem(this);
-    lord_frame.setPos(-7, -6);
-    lord_frame.setZValue(1.5);
-    lord_frame.hide();
+    lord_frame = new QGraphicsPixmapItem(QPixmap("image/system/lordframe.png"), this);
+    lord_frame->setPos(-7, -6);
+    lord_frame->setZValue(1.5);
+    lord_frame->hide();
 
     QStringList names;
     names   << "round_start" << "start" << "judge" << "draw"
@@ -325,14 +325,14 @@ void Photo::updateAvatar(){
 
         if(player->getGameMode() == "06_3v3"){
             if(player->getRole() == "renegade" || player->isLord())
-                lord_frame.show();
+                lord_frame->show();
             else
-                lord_frame.hide();
+                lord_frame->hide();
         }else{
             if(player->isLord())
-                lord_frame.show();
+                lord_frame->show();
             else
-                lord_frame.hide();
+                lord_frame->hide();
         }
     }else{
         avatar = QPixmap();
@@ -342,7 +342,7 @@ void Photo::updateAvatar(){
         small_avatar_area->setToolTip(QString());
 
         ready_item->hide();
-        lord_frame.hide();
+        lord_frame->hide();
     }
 
     hide_avatar = false;

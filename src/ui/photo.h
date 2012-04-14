@@ -70,11 +70,10 @@ protected:
 private:
     const ClientPlayer *player;
     QPixmap avatar, small_avatar;
-    QGraphicsPixmapItem *kingdom_item, *ready_item;
+    QGraphicsPixmapItem *kingdom_item, *ready_item, *lord_frame;
     QPixmap kingdom_frame;
     QPixmap handcard;
     Pixmap chain;
-    Pixmap lord_frame;
     RoleCombobox *role_combobox;
     QGraphicsProxyWidget  *pile_button;
     QGraphicsPixmapItem *action_item, *save_me_item;
