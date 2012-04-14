@@ -3496,8 +3496,12 @@ void RoomScene::animateHpChange(const QString &name, const QStringList &args)
             i+=hp-delta;
 
             QPoint pos;
-            if(max_hp < 6)
-                pos = QPoint(start_x, skip * (i+1) + i * width - 2);
+            if(max_hp < 6){
+                if(max_hp < 4)
+                    pos = QPoint(start_x, skip * (i+2) + (i+1) * width - 2);
+                else
+                    pos = QPoint(start_x, skip * (i+1) + i * width - 2);
+            }
             else
                 pos = QPoint(start_x, 35);
             pos.rx() += dashboard->scenePos().x();

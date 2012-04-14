@@ -474,13 +474,31 @@ void Dashboard::drawHp(QPainter *painter) const{
     int skip = 6;
     qreal start_x = left_pixmap.width() + middle->rect().width() + 115;
 
-    if(max_hp < 6){
-        int i;
-        for(i=0; i<hp; i++)
-            painter->drawPixmap(start_x + 1, 6  + i * magatama->height() + i * skip, *magatama);
+    QString bgPath = QString("image/system/magatamas/bg%1.png").arg(((max_hp > 3) && (max_hp < 6)) ? "1" : "2");
+    QPixmap hpbg(bgPath);
 
-        for(i=hp; i<max_hp; i++)
-            painter->drawPixmap(start_x + 1, 6  + i * magatama->height() + i * skip, *zero_magatama);
+    if(max_hp > 0)
+        painter->drawPixmap(start_x-115, 0, hpbg);
+
+    if(max_hp < 6){
+        if(max_hp > 3){
+
+            int i;
+            for(i=0; i<hp; i++)
+                painter->drawPixmap(start_x + 1, 6  + i * magatama->height() + i * skip, *magatama);
+
+            for(i=hp; i<max_hp; i++)
+                painter->drawPixmap(start_x + 1, 6  + i * magatama->height() + i * skip, *zero_magatama);
+        }
+        else
+        {
+            int i;
+            for(i=0; i<hp; i++)
+                painter->drawPixmap(start_x + 1, 4  + (i + 1) * magatama->height() + (i + 1) * skip, *magatama);
+
+            for(i=hp; i<max_hp; i++)
+                painter->drawPixmap(start_x + 1, 4  + (i + 1) * magatama->height() + (i + 1) * skip, *zero_magatama);
+        }
     }
     else{
         painter->drawPixmap(start_x + 1, 37, *magatama);
