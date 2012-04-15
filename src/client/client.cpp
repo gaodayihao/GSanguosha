@@ -384,6 +384,8 @@ void Client::addRobot(){
 }
 
 void Client::fillRobots(){
+    if(!Self->isReady())
+        Self->changeReady();
     request("fillRobots .");
 }
 
