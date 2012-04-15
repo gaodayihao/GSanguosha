@@ -378,7 +378,11 @@ bool SupplyShortage::targetFilter(const QList<const Player *> &targets, const Pl
     if(Self->hasSkill("qicai"))
         return true;
 
-    int distance = Self->distanceTo(to_select);
+    int distance;
+    if(Self->getOffensiveHorse() == Sanguosha->getCard(subcards.first()))
+        distance = Self->distanceTo(to_select, 1);
+    else
+        distance = Self->distanceTo(to_select);
     if(Self->hasSkill("duanliang"))
         return distance <= 2;
     else

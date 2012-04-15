@@ -19,6 +19,10 @@ public:
         return !target->hasSkill(objectName());
     }
 
+    virtual int getPriority() const{
+        return 2;
+    }
+
     virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
         if(player->isNude())
             return false;
