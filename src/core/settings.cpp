@@ -132,6 +132,8 @@ void Settings::init(){
     NodeAddress = value("NodeAddress", "119.146.144.144").toString();
     NodePort = value("NodePort", 9527).toUInt();
 
+    GodSelectLimited = value("GodSelectLimited", 98).toUInt();
+
     alwaysTrustAI = value("alwaysTrustAI", true).toBool();
     useTrustAI = false;
 

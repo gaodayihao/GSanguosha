@@ -16,7 +16,8 @@ end
 
 function load_translations()
 	local lang = sgs.GetConfig("Language", "zh_CN")
-	local lang_dir = "lang/" .. lang
+	local mode = sgs.GetConfig("SoundEffectMode", "Professional2") .. "/"
+	local lang_dir = "lang/" .. mode .. lang
 
 	local lang_files = sgs.GetFileNames(lang_dir)
 	for _, file in ipairs(lang_files) do	

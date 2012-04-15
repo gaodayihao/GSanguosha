@@ -627,6 +627,21 @@ QStringList Engine::getLimitedGeneralNames() const{
             general_names << itor.key();
         }
     }
+
+    return general_names;
+}
+
+QStringList Engine::getGodGeneralNames() const{
+    QStringList general_names;
+    QHashIterator<QString, const General *> itor(generals);
+    while(itor.hasNext()){
+        itor.next();
+        if(!ban_package.contains(itor.value()->getPackage())
+                && itor.value()->getKingdom() == "god"){
+            general_names << itor.key();
+        }
+    }
+
     return general_names;
 }
 

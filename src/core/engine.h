@@ -79,6 +79,7 @@ public:
     QList<int> getRandomCards() const;
     QString getRandomGeneralName() const;
     QStringList getLimitedGeneralNames() const;
+    QStringList getGodGeneralNames() const;
 
     void playAudio(const QString &name) const;
     void playEffect(const QString &filename) const;

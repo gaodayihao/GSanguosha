@@ -4,37 +4,37 @@
 <context>
     <name>BanlistDialog</name>
     <message>
-        <location filename="src/server/server.cpp" line="354"/>
+        <location filename="src/server/server.cpp" line="360"/>
         <source>Select generals that are excluded</source>
         <translation>选择排除的武将</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="408"/>
+        <location filename="src/server/server.cpp" line="414"/>
         <source>Add ...</source>
         <translation>添加 ...</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="409"/>
+        <location filename="src/server/server.cpp" line="415"/>
         <source>Remove</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="410"/>
+        <location filename="src/server/server.cpp" line="416"/>
         <source>Add 2nd general ...</source>
         <translation>禁作副将 ...</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="411"/>
+        <location filename="src/server/server.cpp" line="417"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="445"/>
+        <location filename="src/server/server.cpp" line="451"/>
         <source>Banned for all: %1</source>
         <translation>%1 (单禁)</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="461"/>
+        <location filename="src/server/server.cpp" line="467"/>
         <source>Banned for second general: %1</source>
         <translation>%1 (禁作副将)</translation>
     </message>
@@ -404,260 +404,260 @@
         <translation>没有名为 &quot;%1&quot; 的可动态调用方法</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="418"/>
+        <location filename="src/client/client.cpp" line="420"/>
         <source>Game will start in &lt;b&gt;%1&lt;/b&gt; seconds</source>
         <translation>游戏将在 &lt;b&gt;%1&lt;/b&gt; 秒后开始</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="457"/>
+        <location filename="src/client/client.cpp" line="459"/>
         <source>Your role is %1</source>
         <translation>您的角色是 %1</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="459"/>
+        <location filename="src/client/client.cpp" line="461"/>
         <source>
  wait for the lord player choosing general, please</source>
         <translation>
 请等待主公选择武将</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="526"/>
+        <location filename="src/client/client.cpp" line="528"/>
         <source>moveNCards string is not well formatted!</source>
         <translation>moveNCards 字符串没有格式化好!</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="648"/>
+        <location filename="src/client/client.cpp" line="650"/>
         <source>The argument (%1) of command %2 does not conform the format %3</source>
         <translation>命令 %2 的参数 (%1) 不符合其格式 %3</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="650"/>
+        <location filename="src/client/client.cpp" line="652"/>
         <source>Command format warning</source>
         <translation>命令格式警告</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="705"/>
+        <location filename="src/client/client.cpp" line="707"/>
         <source>Do you want to invoke skill [%1] ?</source>
         <translation>您想发动技能【%1】吗 ?</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="675"/>
-        <location filename="src/client/client.cpp" line="711"/>
+        <location filename="src/client/client.cpp" line="677"/>
+        <location filename="src/client/client.cpp" line="713"/>
         <source>&lt;br/&gt; &lt;b&gt;Notice&lt;/b&gt;: %1&lt;br/&gt;</source>
         <translation>&lt;br/&gt; &lt;b&gt;温馨提示&lt;/b&gt;: %1&lt;br/&gt;</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="738"/>
+        <location filename="src/client/client.cpp" line="740"/>
         <source>Please choose:</source>
         <translation>请选择:</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1022"/>
+        <location filename="src/client/client.cpp" line="1025"/>
         <source>Draw pile: &lt;b&gt;%1&lt;/b&gt;, discard pile: &lt;b&gt;%2&lt;/b&gt;, swap times: &lt;b&gt;%3&lt;/b&gt;</source>
         <translation>摸牌堆:&lt;b&gt;%1&lt;/b&gt;,弃牌堆:&lt;b&gt;%2&lt;/b&gt;,洗牌次数:&lt;b&gt;%3&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1034"/>
+        <location filename="src/client/client.cpp" line="1037"/>
         <source>Discarding string is not well formatted!</source>
         <translation>弃牌字符串没有格式化好!</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1047"/>
+        <location filename="src/client/client.cpp" line="1050"/>
         <source>Please discard %1 card(s), include equip</source>
         <translation>请弃掉 %1 张牌，包括装备</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1049"/>
+        <location filename="src/client/client.cpp" line="1052"/>
         <source>Please discard %1 card(s), only hand cards is allowed</source>
         <translation>请弃掉 %1 张手牌</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1060"/>
+        <location filename="src/client/client.cpp" line="1063"/>
         <source>Exchange string is not well formatted!</source>
         <translation>交换字符串没有格式化好!</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1067"/>
+        <location filename="src/client/client.cpp" line="1070"/>
         <source>Please give %1 cards to exchange</source>
         <translation>请选择用于交换的 %1 张手牌</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1128"/>
+        <location filename="src/client/client.cpp" line="1131"/>
         <source>%1[dead]</source>
         <translation>%1【阵亡】</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1147"/>
+        <location filename="src/client/client.cpp" line="1150"/>
         <source>Game is over now</source>
         <translation>游戏已经结束</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1149"/>
+        <location filename="src/client/client.cpp" line="1152"/>
         <source>The server require password to signup</source>
         <translation>服务器要求密码才能登录</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1151"/>
+        <location filename="src/client/client.cpp" line="1154"/>
         <source>Your password is wrong</source>
         <translation>密码错误</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1153"/>
+        <location filename="src/client/client.cpp" line="1156"/>
         <source>Invalid signup string</source>
         <translation>无效的登录字符串</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1155"/>
+        <location filename="src/client/client.cpp" line="1158"/>
         <source>Your level is not enough</source>
         <translation>您的等级不够</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1157"/>
+        <location filename="src/client/client.cpp" line="1160"/>
         <source>Unknown warning: %1</source>
         <translation>未知警告: %1</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1189"/>
+        <location filename="src/client/client.cpp" line="1192"/>
         <source>Please choose a suit</source>
         <translation>请选择一种花色</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1226"/>
+        <location filename="src/client/client.cpp" line="1229"/>
         <source>Please choose a kingdom</source>
         <translation>请选择一个势力</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1319"/>
+        <location filename="src/client/client.cpp" line="1322"/>
         <source>You are dying, please provide %1 peach(es)(or analeptic) to save yourself</source>
         <translation>您正在死亡线上挣扎，请提供 %1 个桃子（或酒）来救您自己</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1323"/>
+        <location filename="src/client/client.cpp" line="1326"/>
         <source>%1 is dying, please provide %2 peach(es) to save him</source>
         <translation>%1 正在死亡线上挣扎，请提供 %2 个桃子来拯救他</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1334"/>
+        <location filename="src/client/client.cpp" line="1337"/>
         <source>%1 request you to show one hand card</source>
         <translation>%1 要求您展示一张手牌</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1474"/>
+        <location filename="src/client/client.cpp" line="1477"/>
         <source>Please play a card for pindian</source>
         <translation>请打出一张卡牌以用于拼点</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1477"/>
+        <location filename="src/client/client.cpp" line="1480"/>
         <source>%1 ask for you to play a card to pindian</source>
         <translation>%1 要求你打出一张卡牌已用于拼点</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1489"/>
+        <location filename="src/client/client.cpp" line="1492"/>
         <source>Please distribute %1 cards as you wish</source>
         <translation>请将 %1 张牌任意分配</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1546"/>
+        <location filename="src/client/client.cpp" line="1549"/>
         <source>&lt;font color=&apos;red&apos;&gt;System: %1&lt;/font&gt;</source>
         <translation>&lt;font color=&apos;red&apos;&gt;系统: %1&lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1562"/>
+        <location filename="src/client/client.cpp" line="1565"/>
         <source>&lt;font color=&apos;%1&apos;&gt;[%2] said: %3 &lt;/font&gt;</source>
         <translation>&lt;font color=&apos;%1&apos;&gt;[%2] 说: %3 &lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1694"/>
+        <location filename="src/client/client.cpp" line="1697"/>
         <source>The order who first choose general</source>
         <translation>选择武将的顺序</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1696"/>
+        <location filename="src/client/client.cpp" line="1699"/>
         <source>The order who first in turn</source>
         <translation>先手顺序</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1698"/>
+        <location filename="src/client/client.cpp" line="1701"/>
         <source>Please select the order</source>
         <translation>请选择对应的阵营</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1699"/>
+        <location filename="src/client/client.cpp" line="1702"/>
         <source>Warm</source>
         <translation>暖色</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1701"/>
+        <location filename="src/client/client.cpp" line="1704"/>
         <source>Cool</source>
         <translation>冷色</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1730"/>
+        <location filename="src/client/client.cpp" line="1733"/>
         <source>Select role in 3v3 mode</source>
         <translation>在 3v3 模式中选择身份</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1732"/>
+        <location filename="src/client/client.cpp" line="1735"/>
         <source>Please select a role</source>
         <translation>请选择一个身份</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1748"/>
+        <location filename="src/client/client.cpp" line="1751"/>
         <source>Warm leader</source>
         <translation>暖色主帅</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1749"/>
+        <location filename="src/client/client.cpp" line="1752"/>
         <source>Warm guard</source>
         <translation>暖色前锋</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1750"/>
+        <location filename="src/client/client.cpp" line="1753"/>
         <source>Cool leader</source>
         <translation>冷色主帅</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1751"/>
+        <location filename="src/client/client.cpp" line="1754"/>
         <source>Cool guard</source>
         <translation>冷色前锋</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1753"/>
+        <location filename="src/client/client.cpp" line="1756"/>
         <source>Leader of Team 1</source>
         <translation>第一队主帅</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1754"/>
+        <location filename="src/client/client.cpp" line="1757"/>
         <source>Guard of Team 1</source>
         <translation>第一队前锋</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1755"/>
+        <location filename="src/client/client.cpp" line="1758"/>
         <source>Leader of Team 2</source>
         <translation>第二队主帅</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1756"/>
+        <location filename="src/client/client.cpp" line="1759"/>
         <source>Guard of Team 2</source>
         <translation>第二队前锋</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1774"/>
+        <location filename="src/client/client.cpp" line="1777"/>
         <source>Abstain</source>
         <translation>弃权</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1796"/>
+        <location filename="src/client/client.cpp" line="1799"/>
         <source>Please select the direction</source>
         <translation>请选择方向</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1803"/>
+        <location filename="src/client/client.cpp" line="1806"/>
         <source>CCW</source>
         <translation>逆时针</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="1800"/>
+        <location filename="src/client/client.cpp" line="1803"/>
         <source>CW</source>
         <translation>顺时针</translation>
     </message>
@@ -665,11 +665,11 @@
         <location filename="src/client/client.cpp" line="217"/>
         <location filename="src/client/client.cpp" line="262"/>
         <location filename="src/client/client.cpp" line="284"/>
-        <location filename="src/client/client.cpp" line="502"/>
-        <location filename="src/client/client.cpp" line="526"/>
-        <location filename="src/client/client.cpp" line="1034"/>
-        <location filename="src/client/client.cpp" line="1060"/>
-        <location filename="src/client/client.cpp" line="1160"/>
+        <location filename="src/client/client.cpp" line="504"/>
+        <location filename="src/client/client.cpp" line="528"/>
+        <location filename="src/client/client.cpp" line="1037"/>
+        <location filename="src/client/client.cpp" line="1063"/>
+        <location filename="src/client/client.cpp" line="1163"/>
         <location filename="src/dialog/halldialog.cpp" line="224"/>
         <source>Warning</source>
         <translation>警告</translation>
@@ -685,7 +685,7 @@
         <translation>没有名为 %1 的玩家</translation>
     </message>
     <message>
-        <location filename="src/client/client.cpp" line="502"/>
+        <location filename="src/client/client.cpp" line="504"/>
         <source>Card moving response string is not well formatted</source>
         <translation>卡牌移动回复字符串并没有格式好</translation>
     </message>
@@ -1662,97 +1662,97 @@
 <context>
     <name>Engine</name>
     <message>
-        <location filename="src/core/engine.cpp" line="97"/>
+        <location filename="src/core/engine.cpp" line="92"/>
         <source>2 players</source>
         <translation>2 人局</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="99"/>
+        <location filename="src/core/engine.cpp" line="94"/>
         <source>2 players (KOF style)</source>
         <translation>2 人局 [KOF模式]</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="100"/>
+        <location filename="src/core/engine.cpp" line="95"/>
         <source>3 players</source>
         <translation>3 人局</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="101"/>
+        <location filename="src/core/engine.cpp" line="96"/>
         <source>4 players</source>
         <translation>4 人局</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="102"/>
+        <location filename="src/core/engine.cpp" line="97"/>
         <source>4 players (Hulao Pass)</source>
         <translation>4 人局 [虎牢关1v3]</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="103"/>
+        <location filename="src/core/engine.cpp" line="98"/>
         <source>5 players</source>
         <translation>5 人局</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="104"/>
+        <location filename="src/core/engine.cpp" line="99"/>
         <source>6 players</source>
         <translation>6 人局</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="105"/>
+        <location filename="src/core/engine.cpp" line="100"/>
         <source>6 players (2 renegades)</source>
         <translation>6 人局 [双内奸]</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="106"/>
+        <location filename="src/core/engine.cpp" line="101"/>
         <source>6 players (3v3)</source>
         <translation>6 人局 [3v3]</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="107"/>
+        <location filename="src/core/engine.cpp" line="102"/>
         <source>7 players</source>
         <translation>7 人局</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="108"/>
+        <location filename="src/core/engine.cpp" line="103"/>
         <source>8 players</source>
         <translation>8 人局</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="109"/>
+        <location filename="src/core/engine.cpp" line="104"/>
         <source>8 players (2 renegades)</source>
         <translation>8 人局 [双内奸]</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="110"/>
+        <location filename="src/core/engine.cpp" line="105"/>
         <source>8 players (0 renegade)</source>
         <translation>8 人局 [无内奸]</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="111"/>
+        <location filename="src/core/engine.cpp" line="106"/>
         <source>8 players (same mode)</source>
         <translation>8 人局 [同将模式]</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="112"/>
+        <location filename="src/core/engine.cpp" line="107"/>
         <source>9 players</source>
         <translation>9 人局</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="113"/>
+        <location filename="src/core/engine.cpp" line="108"/>
         <source>10 players</source>
         <translation>10 人局</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="114"/>
+        <location filename="src/core/engine.cpp" line="109"/>
         <source>10 players (1 renegade)</source>
         <translation>10 人局 [单内奸]</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="115"/>
+        <location filename="src/core/engine.cpp" line="110"/>
         <source>10 players (0 renegade)</source>
         <translation>10 人局 [无内奸]</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="122"/>
+        <location filename="src/core/engine.cpp" line="117"/>
         <source>Lua script error</source>
         <translation>Lua 脚本错误</translation>
     </message>
@@ -2793,7 +2793,7 @@
 <context>
     <name>Photo</name>
     <message>
-        <location filename="src/ui/photo.cpp" line="601"/>
+        <location filename="src/ui/photo.cpp" line="626"/>
         <source>Multiple</source>
         <translation>多个牌堆</translation>
     </message>
@@ -2931,68 +2931,68 @@
 <context>
     <name>Room</name>
     <message>
-        <location filename="src/server/room.cpp" line="1397"/>
+        <location filename="src/server/room.cpp" line="1393"/>
         <source>disconnected</source>
         <translation>断开</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1636"/>
+        <location filename="src/server/room.cpp" line="1632"/>
         <source>Reply player should be %1 instead of %2</source>
         <translation>回复玩家应该是 %1 而不是 %2</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1669"/>
+        <location filename="src/server/room.cpp" line="1665"/>
         <source>Computer %1</source>
         <translation>电脑 %1</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1628"/>
+        <location filename="src/server/room.cpp" line="1624"/>
         <source>Reply function should be %1 instead of %2</source>
         <translation>回复函数应该是 %1 而不是 %2</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1417"/>
-        <location filename="src/server/room.cpp" line="1515"/>
-        <location filename="src/server/room.cpp" line="1746"/>
-        <location filename="src/server/room.cpp" line="3700"/>
+        <location filename="src/server/room.cpp" line="1413"/>
+        <location filename="src/server/room.cpp" line="1511"/>
+        <location filename="src/server/room.cpp" line="1742"/>
+        <location filename="src/server/room.cpp" line="3713"/>
         <source>Contestant</source>
         <translation>选手</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1418"/>
-        <location filename="src/server/room.cpp" line="1516"/>
+        <location filename="src/server/room.cpp" line="1414"/>
+        <location filename="src/server/room.cpp" line="1512"/>
         <source>&lt;font color=#FFFFFF&gt;Player &lt;b&gt;%1&lt;/b&gt; left the game&lt;/font&gt;</source>
         <translation>&lt;font color=#6e6b6b&gt;玩家 %1 离开了游戏&lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1648"/>
+        <location filename="src/server/room.cpp" line="1644"/>
         <source>%1: %2 is not invokable</source>
         <translation>%1: 不可调用的方法名 %2</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1673"/>
+        <location filename="src/server/room.cpp" line="1669"/>
         <source>Hello, I&apos;m a robot</source>
         <translation>大家好，我是一个机器人</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1707"/>
+        <location filename="src/server/room.cpp" line="1703"/>
         <source>&lt;font color=#EEB422&gt;Game will auto start in 15 sec later&lt;/font&gt;</source>
         <translation>&lt;font color=red&gt;游戏将在15秒后自动开始&lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1745"/>
+        <location filename="src/server/room.cpp" line="1741"/>
         <source>&lt;font color=#EEB422&gt;Player &lt;b&gt;%1&lt;/b&gt; joined the game&lt;/font&gt;</source>
         <translation>&lt;font color=#EEB422&gt;玩家 &lt;b&gt;%1&lt;/b&gt; 加入了游戏&lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="3006"/>
+        <location filename="src/server/room.cpp" line="3019"/>
         <source>Card can not parse:
  %1</source>
         <translation>卡牌字符串无法解析:
 %1</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="3699"/>
+        <location filename="src/server/room.cpp" line="3712"/>
         <source>&lt;font color=#EEB422&gt;The network delay of player &lt;b&gt;%1&lt;/b&gt; is %2 milliseconds.&lt;/font&gt;</source>
         <translation>&lt;font color=#EEB422&gt;玩家 &lt;b&gt;%1&lt;/b&gt; 的网络延迟为 %2 毫秒&lt;/font&gt;</translation>
     </message>
@@ -3022,11 +3022,11 @@
         <location filename="src/ui/roomscene.cpp" line="2763"/>
         <location filename="src/ui/roomscene.cpp" line="2773"/>
         <location filename="src/ui/roomscene.cpp" line="2788"/>
-        <location filename="src/ui/roomscene.cpp" line="3747"/>
-        <location filename="src/ui/roomscene.cpp" line="3752"/>
-        <location filename="src/ui/roomscene.cpp" line="3766"/>
-        <location filename="src/ui/roomscene.cpp" line="3781"/>
-        <location filename="src/ui/roomscene.cpp" line="3787"/>
+        <location filename="src/ui/roomscene.cpp" line="3751"/>
+        <location filename="src/ui/roomscene.cpp" line="3756"/>
+        <location filename="src/ui/roomscene.cpp" line="3770"/>
+        <location filename="src/ui/roomscene.cpp" line="3785"/>
+        <location filename="src/ui/roomscene.cpp" line="3791"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
@@ -3305,57 +3305,57 @@
         <translation>自由扔掉任意手牌和装备</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3733"/>
+        <location filename="src/ui/roomscene.cpp" line="3737"/>
         <source>Server information</source>
         <translation>服务器信息</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3747"/>
+        <location filename="src/ui/roomscene.cpp" line="3751"/>
         <source>Only the Owner can kick!</source>
         <translation>只有房主能踢人！</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3752"/>
+        <location filename="src/ui/roomscene.cpp" line="3756"/>
         <source>This function is disabled in contest mode</source>
         <translation>此功能在竞赛模式下是禁用的</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3766"/>
+        <location filename="src/ui/roomscene.cpp" line="3770"/>
         <source>Here is no player to kick</source>
         <translation>没有可踢除的玩家</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3771"/>
+        <location filename="src/ui/roomscene.cpp" line="3775"/>
         <source>Kick</source>
         <translation>踢人</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3772"/>
+        <location filename="src/ui/roomscene.cpp" line="3776"/>
         <source>Please select the player to kick</source>
         <translation>请选择被踢玩家</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3781"/>
+        <location filename="src/ui/roomscene.cpp" line="3785"/>
         <source>Only lord can surrender!</source>
         <translation>只有主公才能投降!</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3787"/>
+        <location filename="src/ui/roomscene.cpp" line="3791"/>
         <source>When there are more than 2 players, the lord can surrender!</source>
         <translation>只有场上存活人数大于2时才能投降!</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3792"/>
+        <location filename="src/ui/roomscene.cpp" line="3796"/>
         <source>Surrender</source>
         <translation>投降</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3792"/>
+        <location filename="src/ui/roomscene.cpp" line="3796"/>
         <source>Are you sure to surrender ?</source>
         <translation>您真的要投降吗 ?</translation>
     </message>
     <message>
-        <location filename="src/ui/roomscene.cpp" line="3998"/>
+        <location filename="src/ui/roomscene.cpp" line="4002"/>
         <source>Complete</source>
         <translation>完成</translation>
     </message>
@@ -3417,17 +3417,17 @@ P = 你自己, R = 你所在的房间</translation>
 <context>
     <name>Select3v3GeneralDialog</name>
     <message>
-        <location filename="src/server/server.cpp" line="753"/>
+        <location filename="src/server/server.cpp" line="759"/>
         <source>Select generals in extend 3v3 mode</source>
         <translation>选择在扩展 3v3 模式中启用的武将</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="762"/>
+        <location filename="src/server/server.cpp" line="768"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="821"/>
+        <location filename="src/server/server.cpp" line="827"/>
         <source>Check/Uncheck all</source>
         <translation>全部勾选或取消勾选</translation>
     </message>
@@ -3435,42 +3435,42 @@ P = 你自己, R = 你所在的房间</translation>
 <context>
     <name>Server</name>
     <message>
-        <location filename="src/server/server.cpp" line="1054"/>
+        <location filename="src/server/server.cpp" line="1063"/>
         <source>Lua scripts error</source>
         <translation>Lua 脚本错误</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="1073"/>
+        <location filename="src/server/server.cpp" line="1082"/>
         <source>Forbid the connection of address %1</source>
         <translation>禁止了地址 %1 的连接</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="1082"/>
+        <location filename="src/server/server.cpp" line="1091"/>
         <source>%1 connected</source>
         <translation>%1 已连接</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="1273"/>
+        <location filename="src/server/server.cpp" line="1282"/>
         <source>Invalid refreshRooms string: %1</source>
         <translation>无效的刷新房间字符串: %1</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="1311"/>
+        <location filename="src/server/server.cpp" line="1320"/>
         <source>Invalid reJoinRoom string: %1</source>
         <translation>无效的重连房间字符串: %1</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="1344"/>
+        <location filename="src/server/server.cpp" line="1353"/>
         <source>Invalid joinRoom string: %1</source>
         <translation>无效的加入房间字符串: %1</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="1381"/>
+        <location filename="src/server/server.cpp" line="1390"/>
         <source>Invalid createRoom string: %1</source>
         <translation>无效的创建房间字符串: %1</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="1420"/>
+        <location filename="src/server/server.cpp" line="1429"/>
         <source>Invalid signup string: %1</source>
         <translation>无效的登录字符串: %1</translation>
     </message>
@@ -3498,7 +3498,7 @@ P = 你自己, R = 你所在的房间</translation>
         <translation>禁表 ...</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="522"/>
+        <location filename="src/server/server.cpp" line="528"/>
         <source>3v3 options</source>
         <translation>3v3 选项</translation>
     </message>
@@ -3518,77 +3518,82 @@ P = 你自己, R = 你所在的房间</translation>
         <translation>卡牌包</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="164"/>
+        <location filename="src/server/server.cpp" line="169"/>
         <source>This option enables the cheat menu</source>
         <translation>本选项启用作弊菜单</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="170"/>
+        <location filename="src/server/server.cpp" line="175"/>
         <source>Assign only your own role</source>
         <translation>仅分配自己的身份</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="202"/>
+        <location filename="src/server/server.cpp" line="207"/>
         <source>Enable Basara</source>
         <translation>启用暗将模式</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="207"/>
+        <location filename="src/server/server.cpp" line="212"/>
         <source>Enable Hegemony</source>
         <translation>启用国战模式</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="527"/>
+        <location filename="src/server/server.cpp" line="251"/>
+        <source>GodSelectLimited</source>
+        <translation>神将选择数限制</translation>
+    </message>
+    <message>
+        <location filename="src/server/server.cpp" line="533"/>
         <source>Standard mode</source>
         <translation>经典3v3</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="528"/>
+        <location filename="src/server/server.cpp" line="534"/>
         <source>New Mode</source>
         <translation>新版3v3</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="529"/>
+        <location filename="src/server/server.cpp" line="535"/>
         <source>Extension mode</source>
         <translation>全扩3v3</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="530"/>
+        <location filename="src/server/server.cpp" line="536"/>
         <source>General selection ...</source>
         <translation>武将选择 ...</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="535"/>
+        <location filename="src/server/server.cpp" line="541"/>
         <source>Exclude disasters</source>
         <translation>移除天灾卡牌</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="540"/>
+        <location filename="src/server/server.cpp" line="546"/>
         <source>Normal</source>
         <translation>普通</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="541"/>
+        <location filename="src/server/server.cpp" line="547"/>
         <source>Random</source>
         <translation>随机</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="542"/>
+        <location filename="src/server/server.cpp" line="548"/>
         <source>All roles</source>
         <translation>全身份</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="557"/>
+        <location filename="src/server/server.cpp" line="563"/>
         <source>Role choose</source>
         <translation>身份选择</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="606"/>
+        <location filename="src/server/server.cpp" line="612"/>
         <source>Scenario mode</source>
         <translation>剧情模式</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="159"/>
+        <location filename="src/server/server.cpp" line="164"/>
         <source>Contest mode</source>
         <translation>竞赛模式</translation>
     </message>
@@ -3598,87 +3603,87 @@ P = 你自己, R = 你所在的房间</translation>
         <translation>基本</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="161"/>
+        <location filename="src/server/server.cpp" line="166"/>
         <source>Requires password to login, hide screen name and disable kicking</source>
         <translation>需要密码才能登录，隐藏玩家昵称且禁止主公T人</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="167"/>
+        <location filename="src/server/server.cpp" line="172"/>
         <source>Assign role and seat freely</source>
         <translation>自由分配身份和座位</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="182"/>
+        <location filename="src/server/server.cpp" line="187"/>
         <source>Disable chat</source>
         <translation>禁止聊天</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="185"/>
+        <location filename="src/server/server.cpp" line="190"/>
         <source>Enable second general</source>
         <translation>启用双将</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="187"/>
+        <location filename="src/server/server.cpp" line="192"/>
         <source>Enable Scene</source>
         <translation>启用场景模式</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="195"/>
+        <location filename="src/server/server.cpp" line="200"/>
         <source>Sum - 3</source>
         <translation>上限之和减3</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="196"/>
+        <location filename="src/server/server.cpp" line="201"/>
         <source>Minimum</source>
         <translation>较小值</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="197"/>
+        <location filename="src/server/server.cpp" line="202"/>
         <source>Average</source>
         <translation>平均值</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="251"/>
+        <location filename="src/server/server.cpp" line="257"/>
         <source>Upperlimit for general</source>
         <translation>选将上限</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="192"/>
+        <location filename="src/server/server.cpp" line="197"/>
         <source>Max HP scheme</source>
         <translation>体力上限分配方案</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="212"/>
+        <location filename="src/server/server.cpp" line="217"/>
         <source>Annouce my IP in WAN</source>
         <translation>在广域网上公布我的 IP</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="220"/>
+        <location filename="src/server/server.cpp" line="225"/>
         <source>Public IP or domain</source>
         <translation>公网 IP 或域名</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="257"/>
+        <location filename="src/server/server.cpp" line="263"/>
         <source>Address</source>
         <translation>地址</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="223"/>
+        <location filename="src/server/server.cpp" line="228"/>
         <source>Detect my WAN IP</source>
         <translation>探测我的广域网IP</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="242"/>
+        <location filename="src/server/server.cpp" line="247"/>
         <source>Clear server log automatic</source>
         <translation>自动清理服务器日志</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="260"/>
+        <location filename="src/server/server.cpp" line="266"/>
         <source>NodeAddress</source>
         <translation>节点地址</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="261"/>
+        <location filename="src/server/server.cpp" line="267"/>
         <source>NodePort</source>
         <translation>节点端口</translation>
     </message>
@@ -3688,43 +3693,43 @@ P = 你自己, R = 你所在的房间</translation>
         <translation>人工智能</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="287"/>
+        <location filename="src/server/server.cpp" line="293"/>
         <source>Role predictable</source>
         <translation>身份预知</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="290"/>
+        <location filename="src/server/server.cpp" line="296"/>
         <source>AI Chat</source>
         <translation>开启 AI 聊天</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="297"/>
+        <location filename="src/server/server.cpp" line="303"/>
         <source> millisecond</source>
         <translation> 毫秒</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="303"/>
+        <location filename="src/server/server.cpp" line="309"/>
         <source>AI delay</source>
         <translation>电脑延迟</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="659"/>
+        <location filename="src/server/server.cpp" line="665"/>
         <source>Custom Mini Scene</source>
         <translation>自定义小型场景</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="628"/>
+        <location filename="src/server/server.cpp" line="634"/>
         <source>Mini Scenes</source>
         <translation>小型场景</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="730"/>
-        <location filename="src/server/server.cpp" line="745"/>
+        <location filename="src/server/server.cpp" line="736"/>
+        <location filename="src/server/server.cpp" line="751"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="745"/>
+        <location filename="src/server/server.cpp" line="751"/>
         <source>Please fill address when you want to annouce your server&apos;s IP</source>
         <translation>若您想在广域网上公布服务器，请填入地址</translation>
     </message>
@@ -3734,23 +3739,23 @@ P = 你自己, R = 你所在的房间</translation>
         <translation>高级</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="573"/>
+        <location filename="src/server/server.cpp" line="579"/>
         <source>Game mode</source>
         <translation>游戏模式</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="616"/>
-        <location filename="src/server/server.cpp" line="643"/>
+        <location filename="src/server/server.cpp" line="622"/>
+        <location filename="src/server/server.cpp" line="649"/>
         <source>%1 (%2 persons)</source>
         <translation>%1 (%2 人)</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="163"/>
+        <location filename="src/server/server.cpp" line="168"/>
         <source>Choose generals and cards freely</source>
         <translation>自由选择武将与卡牌</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="179"/>
+        <location filename="src/server/server.cpp" line="184"/>
         <source>Forbid same IP with multiple connection</source>
         <translation>禁止同一个IP建立多个连接</translation>
     </message>
@@ -3760,27 +3765,27 @@ P = 你自己, R = 你所在的房间</translation>
         <translation>服务器名</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="259"/>
+        <location filename="src/server/server.cpp" line="265"/>
         <source>Port</source>
         <translation>端口</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="282"/>
+        <location filename="src/server/server.cpp" line="288"/>
         <source>Always TrustAI</source>
         <translation>总是使用托管型AI(单机下不生效)</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="279"/>
+        <location filename="src/server/server.cpp" line="285"/>
         <source>Enable AI</source>
         <translation>启用 AI</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="704"/>
+        <location filename="src/server/server.cpp" line="710"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="src/server/server.cpp" line="705"/>
+        <location filename="src/server/server.cpp" line="711"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -3926,7 +3931,7 @@ P = 你自己, R = 你所在的房间</translation>
         <translation>匿名</translation>
     </message>
     <message>
-        <location filename="src/server/serverplayer.cpp" line="755"/>
+        <location filename="src/server/serverplayer.cpp" line="762"/>
         <source>Contestant</source>
         <translation>选手</translation>
     </message>

@@ -89,6 +89,7 @@ public:
     bool ClearServerLog;
     ushort NodePort;
     QString NodeAddress;
+    int GodSelectLimited;
 
     bool alwaysTrustAI;
     bool useTrustAI;

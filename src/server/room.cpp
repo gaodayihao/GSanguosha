@@ -1753,14 +1753,22 @@ void Room::signup(ServerPlayer *player, const QString &screen_name, const QStrin
 }
 
 void Room::assignGeneralsForPlayers(const QList<ServerPlayer *> &to_assign){
-
     QSet<QString> existed;
     foreach(ServerPlayer *player, players){
-        if(player->getGeneral())
             existed << player->getGeneralName();
 
         if(player->getGeneral2())
             existed << player->getGeneral2Name();
+    }
+
+    QStringList god_generals = Sanguosha->getGodGeneralNames();
+    if(!god_generals.isEmpty() && Config.GodSelectLimited < god_generals.count()){
+        qShuffle(god_generals);
+
+        QStringList tempNames = god_generals.mid(Config.GodSelectLimited);
+        foreach(QString tempName, tempNames)
+            if(!existed.contains(tempName))
+                existed << tempName;
     }
 
     const int max_choice = (Config.EnableHegemony && Config.Enable2ndGeneral) ? 5

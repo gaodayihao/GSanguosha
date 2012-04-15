@@ -86,7 +86,7 @@ private:
     QGroupBox *create3v3Box();
 
     QLineEdit *server_name_edit;
-    QSpinBox *timeout_spinbox;
+    QSpinBox *timeout_spinbox, *god_selectlimited_spinbox;
     QCheckBox *nolimit_checkbox;
     QCheckBox *contest_mode_checkbox;
     QCheckBox *free_choose_checkbox;

@@ -156,6 +156,11 @@ QWidget *ServerDialog::createPackageTab(){
 QWidget *ServerDialog::createAdvancedTab(){
     QVBoxLayout *layout = new QVBoxLayout;
 
+    god_selectlimited_spinbox = new QSpinBox;
+    god_selectlimited_spinbox->setMinimum(1);
+    god_selectlimited_spinbox->setMaximum(99);
+    god_selectlimited_spinbox->setValue(Config.GodSelectLimited);
+
     contest_mode_checkbox = new QCheckBox(tr("Contest mode"));
     contest_mode_checkbox->setChecked(Config.ContestMode);
     contest_mode_checkbox->setToolTip(tr("Requires password to login, hide screen name and disable kicking"));
@@ -243,6 +248,7 @@ QWidget *ServerDialog::createAdvancedTab(){
     clearserverlog_checkbox->setChecked(Config.ClearServerLog);
     clearserverlog_checkbox->setEnabled(true); //
 
+    layout->addLayout(HLay(new QLabel(tr("GodSelectLimited")), god_selectlimited_spinbox));
     layout->addWidget(contest_mode_checkbox);
     layout->addWidget(forbid_same_ip_checkbox);
     layout->addWidget(disable_chat_checkbox);
@@ -902,6 +908,7 @@ bool ServerDialog::config(){
     Config.EnableAI = ai_enable_checkbox->isChecked();
     Config.AIDelay = ai_delay_spinbox->value();
     Config.ServerPort = port_edit->text().toInt();
+    Config.GodSelectLimited = god_selectlimited_spinbox->value();
 
     // 20111220 by highlandz
     Config.NodeAddress=node_address_edit->text();
@@ -945,6 +952,8 @@ bool ServerDialog::config(){
     Config.setValue("ServerPort", Config.ServerPort);
     Config.setValue("AnnounceIP", Config.AnnounceIP);
     Config.setValue("Address", Config.Address);
+
+    Config.setValue("GodSelectLimited", Config.GodSelectLimited);
 
     Config.setValue("NodeAddress", Config.NodeAddress);
     Config.setValue("NodePort", Config.NodePort);
