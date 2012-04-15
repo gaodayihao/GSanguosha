@@ -36,8 +36,14 @@ QString Slash::getSubtype() const{
     return "attack_card";
 }
 
+static bool CompareBySeat(const ServerPlayer *a, const ServerPlayer *b){
+    return a->getSeat() < b->getSeat();
+}
+
 void Slash::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    BasicCard::use(room, source, targets);
+    QList<ServerPlayer *> temp_targets = targets;
+    qStableSort(temp_targets.begin(), temp_targets.end(), CompareBySeat);
+    BasicCard::use(room, source, temp_targets);
 
     if(this->hasFlag("drank")){
         LogMessage log;
