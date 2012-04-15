@@ -90,7 +90,7 @@ public:
             }
         }else if(event == CardDiscarded){
             const Card *card = data.value<CardStar>();
-            if(card->subcardsLength() == 0)
+            if(card->subcardsLength() == 0 && card->isVirtualCard())
                 return false;
 
             clubs = getClubs(card);
