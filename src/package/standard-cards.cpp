@@ -439,14 +439,14 @@ Halberd::Halberd(Suit suit, int number)
 class KylinBowSkill: public WeaponSkill{
 public:
     KylinBowSkill():WeaponSkill("kylin_bow"){
-        events << DamagedProceed;
+        events << DamageProceed;
     }
 
     virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
 
         QStringList horses;
-        if(damage.card && damage.card->inherits("Slash")){
+        if(damage.card && damage.card->inherits("Slash") && !damage.chain){
             if(damage.to->getDefensiveHorse())
                 horses << "dhorse";
             if(damage.to->getOffensiveHorse())
@@ -1007,7 +1007,7 @@ void Lightning::takeEffect(ServerPlayer *target) const{
 class IceSwordSkill: public WeaponSkill{
 public:
     IceSwordSkill():WeaponSkill("ice_sword"){
-        events << DamagedProceed;
+        events << DamageProceed;
     }
 
     virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
@@ -1015,7 +1015,8 @@ public:
 
         Room *room = player->getRoom();
 
-        if(damage.card && damage.card->inherits("Slash") && !damage.to->isNude() && player->askForSkillInvoke("ice_sword", data)){
+        if(damage.card && damage.card->inherits("Slash") && !damage.to->isNude()
+                && !damage.chain && player->askForSkillInvoke("ice_sword", data)){
             room->setEmotion(player, QString("weapon/%1").arg(objectName()));
 
             int card_id = room->askForCardChosen(player, damage.to, "he", "ice_sword");

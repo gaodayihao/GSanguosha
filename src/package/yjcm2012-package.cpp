@@ -309,7 +309,7 @@ public:
 class Qianxi: public TriggerSkill{
 public:
     Qianxi():TriggerSkill("qianxi"){
-        events << DamagedProceed;
+        events << DamageProceed;
     }
 
     virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
