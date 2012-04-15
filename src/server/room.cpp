@@ -1755,6 +1755,7 @@ void Room::signup(ServerPlayer *player, const QString &screen_name, const QStrin
 void Room::assignGeneralsForPlayers(const QList<ServerPlayer *> &to_assign){
     QSet<QString> existed;
     foreach(ServerPlayer *player, players){
+        if(player->getGeneral())
             existed << player->getGeneralName();
 
         if(player->getGeneral2())

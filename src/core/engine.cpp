@@ -627,7 +627,6 @@ QStringList Engine::getLimitedGeneralNames() const{
             general_names << itor.key();
         }
     }
-
     return general_names;
 }
 
@@ -641,7 +640,6 @@ QStringList Engine::getGodGeneralNames() const{
             general_names << itor.key();
         }
     }
-
     return general_names;
 }
 
