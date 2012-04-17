@@ -212,7 +212,7 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
     case CardFinished: {
             CardUseStruct use = data.value<CardUseStruct>();
 
-            use.card->setFlags(".");
+            use.card->clearFlags();
 
             break;
         }
