@@ -90,8 +90,6 @@ public:
             }
         }else if(event == CardDiscarded){
             const Card *card = data.value<CardStar>();
-            if(card->subcardsLength() == 0 && card->isVirtualCard())
-                return false;
 
             clubs = getClubs(card);
         }else if(event == FinishJudge){
@@ -869,7 +867,7 @@ public:
                 room->showCard(player, card->getEffectiveId());
 
                 if(card->getTypeId() != Card::Basic){
-                    room->throwCard(card);
+                    room->throwCard(card, player);
 
                     room->playSkillEffect(objectName());
 

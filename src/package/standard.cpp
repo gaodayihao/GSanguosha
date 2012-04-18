@@ -85,8 +85,7 @@ void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
     }
 
     if(equipped){
-        room->setPlayerFlag(target, "UninstallEquip");
-        room->throwCard(equipped);
+        room->throwCard(equipped, source);
     }
 
     if(room->getCardOwner(this->getEffectiveId()) == target || this->objectName() == "gale-shell"){

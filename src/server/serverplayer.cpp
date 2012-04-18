@@ -77,9 +77,9 @@ void ServerPlayer::throwAllEquips(){
     DummyCard *card = new DummyCard;
     foreach(const Card *equip, equips)
         card->addSubcard(equip);
-    room->moveCardTo(card, NULL, Player::DiscardedPile, true);
 
-    room->doDisCarded(this, card, false);
+    room->throwCard(card, this);
+
     card->deleteLater();
 }
 
@@ -87,9 +87,9 @@ void ServerPlayer::throwAllHandCards(){
     DummyCard *card = wholeHandCards();
     if(card == NULL)
         return;
-    room->moveCardTo(card, NULL, Player::DiscardedPile, true);
 
-    room->doDisCarded(this, card, false);
+    room->throwCard(card, this);
+
     card->deleteLater();
 }
 
@@ -139,9 +139,7 @@ void ServerPlayer::throwAllCards(){
         foreach(const Card *equip, equips)
             card->addSubcard(equip);
     if(card != NULL){
-        room->moveCardTo(card, NULL , Player::DiscardedPile, true);
-
-        room->doDisCarded(this, card, false);
+        room->throwCard(card, this);
     }
     card->deleteLater();
 

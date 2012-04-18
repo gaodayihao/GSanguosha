@@ -12,7 +12,7 @@ ZhihengCard::ZhihengCard(){
 }
 
 void ZhihengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const{
-    room->throwCard(this);
+    room->throwCard(this,source);
     if(source->isAlive())
         room->drawCards(source, subcards.length());
 }
@@ -171,8 +171,8 @@ bool LijianCard::targetsFeasible(const QList<const Player *> &targets, const Pla
     return targets.length() == 2;
 }
 
-void LijianCard::use(Room *room, ServerPlayer *, const QList<ServerPlayer *> &targets) const{
-    room->throwCard(this);
+void LijianCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
+    room->throwCard(this, source);
     room->playSkillEffect("lijian");
 
     ServerPlayer *to = targets.at(0);
@@ -202,7 +202,7 @@ bool QingnangCard::targetsFeasible(const QList<const Player *> &targets, const P
 }
 
 void QingnangCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    room->throwCard(this);
+    room->throwCard(this, source);
 
     ServerPlayer *target = targets.value(0, source);
 

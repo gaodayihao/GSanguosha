@@ -2584,15 +2584,40 @@ void Room::drawCards(ServerPlayer *player, int n, const QString &reason){
     thread->trigger(CardDrawnDone, player, data);
 }
 
-void Room::throwCard(const Card *card){
+void Room::throwCard(const Card *card, ServerPlayer *who){
     if(card == NULL)
         return;
 
+    if(who){
+        LogMessage log;
+        log.type = "$DiscardCard";
+        log.from = who;
+        QList<int> to_discard;
+        if(card->isVirtualCard())
+            to_discard.append(card->getSubcards());
+        else
+            to_discard << card->getEffectiveId();
+
+        foreach(int card_id, to_discard){
+            if(log.card_str.isEmpty())
+                log.card_str = QString::number(card_id);
+            else
+                log.card_str += "+" + QString::number(card_id);
+        }
+        sendLog(log);
+    }
+
     moveCardTo(card, NULL, Player::DiscardedPile);
+
+    if(who){
+        CardStar card_ptr = card;
+        QVariant data = QVariant::fromValue(card_ptr);
+        thread->trigger(CardDiscarded, who, data);
+    }
 }
 
-void Room::throwCard(int card_id){
-    moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DiscardedPile);
+void Room::throwCard(int card_id, ServerPlayer *who){
+    throwCard(Sanguosha->getCard(card_id), who);
 }
 
 RoomThread *Room::getThread() const{
@@ -2774,16 +2799,6 @@ void Room::doMove(const CardMoveStruct &move, const QSet<ServerPlayer *> &scope)
         thread->trigger(CardGot, move.to, data);
     }
     Sanguosha->getCard(move.card_id)->onMove(move);
-    if(move.to_place && move.to_place == Player::DiscardedPile
-            && card->inherits("EquipCard")
-            && move.from && move.from_place &&move.from_place == Player::Equip
-            && move.from->hasFlag("UninstallEquip")){
-        setPlayerFlag(move.from, "-UninstallEquip");
-        DummyCard *dummy_card = new DummyCard;
-        dummy_card->addSubcard(card);
-        doDisCarded(move.from, dummy_card, false);
-        dummy_card->deleteLater();
-    }
 }
 
 
@@ -2863,27 +2878,6 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
 
     first->setFlags("-cmoving");
     second->setFlags("-cmoving");
-}
-
-void Room::doDisCarded(ServerPlayer *who, const DummyCard *card, bool log){
-    if(log){
-        LogMessage log;
-        log.type = "$DiscardCard";
-        log.from = who;
-
-        foreach(int card_id, card->getSubcards()){
-
-            if(log.card_str.isEmpty())
-                log.card_str = QString::number(card_id);
-            else
-                log.card_str += "+" + QString::number(card_id);
-        }
-        sendLog(log);
-    }
-
-    CardStar card_star = card;
-    QVariant data = QVariant::fromValue(card_star);
-    thread->trigger(CardDiscarded, who, data);
 }
 
 QString CardMoveStruct::toString() const{
@@ -3119,24 +3113,9 @@ bool Room::askForDiscard(ServerPlayer *target, const QString &reason, int discar
     foreach(int card_id, to_discard)
         dummy_card->addSubcard(card_id);
 
-    throwCard(dummy_card);
+    throwCard(dummy_card, target);
 
-    LogMessage log;
-    log.type = "$DiscardCard";
-    log.from = target;
-    foreach(int card_id, to_discard){
-
-        if(log.card_str.isEmpty())
-            log.card_str = QString::number(card_id);
-        else
-            log.card_str += "+" + QString::number(card_id);
-    }
-    sendLog(log);
-
-    CardStar card_star = dummy_card;
-    QVariant data = QVariant::fromValue(card_star);
-    thread->trigger(CardDiscarded, target, data);
-
+    QVariant data;
     data=QString("%1:%2").arg("cardDiscard").arg(dummy_card->toString());
     thread->trigger(ChoiceMade, target, data);
 
@@ -3278,7 +3257,7 @@ void Room::doGongxin(ServerPlayer *shenlumeng, ServerPlayer *target){
             if(card->getSuit() == Card::Heart && !card->inherits("Shit")){
                 showCard(target, card->getEffectiveId());
                 thread->delay();
-                throwCard(card);
+                throwCard(card, target);
                 return;
             }
         }
@@ -3304,7 +3283,7 @@ void Room::doGongxin(ServerPlayer *shenlumeng, ServerPlayer *target){
 
     QString result = askForChoice(shenlumeng, "gongxin", "discard+put");
     if(result == "discard")
-        throwCard(card_id);
+        throwCard(card_id, target);
     else{
         moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile, true);
     }

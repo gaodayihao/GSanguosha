@@ -135,12 +135,11 @@ public:
     void obtainCard(ServerPlayer *target, const Card *card);
     void obtainCard(ServerPlayer *target, int card_id);
 
-    void throwCard(const Card *card);
-    void throwCard(int card_id);
+    void throwCard(const Card *card, ServerPlayer *who = NULL);
+    void throwCard(int card_id, ServerPlayer *who = NULL);
     void moveCardTo(const Card *card, ServerPlayer *to, Player::Place place, bool open = true);
     void doMove(const CardMoveStruct &move, const QSet<ServerPlayer *> &scope);
     void ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyCard *card1, const DummyCard *card2, Player::Place place, bool open = false);
-    void doDisCarded(ServerPlayer *who, const DummyCard *card, bool log = true);
 
 
     // interactive methods
