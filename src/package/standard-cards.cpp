@@ -249,7 +249,7 @@ public:
         effect.to->addMark("qinggang");
 
         if(effect.to->getArmor() || effect.to->hasSkill("bazhen"))
-            effect.to->getRoom()->setEmotion(effect.to, QString("weapon/%1").arg(objectName()));
+            effect.from->getRoom()->setEmotion(effect.to, QString("weapon/%1").arg(objectName()));
         return false;
     }
 };
