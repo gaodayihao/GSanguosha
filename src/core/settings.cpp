@@ -129,6 +129,8 @@ void Settings::init(){
 
     HistoryNodeList = value("HistoryNodeList").toStringList();
     ClearServerLog = value("ClearServerLog", true).toBool();
+    NodeAddress = value("NodeAddress", "119.146.144.144").toString();
+    NodePort = value("NodePort", 9527u).toUInt();
 
     GodSelectLimited = value("GodSelectLimited", 98).toUInt();
 
