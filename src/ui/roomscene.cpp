@@ -3760,8 +3760,6 @@ void RoomScene::kick(){
     QList<const ClientPlayer *> players = ClientInstance->getPlayers();
     QStringList items;
     foreach(const ClientPlayer *player, players){
-        if(player == Self || player->getState() == "robot")
-            continue;
         QString general_name = Sanguosha->translate(player->getGeneralName());
         items << QString("%1 [%2]").arg(player->screenName()).arg(general_name);
     }
@@ -3776,7 +3774,7 @@ void RoomScene::kick(){
                                          tr("Please select the player to kick"), items, 0, false, &ok);
     if(ok){
         int index = items.indexOf(item);
-        ClientInstance->kick(players.at(index + 1)->objectName());
+        ClientInstance->kick(players.at(index)->objectName());
     }
 }
 

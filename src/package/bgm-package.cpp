@@ -78,7 +78,7 @@ void LihunCard::onEffect(const CardEffectStruct &effect) const{
 //    foreach(const Card *cd, effect.to->getHandcards()){
 //        room->moveCardTo(cd, effect.from, Player::Hand, false);
 //    }
-    room->setTag("LihunTarget", QVariant::fromValue(effect.to));
+    effect.to->setFlags("LihunTarget");
     DummyCard *cd = effect.to->wholeHandCards();
     if(cd)
         room->moveCardTo(cd, effect.from, Player::Hand, false);
@@ -125,7 +125,15 @@ public:
         Room *room = diaochan->getRoom();
 
         if(event == PhaseChange && diaochan->getPhase() == Player::Discard){
-            ServerPlayer *target = room->getTag("LihunTarget").value<PlayerStar>();
+            ServerPlayer *target = NULL;
+            foreach(ServerPlayer *other, room->getOtherPlayers(diaochan)){
+                if(other->hasFlag("LihunTarget")){
+                    other->setFlags("-LihunTarget");
+                    target = other;
+                    break;
+                }
+            }
+
             if(!target || target->isDead())
                 return false;
 
