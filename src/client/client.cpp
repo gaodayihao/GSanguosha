@@ -1442,7 +1442,7 @@ void Client::doGuanxing(const QString &guanxing_str){
 }
 
 void Client::doGongxin(const QString &gongxin_str){
-    QRegExp rx("(\\w+)(!?):(.+)");
+    QRegExp rx("(\\w+)(!?):(.+):(S?)");
     if(!rx.exactMatch(gongxin_str))
         return;
 
@@ -1450,13 +1450,14 @@ void Client::doGongxin(const QString &gongxin_str){
     ClientPlayer *who = getPlayer(texts.at(1));
     bool enable_heart = texts.at(2).isEmpty();
     QStringList cards = texts.at(3).split("+");
+    bool enable_Spade = !texts.at(4).isEmpty();
     QList<int> card_ids;
     foreach(QString card, cards)
         card_ids << card.toInt();
 
     who->setCards(card_ids);
 
-    emit gongxin(card_ids, enable_heart);
+    emit gongxin(card_ids, enable_heart, enable_Spade);
     setStatus(AskForGongxin);
 }
 

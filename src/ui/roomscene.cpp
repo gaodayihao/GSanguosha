@@ -160,7 +160,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(ClientInstance, SIGNAL(player_killed(QString)), this, SLOT(killPlayer(QString)));
     connect(ClientInstance, SIGNAL(player_revived(QString)), this, SLOT(revivePlayer(QString)));
     connect(ClientInstance, SIGNAL(card_shown(QString,int)), this, SLOT(showCard(QString,int)));
-    connect(ClientInstance, SIGNAL(gongxin(QList<int>, bool)), this, SLOT(doGongxin(QList<int>, bool)));
+    connect(ClientInstance, SIGNAL(gongxin(QList<int>, bool, bool)), this, SLOT(doGongxin(QList<int>, bool, bool)));
     connect(ClientInstance, SIGNAL(focus_moved(QString)), this, SLOT(moveFocus(QString)));
     connect(ClientInstance, SIGNAL(emotion_set(QString,QString)), this, SLOT(setEmotion(QString,QString)));
     connect(ClientInstance, SIGNAL(skill_invoked(QString,QString)), this, SLOT(showSkillInvocation(QString,QString)));
@@ -3036,9 +3036,11 @@ void RoomScene::speak(){
     chat_edit->clear();
 }
 
-void RoomScene::doGongxin(const QList<int> &card_ids, bool enable_heart){
+void RoomScene::doGongxin(const QList<int> &card_ids, bool enable_heart, bool enable_Spade){
     card_container->fillCards(card_ids);
-    if(enable_heart)
+    if(enable_Spade)
+        card_container->startGongxinwithHongyan();
+    else if(enable_heart)
         card_container->startGongxin();
     else
         card_container->addCloseButton();

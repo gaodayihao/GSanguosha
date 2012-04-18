@@ -45,6 +45,7 @@ public:
     int getFirstEnabled() const;
     void startChoose();
     void startGongxin();
+    void startGongxinwithHongyan();
     void addCloseButton(bool dispose = false);
     void view(const ClientPlayer *player);
 

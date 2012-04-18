@@ -3271,7 +3271,8 @@ void Room::doGongxin(ServerPlayer *shenlumeng, ServerPlayer *target){
     foreach(int handcard, handcards)
         handcards_str << QString::number(handcard);
 
-    const QString &ask_str = QString("%1:%2").arg(target->objectName()).arg(handcards_str.join("+"));
+    const QString &ask_str = QString("%1:%2:%3").arg(target->objectName()).arg(handcards_str.join("+"))
+                             .arg(target->hasSkill("hongyan")? "S" : QString());
     executeCommand(shenlumeng, "doGongxin", "replyGongxinCommand", ask_str, ".");
 
 
@@ -3581,7 +3582,7 @@ void Room::showAllCards(ServerPlayer *player, ServerPlayer *to){
     QStringList handcards_str;
     foreach(const Card *card, player->getHandcards())
         handcards_str << QString::number(card->getId());
-    QString gongxin_str = QString("%1!:%2").arg(player->objectName()).arg(handcards_str.join("+"));
+    QString gongxin_str = QString("%1!:%2:").arg(player->objectName()).arg(handcards_str.join("+"));
 
     if(to)
         to->invoke("doGongxin", gongxin_str);

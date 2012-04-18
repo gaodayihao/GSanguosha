@@ -242,7 +242,7 @@ signals:
     void card_shown(const QString &player_name, int card_id);
     void log_received(const QString &log_str);
     void guanxing(const QList<int> &card_ids, bool up_only);
-    void gongxin(const QList<int> &card_ids, bool enable_heart);
+    void gongxin(const QList<int> &card_ids, bool enable_heart, bool enable_Spade);
     void focus_moved(const QString &focus);
     void emotion_set(const QString &target, const QString &emotion);
     void skill_invoked(const QString &who, const QString &skill_name);

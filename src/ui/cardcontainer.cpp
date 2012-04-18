@@ -160,6 +160,14 @@ void CardContainer::startGongxin(){
     }
 }
 
+void CardContainer::startGongxinwithHongyan(){
+    foreach(GrabCardItem *item, items){
+        if(item->getCard()->getSuit() == Card::Heart || item->getCard()->getSuit() == Card::Spade){
+            connect(item, SIGNAL(double_clicked()), this, SLOT(gongxinItem()));
+        }
+    }
+}
+
 void CardContainer::addCloseButton(bool dispose){
     close_button->show();
 
