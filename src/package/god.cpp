@@ -196,7 +196,7 @@ void GreatYeyanCard::use(Room *room, ServerPlayer *shenzhouyu, const QList<Serve
     room->broadcastInvoke("animate", "lightbox:$greatyeyan");
 
     shenzhouyu->loseMark("@flame");
-    room->throwCard(this);
+    room->throwCard(this, shenzhouyu);
     room->loseHp(shenzhouyu, 3);
 
     damage(shenzhouyu, targets.first(), 3);
@@ -214,7 +214,7 @@ void MediumYeyanCard::use(Room *room, ServerPlayer *shenzhouyu, const QList<Serv
     room->broadcastInvoke("animate", "lightbox:$mediumyeyan");
 
     shenzhouyu->loseMark("@flame");
-    room->throwCard(this);
+    room->throwCard(this, shenzhouyu);
     room->loseHp(shenzhouyu, 3);
 
     ServerPlayer *first = targets.first();

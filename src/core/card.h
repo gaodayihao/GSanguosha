@@ -148,6 +148,7 @@ protected:
     bool mute;
     bool will_throw;
     bool can_jilei;
+    bool owner_discarded;
 
 private:
     Suit suit;
