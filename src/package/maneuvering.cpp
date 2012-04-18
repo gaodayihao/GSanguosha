@@ -89,9 +89,9 @@ void Analeptic::onEffect(const CardEffectStruct &effect) const{
     }
 }
 
-class FanSkill: public OneCardViewAsSkill{
+class FanViewAsSkill: public OneCardViewAsSkill{
 public:
-    FanSkill():OneCardViewAsSkill("fan"){
+    FanViewAsSkill():OneCardViewAsSkill("fan"){
 
     }
 
@@ -116,9 +116,35 @@ public:
     }
 };
 
+class FanSkill: public WeaponSkill{
+public:
+    FanSkill():WeaponSkill("fan"){
+        events << SlashEffect;
+    }
+
+    virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
+        SlashEffectStruct effect = data.value<SlashEffectStruct>();
+        if(!effect.slash->getSkillName().isEmpty() && effect.slash->getSubcards().length() > 0)
+            return false;
+
+        if(effect.nature == DamageStruct::Normal){
+            if(player->getRoom()->askForSkillInvoke(player, objectName(), data)){
+                effect.nature = DamageStruct::Fire;
+
+                player->getRoom()->setEmotion(player, QString("weapon/%1").arg(objectName()));
+
+                data = QVariant::fromValue(effect);
+            }
+        }
+
+        return false;
+    }
+};
+
 Fan::Fan(Suit suit, int number):Weapon(suit, number, 4){
     setObjectName("fan");
     attach_skill = true;
+    skill = new FanSkill;
 }
 
 class GudingBladeSkill: public WeaponSkill{
@@ -465,7 +491,7 @@ ManeuveringPackage::ManeuveringPackage()
     foreach(Card *card, cards)
         card->setParent(this);
 
-    skills << new FanSkill;
+    skills << new FanViewAsSkill;
     type = CardPack;
 
 }

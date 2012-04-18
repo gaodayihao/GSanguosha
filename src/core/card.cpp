@@ -413,6 +413,8 @@ static bool CompareByActionOrder(ServerPlayer *a, ServerPlayer *b){
 
 void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     ServerPlayer *player = card_use.from;
+    QVariant data = QVariant::fromValue(card_use);
+    RoomThread *thread = room->getThread();
 
     LogMessage log;
     log.from = player;
@@ -421,8 +423,6 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     log.card_str = toString();
     room->sendLog(log);
 
-    QVariant data = QVariant::fromValue(card_use);
-    RoomThread *thread = room->getThread();
     thread->trigger(CardUsed, player, data);
 
     thread->trigger(CardFinished, player, data);
