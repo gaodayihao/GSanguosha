@@ -241,7 +241,7 @@ QWidget *ServerDialog::createAdvancedTab(){
     node_address_edit->setText(Config.value("NodeAddress", "119.146.144.144").toString());
 
     node_port_edit = new QLineEdit;
-    node_port_edit->setText(QString::number(Config.value("NodePort", 9527).toUInt()));
+    node_port_edit->setText(QString::number(Config.value("NodePort", 9527u).toUInt()));
     node_port_edit->setValidator(new QIntValidator(1, 9999, node_port_edit));
 
     clearserverlog_checkbox = new QCheckBox(tr("Clear server log automatic"));
