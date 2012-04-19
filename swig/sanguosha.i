@@ -481,6 +481,7 @@ enum TriggerEvent{
     SlashMissed,
 
     CardAsked,
+	CardonUse,
     CardUsed,
     CardResponsed,
     CardDiscarded,

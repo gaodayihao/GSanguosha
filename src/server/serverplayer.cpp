@@ -400,11 +400,20 @@ void ServerPlayer::addCard(const Card *card, Place place){
 }
 
 bool ServerPlayer::isLastHandCard(const Card *card) const{
-    if(handcards.length() != 1)
-        return false;
+    if(card->isVirtualCard()){
+        if(card->getSubcards().length() != handcards.length())
+            return false;
 
-    return card->getEffectiveId() == handcards.first()->getEffectiveId();
+        foreach(int card_id, card->getSubcards())
+            if(hasEquip(Sanguosha->getCard(card_id)))
+                return false;
+    }else{
+        if(handcards.length() != 1)
+            return false;
 
+        return card->getEffectiveId() == handcards.first()->getEffectiveId();
+    }
+    return true;
 }
 
 QList<int> ServerPlayer::handCards() const{

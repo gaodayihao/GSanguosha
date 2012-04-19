@@ -606,7 +606,7 @@ void TiaoxinCard::onEffect(const CardEffectStruct &effect) const{
     else
         room->playSkillEffect("tiaoxin", qrand() % 2 + 1);
 
-    const Card *slash = room->askForCard(effect.to, "slash", "@tiaoxin-slash:" + effect.from->objectName());
+    const Card *slash = room->askForCard(effect.to, "slash", "@tiaoxin-slash-Use:" + effect.from->objectName());
 
     if(slash){
         CardUseStruct use;

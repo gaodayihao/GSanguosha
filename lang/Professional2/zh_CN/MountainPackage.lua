@@ -47,7 +47,7 @@ return {
 	["zhiji:draw"] = "摸2张牌",
 	["zhiji:recover"] = "回复1点体力",
 	["#ZhijiWake"] = "%from 没有手牌，触发了觉醒技【%arg】",
-	["@tiaoxin-slash"] = "%src 向你发动【挑衅】，请对其使用一张杀",
+	["@tiaoxin-slash-Use"] = "%src 向你发动【挑衅】，请对其使用一张杀",
 
 	["#sunce"] = "江东的小霸王",
 	["sunce"] = "孙策",

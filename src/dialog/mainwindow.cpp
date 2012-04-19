@@ -321,6 +321,7 @@ void BackLoader::run()
             << "weapon/double_sword"
             << "weapon/fan"
             << "weapon/guding_blade"
+            << "weapon/halberd"
             << "weapon/ice_sword"
             << "weapon/kylin_bow"
             << "weapon/qinggang_sword"

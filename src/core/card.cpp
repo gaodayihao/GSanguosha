@@ -424,9 +424,13 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     log.card_str = toString();
     room->sendLog(log);
 
-    thread->trigger(CardUsed, player, data);
+    thread->trigger(CardonUse, player, data);
 
-    thread->trigger(CardFinished, player, data);
+    CardUseStruct use = data.value<CardUseStruct>();
+
+    thread->trigger(CardUsed, use.from, data);
+
+    thread->trigger(CardFinished, use.from, data);
 }
 
 void Card::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{

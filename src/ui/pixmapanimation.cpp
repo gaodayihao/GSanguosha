@@ -23,7 +23,11 @@ void PixmapAnimation::setPath(const QString &path)
 {
     frames.clear();
 
-    if(path.contains("weapon/crossbow") || !path.contains("weapon/")){
+    bool notUseLight = path.contains("weapon/crossbow")|| path.contains("weapon/double_sword")
+                       || path.contains("weapon/halberd")
+                       || !path.contains("weapon/");
+
+    if(notUseLight){
         int i = 0;
         QString pic_path = QString("%1%2%3").arg(path).arg(i++).arg(".png");
         do{
@@ -97,6 +101,12 @@ PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, co
             pma->moveBy(pma->boundingRect().width()*0.15,
                         pma->boundingRect().height()*0.15);
             pma->setScale(0.7);
+        }
+
+        else if(emotion.contains("double_sword"))
+        {
+            pma->moveBy(13, -85);
+            pma->setScale(1.3);
         }
 
         pma->moveBy((parent->boundingRect().width() - pma->boundingRect().width())/2,

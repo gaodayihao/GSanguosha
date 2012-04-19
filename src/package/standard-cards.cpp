@@ -79,23 +79,8 @@ bool Slash::targetsFeasible(const QList<const Player *> &targets, const Player *
 bool Slash::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
     int slash_targets = 1;
 
-    if(Self->hasWeapon("halberd")
-      && this->getSkillName() == "longhun"
-      && this->getSubcards().length() == Self->getHandcardNum()){
-
-        bool threetarget = true;
-        foreach(int card_id, this->getSubcards()){
-            if(Sanguosha->getCard(card_id)->isEquipped()){
-                threetarget = false;
-                break;
-            }
-        }
-        slash_targets = threetarget ? 3 : 1;
-    }
-
-    if(Self->hasWeapon("halberd") && Self->isLastHandCard(this)){
-        slash_targets = 3;
-    }
+    if(Self->hasFlag("halberdusing"))
+        slash_targets += 1;
 
     if(Self->hasSkill("shenji") && Self->getWeapon() == NULL)
         slash_targets = 3;
@@ -117,18 +102,14 @@ bool Slash::targetFilter(const QList<const Player *> &targets, const Player *to_
         distance_limit = false;
     }
 
-    if(getSkillName().contains("wusheng") && !Self->hasFlag("tianyi_success")){
+    int distance_fix = 0;
+    if(Self->getWeapon() && subcards.contains(Self->getWeapon()->getEffectiveId()))
+        distance_fix += Self->getWeapon()->getRange() - 1;
 
-        if(Self->getWeapon() == Sanguosha->getCard(subcards.first()))
-            return Self->canSlash(to_select, true, Self->getWeapon()->getRange() - 1);
+    if(Self->getOffensiveHorse() && subcards.contains(Self->getOffensiveHorse()->getEffectiveId()))
+        distance_fix += 1;
 
-        if(Self->getOffensiveHorse() == Sanguosha->getCard(subcards.first()))
-            return Self->canSlash(to_select, true, 1);
-        else
-            return Self->canSlash(to_select, distance_limit);
-    }
-
-    return Self->canSlash(to_select, distance_limit);
+    return Self->canSlash(to_select, distance_limit, distance_fix);
 }
 
 Jink::Jink(Suit suit, int number):BasicCard(suit, number){
@@ -436,10 +417,99 @@ Axe::Axe(Suit suit, int number)
     attach_skill = true;
 }
 
+HalberdCard::HalberdCard(){
+    once = true;
+}
+
+bool HalberdCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    QStringList removetargets = Self->tag.value("Halberdtargets", NULL).toStringList();
+
+    foreach(QString removetarget, removetargets)
+        if(to_select->objectName() == removetarget)
+            return false;
+
+    Card *slash = Sanguosha->cloneCard("slash", Card::NoSuit, 0);
+    return slash->targetFilter(targets, to_select, Self) && !Self->isProhibited(to_select, slash);
+}
+
+bool HalberdCard::targetsFeasible(const QList<const Player *> &targets, const Player *) const{
+    return !targets.isEmpty();
+}
+
+void HalberdCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
+    Self->tag.remove("Halberdtargets");
+
+    QStringList newtargets;
+    foreach(ServerPlayer *target, targets)
+        newtargets << target->objectName();
+
+    Self->tag["Halberdtargets"] = newtargets;
+    room->setEmotion(source, QString("weapon/%1").arg("halberd"));
+    room->getThread()->delay(1200);
+}
+
+class HalberdViewAsSkill: public ZeroCardViewAsSkill{
+public:
+    HalberdViewAsSkill():ZeroCardViewAsSkill("halberd"){
+
+    }
+
+    virtual const Card *viewAs() const{
+        return new HalberdCard;
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return false;
+    }
+};
+
+class HalberdSkill: public WeaponSkill{
+public:
+    HalberdSkill():WeaponSkill("halberd"){
+        events << CardonUse;
+    }
+
+    ServerPlayer *findPlayerByobjectName(Room *room, QString Name) const{
+        foreach(ServerPlayer *sp,room->getAlivePlayers())
+            if(sp->objectName() == Name)
+                return sp;
+        return NULL;
+    }
+
+    virtual bool trigger(TriggerEvent, ServerPlayer *player, QVariant &data) const{
+        CardUseStruct use = data.value<CardUseStruct>();
+
+        if(!use.card->inherits("Slash") || !player->isLastHandCard(use.card))
+            return false;
+
+        QStringList targets;
+        foreach(ServerPlayer *sp, use.to)
+            targets << sp->objectName();
+
+        Room *room = player->getRoom();
+        Self->tag["Halberdtargets"] = targets;
+        room->setPlayerFlag(player, "halberdusing");
+
+        if(room->askForUseCard(player, "@halberd", "halberd")){
+            QStringList newtargets = Self->tag.value("Halberdtargets", NULL).toStringList();
+            foreach(QString newtarget, newtargets)
+                use.to << findPlayerByobjectName(room, newtarget);
+            data = QVariant::fromValue(use);
+        }
+
+        Self->tag.remove("Halberdtargets");
+        room->setPlayerFlag(player, "-halberdusing");
+
+        return false;
+    }
+};
+
 Halberd::Halberd(Suit suit, int number)
     :Weapon(suit, number, 4)
 {
     setObjectName("halberd");
+    skill = new HalberdSkill;
+    attach_skill = true;
 }
 
 class KylinBowSkill: public WeaponSkill{
@@ -732,7 +802,7 @@ void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
 
     bool on_effect = room->cardEffect(this, source, killer);
     if(on_effect){
-        QString prompt = QString("collateral-slash:%1:%2")
+        QString prompt = QString("collateral-slash-Use:%1:%2")
                 .arg(source->objectName()).arg(victims.first()->objectName());
         const Card *slash = room->askForCard(killer, "slash", prompt);
         if (victims.first()->isDead()){
@@ -1232,7 +1302,10 @@ StandardCardPackage::StandardCardPackage()
     foreach(Card *card, cards)
         card->setParent(this);
 
-    skills << new SpearSkill << new AxeViewAsSkill;
+    skills << new SpearSkill << new AxeViewAsSkill
+           << new HalberdViewAsSkill;
+
+    addMetaObject<HalberdCard>();
 }
 
 StandardExCardPackage::StandardExCardPackage()

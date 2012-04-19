@@ -71,7 +71,7 @@ return {
 	["@chaos"] = "乱武",
 	["#WanshaOne"] = "%from 的锁定技【%arg】被触发，只能 %from 自救",
 	["#WanshaTwo"] = "%from 的锁定技【%arg】被触发，只有 %from 和 %to 自己才能救 %to",
-	["@luanwu-slash"] = "请打出一张杀以响应【乱武】",
+	["@luanwu-slash-Use"] = "请打出一张杀以响应【乱武】",
 
 	["#dongzhuo"] = "魔王",
 	["dongzhuo"] = "董卓",

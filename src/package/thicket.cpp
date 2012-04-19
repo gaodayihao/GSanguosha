@@ -567,7 +567,7 @@ bool DimengCard::targetFilter(const QList<const Player *> &targets, const Player
     return false;
 }
 
-bool DimengCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+bool DimengCard::targetsFeasible(const QList<const Player *> &targets, const Player *) const{
     return targets.length() == 2;
 }
 
@@ -673,13 +673,17 @@ void LuanwuCard::onEffect(const CardEffectStruct &effect) const{
     }
 
     const Card *slash = NULL;
-    if(!luanwu_targets.isEmpty() && (slash = room->askForCard(effect.to, "slash", "@luanwu-slash"))){
+    if(!luanwu_targets.isEmpty() && (slash = room->askForCard(effect.to, "slash", "@luanwu-slash-Use"))){
         ServerPlayer *to_slash;
         if(luanwu_targets.length() == 1)
             to_slash = luanwu_targets.first();
         else
             to_slash = room->askForPlayerChosen(effect.to, luanwu_targets, "luanwu");
-        room->cardEffect(slash, effect.to, to_slash);
+        CardUseStruct use;
+        use.card = slash;
+        use.from = effect.to;
+        use.to << to_slash;
+        room->useCard(use);
     }else
         room->loseHp(effect.to);
 }

@@ -797,9 +797,10 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
     card = card->validateInResposing(player, &continuable);
 
     if(card){
+        bool foruse = prompt.contains("-Use");
         if(card->getTypeId() != Card::Skill){
             const CardPattern *card_pattern = Sanguosha->getPattern(pattern);
-            if(card_pattern == NULL || card_pattern->willThrow())
+            if((card_pattern == NULL || card_pattern->willThrow()) && !foruse)
                 throwCard(card);
         }else if(card->willThrow())
             throwCard(card);
@@ -810,7 +811,8 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
         CardStar card_ptr = card;
         QVariant card_star = QVariant::fromValue(card_ptr);
 
-        if(!card->inherits("DummyCard") && !pattern.startsWith(".")
+        if(foruse);
+        else if(!card->inherits("DummyCard") && !pattern.startsWith(".")
             && !prompt.toLower().contains("discard")){
             LogMessage log;
             log.card_str = card->toString();
@@ -2205,7 +2207,7 @@ void Room::loseMaxHp(ServerPlayer *victim, int lose){
     int hp = victim->getHp();
     victim->setMaxHP(qMax(victim->getMaxHP() - lose, 0));
 
-    Sanguosha->playAudio("maxhplost");
+    broadcastInvoke("playAudio", "maxhplost");
 
     broadcastProperty(victim, "maxhp");
     broadcastProperty(victim, "hp");
