@@ -229,8 +229,10 @@ public:
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
         effect.to->addMark("qinggang");
 
-        if(effect.to->getArmor() || effect.to->hasSkill("bazhen"))
-            effect.from->getRoom()->setEmotion(effect.to, QString("weapon/%1").arg(objectName()));
+        if(effect.to->getArmor() || effect.to->hasSkill("bazhen")){
+            effect.from->getRoom()->getThread()->delay(1200);
+            effect.from->getRoom()->setEmotion(effect.from, QString("weapon/%1").arg(objectName()));
+        }
         return false;
     }
 };

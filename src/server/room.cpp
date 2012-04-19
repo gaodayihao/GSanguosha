@@ -468,28 +468,41 @@ void Room::slashEffect(const SlashEffectStruct &effect){
     if(effect.from->getMark("SlashCount") > 1 && effect.from->hasSkill("paoxiao"))
         playSkillEffect("paoxiao");
 
-    QVariant data = QVariant::fromValue(effect);
-    if(effect.nature ==DamageStruct::Thunder)setEmotion(effect.from, "thunder_slash");
-    else if(effect.nature == DamageStruct::Fire)setEmotion(effect.from, "fire_slash");
-    else if(effect.slash->isBlack())setEmotion(effect.from, "slash_black");
-    else if(effect.slash->isRed())setEmotion(effect.from, "slash_red");
-    else setEmotion(effect.from, "killer");
-    setEmotion(effect.to, "victim");
+    bool useslasheffect = true;
 
     if(effect.from->hasFlag("QingLongblade")){
         setEmotion(effect.from, QString("weapon/%1").arg("blade"));
         setPlayerFlag(effect.from, "-QingLongblade");
+        useslasheffect = false;
     }
 
-    if(effect.from->hasWeapon("crossbow") && !effect.from->hasSkill("paoxiao"))
+    if(effect.from->getPhase() == Player::Play &&
+            effect.from->hasWeapon("crossbow") && !effect.from->hasSkill("paoxiao")){
         setEmotion(effect.from, QString("weapon/%1").arg("crossbow"));
+        useslasheffect = false;
+    }
 
-    if(effect.slash->getSkillName() == "spear")
+    if(effect.slash->getSkillName() == "spear"){
         setEmotion(effect.from, QString("weapon/%1").arg("spear"));
+        useslasheffect = false;
+    }
 
-    if(effect.slash->getSkillName() == "fan")
+    if(effect.slash->getSkillName() == "fan"){
         setEmotion(effect.from, QString("weapon/%1").arg("fan"));
+        useslasheffect = false;
+    }
 
+    QVariant data = QVariant::fromValue(effect);
+
+    if(useslasheffect){
+        if(effect.nature ==DamageStruct::Thunder)setEmotion(effect.from, "thunder_slash");
+        else if(effect.nature == DamageStruct::Fire)setEmotion(effect.from, "fire_slash");
+        else if(effect.slash->isBlack())setEmotion(effect.from, "slash_black");
+        else if(effect.slash->isRed())setEmotion(effect.from, "slash_red");
+        else setEmotion(effect.from, "killer");
+    }
+
+    setEmotion(effect.to, "victim");
     setTag("LastSlashEffect", data);
     bool broken = thread->trigger(SlashEffect, effect.from, data);
     if(!broken)
