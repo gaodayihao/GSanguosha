@@ -923,7 +923,7 @@ void XinzhanCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer
     }
 
     if(!left.isEmpty())
-        room->doGuanxing(source, left, true);
+        room->askForGuanxing(source, left, true);
  }
 
 class Xinzhan: public ZeroCardViewAsSkill{

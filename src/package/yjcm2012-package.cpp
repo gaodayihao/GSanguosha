@@ -185,7 +185,7 @@ public:
         return GuhuoDialog::GetInstance("qice", false);
     }
 
-    virtual bool viewFilter(const QList<CardItem *> &selected, const CardItem *to_select) const{
+    virtual bool viewFilter(const QList<CardItem *> &, const CardItem *to_select) const{
         return !to_select->isEquipped();
     }
 
@@ -531,7 +531,7 @@ public:
         return Slash::IsAvailable(player);
     }
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
         return pattern == "slash";
     }
 
@@ -554,7 +554,7 @@ public:
         events << Dying << DamageProceed << CardFinished;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
+    virtual bool triggerable(const ServerPlayer *) const{
         return true;
     }
 
@@ -565,8 +565,8 @@ public:
 
         if(event == Dying){
             DyingStruct dying = data.value<DyingStruct>();
-            if(!handang || !dying.savers.contains(handang) || dying.who->getHp() > 0 ||
-               handang->isNude() || !room->askForSkillInvoke(handang, objectName(), data))
+            if(!handang || !dying.savers.contains(handang) || dying.who->getHp() > 0 || handang->isNude() ||
+               room->getCurrent()->isDead() || !room->askForSkillInvoke(handang, objectName(), data))
                 return false;
             room->playSkillEffect(objectName());
 
@@ -661,7 +661,7 @@ protected:
         return !player->hasUsed("AnxuCard");
     }
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+    virtual bool isEnabledAtResponse(const Player *, const QString &) const{
         return false;
     }
 };
@@ -713,7 +713,7 @@ public:
         return Slash::IsAvailable(player);
     }
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
         return  pattern == "slash";
     }
 
@@ -772,11 +772,11 @@ public:
         return false;
     }
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
         return pattern == "@@chunlao";
     }
 
-    virtual bool viewFilter(const QList<CardItem *> &selected, const CardItem *to_select) const{
+    virtual bool viewFilter(const QList<CardItem *> &, const CardItem *to_select) const{
         return to_select->getFilteredCard()->inherits("Slash");
     }
 

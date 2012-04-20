@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{2CFD36B2-A793-499C-8521-9286DCB027F7}</ProjectGuid>
+    <ProjectGuid>{D1D5B663-5AE0-4811-8672-D13C4661857F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>lua</RootNamespace>
+    <RootNamespace>jsoncpp</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -40,11 +40,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)..\..\lib\</OutDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-  	<OutDir>$(SolutionDir)..\..\lib\</OutDir>
+    <OutDir>$(SolutionDir)..\..\lib\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -53,6 +50,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\src\jsoncpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -77,62 +75,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\lua\lapi.h" />
-    <ClInclude Include="..\..\src\lua\lauxlib.h" />
-    <ClInclude Include="..\..\src\lua\lcode.h" />
-    <ClInclude Include="..\..\src\lua\ldebug.h" />
-    <ClInclude Include="..\..\src\lua\ldo.h" />
-    <ClInclude Include="..\..\src\lua\lfunc.h" />
-    <ClInclude Include="..\..\src\lua\lgc.h" />
-    <ClInclude Include="..\..\src\lua\llex.h" />
-    <ClInclude Include="..\..\src\lua\llimits.h" />
-    <ClInclude Include="..\..\src\lua\lmem.h" />
-    <ClInclude Include="..\..\src\lua\lobject.h" />
-    <ClInclude Include="..\..\src\lua\lopcodes.h" />
-    <ClInclude Include="..\..\src\lua\lparser.h" />
-    <ClInclude Include="..\..\src\lua\lstate.h" />
-    <ClInclude Include="..\..\src\lua\lstring.h" />
-    <ClInclude Include="..\..\src\lua\ltable.h" />
-    <ClInclude Include="..\..\src\lua\ltm.h" />
-    <ClInclude Include="..\..\src\lua\lua.h" />
-    <ClInclude Include="..\..\src\lua\lua.hpp" />
-    <ClInclude Include="..\..\src\lua\luaconf.h" />
-    <ClInclude Include="..\..\src\lua\lualib.h" />
-    <ClInclude Include="..\..\src\lua\lundump.h" />
-    <ClInclude Include="..\..\src\lua\lvm.h" />
-    <ClInclude Include="..\..\src\lua\lzio.h" />
+    <None Include="..\..\src\jsoncpp\src\json_internalarray.inl" />
+    <None Include="..\..\src\jsoncpp\src\json_internalmap.inl" />
+    <None Include="..\..\src\jsoncpp\src\json_valueiterator.inl" />
+    <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\lua\lapi.c" />
-    <ClCompile Include="..\..\src\lua\lauxlib.c" />
-    <ClCompile Include="..\..\src\lua\lbaselib.c" />
-    <ClCompile Include="..\..\src\lua\lcode.c" />
-    <ClCompile Include="..\..\src\lua\ldblib.c" />
-    <ClCompile Include="..\..\src\lua\ldebug.c" />
-    <ClCompile Include="..\..\src\lua\ldo.c" />
-    <ClCompile Include="..\..\src\lua\ldump.c" />
-    <ClCompile Include="..\..\src\lua\lfunc.c" />
-    <ClCompile Include="..\..\src\lua\lgc.c" />
-    <ClCompile Include="..\..\src\lua\linit.c" />
-    <ClCompile Include="..\..\src\lua\liolib.c" />
-    <ClCompile Include="..\..\src\lua\llex.c" />
-    <ClCompile Include="..\..\src\lua\lmathlib.c" />
-    <ClCompile Include="..\..\src\lua\lmem.c" />
-    <ClCompile Include="..\..\src\lua\loadlib.c" />
-    <ClCompile Include="..\..\src\lua\lobject.c" />
-    <ClCompile Include="..\..\src\lua\lopcodes.c" />
-    <ClCompile Include="..\..\src\lua\loslib.c" />
-    <ClCompile Include="..\..\src\lua\lparser.c" />
-    <ClCompile Include="..\..\src\lua\lstate.c" />
-    <ClCompile Include="..\..\src\lua\lstring.c" />
-    <ClCompile Include="..\..\src\lua\lstrlib.c" />
-    <ClCompile Include="..\..\src\lua\ltable.c" />
-    <ClCompile Include="..\..\src\lua\ltablib.c" />
-    <ClCompile Include="..\..\src\lua\ltm.c" />
-    <ClCompile Include="..\..\src\lua\lundump.c" />
-    <ClCompile Include="..\..\src\lua\lvm.c" />
-    <ClCompile Include="..\..\src\lua\lzio.c" />
-    <ClCompile Include="..\..\src\lua\print.c" />
+    <ClInclude Include="..\..\src\jsoncpp\include\json\assertions.h" />
+    <ClInclude Include="..\..\src\jsoncpp\include\json\autolink.h" />
+    <ClInclude Include="..\..\src\jsoncpp\include\json\config.h" />
+    <ClInclude Include="..\..\src\jsoncpp\include\json\features.h" />
+    <ClInclude Include="..\..\src\jsoncpp\include\json\forwards.h" />
+    <ClInclude Include="..\..\src\jsoncpp\include\json\json.h" />
+    <ClInclude Include="..\..\src\jsoncpp\include\json\reader.h" />
+    <ClInclude Include="..\..\src\jsoncpp\include\json\value.h" />
+    <ClInclude Include="..\..\src\jsoncpp\include\json\writer.h" />
+    <ClInclude Include="..\..\src\jsoncpp\src\json_batchallocator.h" />
+    <ClInclude Include="..\..\src\jsoncpp\src\json_tool.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\jsoncpp\src\json_reader.cpp" />
+    <ClCompile Include="..\..\src\jsoncpp\src\json_value.cpp" />
+    <ClCompile Include="..\..\src\jsoncpp\src\json_writer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

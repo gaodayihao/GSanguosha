@@ -810,7 +810,7 @@ public:
 	void sendJudgeResult(const JudgeStar judge);
 	QList<int> getNCards(int n, bool update_pile_number = true);
 	ServerPlayer *getLord() const;
-	void doGuanxing(ServerPlayer *zhuge, const QList<int> &cards, bool up_only);
+	void askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, bool up_only);
 	void doGongxin(ServerPlayer *shenlumeng, ServerPlayer *target);
 	int drawCard();
 	const Card *peek();
@@ -821,11 +821,6 @@ public:
 	void sendLog(const LogMessage &log);
 	void showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer = NULL);
 	void showAllCards(ServerPlayer *player, ServerPlayer *to = NULL);
-	void getResult(const char *reply_func, ServerPlayer *reply_player, const char *defaultValue, bool move_focus = true,
-					bool supply_timeout = false, time_t timeout = 0);
-	void executeCommand(ServerPlayer* player, const char *invokeString, const char *commandString,
-					const char *invokeArg, const char *defaultValue, bool broadcast = false, bool move_focus = true,
-					bool supply_timeout = false, time_t timeout = 0);
 	void acquireSkill(ServerPlayer *player, const Skill *skill, bool open = true);
 	void acquireSkill(ServerPlayer *player, const char *skill_name, bool open = true);
 	void adjustSeats();

@@ -203,8 +203,8 @@ RoomScene::RoomScene(QMainWindow *main_window)
         card_container->shift();
         card_container->setZValue(guanxing_box->zValue());
 
-        connect(card_container, SIGNAL(item_chosen(int)), ClientInstance, SLOT(chooseAG(int)));
-        connect(card_container, SIGNAL(item_gongxined(int)), ClientInstance, SLOT(replyGongxin(int)));
+        connect(card_container, SIGNAL(item_chosen(int)), ClientInstance, SLOT(onPlayerChooseAG(int)));
+        connect(card_container, SIGNAL(item_gongxined(int)), ClientInstance, SLOT(onPlayerReplyGongxin(int)));
 
         connect(ClientInstance, SIGNAL(ag_filled(QList<int>)), card_container, SLOT(fillCards(QList<int>)));
         connect(ClientInstance, SIGNAL(ag_taken(const ClientPlayer*,int)), this, SLOT(takeAmazingGrace(const ClientPlayer*,int)));
@@ -1581,7 +1581,7 @@ void RoomScene::enableTargets(const Card *card){
         return;
     }
 
-    if(card->targetFixed() || ClientInstance->noTargetResponsing()){
+    if(card->targetFixed() || ClientInstance->hasNoTargetResponsing()){
         foreach(QGraphicsItem *item, item2player.keys()){
             //item->setOpacity(1.0);
             animations->effectOut(item);
@@ -1664,10 +1664,10 @@ void RoomScene::useSelectedCard(){
     case Client::Responsing:{
             const Card *card = dashboard->getSelected();
             if(card){
-                if(ClientInstance->noTargetResponsing())
-                    ClientInstance->responseCard(card);
+                if(ClientInstance->hasNoTargetResponsing())
+                    ClientInstance->onPlayerResponseCard(card);
                 else
-                    ClientInstance->useCard(card, selected_targets);
+                    ClientInstance->onPlayerUseCard(card, selected_targets);
                 prompt_box->disappear();
             }
 
@@ -1678,7 +1678,7 @@ void RoomScene::useSelectedCard(){
     case Client::Discarding: {
             const Card *card = dashboard->pendingCard();
             if(card){
-                ClientInstance->discardCards(card);
+                ClientInstance->onPlayerDiscardCards(card);
                 dashboard->stopPending();
                 prompt_box->disappear();
             }
@@ -1691,7 +1691,7 @@ void RoomScene::useSelectedCard(){
             return;
         }
     case Client::AskForAG:{
-            ClientInstance->chooseAG(-1);
+            ClientInstance->onPlayerChooseAG(-1);
             return;
         }
 
@@ -1708,7 +1708,7 @@ void RoomScene::useSelectedCard(){
         }
 
     case Client::AskForPlayerChoose:{
-            ClientInstance->choosePlayer(selected_targets.first());
+            ClientInstance->onPlayerChoosePlayer(selected_targets.first());
             prompt_box->disappear();
 
             break;
@@ -1717,7 +1717,7 @@ void RoomScene::useSelectedCard(){
     case Client::AskForYiji:{
             const Card *card = dashboard->pendingCard();
             if(card){
-                ClientInstance->replyYiji(card, selected_targets.first());
+                ClientInstance->onPlayerReplyYiji(card, selected_targets.first());
                 dashboard->stopPending();
                 prompt_box->disappear();
             }
@@ -1732,7 +1732,7 @@ void RoomScene::useSelectedCard(){
         }
 
     case Client::AskForGongxin:{
-            ClientInstance->replyGongxin();
+            ClientInstance->onPlayerReplyGongxin();
             card_container->clear();
 
             break;
@@ -1764,7 +1764,7 @@ void RoomScene::onEnabledChange()
 
 void RoomScene::useCard(const Card *card){
     if(card->targetFixed() || card->targetsFeasible(selected_targets, Self))
-        ClientInstance->useCard(card, selected_targets);
+        ClientInstance->onPlayerUseCard(card, selected_targets);
 
     enableTargets(NULL);
 }
@@ -1968,7 +1968,7 @@ void RoomScene::doTimeout(){
         }
 
     case Client::AskForPlayerChoose:{
-            ClientInstance->choosePlayer(NULL);
+            ClientInstance->onPlayerChoosePlayer(NULL);
             dashboard->stopPending();
             prompt_box->disappear();
             break;
@@ -1977,7 +1977,7 @@ void RoomScene::doTimeout(){
     case Client::AskForAG:{
             int card_id = card_container->getFirstEnabled();
             if(card_id != -1)
-                ClientInstance->chooseAG(card_id);
+                ClientInstance->onPlayerChooseAG(card_id);
 
             break;
         }
@@ -2026,7 +2026,7 @@ void RoomScene::updateStatus(Client::Status status){
             prompt_box->appear();
 
             ok_button->setEnabled(false);
-            cancel_button->setEnabled(ClientInstance->refusable);
+            cancel_button->setEnabled(ClientInstance->m_isDiscardActionRefusable);
             discard_button->setEnabled(false);
 
             QString pattern = ClientInstance->getPattern();
@@ -2057,11 +2057,11 @@ void RoomScene::updateStatus(Client::Status status){
             prompt_box->appear();
 
             ok_button->setEnabled(false);
-            cancel_button->setEnabled(ClientInstance->refusable);
+            cancel_button->setEnabled(ClientInstance->m_isDiscardActionRefusable);
             discard_button->setEnabled(false);
 
             discard_skill->setNum(ClientInstance->discard_num);
-            discard_skill->setIncludeEquip(ClientInstance->include_equip);
+            discard_skill->setIncludeEquip(ClientInstance->m_canDiscardEquip);
             dashboard->startPending(discard_skill);
             break;
         }
@@ -2126,7 +2126,7 @@ void RoomScene::updateStatus(Client::Status status){
     case Client::AskForAG:{
             dashboard->disableAllCards();
 
-            ok_button->setEnabled(ClientInstance->refusable);
+            ok_button->setEnabled(ClientInstance->m_isDiscardActionRefusable);
             cancel_button->setEnabled(false);
             discard_button->setEnabled(false);
 
@@ -2324,10 +2324,10 @@ void RoomScene::doCancelButton(){
                 }
             }
 
-            if(ClientInstance->noTargetResponsing())
-                ClientInstance->responseCard(NULL);
+            if(ClientInstance->hasNoTargetResponsing())
+                ClientInstance->onPlayerResponseCard(NULL);
             else
-                ClientInstance->useCard(NULL);
+                ClientInstance->onPlayerUseCard(NULL);
             prompt_box->disappear();
             dashboard->stopPending();
             break;
@@ -2335,7 +2335,7 @@ void RoomScene::doCancelButton(){
 
     case Client::Discarding:{
             dashboard->stopPending();
-            ClientInstance->discardCards(NULL);
+            ClientInstance->onPlayerDiscardCards(NULL);
             prompt_box->disappear();
             break;
         }
@@ -2353,7 +2353,7 @@ void RoomScene::doCancelButton(){
 
     case Client::AskForYiji:{
             dashboard->stopPending();
-            ClientInstance->replyYiji(NULL, NULL);
+            ClientInstance->onPlayerReplyYiji(NULL, NULL);
             prompt_box->disappear();
             break;
         }
@@ -2369,7 +2369,7 @@ void RoomScene::doDiscardButton(){
     dashboard->unselectAll();
 
     if(ClientInstance->getStatus() == Client::Playing){
-        ClientInstance->useCard(NULL);
+        ClientInstance->onPlayerUseCard(NULL);
     }
 }
 
