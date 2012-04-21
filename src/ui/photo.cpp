@@ -192,7 +192,7 @@ void Photo::setEmotion(const QString &emotion, bool permanent){
     emotion_item->setPixmap(QPixmap(path));
     emotion_item->show();
 
-    if(emotion == "question" || emotion == "no-question")
+    if(emotion == "question" || emotion == "no-question" || emotion.contains("guhuo/"))
         return;
 
     if(!permanent)
