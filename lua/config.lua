@@ -3,7 +3,7 @@
 -- and it is a little different from config.ini
 
 config = {
-	version = "2012041902",
+	version = "2012042103",
 	version_name = "踏青版",
 	mod_name = "GDMOD",
 	kingdoms = { "wei", "shu", "wu", "qun", "god"},
