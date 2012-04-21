@@ -424,11 +424,8 @@ HalberdCard::HalberdCard(){
 }
 
 bool HalberdCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    QStringList removetargets = Self->tag.value("Halberdtargets", NULL).toStringList();
-
-    foreach(QString removetarget, removetargets)
-        if(to_select->objectName() == removetarget)
-            return false;
+    if(to_select->hasFlag("Halberdtarget"))
+        return false;
 
     Card *slash = Sanguosha->cloneCard("slash", Card::NoSuit, 0);
     return slash->targetFilter(targets, to_select, Self) && !Self->isProhibited(to_select, slash);
@@ -439,13 +436,10 @@ bool HalberdCard::targetsFeasible(const QList<const Player *> &targets, const Pl
 }
 
 void HalberdCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    Self->tag.remove("Halberdtargets");
 
-    QStringList newtargets;
     foreach(ServerPlayer *target, targets)
-        newtargets << target->objectName();
+        room->setPlayerFlag(target, "newHalberdtarget");
 
-    Self->tag["Halberdtargets"] = newtargets;
     room->setEmotion(source, QString("weapon/%1").arg("halberd"));
     room->getThread()->delay(1200);
 }
@@ -484,22 +478,28 @@ public:
         if(!use.card->inherits("Slash") || !player->isLastHandCard(use.card))
             return false;
 
-        QStringList targets;
-        foreach(ServerPlayer *sp, use.to)
-            targets << sp->objectName();
-
         Room *room = player->getRoom();
-        Self->tag["Halberdtargets"] = targets;
+        foreach(ServerPlayer *sp, use.to){
+            room->setPlayerFlag(sp, "Halberdtarget");
+        }
+
         room->setPlayerFlag(player, "halberdusing");
 
         if(room->askForUseCard(player, "@halberd", "halberd")){
-            QStringList newtargets = Self->tag.value("Halberdtargets", NULL).toStringList();
-            foreach(QString newtarget, newtargets)
-                use.to << findPlayerByobjectName(room, newtarget);
+
+            foreach(ServerPlayer *sp, room->getAllPlayers())
+                if(sp->hasFlag("newHalberdtarget")){
+                    use.to << sp;
+                    room->setPlayerFlag(sp, "-newHalberdtarget");
+                }
+
             data = QVariant::fromValue(use);
         }
 
-        Self->tag.remove("Halberdtargets");
+
+        foreach(ServerPlayer *sp, room->getAllPlayers())
+            room->setPlayerFlag(sp, "-Halberdtarget");
+
         room->setPlayerFlag(player, "-halberdusing");
 
         return false;
