@@ -264,6 +264,62 @@ void MainWindow::networkError(const QString &error_msg){
         QMessageBox::warning(this, tr("Network error"), error_msg);
 }
 
+//Warning:If you will compiled it for Mac, please remove class Backloader
+BackLoader::BackLoader(QObject * parent)
+    :QThread(parent)
+{
+}
+
+void BackLoader::run()
+{
+    QStringList emotions;
+    emotions << "peach"
+             << "analeptic"
+             << "chain"
+             << "damage"
+             << "duel"
+             << "fire_slash"
+             << "thunder_slash"
+             << "killer"
+             << "jink"
+             << "no-success"
+             << "slash_black"
+             << "slash_red"
+             << "success"
+             << "armor/renwang_shield"
+             << "armor/eight_diagram"
+             << "armor/silver_lion"
+             << "armor/vine"
+             << "weapon/axe"
+             << "weapon/blade"
+             << "weapon/crossbow"
+             << "weapon/double_sword"
+             << "weapon/fan"
+             << "weapon/guding_blade"
+             << "weapon/halberd"
+             << "weapon/ice_sword"
+             << "weapon/kylin_bow"
+             << "weapon/qinggang_sword"
+             << "weapon/sp_moonspear"
+             << "weapon/spear";
+
+    foreach(QString emotion, emotions){
+        int n = PixmapAnimation::GetFrameCount(emotion);
+        for(int i=0; i<n; i++){
+
+            QString filename = QString("image/system/emotion/%1/%2.png").arg(emotion).arg(i);
+            try{
+                PixmapAnimation::GetFrameFromCache(filename);
+            }
+            catch(...){
+                continue;
+            }
+        }
+    }
+
+    emit finished();
+}
+
 void MainWindow::enterRoom(){
     // add current ip to history
     if(!Config.HistoryIPs.contains(Config.HostAddress)){
@@ -316,6 +372,10 @@ void MainWindow::enterRoom(){
     ui->menuHelp->setEnabled(false);
     connect(room_scene, SIGNAL(restart()), this, SLOT(startConnection()));
     connect(room_scene, SIGNAL(return_to_start()), this, SLOT(gotoStartScene()));
+
+    //Warning:If you will compiled it for Mac, please remove class Backloader
+    BackLoader *loader = new BackLoader(this);
+    loader->start();
 
     room_scene->adjustItems();
     gotoScene(room_scene);
