@@ -469,12 +469,6 @@ bool ServerPlayer::hasNullification() const{
                 return true;
         }
     }
-    if(hasSkill("wushen")){
-        foreach(const Card *card, handcards){
-            if(card->objectName() == "nullification" && card->getSuit() != Card::Heart)
-                return true;
-        }
-    }
     if(hasSkill("guhuo")){
         return !isKongcheng();
     }
@@ -516,11 +510,6 @@ bool ServerPlayer::hasNullification() const{
             return true;
     }
 
-    foreach(const Card *card, handcards){
-        if(card->objectName() == "nullification")
-            return true;
-    }
-
     foreach(const Skill* skill, getVisibleSkillList()){
         if(skill->inherits("LuaViewAsSkill")){
             const LuaViewAsSkill* luaskill = qobject_cast<const LuaViewAsSkill*>(skill);
@@ -535,6 +524,18 @@ bool ServerPlayer::hasNullification() const{
         }
     }
 
+    if(hasSkill("wushen")){
+        foreach(const Card *card, handcards){
+            if(card->objectName() == "nullification" && card->getSuit() != Card::Heart)
+                return true;
+        }
+        return false;
+    }
+
+    foreach(const Card *card, handcards){
+        if(card->objectName() == "nullification")
+            return true;
+    }
     return false;
 }
 
