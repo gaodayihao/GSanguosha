@@ -19,10 +19,28 @@ namespace QSanProtocol
         S_SERVER_REQUEST,
         S_SERVER_REPLY,
         S_SERVER_NOTIFICATION,
-        S_CLIENT_CHEAT_REQUEST,
         S_CLIENT_REQUEST,
         S_CLIENT_REPLY,
         S_CLIENT_NOTIFICATION
+    };
+
+    enum CheatCode
+    {
+        S_CHEAT_GET_ONE_CARD,
+        S_CHEAT_CHANGE_GENERAL,
+        S_CHEAT_KILL_PLAYER,
+        S_CHEAT_REVIVE_PLAYER,
+        S_CHEAT_MAKE_DAMAGE,
+        S_CHEAT_RUN_SCRIPT
+    };
+
+    enum CheatCategory
+    {
+        S_CHEAT_FIRE_DAMAGE,
+        S_CHEAT_THUNDER_DAMAGE,
+        S_CHEAT_NORMAL_DAMAGE,
+        S_CHEAT_HP_RECOVER,
+        S_CHEAT_HP_LOSE
     };
 
     enum CommandType
@@ -59,13 +77,14 @@ namespace QSanProtocol
         S_COMMAND_SET_PROPERTY,
         S_COMMAND_SET_HP,
         S_COMMAND_SET_MAXHP,
-        S_COMMAND_CHEAT_USECARD
+        S_COMMAND_CHEAT,
+        S_COMMAND_SURRENDER
     };
 
     enum Game3v3ChooseOrderCommand
     {
         S_REASON_CHOOSE_ORDER_TURN,
-        S_REASON_CHOOSE_ORDER_SELECT,
+        S_REASON_CHOOSE_ORDER_SELECT
     };
 
     enum Game3v3Camp
@@ -119,6 +138,6 @@ namespace QSanProtocol
 
         Json::Reader m_jsonReader;
     };    
-};
+}
 
 #endif

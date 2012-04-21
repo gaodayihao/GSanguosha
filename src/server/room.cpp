@@ -30,8 +30,8 @@ using namespace QSanProtocol::Utils;
 Room::Room(QObject *parent, const QString &mode)
     :QThread(parent), mode(mode), current(NULL), pile1(Sanguosha->getRandomCards()),
     draw_pile(&pile1), discard_pile(&pile2),
-    game_started(false), game_finished(false), L(NULL), thread(NULL),
-    thread_3v3(NULL), sem(new QSemaphore), _m_mutexInteractive(QMutex::NonRecursive),
+    game_started(false), game_finished(false), m_surrenderRequestReceived(false), L(NULL), thread(NULL),
+    thread_3v3(NULL), sem(new QSemaphore), _m_mutexRoom(QMutex::NonRecursive),
     provided(NULL), has_provided(false), _virtual(false)
 {
     player_count = Sanguosha->getPlayerCount(mode);
@@ -55,6 +55,12 @@ void Room::initCallbacks(){
     m_requestResponsePair[S_COMMAND_PINDIAN] = S_COMMAND_RESPONSE_CARD;
     m_requestResponsePair[S_COMMAND_EXCHANGE_CARD] = S_COMMAND_DISCARD_CARD;
     m_requestResponsePair[S_COMMAND_CHOOSE_DIRECTION] = S_COMMAND_MULTIPLE_CHOICE;
+
+    // client request handlers
+    m_callbacks[S_COMMAND_SURRENDER] = &Room::processRequestSurrender;
+    m_callbacks[S_COMMAND_CHEAT] = &Room::processRequestCheat;
+
+
     // init callback table
     callbacks["arrangeCommand"] = &Room::arrangeCommand;
     callbacks["takeGeneralCommand"] = &Room::takeGeneralCommand;
@@ -67,7 +73,6 @@ void Room::initCallbacks(){
     callbacks["speakCommand"] = &Room::speakCommand;
     callbacks["trustCommand"] = &Room::trustCommand;
     callbacks["kickCommand"] = &Room::kickCommand;
-    callbacks["surrenderCommand"] = &Room::surrenderCommand;
 
     //Client request
     callbacks["networkDelayTestCommand"] = &Room::networkDelayTestCommand;
@@ -594,6 +599,7 @@ bool Room::executeCommand(ServerPlayer* player, const QSanProtocol::QSanGeneralP
    player->acquireLock(ServerPlayer::SEMA_MUTEX);
    if (packet->getPacketType() == S_SERVER_REQUEST)
    {
+       player->m_isClientResponseReady = false;
        player->drainLock(ServerPlayer::SEMA_COMMAND_INTERACTIVE);
        player->setClientReply(Json::Value::null);
        player->setClientReplyString(QString());
@@ -639,29 +645,17 @@ void Room::broadcastInvoke(const QSanProtocol::QSanPacket* packet, ServerPlayer 
 bool Room::getResult(ServerPlayer* player, time_t timeOut){
     Q_ASSERT(player->m_isWaitingReply);
     QTime timer;
-    timer.start();
     bool validResult = false;
     player->acquireLock(ServerPlayer::SEMA_MUTEX);
-    _m_mutexInteractive.lock();
-    while(Config.OperationNoLimit || timeOut >= timer.elapsed())
+    if (player->isOnline())
     {
-        if (!player->isOnline())
-            break;
-
         player->releaseLock(ServerPlayer::SEMA_MUTEX);
-        _m_mutexInteractive.unlock();
 
         if (Config.OperationNoLimit)
             player->acquireLock(ServerPlayer::SEMA_COMMAND_INTERACTIVE);
-        else if (!player->tryAcquireLock(ServerPlayer::SEMA_COMMAND_INTERACTIVE, timeOut - timer.elapsed()))
-        {
-            _m_mutexInteractive.lock();
-            player->acquireLock(ServerPlayer::SEMA_MUTEX);
-            break;
-        }
+        else
+            player->tryAcquireLock(ServerPlayer::SEMA_COMMAND_INTERACTIVE, timeOut) ;
 
-        _m_mutexInteractive.lock();
-        player->acquireLock(ServerPlayer::SEMA_MUTEX);
         // Note that we rely on interactiveCommand to filter out all unrelevant packet.
         // By the time the lock is released, m_clientResponse must be the right message
         // assuming the client side is not tampered.
@@ -669,13 +663,12 @@ bool Room::getResult(ServerPlayer* player, time_t timeOut){
         // Also note that lock can be released when a player switch to trust or offline status.
         // It is ensured by trustCommand and reportDisconnection that the player reports these status
         // is the player waiting the lock. In these cases, the serial number and command type doesn't matter.
-        validResult = true;
-        break;
+        player->acquireLock(ServerPlayer::SEMA_MUTEX);
+        validResult = player->m_isClientResponseReady;
     }
     player->m_expectedReplyCommand = S_COMMAND_UNKNOWN;
     player->m_isWaitingReply = false;
     player->m_expectedReplySerial = -1;
-    _m_mutexInteractive.unlock();
     player->releaseLock(ServerPlayer::SEMA_MUTEX);
     return validResult;
 }
@@ -798,10 +791,13 @@ bool Room::askForNullification(const TrickCard *trick, ServerPlayer *from, Serve
                 arg[0] = toJsonString(trick_name);
                 arg[1] = from ? toJsonString(from->objectName()) : Json::Value::null;
                 arg[2] = toJsonString(to->objectName());
-                Json::Value clientReply = player->getClientReply();
-                if(doRequest(player, S_COMMAND_NULLIFICATION, arg, false, false)
-                    && clientReply.isString())
-                    card = Card::Parse(toQString(clientReply));
+
+                if(doRequest(player, S_COMMAND_NULLIFICATION, arg, false, false))
+                {
+                    Json::Value clientReply = player->getClientReply();
+                    if (clientReply.isString())
+                        card = Card::Parse(toQString(clientReply));
+                }
             }
 
             if(card == NULL) break;
@@ -1642,19 +1638,124 @@ void Room::reportDisconnection(){
 }
 
 void Room::trustCommand(ServerPlayer *player, const QString &){
-    _m_mutexInteractive.lock();
+    player->acquireLock(ServerPlayer::SEMA_MUTEX);
     if (player->isOnline()){
         player->setState("trust");
         if (player->m_isWaitingReply) {
-            _m_mutexInteractive.unlock();
+            player->releaseLock(ServerPlayer::SEMA_MUTEX);
             player->releaseLock(ServerPlayer::SEMA_COMMAND_INTERACTIVE);
         }
     }else
     {
         player->setState("online");
-        _m_mutexInteractive.unlock();
     }
+    player->releaseLock(ServerPlayer::SEMA_MUTEX);
     broadcastProperty(player, "state");
+}
+
+bool Room::processRequestCheat(ServerPlayer *player, const QSanProtocol::QSanGeneralPacket *packet)
+{
+    if (!Config.FreeChoose) return false;
+    Json::Value arg = packet->getMessageBody();
+    if (!arg.isArray() || !arg[0].isInt()) return false;
+    player->m_cheatArgs = arg;
+    player->releaseLock(ServerPlayer::SEMA_COMMAND_INTERACTIVE);
+    return true;
+}
+
+bool Room::makeSurrender(ServerPlayer* initiator)
+{
+    bool loyalGiveup = true; int loyalAlive = 0;
+    bool renegadeGiveup = true; int renegadeAlive = 0;
+    bool rebelGiveup = true; int rebelAlive = 0;
+
+    // broadcast polling request
+    QList<ServerPlayer*> playersAlive;
+    foreach(ServerPlayer *player, players)
+    {
+        QString playerRole = player->getRole();
+        if ((playerRole == "loyalist" || playerRole == "lord") && player->isAlive()) loyalAlive++;
+        else if (playerRole == "rebel" && player->isAlive()) rebelAlive++;
+        else if (playerRole == "renegade" && player->isAlive()) renegadeAlive++;
+        if (player != initiator && player->isAlive() && player->isOnline())
+        {
+            playersAlive << player;
+        }
+    }
+    foreach (ServerPlayer* player, playersAlive)
+    {
+        doRequest(player, S_COMMAND_SURRENDER, toJsonString(initiator->getGeneral()->objectName()), false, false, false);
+    }
+    // collect polls
+    foreach (ServerPlayer* player, playersAlive)
+    {
+        bool result = false;
+        if (player == initiator || !player->isAlive())
+            continue;
+        if (!getResult(player, getCommandTimeout(S_COMMAND_MULTIPLE_CHOICE))
+            || !player->getClientReply().isBool())
+        {
+            result = !player->isOnline();
+        }
+        else
+        {
+            result = player->getClientReply().asBool();
+        }
+        QString playerRole = player->getRole();
+        if (playerRole == "loyalist" || playerRole == "lord")
+        {
+            loyalGiveup &= result;
+            if (player->isAlive()) loyalAlive++;
+        }
+        else if (playerRole == "rebel")
+        {
+            rebelGiveup &= result;
+            if (player->isAlive()) rebelAlive++;
+        }
+        else if (playerRole == "renegade")
+        {
+            renegadeGiveup &= result;
+            if (player->isAlive()) renegadeAlive++;
+        }
+    }
+
+    // vote counting
+    if (loyalGiveup && renegadeGiveup && !rebelGiveup)
+        gameOver("rebel");
+    else if (loyalGiveup && !renegadeGiveup && rebelGiveup)
+        gameOver("renegade");
+    else if (!loyalGiveup && renegadeGiveup && rebelGiveup)
+        gameOver("lord+loyalist");
+    else if (loyalGiveup && renegadeGiveup && rebelGiveup)
+    {
+        // if everyone give up, then ensure that the initiator doesn't win.
+        QString playerRole = initiator->getRole();
+        if (playerRole == "lord" || playerRole == "loyalist")
+        {
+            gameOver(renegadeAlive >= rebelAlive ? "renegade" : "rebel");
+        }
+        else if (playerRole == "renegade")
+        {
+            gameOver(loyalAlive >= rebelAlive ? "loyalist+lord" : "rebel");
+        }
+        else if (playerRole == "rebel")
+        {
+            gameOver(renegadeAlive >= loyalAlive ? "renegade" : "loyalist+lord");
+        }
+    }
+
+    return true;
+}
+
+bool Room::processRequestSurrender(ServerPlayer *player, const QSanProtocol::QSanGeneralPacket *packet)
+{
+    //@todo: Strictly speaking, the client must be in the PLAY phase
+    //@todo: return false for 3v3 and 1v1!!!
+    if (player == NULL || !player->m_isWaitingReply)
+        return false;
+    m_surrenderRequestReceived = true;
+    player->releaseLock(ServerPlayer::SEMA_COMMAND_INTERACTIVE);
+    return true;
 }
 
 void Room::processRequest(const QString &request){
@@ -1662,12 +1763,20 @@ void Room::processRequest(const QString &request){
     //@todo: remove this thing after the new protocol is fully deployed
     if (packet.parse(request.toAscii().constData()))
     {
+        ServerPlayer *player = qobject_cast<ServerPlayer*>(sender());
         if (packet.getPacketType() == S_CLIENT_REPLY)
         {
-            ServerPlayer *player = qobject_cast<ServerPlayer*>(sender());
             if (player == NULL) return;
             player->setClientReplyString(request);
             interactiveCommand(player, &packet);
+        }
+        //@todo: make sure that cheat is binded to Config.FreeChoose, better make
+        // a seperate variable called EnableCheat
+        else if (packet.getPacketType() == S_CLIENT_REQUEST)
+        {
+            CallBack callback = m_callbacks[packet.getCommandType()];
+            if (!callback) return;
+            (this->*callback)(player, &packet);
         }
     }
     else
@@ -1992,7 +2101,6 @@ void Room::run(){
     // initialize random seed for later use
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
 
-    _m_mutexInteractive.unlock();
     foreach (ServerPlayer *player, players){
         //Ensure that the game starts with all player's mutex locked
         player->drainAllLocks();
@@ -2220,7 +2328,6 @@ void Room::speakCommand(ServerPlayer *player, const QString &arg){
 
 void Room::interactiveCommand(ServerPlayer *player, const QSanGeneralPacket *packet){
     player->acquireLock(ServerPlayer::SEMA_MUTEX);
-    _m_mutexInteractive.lock();
     bool success = false;
     if (player == NULL)
     {
@@ -2244,14 +2351,13 @@ void Room::interactiveCommand(ServerPlayer *player, const QSanGeneralPacket *pac
 
     if (!success)
     {
-        _m_mutexInteractive.unlock();
         player->releaseLock(ServerPlayer::SEMA_MUTEX);
         return;
     }
     else
     {
         player->setClientReply(packet->getMessageBody());
-        _m_mutexInteractive.unlock();
+        player->m_isClientResponseReady = true;
         player->releaseLock(ServerPlayer::SEMA_COMMAND_INTERACTIVE);
         player->releaseLock(ServerPlayer::SEMA_MUTEX);
     }
@@ -3074,29 +3180,28 @@ void Room::activate(ServerPlayer *player, CardUseStruct &card_use){
 
     }else{
         bool success = doRequest(player, S_COMMAND_PLAY_CARD, toJsonString(player->objectName()), true);
-
         Json::Value clientReply = player->getClientReply();
-        if (!success || clientReply.isNull()) return;
 
-        // @todo: fix this thing!!!!
-        // Warning: READ THIS BEFORE YOU CHANGE
-        // Sending cheat via replyServer will seriously compromise the design of the new protocol and interactiveCommand,
-        // making the synchronization very difficult and code very hard to maintain. Here is what I suggest for
-        // making cheat work.
-        // 1. Instead of returning a string via doRequest, define a new packet type called S_CLIENT_REQUEST_CHEAT;
-        // 2. In processRequest, do not forward S_CLIENT_REQUEST_CHEAT to interactiveCommand; instead, create a new callback
-        //    function that write cheat code to a buffer, and then call player->releaseLock(ServerPlayer::SEMA_COMMANDINTERACTIVE)
-        // 3. Since the lock is released, you can first check if (1)cheat is allowed on this server, and if so, (2) whether the cheat
-        //    code buffer has been filled. If there is anything in the cheat code buffer, read cheat buffer instead.
-        // 4. If the cheat buffer is read, then do not read from clientReply any more.
-        bool isCheat = false;
-        QString cheatString;
-        if (isCheat) {
-            makeCheat(cheatString);
-            if(player->isAlive())
+        if (m_surrenderRequestReceived)
+        {
+            makeSurrender(player);
+            if (!game_finished)
                 return activate(player, card_use);
-            return;
+
         }
+        else
+        {
+            //@todo: change FreeChoose to EnableCheat
+            if (Config.FreeChoose) {
+                if(makeCheat(player)){
+                    if(player->isAlive())
+                        return activate(player, card_use);
+                    return;
+                }
+            }
+        }
+
+        if (!success || clientReply.isNull()) return;
 
         card_use.from = player;
         if (!card_use.tryParse(clientReply, this) || !card_use.isValid()){
@@ -3453,75 +3558,103 @@ void Room::kickCommand(ServerPlayer *player, const QString &arg){
     to_kick->kick();
 }
 
-void Room::makeCheat(const QString &cheat_str){
-    QRegExp damage_rx(":(.+)->(\\w+):([NTFRL])(\\d+)");
-    QRegExp killing_rx(":KILL:(.+)->(\\w+)");
-    QRegExp revive_rx(":REVIVE:(.+)");
-    QRegExp doscript_rx(":SCRIPT:(.+)");
-
-    if(damage_rx.exactMatch(cheat_str))
-        makeDamage(damage_rx.capturedTexts());
-    else if(killing_rx.exactMatch(cheat_str)){
-        makeKilling(killing_rx.capturedTexts());
-    }else if(revive_rx.exactMatch(cheat_str)){
-        makeReviving(revive_rx.capturedTexts());
-    }else if(doscript_rx.exactMatch(cheat_str)){
-        QString script = doscript_rx.capturedTexts().value(1);
-        if(!script.isEmpty()){
-            QByteArray data = QByteArray::fromBase64(script.toAscii());
-            data = qUncompress(data);
-            script = data;
-            doScript(script);
-        }
+bool Room::makeCheat(ServerPlayer* player){
+    Json::Value& arg = player->m_cheatArgs;
+    if (!arg.isArray() || !arg[0].isInt()) return false;
+    CheatCode code = (CheatCode)arg[0].asInt();
+    if (code == S_CHEAT_KILL_PLAYER)
+    {
+        if (!isStringArray(arg[1], 0, 1)) return false;
+        makeKilling(toQString(arg[1][0]), toQString(arg[1][1]));
     }
+    else if (code == S_CHEAT_MAKE_DAMAGE)
+    {
+        if (arg[1].size() != 4 || !isStringArray(arg[1], 0, 1)
+            || !arg[1][2].isInt() || !arg[1][3].isInt())
+            return false;
+        makeDamage(toQString(arg[1][0]), toQString(arg[1][1]),
+            (QSanProtocol::CheatCategory)arg[1][2].asInt(), arg[1][3].asInt());
+    }
+    else if (code == S_CHEAT_REVIVE_PLAYER)
+    {
+        if (!arg[1].isString()) return false;
+        makeReviving(toQString(arg[1]));
+    }
+    else if (code == S_CHEAT_RUN_SCRIPT)
+    {
+        if (!arg[1].isString()) return false;
+        QByteArray data = QByteArray::fromBase64(arg[1].asCString());
+        data = qUncompress(data);
+        doScript(data);
+    }
+    else if (code == S_CHEAT_GET_ONE_CARD)
+    {
+        if (!arg[1].isInt()) return false;
+        int card_id = arg[1].asInt();
+
+        LogMessage log;
+        log.type = "$CheatCard";
+        log.from = player;
+        log.card_str = QString::number(card_id);
+        sendLog(log);
+
+        obtainCard(player, card_id);
+    }
+    else if (code == S_CHEAT_CHANGE_GENERAL)
+    {
+        if (!arg[1].isString()) return false;
+        QString generalName = toQString(arg[1]);
+        transfigure(player, generalName, false, true);
+    }
+    arg = Json::Value::null;
+    return true;
 }
 
-void Room::makeDamage(const QStringList &texts){
-    int point = texts.at(4).toInt();
-
+void Room::makeDamage(const QString& source, const QString& target, QSanProtocol::CheatCategory nature, int point){
+    ServerPlayer* sourcePlayer = findChild<ServerPlayer *>(source);
+    ServerPlayer* targetPlayer = findChild<ServerPlayer *>(target);
+    if (targetPlayer == NULL) return;
     // damage
-    DamageStruct damage;
-    if(texts.at(1) != ".")
-        damage.from = findChild<ServerPlayer *>(texts.at(1));
-
-    damage.to = findChild<ServerPlayer *>(texts.at(2));
-
-    char nature = texts.at(3).toAscii().at(0);
     switch(nature){
-    case 'N': damage.nature = DamageStruct::Normal; break;
-    case 'T': damage.nature = DamageStruct::Thunder; break;
-    case 'F': damage.nature = DamageStruct::Fire; break;
-    case 'L': loseHp(damage.to, point); return;
-    case 'R':{
-        RecoverStruct recover;
-        if(texts.at(1) != ".")
-            recover.who = findChild<ServerPlayer *>(texts.at(1));
-        ServerPlayer *player = findChild<ServerPlayer *>(texts.at(2));
-
-        recover.recover = point;
-
-        this->recover(player, recover);
-
+    case S_CHEAT_HP_LOSE:{
+        loseHp(targetPlayer, point);
         return;
     }
+    case S_CHEAT_HP_RECOVER:{
+        RecoverStruct recover;
+        recover.who = sourcePlayer;
+        recover.recover = point;
+        this->recover(targetPlayer, recover);
+        return;
+    }
+    default:
+         break;
     }
 
+    static QMap<QSanProtocol::CheatCategory, DamageStruct::Nature> nature_map;
+    if(nature_map.isEmpty()){
+        nature_map[S_CHEAT_NORMAL_DAMAGE] = DamageStruct::Normal;
+        nature_map[S_CHEAT_THUNDER_DAMAGE] = DamageStruct::Thunder;
+        nature_map[S_CHEAT_FIRE_DAMAGE] = DamageStruct::Fire;
+    }
+    if (targetPlayer == NULL) return;
+    DamageStruct damage;
+    damage.from = sourcePlayer;
+    damage.to = targetPlayer;
     damage.damage = point;
-
+    damage.nature = nature_map[nature];
     this->damage(damage);
 }
 
-void Room::makeKilling(const QStringList &texts){
+void Room::makeKilling(const QString& killerName, const QString& victimName){
     ServerPlayer *killer = NULL, *victim = NULL;
 
-    if(texts.at(1) != ".")
-        killer = findChild<ServerPlayer *>(texts.at(1));
+    killer = findChild<ServerPlayer *>(killerName);
+    victim = findChild<ServerPlayer *>(victimName);
 
-    victim = findChild<ServerPlayer *>(texts.at(2));
+    if (victim == NULL) return;
 
-    Q_ASSERT(victim);
-
-    if(killer == NULL)
+    if (killer == NULL)
         return killPlayer(victim);
 
     DamageStruct damage;
@@ -3530,33 +3663,12 @@ void Room::makeKilling(const QStringList &texts){
     killPlayer(victim, &damage);
 }
 
-void Room::makeReviving(const QStringList &texts){
-    ServerPlayer *player = findChild<ServerPlayer *>(texts.at(1));
+void Room::makeReviving(const QString &name){
+    ServerPlayer *player = findChild<ServerPlayer *>(name);
     Q_ASSERT(player);
     revivePlayer(player);
     setPlayerProperty(player, "maxhp", player->getGeneralMaxHP());
     setPlayerProperty(player, "hp", player->getMaxHP());
-}
-
-void Room::surrenderCommand(ServerPlayer *player, const QString &){
-    if(!player->isLord())
-        return;
-
-    if(alivePlayerCount() <= 2)
-        return;
-
-    QStringList roles = aliveRoles(player);
-    bool can_surrender = true;
-    foreach(QString role, roles){
-        if(role == "loyalist" || role == "renegade"){
-            can_surrender = false;
-            break;
-        }
-    }
-
-    if(can_surrender){
-        gameOver("rebel");
-    }
 }
 
 void Room::fillAG(const QList<int> &card_ids, ServerPlayer *who){
@@ -3626,14 +3738,11 @@ void Room::showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer
     show_str[1] = card_id;
     if(only_viewer)
         doNotify(player, S_COMMAND_SHOW_CARD, show_str);
-        //only_viewer->invoke("showCard", show_str);
     else
         doNotify(player, S_COMMAND_SHOW_CARD, show_str, true);
-        //broadcastInvoke("showCard", show_str);
 }
 
 void Room::showAllCards(ServerPlayer *player, ServerPlayer *to){
-
     Json::Value gongxinArgs(Json::arrayValue);
     gongxinArgs[0] = toJsonString(player->objectName());
     gongxinArgs[1] = false;

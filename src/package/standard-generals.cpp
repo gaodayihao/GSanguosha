@@ -1493,9 +1493,6 @@ TestPackage::TestPackage()
     new General(this, "sujiangf", "god", 5, false, true);
 
     new General(this, "anjiang", "god", 4,true, true, true);
-
-    addMetaObject<CheatCard>();
-    addMetaObject<ChangeCard>();
 }
 
 ADD_PACKAGE(Test)

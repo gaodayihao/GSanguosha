@@ -50,6 +50,8 @@
 
 #endif
 
+using namespace QSanProtocol;
+
 static QPointF DiscardedPos(-6, 8);
 static QPointF DrawPilePos(-108, 8);
 
@@ -1703,7 +1705,7 @@ void RoomScene::useSelectedCard(){
 
     case Client::AskForSkillInvoke:{
             prompt_box->disappear();
-            ClientInstance->invokeSkill(true);
+            ClientInstance->onPlayerInvokeSkill(true);
             break;
         }
 
@@ -2083,7 +2085,7 @@ void RoomScene::updateStatus(Client::Status status){
                 if(button->objectName() == skill_name){
                     QCheckBox *check_box = qobject_cast<QCheckBox *>(button);
                     if(check_box && check_box->isChecked()){
-                        ClientInstance->invokeSkill(true);
+                        ClientInstance->onPlayerInvokeSkill(true);
                         return;
                     }
                 }
@@ -2346,7 +2348,7 @@ void RoomScene::doCancelButton(){
         }
 
     case Client::AskForSkillInvoke:{
-            ClientInstance->invokeSkill(false);
+            ClientInstance->onPlayerInvokeSkill(false);
             prompt_box->disappear();
             break;
         }
@@ -2639,7 +2641,7 @@ void ScriptExecutor::doScript(){
     data = qCompress(data);
     script = data.toBase64();
 
-    ClientInstance->request("useCard :SCRIPT:" + script);
+    ClientInstance->requestCheatRunScript(script);
 }
 
 DeathNoteDialog::DeathNoteDialog(QWidget *parent)
@@ -2671,10 +2673,8 @@ DeathNoteDialog::DeathNoteDialog(QWidget *parent)
 void DeathNoteDialog::accept(){
     QDialog::accept();
 
-    ClientInstance->request(QString("useCard :KILL:%1->%2")
-                            .arg(killer->itemData(killer->currentIndex()).toString())
-                            .arg(victim->itemData(victim->currentIndex()).toString())
-                            );
+    ClientInstance->requestCheatKill(killer->itemData(killer->currentIndex()).toString(),
+                            victim->itemData(victim->currentIndex()).toString());
 }
 
 DamageMakerDialog::DamageMakerDialog(QWidget *parent)
@@ -2689,11 +2689,11 @@ DamageMakerDialog::DamageMakerDialog(QWidget *parent)
     RoomScene::FillPlayerNames(damage_target, false);
 
     damage_nature = new QComboBox;
-    damage_nature->addItem(tr("Normal"), "N");
-    damage_nature->addItem(tr("Thunder"), "T");
-    damage_nature->addItem(tr("Fire"), "F");
-    damage_nature->addItem(tr("HP recover"), "R");
-    damage_nature->addItem(tr("Lose HP"), "L");
+    damage_nature->addItem(tr("Normal"), S_CHEAT_NORMAL_DAMAGE);
+    damage_nature->addItem(tr("Thunder"), S_CHEAT_THUNDER_DAMAGE);
+    damage_nature->addItem(tr("Fire"), S_CHEAT_FIRE_DAMAGE);
+    damage_nature->addItem(tr("HP recover"), S_CHEAT_HP_RECOVER);
+    damage_nature->addItem(tr("Lose HP"), S_CHEAT_HP_LOSE);
 
     damage_point = new QSpinBox;
     damage_point->setRange(1, 1000);
@@ -2741,11 +2741,10 @@ void RoomScene::FillPlayerNames(QComboBox *combobox, bool add_none){
 void DamageMakerDialog::accept(){
     QDialog::accept();
 
-    ClientInstance->request(QString("useCard :%1->%2:%3%4")
-                            .arg(damage_source->itemData(damage_source->currentIndex()).toString())
-                            .arg(damage_target->itemData(damage_target->currentIndex()).toString())
-                            .arg(damage_nature->itemData(damage_nature->currentIndex()).toString())
-                            .arg(damage_point->value()));
+    ClientInstance->requestCheatDamage(damage_source->itemData(damage_source->currentIndex()).toString(),
+                            damage_target->itemData(damage_target->currentIndex()).toString(),
+                            (DamageStruct::Nature)damage_nature->itemData(damage_nature->currentIndex()).toInt(),
+                            damage_point->value());
 }
 
 void RoomScene::makeDamage(){
@@ -2794,7 +2793,7 @@ void RoomScene::makeReviving(){
                                          tr("Please select a player to revive"), items, 0, false, &ok);
     if(ok){
         int index = items.indexOf(item);
-        ClientInstance->request("useCard :REVIVE:" + victims.at(index)->objectName());
+        ClientInstance->requestCheatRevive(victims.at(index)->objectName());
     }
 }
 
@@ -3781,21 +3780,16 @@ void RoomScene::kick(){
 }
 
 void RoomScene::surrender(){
-    if(Self->getRole() != "lord"){
-        QMessageBox::warning(main_window, tr("Warning"), tr("Only lord can surrender!"));
-        return;
-    }
 
-    int alive_count = Self->aliveCount();
-    if(alive_count <= 2){
-        QMessageBox::warning(main_window, tr("Warning"), tr("When there are more than 2 players, the lord can surrender!"));
+    if(Self->getPhase() != Player::Play){
+        QMessageBox::warning(main_window, tr("Warning"), tr("You can only initiate a surrender poll at your play phase!"));
         return;
     }
 
     QMessageBox::StandardButton button;
     button = QMessageBox::question(main_window, tr("Surrender"), tr("Are you sure to surrender ?"));
     if(button == QMessageBox::Ok){
-        ClientInstance->surrender();
+        ClientInstance->requestSurrender();
     }
 }
 

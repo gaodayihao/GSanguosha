@@ -25,6 +25,7 @@ public:
     friend class RoomThread1v1;
 
     typedef void (Room::*Callback)(ServerPlayer *, const QString &);
+    typedef bool (Room::*CallBack)(ServerPlayer *, const QSanProtocol::QSanGeneralPacket*);
 
     explicit Room(QObject *parent, const QString &mode);
     QString createLuaState();
@@ -228,7 +229,6 @@ public:
     void speakCommand(ServerPlayer *player, const QString &arg);
     void trustCommand(ServerPlayer *player, const QString &arg);
     void kickCommand(ServerPlayer *player, const QString &arg);
-    void surrenderCommand(ServerPlayer *player, const QString &);
     void interactiveCommand(ServerPlayer *player, const QSanProtocol::QSanGeneralPacket* arg);
     void addRobotCommand(ServerPlayer *player, const QString &arg);
     void fillRobotsCommand(ServerPlayer *player, const QString &arg);
@@ -262,6 +262,7 @@ public:
     QList<ServerPlayer*> players, alive_players;
     bool game_started;
     bool game_finished;
+    bool m_surrenderRequestReceived;
     int getDrawPileCount();
     void releaseSource();
 
@@ -273,10 +274,11 @@ private:
     RoomThread3v3 *thread_3v3;
     RoomThread1v1 *thread_1v1;
     QSemaphore *sem;
-    QMutex _m_mutexInteractive;
+    QMutex _m_mutexRoom;
 
 
     QHash<QString, Callback> callbacks;
+    QHash<QSanProtocol::CommandType, CallBack> m_callbacks;
     QHash<QSanProtocol::CommandType, QSanProtocol::CommandType> m_requestResponsePair;
 
     QMap<int, Player::Place> place_map;
@@ -302,10 +304,16 @@ private:
     QString askForOrder(ServerPlayer *player);
     QString askForRole(ServerPlayer *player, const QStringList &roles, const QString &scheme);
 
-    void makeCheat(const QString &cheat_str);
-    void makeDamage(const QStringList &texts);
-    void makeKilling(const QStringList &texts);
-    void makeReviving(const QStringList &texts);
+    //process client requests
+    bool processRequestCheat(ServerPlayer *player, const QSanProtocol::QSanGeneralPacket *packet);
+    bool processRequestSurrender(ServerPlayer *player, const QSanProtocol::QSanGeneralPacket *packet);
+
+    bool makeSurrender(ServerPlayer* player);
+    bool makeCheat(ServerPlayer* player);
+    void makeDamage(const QString& source, const QString& target, QSanProtocol::CheatCategory nature, int point);
+    void makeKilling(const QString& killer, const QString& victim);
+    void makeReviving(const QString &name);
+
     void doScript(const QString &script);
 
 private slots:

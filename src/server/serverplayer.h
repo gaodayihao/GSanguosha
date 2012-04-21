@@ -128,8 +128,11 @@ public:
     inline Json::Value getClientReply(){return m_clientResponse;}
     inline void setClientReply(const Json::Value &val){m_clientResponse = val;}
     QSanProtocol::CommandType m_expectedReplyCommand;
-    int m_expectedReplySerial;
     bool m_isWaitingReply;
+    int m_expectedReplySerial;
+    Json::Value m_cheatCode;
+    bool m_isClientResponseReady;
+    Json::Value m_cheatArgs;
 
 protected:
     //Synchronization helpers

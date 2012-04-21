@@ -69,6 +69,7 @@ Client::Client(QObject *parent, const QString &filename)
     //callbacks["moveFocus"] = &Client::moveFocus;
     callbacks["setEmotion"] = &Client::setEmotion;
     m_callbacks[S_COMMAND_INVOKE_SKILL] = &Client::skillInvoked;
+    m_callbacks[S_COMMAND_SKILL_GONGXIN] = &Client::askForGongxin;
     //callbacks["skillInvoked"] = &Client::skillInvoked;
     callbacks["addHistory"] = &Client::addHistory;
     callbacks["animate"] = &Client::animate;
@@ -115,6 +116,12 @@ Client::Client(QObject *parent, const QString &filename)
     //callbacks["askForYiji"] = &Client::askForYiji;
     m_interactions[S_COMMAND_PLAY_CARD] = &Client::activate;
     //callbacks["activate"] = &Client::activate;
+    m_interactions[S_COMMAND_DISCARD_CARD] = &Client::askForDiscard;
+    //callbacks["askForDiscard"] = &Client::askForDiscard;
+    m_interactions[S_COMMAND_CHOOSE_SUIT] = &Client::askForSuit;
+    //callbacks["askForSuit"] = &Client::askForSuit;
+    m_interactions[S_COMMAND_CHOOSE_KINGDOM] = &Client::askForKingdom;
+    //callbacks["askForKingdom"] = &Client::askForKingdom;
     m_interactions[S_COMMAND_RESPONSE_CARD] = &Client::askForCard;
     //callbacks["askForCard"] = &Client::askForCard;
     m_interactions[S_COMMAND_USE_CARD] = &Client::askForUseCard;
@@ -135,6 +142,7 @@ Client::Client(QObject *parent, const QString &filename)
     //callbacks["askForCardChosen"] = &Client::askForCardChosen;
     m_interactions[S_COMMAND_CHOOSE_ORDER] = &Client::askForOrder;
     m_interactions[S_COMMAND_CHOOSE_ROLE_3V3] = &Client::askForRole3v3;
+    m_interactions[S_COMMAND_SURRENDER] = &Client::askForSurrender;
 
     callbacks["fillAG"] = &Client::fillAG;
     callbacks["takeAG"] = &Client::takeAG;
@@ -214,6 +222,15 @@ void Client::replyToServer(CommandType command, const Json::Value &arg){
     {
         QSanGeneralPacket packet(S_CLIENT_REPLY, command);
         packet.m_localSerial = _m_lastServerSerial;
+        packet.setMessageBody(arg);
+        socket->send(toQString(packet.toString()));
+    }
+}
+
+void Client::requestToServer(CommandType command, const Json::Value &arg){
+    if(socket)
+    {
+        QSanGeneralPacket packet(S_CLIENT_REQUEST, command);
         packet.setMessageBody(arg);
         socket->send(toQString(packet.toString()));
     }
@@ -414,38 +431,55 @@ void Client::onPlayerChooseGeneral(const QString &item_name){
     }
 }
 
-void Client::requestCard(int card_id){
-    //   request(QString("useCard @CheatCard=%1->.").arg(card_id));
-    //QString card_str = QString("@CheatCard=%1:.").arg(card_id);
-    //replyToServer(S_COMMAND_USE_CARD, toJsonArray(card_str, Json::Value::null));
-    // @todo: fix this thing!!!!
-    // Warning: READ THIS BEFORE YOU CHANGE
-    // Sending cheat via replyToServer will seriously compromise the design of the new protocol and interactiveCommand,
-    // making the synchronization very difficult and code very hard to maintain. Here is what I suggest for
-    // making cheat work.
-    // 1. Instead of returning a string via doRequest, define a new packet type called S_CLIENT_REQUEST_CHEAT;
-    // 2. In processRequest, do not forward S_CLIENT_REQUEST_CHEAT packets to interactiveCommand; instead, create a new callback
-    //    function that write cheat code to a buffer, and then call player->releaseLock(ServerPlayer::SEMA_COMMANDINTERACTIVE)
-    // 3. Since the lock is released, you can first check if (1)cheat is allowed on this server, and if so, (2) whether the cheat
-    //    code buffer has been filled. If there is anything in the cheat code buffer, read cheat buffer instead.
-    // 4. If the cheat buffer is read, then do not read from clientReply any more.
+void Client::requestCheatRunScript(const QString& script)
+{
+    Json::Value cheatReq(Json::arrayValue), cheatArg(Json::arrayValue);
+    cheatReq[0] = (int)S_CHEAT_RUN_SCRIPT;
+    cheatReq[1] = toJsonString(script);
+    requestToServer(S_COMMAND_CHEAT, cheatReq);
 }
 
-void Client::changeGeneral(QString name){
-    //Self->tag["GeneralName"] = name;
-    //request(QString("useCard @ChangeCard=.->."));
-    //replyToServer(S_COMMAND_USE_CARD, toJsonArray("@ChangeCard=.:.", Json::Value::null));
-    // @todo: fix this thing!!!!
-    // Warning: READ THIS BEFORE YOU CHANGE
-    // Sending cheat via replyServer will seriously compromise the design of the new protocol and interactiveCommand,
-    // making the synchronization very difficult and code very hard to maintain. Here is what I suggest for
-    // making cheat work.
-    // 1. Instead of returning a string via doRequest, define a new packet type called S_CLIENT_REQUEST_CHEAT;
-    // 2. In processRequest, do not forward S_CLIENT_REQUEST_CHEAT to interactiveCommand; instead, create a new callback
-    //    function that write cheat code to a buffer, and then call player->releaseLock(ServerPlayer::SEMA_COMMANDINTERACTIVE)
-    // 3. Since the lock is released, you can first check if (1)cheat is allowed on this server, and if so, (2) whether the cheat
-    //    code buffer has been filled. If there is anything in the cheat code buffer, read cheat buffer instead.
-    // 4. If the cheat buffer is read, then do not read from clientReply any more.
+void Client::requestCheatRevive(const QString& name)
+{
+    Json::Value cheatReq(Json::arrayValue), cheatArg(Json::arrayValue);
+    cheatReq[0] = (int)S_CHEAT_REVIVE_PLAYER;
+    cheatReq[1] = toJsonString(name);
+    requestToServer(S_COMMAND_CHEAT, cheatReq);
+}
+
+void Client::requestCheatDamage(const QString& source, const QString& target, DamageStruct::Nature nature, int points)
+{
+    Json::Value cheatReq(Json::arrayValue), cheatArg(Json::arrayValue);
+    cheatArg[0] = toJsonString(source);
+    cheatArg[1] = toJsonString(target);
+    cheatArg[2] = (int)nature;
+    cheatArg[3] = points;
+
+    cheatReq[0] = (int)S_CHEAT_MAKE_DAMAGE;
+    cheatReq[1] = cheatArg;
+    requestToServer(S_COMMAND_CHEAT, cheatReq);
+}
+
+void Client::requestCheatKill(const QString& killer, const QString& victim)
+{
+    Json::Value cheatArg;
+    cheatArg[0] = (int)S_CHEAT_KILL_PLAYER;
+    cheatArg[1] = toJsonArray(killer, victim);
+    requestToServer(S_COMMAND_CHEAT, cheatArg);
+}
+
+void Client::requestCheatGetOneCard(int card_id){
+    Json::Value cheatArg;
+    cheatArg[0] = (int)S_CHEAT_GET_ONE_CARD;
+    cheatArg[1] = card_id;
+    requestToServer(S_COMMAND_CHEAT, cheatArg);
+}
+
+void Client::requestCheatChangeGeneral(QString name){
+    Json::Value cheatArg;
+    cheatArg[0] = (int)S_CHEAT_CHANGE_GENERAL;
+    cheatArg[1] = toJsonString(name);
+    requestToServer(S_COMMAND_CHEAT, cheatArg);
 }
 
 void Client::addRobot(){
@@ -689,8 +723,11 @@ QString Client::getSkillNameToInvoke() const{
     return skill_to_invoke;
 }
 
-void Client::invokeSkill(bool invoke){
-    replyToServer(S_COMMAND_INVOKE_SKILL, invoke);
+void Client::onPlayerInvokeSkill(bool invoke){
+    if (skill_name == "surrender")
+        replyToServer(S_COMMAND_SURRENDER, invoke);
+    else
+        replyToServer(S_COMMAND_INVOKE_SKILL, invoke);
     setStatus(NotActive);
 }
 
@@ -767,6 +804,8 @@ void Client::askForSkillInvoke(const Json::Value &arg){
     QString skill_name = toQString(arg[0]);
     QString data = toQString(arg[1]);
 
+    skill_to_invoke = skill_name;
+
     QString text;
     if(data.isEmpty())
         text = tr("Do you want to invoke skill [%1] ?").arg(Sanguosha->translate(skill_name));
@@ -786,6 +825,20 @@ void Client::onPlayerMakeChoice(){
     QString option = sender()->objectName();
     replyToServer(S_COMMAND_MULTIPLE_CHOICE, toJsonString(option));
     setStatus(NotActive);
+}
+
+void Client::askForSurrender(const Json::Value &initiator){
+
+    if (!initiator.isString()) return;
+
+    QString text = tr("%1 initiated a vote for disadvataged side to claim "
+                        "capitulation. Click \"OK\" to surrender or \"Cancel\" to resist.")
+                            .arg(Sanguosha->translate(toQString(initiator)));
+    text.append(tr("<br/> <b>Noitce</b>: if all people on your side decides to surrender. "
+                   "You'll lose this game."));
+    skill_name = "surrender";
+    prompt_doc->setHtml(text);
+    setStatus(AskForSkillInvoke);
 }
 
 void Client::askForChoice(const Json::Value &ask_str){
@@ -952,9 +1005,8 @@ void Client::trust(){
     setStatus(NotActive);
 }
 
-void Client::surrender(){
-    request("surrender .");
-
+void Client::requestSurrender(){
+    requestToServer(S_COMMAND_SURRENDER);
     setStatus(NotActive);
 }
 
