@@ -3343,8 +3343,8 @@ QString Room::askForKingdom(ServerPlayer *player){
     if (success && clientReply.isString())
     {
         QString kingdom = toQString(clientReply.asCString());
-        if (kingdom == "wei" || kingdom == "shu" || kingdom == "wu" || kingdom == "qun")
-            return kingdom;
+        QStringList kingdoms = Sanguosha->getKingdoms();
+        if (kingdoms.contains(kingdom)) return kingdom;
     }
     return "wei";
 }
