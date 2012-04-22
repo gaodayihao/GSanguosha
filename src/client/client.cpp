@@ -1551,7 +1551,7 @@ void Client::askForGuanxing(const Json::Value &arg){
 }
 
 void Client::askForGongxin(const Json::Value &arg){
-    if (!arg.isArray() || arg.size() != 3
+    if (!arg.isArray() || arg.size() != 4
         || !arg[0].isString() || ! arg[1].isBool()
         || !arg[3].isBool())
         return;

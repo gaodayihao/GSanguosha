@@ -1206,7 +1206,7 @@ void Server::processRequest(char *request){
                 int roomcount=0; // 20111220
                 foreach(Room *room, rooms){
                     // playercount+=room->players.length();
-                    foreach(ServerPlayer *player, room->players){
+                    foreach(ServerPlayer *player, room->getPlayers()){
                         if(player->getState() != "robot")
                             playercount ++;
                         else if(player->getState() == "robot")
@@ -1258,7 +1258,7 @@ void Server::processRequest(char *request){
 
                     int robotcount=0;
                     int playercount=0;
-                    foreach(ServerPlayer *player, room->players){
+                    foreach(ServerPlayer *player, room->getPlayers()){
                         if(player->getState() != "robot")
                             playercount ++;
                         else if(player->getState() == "robot")
@@ -1637,7 +1637,7 @@ void Server::processCmdLine()
     else if(servercmd.indexOf("playerlist")!=-1){
         foreach(Room *room, rooms)
         {
-            foreach(ServerPlayer *player, room->players){
+            foreach(ServerPlayer *player, room->getPlayers()){
                 if(player->getState()!="robot"){
                     QString tmp;
                     tmp="RoomID:"+room->getTag("RoomID").toString()+" -> "; // +room->getTag("RoomOwnerScreenName").toString();
@@ -1652,7 +1652,7 @@ void Server::processCmdLine()
     else if(servercmd.indexOf("ailist")!=-1){
         foreach(Room *room, rooms)
         {
-            foreach(ServerPlayer *player, room->players){
+            foreach(ServerPlayer *player, room->getPlayers()){
                 if(player->getState()=="robot"){
                     QString tmp;
                     tmp="RoomID:"+room->getTag("RoomID").toString()+" -> "; // +room->getTag("RoomOwnerScreenName").toString();
@@ -1707,7 +1707,7 @@ void Server::processCmdLine()
             if(room->game_started){ roomstatus="Playing"; } else {roomstatus="Waiting";}
             int robotcount=0;
             int playercount=0;
-            foreach(ServerPlayer *player, room->players){
+            foreach(ServerPlayer *player, room->getPlayers()){
                 if(player->getState() != "robot")
                     playercount ++;
                 else if(player->getState() == "robot")
@@ -1780,7 +1780,7 @@ void Server::processCmdLine()
         bool result = false;
         foreach(Room *room, rooms)
         {
-            foreach(ServerPlayer *player, room->players){
+            foreach(ServerPlayer *player, room->getPlayers()){
                 if(player->objectName() == name && player->getState()!="robot" && player->getState()!="offline"){
                     result = true;
                     player->emitDisconnect();
