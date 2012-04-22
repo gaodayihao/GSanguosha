@@ -171,7 +171,9 @@ void Replayer::run(){
     nondelays << "addPlayer" << "removePlayer" << "speak";
 
     foreach(Pair pair, pairs){
-        int delay = qMin(pair.elapsed - last, 2500);
+        if(pair.cmd.startsWith("["))
+            continue;
+        int delay = qMin(pair.elapsed - last, 1500);
         last = pair.elapsed;
 
         bool delayed = true;
