@@ -1131,6 +1131,7 @@ public:
             player->getRoom()->sendLog(log);
 
             player->getRoom()->setEmotion(player, QString("armor/%1").arg(objectName()));
+            player->getRoom()->getThread()->delay(1200);
 
             return true;
         }else
