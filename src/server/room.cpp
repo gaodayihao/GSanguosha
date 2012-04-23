@@ -504,11 +504,20 @@ void Room::slashEffect(const SlashEffectStruct &effect){
 
 void Room::slashResult(const SlashEffectStruct &effect, const Card *jink){
     SlashEffectStruct result_effect = effect;
-    result_effect.jink = jink;
+    if(effect.to->hasFlag("DaheTarget") && jink && jink->getSuit() != Card::Heart){
+        LogMessage log;
+        log.type = "$DaheEffect";
+        log.from = effect.from;
+        log.to << effect.to;
+        log.card_str = jink->getEffectIdString();
+        sendLog(log);
+    }
+    else
+        result_effect.jink = jink;
 
     QVariant data = QVariant::fromValue(result_effect);
 
-    if(jink == NULL)
+    if(result_effect.jink == NULL)
         thread->trigger(SlashHit, effect.from, data);
     else{
         setEmotion(effect.to, "jink");

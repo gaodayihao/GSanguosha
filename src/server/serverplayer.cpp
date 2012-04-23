@@ -584,6 +584,8 @@ bool ServerPlayer::pindian(ServerPlayer *target, const QString &reason, const Ca
     else
         room->setEmotion(this, "no-success");
 
+    room->getThread()->trigger(PindianFinished, this, data);
+
     return success;
 }
 
