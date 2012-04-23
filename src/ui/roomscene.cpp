@@ -312,6 +312,9 @@ RoomScene::RoomScene(QMainWindow *main_window)
 
         if(ServerInfo.DisableChat)
             chat_edit_widget->hide();
+
+        chat_box->setEnabled(false);
+        chat_box_widget->setFlag(QGraphicsItem::ItemIsMovable);
     }
 
     {
@@ -331,6 +334,8 @@ RoomScene::RoomScene(QMainWindow *main_window)
             log_box->resize(chat_box->width(), 210);
             log_box_widget->setPos(367, -246);
         }
+
+        log_box_widget->setFlag(QGraphicsItem::ItemIsMovable);
     }
 
     {
@@ -530,7 +535,6 @@ void RoomScene::adjustItems(QMatrix matrix){
 
     qreal dashboard_width = dashboard->boundingRect().width();
     qreal x = - dashboard_width/2;
-//    qreal x = - main_window->width()/2 + 2;
     qreal main_height = main_window->centralWidget()->height() / matrix.m22();
     qreal y = main_height/2 - dashboard->boundingRect().height();
 
