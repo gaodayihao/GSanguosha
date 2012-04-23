@@ -55,5 +55,5 @@ return {
 	["$dahe"] = "燕人张飞在此！",
 	
 	["$DaheEffect"] = "%from 的技能大喝被触发，%to 使用的 %card 无效",
-	["$DaheEffect_nosuit"] = "%from 的技能大喝被触发，%to 使用的【<font color=yellow><b>闪[无色]</b></font>】无效",
+	["$DaheEffect_nosuit"] = "%from 的技能大喝被触发，%to 使用的 <font color=yellow><b>闪[无色]</b></font> 无效",
 }
