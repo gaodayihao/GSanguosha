@@ -578,7 +578,7 @@ public:
             if(slash){
                 room->setTag("JiefanTarget", data);
                 room->setTag("JiefanSlash", slash->getEffectiveId());
-                slash->setFlags("jiefan-slash");
+                room->setCardFlag(slash, "jiefan-slash");
                 CardUseStruct use;
                 use.card = slash;
                 use.from = handang;

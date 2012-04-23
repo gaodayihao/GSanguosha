@@ -508,7 +508,7 @@ void Room::slashResult(const SlashEffectStruct &effect, const Card *jink){
 
     QVariant data = QVariant::fromValue(result_effect);
 
-    if(jink == NULL)
+    if(jink == NULL || (effect.to->hasFlag("DaheTarget") && jink->getSuit() != Card::Heart))
         thread->trigger(SlashHit, effect.from, data);
     else{
         setEmotion(effect.to, "jink");
@@ -1224,6 +1224,38 @@ void Room::setPlayerStatistics(ServerPlayer *player, const QString &property_nam
         prompt += value.toString();
 
     player->invoke("setStatistics", prompt);
+}
+
+void Room::setCardFlag(const Card *card, const QString &flag, ServerPlayer *who){
+    card->setFlags(flag);
+
+    setCardFlag(card->getEffectiveId(), flag, who);
+}
+
+void Room::setCardFlag(int card_id, const QString &flag, ServerPlayer *who){
+    Sanguosha->getCard(card_id)->setFlags(flag);
+
+    QString pattern = QString::number(card_id) + ":" + flag;
+    if(who)
+        who->invoke("setCardFlag", pattern);
+    else
+        broadcastInvoke("setCardFlag", pattern);
+}
+
+void Room::clearCardFlag(const Card *card, ServerPlayer *who){
+    card->clearFlags();
+
+    clearCardFlag(card->getEffectiveId(), who);
+}
+
+void Room::clearCardFlag(int card_id, ServerPlayer *who){
+    Sanguosha->getCard(card_id)->clearFlags();
+
+    QString pattern = QString::number(card_id) + ":" +".";
+    if(who)
+        who->invoke("setCardFlag", pattern);
+    else
+        broadcastInvoke("setCardFlag", pattern);
 }
 
 ServerPlayer *Room::addSocket(ClientSocket *socket){
@@ -2833,7 +2865,7 @@ void Room::drawCards(ServerPlayer *player, int n, const QString &reason){
         int card_id = drawCard();
         card_ids << card_id;
         const Card *card = Sanguosha->getCard(card_id);
-        card->setFlags(reason);
+        player->getRoom()->setCardFlag(card, reason);
 
         QVariant data = QVariant::fromValue(card_id);
         if(thread->trigger(CardDrawing, player, data))
@@ -3504,9 +3536,9 @@ void Room::addToDrawPile(const QList<int> &card_ids){
     broadcastInvoke("setPileNumber", QString::number(draw_pile->length()));
 }
 
-void Room::doGongxin(ServerPlayer *shenlumeng, ServerPlayer *target){
+void Room::doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target){
     //@todo: this thing should be put in AI!!!!!!!!!!
-    if(!shenlumeng->isOnline()){
+    if(!shenlvmeng->isOnline()){
         // throw the first card whose suit is Heart
         QList<const Card *> cards = target->getHandcards();
         foreach(const Card *card, cards){
@@ -3525,9 +3557,9 @@ void Room::doGongxin(ServerPlayer *shenlumeng, ServerPlayer *target){
     gongxinArgs[1] = true;
     gongxinArgs[2] = toJsonIntArray(target->handCards());
     gongxinArgs[3] = target->hasSkill("hongyan");
-    bool success = doRequest(shenlumeng, S_COMMAND_SKILL_GONGXIN, gongxinArgs);
+    bool success = doRequest(shenlvmeng, S_COMMAND_SKILL_GONGXIN, gongxinArgs);
 
-    Json::Value clientReply = shenlumeng->getClientReply();
+    Json::Value clientReply = shenlvmeng->getClientReply();
     if (!success || !clientReply.isInt()
         || !target->handCards().contains(clientReply.asInt()))
         return;
@@ -3535,7 +3567,7 @@ void Room::doGongxin(ServerPlayer *shenlumeng, ServerPlayer *target){
     int card_id = clientReply.asInt();
     showCard(target, card_id);
 
-    QString result = askForChoice(shenlumeng, "gongxin", "discard+put");
+    QString result = askForChoice(shenlvmeng, "gongxin", "discard+put");
     if(result == "discard")
         throwCard(card_id, target);
     else

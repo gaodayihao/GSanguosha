@@ -12,8 +12,8 @@ return {
 	["@nightmare"] = "梦魇",
 	["#WuhunRevenge"] = "%from 的锁定技【%arg2】被触发，持有最多梦魇标记的角色 %to(%arg个)将立即死亡",
 
-	["#shenlumeng"] = "圣光之国士",
-	["shenlumeng"] = "神吕蒙",
+	["#shenlvmeng"] = "圣光之国士",
+	["shenlvmeng"] = "神吕蒙",
 	["shelie"] = "涉猎",
 	[":shelie"] = "摸牌阶段开始时，你可以选择执行以下行动来取代摸牌：从牌堆顶亮出五张牌，拿走不同花色的牌各一张，然后将其余的置入弃牌堆",
 	["gongxin"] = "攻心",
@@ -73,8 +73,8 @@ return {
 	[":feiying"] = "<b>锁定技</b>，当其他角色计算与你的距离时，始终+1",
 	["guixin:yes"] = "你可分别从每名其他角色区域处取得一张牌，然后将你的武将牌翻面",
 
-	["#shenlubu"] = "修罗之道",
-	["shenlubu"] = "神吕布",
+	["#shenlvbu"] = "修罗之道",
+	["shenlvbu"] = "神吕布",
 	["kuangbao"] = "狂暴",
 	[":kuangbao"] = "游戏开始时你获得2个暴怒标记，游戏中你每受到或造成1点伤害，获得1个暴怒标记",
 	["@wrath"] = "暴怒",
@@ -120,12 +120,12 @@ return {
 	["$wuhun2"] = "谁来与我同去。",
 	["~shenguanyu"] = "吾一世英名，竟葬于小人之手！",
 
-	["cv:shenlumeng"] = "官方",
+	["cv:shenlvmeng"] = "官方",
 	["$shelie1"] = "略懂略懂。",
 	["$shelie2"] = "什么都略懂一点，生活更多彩一些。",
 	["$gongxin1"] = "攻城为下，攻心为上。",
 	["$gongxin2"] = "我替施主把把脉。",
-	["~shenlumeng"] = "劫数难逃，我们别无选择……",
+	["~shenlvmeng"] = "劫数难逃，我们别无选择……",
 
 	["cv:shenzhouyu"] = "官方",
 	["$qinyin1"] = "琴声",
@@ -151,7 +151,7 @@ return {
 	["$guixin2"] = "山不厌高，海不厌深",
 	["~shencaocao"] = "腾蛇乘雾……终为土灰……",
 
-	["cv:shenlubu"] = "官方",
+	["cv:shenlvbu"] = "官方",
 	["$kuangbao1"] = "(嚎叫声)",
 	["$kuangbao2"] = "哼！",
 	["$wumou1"] = "哪个说我有勇无谋！？",
@@ -160,7 +160,7 @@ return {
 	["$wuqian2"] = "天皇老子也保不住你！",
 	["$shenfen1"] = "凡人们，颤抖吧！这是神之怒火！！",
 	["$shenfen2"] = "这，才是活生生的地狱！",
-	["~shenlubu"] = "我在修罗烈狱等着你们！哈哈哈哈……",
+	["~shenlvbu"] = "我在修罗烈狱等着你们！哈哈哈哈……",
 
 	["cv:shenzhaoyun"] = "猎狐",
 	["$juejing"] = "龙战于野,其血玄黄",

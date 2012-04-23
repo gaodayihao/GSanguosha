@@ -62,6 +62,10 @@ public:
     void setPlayerMark(ServerPlayer *player, const QString &mark, int value);
     void setPlayerCardLock(ServerPlayer *player, const QString &name);
     void setPlayerStatistics(ServerPlayer *player, const QString &property_name, const QVariant &value);
+    void setCardFlag(const Card *card, const QString &flag, ServerPlayer *who = NULL);
+    void setCardFlag(int card_id, const QString &flag, ServerPlayer *who = NULL);
+    void clearCardFlag(const Card *card, ServerPlayer *who = NULL);
+    void clearCardFlag(int card_id, ServerPlayer *who = NULL);
     void useCard(const CardUseStruct &card_use, bool add_history = true);
     void damage(const DamageStruct &data);
     void sendDamageLog(const DamageStruct &data);
@@ -77,7 +81,7 @@ public:
     ServerPlayer *getLord() const;
     void askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, bool up_only);
     void addToDrawPile(const QList<int> &card_ids);
-    void doGongxin(ServerPlayer *shenlumeng, ServerPlayer *target);
+    void doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target);
     int drawCard();
     const Card *peek();
     void fillAG(const QList<int> &card_ids, ServerPlayer *who = NULL);

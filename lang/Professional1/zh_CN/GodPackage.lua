@@ -13,7 +13,7 @@ return {
 	["#WuhunRevenge"] = "%from 的锁定技【%arg2】被触发，持有最多梦魇标记的角色 %to(%arg个)将立即死亡",
 
 	--神吕蒙
-	["shenlumeng"] = "神·吕蒙",
+	["shenlvmeng"] = "神·吕蒙",
 	["shelie"] = "涉猎",
 	[":shelie"] = "摸牌阶段，你可以选择执行以下行动来取代摸牌：从牌堆顶亮出五张牌，拿走不同花色的牌各一张，然后弃掉其余的。",
 	["gongxin"] = "攻心",
@@ -72,7 +72,7 @@ return {
 	["guixin:yes"] = "你可分别从每名其他角色处（手牌、装备区或判断区）取得一张牌，若如此做，将你的武将牌翻面", 
 
 	--神吕布
-	["shenlubu"] = "神·吕布",
+	["shenlvbu"] = "神·吕布",
 	["kuangbao"] = "狂暴",
 	[":kuangbao"] = "<b>锁定技</b>，游戏开始时，你获得2个暴怒标记：你每受到或造成1点伤害，获得1个暴怒标记。",
 	["wumou"] = "无谋",	
@@ -155,27 +155,27 @@ return {
 	["$lianpo"] = "何为人？是为忍。",
 	
 	["~shenguanyu"] = "阵亡",
-	["~shenlumeng"] = "劫数难逃，我们别无选择……",
+	["~shenlvmeng"] = "劫数难逃，我们别无选择……",
 	["~shenzhouyu"] = "残炎黯然，弦歌不复。",
 	["~shenzhugeliang"] = "吾命将至，再不能临阵讨贼矣……",
 	["~shencaocao"] = "神龟虽寿，犹有竟时。腾蛇乘雾，终为土灰。",
-	["~shenlubu"] = "大耳贼最叵信……啊！",
+	["~shenlvbu"] = "大耳贼最叵信……啊！",
 	["~shenzhaoyun"] = "这，就是失败的滋味么？",
 	["~shensimayi"] = "忍不住了。",
 	
 	["cv:shenguanyu"] = "官方",
-	["cv:shenlumeng"] = "官方",
+	["cv:shenlvmeng"] = "官方",
 	["cv:shenzhouyu"] = "血桜の涙",
 	["cv:shenzhugeliang"] = "背后灵",
 	["cv:shencaocao"] = "倚天の剑",
-	["cv:shenlubu"] = "笑傲糨糊",
+	["cv:shenlvbu"] = "笑傲糨糊",
 	
 	["#shenzhaoyun"] = "神威如龙",
 	["#shensimayi"] = "晋国之祖",
-	["#shenlubu"] = "修罗之道",
+	["#shenlvbu"] = "修罗之道",
 	["#shencaocao"] = "超世之英杰",
 	["#shenzhugeliang"] = "赤壁的妖术师",
 	["#shenzhouyu"] = "赤壁的火神",
-	["#shenlumeng"] = "圣光之国士",
+	["#shenlvmeng"] = "圣光之国士",
 	["#shenguanyu"] = "鬼神再临",
 }
