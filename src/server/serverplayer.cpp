@@ -703,8 +703,6 @@ AI *ServerPlayer::getAI() const{
     }
     else if(getState() == "trust" && !Config.FreeChoose)
         return trust_ai;
-    else if(Config.useTrustAI)
-        return trust_ai;
     else
         return ai;
 }

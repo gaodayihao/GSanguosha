@@ -135,9 +135,6 @@ void Settings::init(){
 
     GodSelectLimited = value("GodSelectLimited", 98).toUInt();
 
-    alwaysTrustAI = value("alwaysTrustAI", true).toBool();
-    useTrustAI = false;
-
     QStringList roles_ban, kof_ban, basara_ban, hegemony_ban, pairs_ban;
 
     roles_ban << "zhugejin";

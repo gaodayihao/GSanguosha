@@ -167,7 +167,6 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionStart_Server_triggered()
 {
-    Config.useTrustAI = Config.alwaysTrustAI;
     ServerDialog *dialog = new ServerDialog(this);
     if(!dialog->config())
         return;
@@ -676,7 +675,6 @@ void MainWindow::on_actionAcknowledgement_triggered()
 
 void MainWindow::on_actionPC_Console_Start_triggered()
 {
-    Config.useTrustAI = false;
     ServerDialog *dialog = new ServerDialog(this);
     dialog->ensureEnableAI();
     if(!dialog->config())

@@ -91,9 +91,6 @@ public:
     ushort NodePort;
     QString NodeAddress;
     int GodSelectLimited;
-
-    bool alwaysTrustAI;
-    bool useTrustAI;
 };
 
 extern Settings Config;

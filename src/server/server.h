@@ -108,7 +108,6 @@ private:
     QLineEdit *address_edit;
     QLineEdit *port_edit;
     QCheckBox *ai_enable_checkbox;
-    QCheckBox *always_trustai_checkbox;
     QCheckBox *role_predictable_checkbox;
     QCheckBox *ai_chat_checkbox;
     QSpinBox *ai_delay_spinbox;

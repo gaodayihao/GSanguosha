@@ -285,11 +285,6 @@ QWidget *ServerDialog::createAITab(){
     ai_enable_checkbox = new QCheckBox(tr("Enable AI"));
     ai_enable_checkbox->setChecked(Config.EnableAI);
 
-    always_trustai_checkbox = new QCheckBox(tr("Always TrustAI"));
-    always_trustai_checkbox->setChecked(Config.alwaysTrustAI);
-    always_trustai_checkbox->setEnabled(ai_enable_checkbox->isChecked());
-    connect(ai_enable_checkbox, SIGNAL(toggled(bool)), always_trustai_checkbox, SLOT(setEnabled(bool)));
-
     role_predictable_checkbox = new QCheckBox(tr("Role predictable"));
     role_predictable_checkbox->setChecked(Config.value("RolePredictable", false).toBool());
 
@@ -303,7 +298,6 @@ QWidget *ServerDialog::createAITab(){
     ai_delay_spinbox->setSuffix(tr(" millisecond"));
 
     layout->addWidget(ai_enable_checkbox);
-    layout->addWidget(always_trustai_checkbox);
     layout->addWidget(role_predictable_checkbox);
     layout->addWidget(ai_chat_checkbox);
     layout->addLayout(HLay(new QLabel(tr("AI delay")), ai_delay_spinbox));
@@ -914,7 +908,6 @@ bool ServerDialog::config(){
     Config.NodeAddress=node_address_edit->text();
     Config.NodePort=node_port_edit->text().toUShort();
     Config.ClearServerLog = clearserverlog_checkbox->isChecked();
-    Config.alwaysTrustAI = always_trustai_checkbox->isChecked() && always_trustai_checkbox->isEnabled();
 
     // game mode
     QString objname = mode_group->checkedButton()->objectName();
@@ -958,7 +951,6 @@ bool ServerDialog::config(){
     Config.setValue("NodeAddress", Config.NodeAddress);
     Config.setValue("NodePort", Config.NodePort);
     Config.setValue("ClearServerLog", Config.ClearServerLog);
-    Config.setValue("alwaysTrustAI", Config.alwaysTrustAI);
 
     Config.beginGroup("3v3");
     Config.setValue("UsingExtension", !standard_3v3_radiobutton->isChecked() && !new_3v3_radiobutton->isChecked());
@@ -1735,8 +1727,6 @@ void Server::processCmdLine()
         emit server_message("AddresssPort: "+Config.Address+":"+QString::number(Config.ServerPort));
         tmp=Config.EnableAI?"Yes":"No";
         emit server_message("EnableAI: "+tmp);
-        tmp=Config.alwaysTrustAI?"Yes":"No";
-        emit server_message("AlwaysTrustAI: "+tmp);
         emit server_message("AIDelay: "+QString::number(Config.AIDelay));
         tmp=Config.AnnounceIP?"Yes":"No";
         emit server_message("AnnounceIP: "+tmp);
