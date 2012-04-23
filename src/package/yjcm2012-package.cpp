@@ -488,36 +488,39 @@ public:
 class Shiyong: public TriggerSkill{
 public:
     Shiyong():TriggerSkill("shiyong"){
-        events << SlashHit;
+        events << SlashEffected << Damaged ;
         frequency = Compulsory;
     }
 
-    virtual int getPriority() const{
-        return -1;
-    }
+    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+        Room *room = player->getRoom();
 
-    virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
-        SlashEffectStruct effect = data.value<SlashEffectStruct>();
-        if(!effect.to->hasSkill(objectName()))
-            return false;
+        if(event == SlashEffected){
+            SlashEffectStruct effect = data.value<SlashEffectStruct>();
+            if(effect.drank)
+                effect.to->setFlags("Dranked");
+            else if(effect.to->hasFlag("Dranked"))
+                effect.to->setFlags("-Dranked");
+        }
+        else{
+            DamageStruct damage = data.value<DamageStruct>();
+            if(damage.card && damage.card->inherits("Slash") &&
+                    (damage.card->isRed() || damage.to->hasFlag("Dranked"))){
+                if(damage.to->hasFlag("Dranked"))
+                    damage.to->setFlags("-Dranked");
 
-        if(effect.slash->isRed() || effect.drank){
-            Room *room = player->getRoom();
-            room->playSkillEffect(objectName());
-            LogMessage log;
-            log.type = "#TriggerSkill";
-            log.from = effect.to;
-            log.arg = objectName();
-            room->sendLog(log);
+                LogMessage log;
+                log.type = "#TriggerSkill";
+                log.from = player;
+                log.arg = objectName();
+                room->sendLog(log);
 
-            room->loseMaxHp(effect.to);
+                room->playSkillEffect(objectName());
+
+                room->loseMaxHp(player);
+            }
         }
         return false;
-    }
-
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target->getRoom()->findPlayerBySkillName(objectName());
     }
 };
 
