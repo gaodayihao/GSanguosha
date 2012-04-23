@@ -1283,25 +1283,6 @@ public:
     }
 };
 
-class Longpo: public GameStartSkill{
-public:
-    Longpo():GameStartSkill("longpo"){
-        frequency = Limited;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        if(Sanguosha->getBanPackages().contains("ngod")) return false;
-        return GameStartSkill::triggerable(target) && target->getGeneralName() == "shenzhaoyun";
-    }
-
-    virtual void onGameStart(ServerPlayer *player) const{
-        if(player->askForSkillInvoke(objectName())){
-            Room *room = player->getRoom();
-            room->transfigure(player, "chudaishenzhaoyun", true, false, "shenzhaoyun");
-        }
-    }
-};
-
 class JuejingEx: public TriggerSkill{
 public:
    JuejingEx():TriggerSkill("juejingEx"){
@@ -1539,7 +1520,7 @@ GodPackage::GodPackage()
     General *shenzhaoyun = new General(this, "shenzhaoyun", "god", 2);
     shenzhaoyun->addSkill(new Juejing);
     shenzhaoyun->addSkill(new Longhun);
-    shenzhaoyun->addSkill(new Longpo);
+    shenzhaoyun->addSkill(new TransfigureSkill("longpo", "shenzhaoyun", "chudaishenzhaoyun"));
 
     General *shensimayi = new General(this, "shensimayi", "god", 4);
     shensimayi->addSkill(new Renjie);
@@ -1578,5 +1559,5 @@ NGodPackage::NGodPackage()
     related_skills.insertMulti("longhunEx", "#duojianQG");
 }
 
-ADD_PACKAGE(God);
-ADD_PACKAGE(NGod);
+ADD_PACKAGE(God)
+ADD_PACKAGE(NGod)

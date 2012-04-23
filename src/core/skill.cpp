@@ -324,6 +324,34 @@ void SPConvertSkill::onGameStart(ServerPlayer *player) const{
     }
 }
 
+TransfigureSkill::TransfigureSkill(const QString &name, const QString &from, const QString &to, const QString &mark_willlose)
+    :GameStartSkill(name), from(from), to(to), mark_willlose(mark_willlose)
+{
+    frequency = Limited;
+}
+
+bool TransfigureSkill::triggerable(const ServerPlayer *target) const{
+    QString package = Sanguosha->getGeneral(to)->getPackage();
+    if(Sanguosha->getBanPackages().contains(package)) return false;
+    return GameStartSkill::triggerable(target) && target->getGeneralName() == from;
+}
+
+void TransfigureSkill::onGameStart(ServerPlayer *player) const{
+    if(player->askForSkillInvoke(objectName())){
+        Room *room = player->getRoom();
+
+        if(!mark_willlose.isEmpty())
+            player->loseAllMarks(mark_willlose);
+
+        room->transfigure(player, to, true);
+
+        const General *general = Sanguosha->getGeneral(to);
+        const QString kingdom = general->getKingdom();
+        if(kingdom != player->getKingdom())
+            room->setPlayerProperty(player, "kingdom", kingdom);
+    }
+}
+
 ProhibitSkill::ProhibitSkill(const QString &name)
     :Skill(name, Skill::Compulsory)
 {

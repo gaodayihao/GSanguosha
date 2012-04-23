@@ -565,26 +565,6 @@ public:
     }
 };
 
-class Guayin: public GameStartSkill{
-public:
-    Guayin():GameStartSkill("guayin"){
-        frequency = Limited;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        if(Sanguosha->getBanPackages().contains("sp")) return false;
-        return GameStartSkill::triggerable(target) && target->getGeneralName() == "guanyu";
-    }
-
-    virtual void onGameStart(ServerPlayer *player) const{
-        if(player->askForSkillInvoke(objectName())){
-            Room *room = player->getRoom();
-            room->transfigure(player, "sp_guanyu", true, false, "guanyu");
-            room->setPlayerProperty(player, "kingdom", "wei");
-        }
-    }
-};
-
 class Longdan:public OneCardViewAsSkill{
 public:
     Longdan():OneCardViewAsSkill("longdan"){
@@ -635,26 +615,6 @@ public:
             return slash;
         }else
             return NULL;
-    }
-};
-
-class Huantong: public GameStartSkill{
-public:
-    Huantong():GameStartSkill("huantong"){
-        frequency = Limited;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        if(Sanguosha->getBanPackages().contains("BGM")) return false;
-        return GameStartSkill::triggerable(target) && target->getGeneralName() == "zhaoyun";
-    }
-
-    virtual void onGameStart(ServerPlayer *player) const{
-        if(player->askForSkillInvoke(objectName())){
-            Room *room = player->getRoom();
-            room->transfigure(player, "bgm_zhaoyun", true, false, "zhaoyun");
-            room->setPlayerProperty(player, "kingdom", "qun");
-        }
     }
 };
 
@@ -1360,10 +1320,11 @@ void StandardPackage::addGenerals(){
 
     guanyu = new General(this, "guanyu", "shu");
     guanyu->addSkill(new Wusheng);
-    guanyu->addSkill(new Guayin);
+    guanyu->addSkill(new TransfigureSkill("guayin", "guanyu", "sp_guanyu"));
 
     zhangfei = new General(this, "zhangfei", "shu");
     zhangfei->addSkill(new Skill("paoxiao"));
+    zhangfei->addSkill(new TransfigureSkill("hengmao", "zhangfei", "bgm_zhangfei"));
 
     zhugeliang = new General(this, "zhugeliang", "shu", 3);
     zhugeliang->addSkill(new Guanxing);
@@ -1373,7 +1334,7 @@ void StandardPackage::addGenerals(){
 
     zhaoyun = new General(this, "zhaoyun", "shu");
     zhaoyun->addSkill(new Longdan);
-    zhaoyun->addSkill(new Huantong);
+    zhaoyun->addSkill(new TransfigureSkill("huantong", "zhaoyun", "bgm_zhaoyun"));
 
     machao = new General(this, "machao", "shu");
     machao->addSkill(new Tieji);

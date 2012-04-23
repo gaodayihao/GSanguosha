@@ -388,27 +388,6 @@ public:
     }
 };
 
-class PTZijian: public GameStartSkill{
-public:
-    PTZijian():GameStartSkill("ptzijian"){
-        frequency = Limited;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        if(Sanguosha->getBanPackages().contains("BGM")) return false;
-        return GameStartSkill::triggerable(target) && target->getGeneralName() == "pangtong";
-    }
-
-    virtual void onGameStart(ServerPlayer *player) const{
-        if(player->askForSkillInvoke(objectName())){
-            Room *room = player->getRoom();
-            player->loseMark("@nirvana");
-            room->transfigure(player, "bgm_pangtong", true, true, "pangtong");
-            room->setPlayerProperty(player, "kingdom", "qun");
-        }
-    }
-};
-
 class Huoji: public OneCardViewAsSkill{
 public:
     Huoji():OneCardViewAsSkill("huoji"){
@@ -578,7 +557,7 @@ FirePackage::FirePackage()
     pangtong->addSkill(new Lianhuan);
     pangtong->addSkill(new MarkAssignSkill("@nirvana", 1));
     pangtong->addSkill(new Niepan);
-    pangtong->addSkill(new PTZijian);
+    pangtong->addSkill(new TransfigureSkill("ptzijian", "pangtong", "bgm_pangtong", "@nirvana"));
 
     related_skills.insertMulti("niepan", "#@nirvana-1");
 

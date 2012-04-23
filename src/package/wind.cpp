@@ -349,25 +349,6 @@ public:
     }
 };
 
-class Fengfa: public GameStartSkill{
-public:
-    Fengfa():GameStartSkill("fengfa"){
-        frequency = Limited;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        if(Sanguosha->getBanPackages().contains("BGM")) return false;
-        return GameStartSkill::triggerable(target) && target->getGeneralName() == "caoren";
-    }
-
-    virtual void onGameStart(ServerPlayer *player) const{
-        if(player->askForSkillInvoke(objectName())){
-            Room *room = player->getRoom();
-            room->transfigure(player, "bgm_caoren", true, false, "caoren");
-        }
-    }
-};
-
 class Liegong: public SlashBuffSkill{
 public:
     Liegong():SlashBuffSkill("liegong"){
@@ -1018,7 +999,7 @@ WindPackage::WindPackage()
 
     caoren = new General(this, "caoren", "wei");
     caoren->addSkill(new Jushou);
-    caoren->addSkill(new Fengfa);
+    caoren->addSkill(new TransfigureSkill("fengfa", "caoren", "bgm_caoren"));
 
     huangzhong = new General(this, "huangzhong", "shu");
     huangzhong->addSkill(new Liegong);

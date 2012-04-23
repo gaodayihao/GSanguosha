@@ -198,6 +198,19 @@ private:
     QString from, to;
 };
 
+class TransfigureSkill: public GameStartSkill{
+    Q_OBJECT
+
+public:
+    TransfigureSkill(const QString &name, const QString &from, const QString &to, const QString &mark_willlose = QString());
+
+    virtual bool triggerable(const ServerPlayer *target) const;
+    virtual void onGameStart(ServerPlayer *player) const;
+
+private:
+    QString from, to, mark_willlose;
+};
+
 class ProhibitSkill: public Skill{
     Q_OBJECT
 
