@@ -24,6 +24,7 @@ config = {
         "Thicket",
         "Mountain",
         "God",
+		"NGod",
         "SP",
         "YJCM",
         "YJCM2012",
