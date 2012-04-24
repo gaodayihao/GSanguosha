@@ -168,6 +168,7 @@ end
 
 -- AI for bgm_zhangfei
 
+sgs.ai_skill_invoke.hengmao = sgs.ai_skill_invoke.longpo
 local dahe_skill={}
 dahe_skill.name="dahe"
 table.insert(sgs.ai_skills,dahe_skill)

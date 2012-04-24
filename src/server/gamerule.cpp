@@ -348,31 +348,35 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
             if(damage.nature != DamageStruct::Normal){
                 room->setPlayerProperty(player, "chained", false);
 
-                room->setTag("chaining", true);
                 // iron chain effect
-                QList<ServerPlayer *> chained_players = room->getAllPlayers();
-                foreach(ServerPlayer *chained_player, chained_players){
-                    if(chained_player->isChained()){
-                        room->getThread()->delay();
+                if(room->getTag("chaining").isNull())
+                {
+                    room->setTag("chaining", true);
 
-                        LogMessage log;
-                        log.type = "#IronChainDamage";
-                        log.from = chained_player;
-                        room->sendLog(log);
+                    QList<ServerPlayer *> chained_players = room->getAllPlayers();
+                    foreach(ServerPlayer *chained_player, chained_players){
+                        if(chained_player->isChained()){
+                            room->getThread()->delay();
 
-                        DamageStruct chain_damage = damage;
-                        chain_damage.to = chained_player;
-                        chain_damage.chain = true;
+                            LogMessage log;
+                            log.type = "#IronChainDamage";
+                            log.from = chained_player;
+                            room->sendLog(log);
 
-                        room->damage(chain_damage);
-                        if(chained_player->hasFlag("no-chainChange")){
-                            room->setPlayerFlag(chained_player, "-no-chainChange");
-                            break;
+                            DamageStruct chain_damage = damage;
+                            chain_damage.to = chained_player;
+                            chain_damage.chain = true;
+
+                            room->damage(chain_damage);
+                            if(chained_player->hasFlag("no-chainChange")){
+                                room->setPlayerFlag(chained_player, "-no-chainChange");
+                                continue;
+                            }
+                            room->setPlayerProperty(chained_player, "chained", false);
                         }
-                        room->setPlayerProperty(chained_player, "chained", false);
                     }
+                    room->removeTag("chaining");
                 }
-                room->removeTag("chaining");
             }
 
             break;
