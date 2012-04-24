@@ -464,7 +464,7 @@ bool DaheCard::targetFilter(const QList<const Player *> &targets, const Player *
 
 void DaheCard::use(Room *room, ServerPlayer *bgm_zhangfei, const QList<ServerPlayer *> &targets) const{
     ServerPlayer *target = targets.first();
-    room->playSkillEffect("dahe");
+    room->playSkillEffect("dahe", 1);
     bgm_zhangfei->pindian(target, "dahe", this);
 
 }
@@ -505,6 +505,7 @@ public:
                 return false;
 
             if(pindian->isSuccess()){
+                room->playSkillEffect("dahe", 2);
                 QList<ServerPlayer *> targets = room->getAlivePlayers();
                 foreach(ServerPlayer *p, targets){
                     if(p->getHp() > pindian->from->getHp())
@@ -514,9 +515,12 @@ public:
                 target->obtainCard(pindian->to_card);
                 pindian->to->setFlags("DaheTarget");
             }
-            else if(!pindian->from->isKongcheng()){
-                room->showAllCards(pindian->from);
-                room->askForDiscard(pindian->from, objectName(), 1);
+            else{
+                room->playSkillEffect("dahe", 3);
+                if(!pindian->from->isKongcheng()){
+                    room->showAllCards(pindian->from);
+                    room->askForDiscard(pindian->from, objectName(), 1);
+                }
             }
         }
         else{

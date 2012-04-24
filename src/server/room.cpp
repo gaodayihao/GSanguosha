@@ -3890,7 +3890,11 @@ void Room::showAllCards(ServerPlayer *player, ServerPlayer *to){
     if (isUnicast)
         doNotify(to, S_COMMAND_SKILL_GONGXIN, gongxinArgs);
     else{
-        doBroadcastNotify(m_players, S_COMMAND_SKILL_GONGXIN, gongxinArgs);
+        QList<ServerPlayer*> toshow;
+        foreach(ServerPlayer *sp, m_players)
+            if(sp != player)
+                toshow << sp;
+        doBroadcastNotify(toshow, S_COMMAND_SKILL_GONGXIN, gongxinArgs);
     }
 }
 
