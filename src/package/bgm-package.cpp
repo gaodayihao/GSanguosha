@@ -521,7 +521,7 @@ public:
             }
         }
         else{
-            if(player->getPhase() != Player::NotActive)
+            if(zhangfei->getPhase() != Player::NotActive)
                 return false;
             foreach(ServerPlayer *sp, room->getAlivePlayers())
                 if(sp->hasFlag(objectName()))
