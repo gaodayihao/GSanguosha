@@ -30,7 +30,6 @@ Client::Client(QObject *parent, const QString &filename)
     :QObject(parent), m_isDiscardActionRefusable(true),
     status(NotActive), alive_count(1), swap_pile(0)
 {
-
     ClientInstance = this;
 
     callbacks["checkVersion"] = &Client::checkVersion;
@@ -116,7 +115,7 @@ Client::Client(QObject *parent, const QString &filename)
     m_interactions[S_COMMAND_SKILL_YIJI] = &Client::askForYiji;
     //callbacks["askForYiji"] = &Client::askForYiji;
     m_interactions[S_COMMAND_PLAY_CARD] = &Client::activate;
-    //callbacks["activate"] = &Client::activate;
+    // callbacks["activate"] = &Client::activate;
     m_interactions[S_COMMAND_DISCARD_CARD] = &Client::askForDiscard;
     //callbacks["askForDiscard"] = &Client::askForDiscard;
     m_interactions[S_COMMAND_CHOOSE_SUIT] = &Client::askForSuit;

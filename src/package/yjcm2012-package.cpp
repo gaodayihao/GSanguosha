@@ -573,7 +573,7 @@ public:
                 return false;
             room->playSkillEffect(objectName());
 
-            const Card *slash = room->askForCard(handang, "slash", "jiefan-slash-Use:" + dying.who->objectName(), data);
+            const Card *slash = room->askForCard(handang, "slash", "jiefan-slash-Use:" + dying.who->objectName(), data, NonTrigger);
 
             if(slash){
                 room->setTag("JiefanTarget", data);

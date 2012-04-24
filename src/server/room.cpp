@@ -56,6 +56,7 @@ void Room::initCallbacks(){
     m_requestResponsePair[S_COMMAND_PINDIAN] = S_COMMAND_RESPONSE_CARD;
     m_requestResponsePair[S_COMMAND_EXCHANGE_CARD] = S_COMMAND_DISCARD_CARD;
     m_requestResponsePair[S_COMMAND_CHOOSE_DIRECTION] = S_COMMAND_MULTIPLE_CHOICE;
+    m_requestResponsePair[S_COMMAND_SHOW_ALL_CARDS] = S_COMMAND_SKILL_GONGXIN;
 
     // client request handlers
     m_callbacks[S_COMMAND_SURRENDER] = &Room::processRequestSurrender;
@@ -595,7 +596,7 @@ bool Room::doRequest(ServerPlayer* player, QSanProtocol::CommandType command, co
         player->m_expectedReplyCommand = command;
 
     if(moveFocus)
-        doBroadcastNotify(m_players, S_COMMAND_MOVE_FOCUS, toJsonString(player->objectName()));
+        doBroadcastNotify(S_COMMAND_MOVE_FOCUS, toJsonString(player->objectName()));
 
     player->invoke(&packet);
     player->releaseLock(ServerPlayer::SEMA_MUTEX);
@@ -699,11 +700,12 @@ bool Room::doNotify(ServerPlayer* player, QSanProtocol::CommandType command, con
     return true;
 }
 
-bool Room::doBroadcastNotify(QList<ServerPlayer*> & players, QSanProtocol::CommandType command, const Json::Value &arg)
+bool Room::doBroadcastNotify(QSanProtocol::CommandType command, const Json::Value &arg, ServerPlayer* except)
 {
-    foreach (ServerPlayer* player, players)
+    foreach (ServerPlayer* player, m_players)
     {
-        doNotify(player, command, arg);
+        if (player != except)
+            doNotify(player, command, arg);
     }
     return true;
 }
@@ -777,7 +779,7 @@ bool Room::askForSkillInvoke(ServerPlayer *player, const QString &skill_name, co
     if(invoked)
     {
         Json::Value msg = toJsonArray(skill_name, player->objectName());
-        doBroadcastNotify(m_players, S_COMMAND_INVOKE_SKILL, msg);
+        doBroadcastNotify(S_COMMAND_INVOKE_SKILL, msg);
     }
 
     QVariant decisionData = QVariant::fromValue("skillInvoke:"+skill_name+":"+(invoked ? "yes" : "no"));
@@ -968,7 +970,8 @@ int Room::askForCardChosen(ServerPlayer *player, ServerPlayer *who, const QStrin
     return card_id;
 }
 
-const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const QString &prompt, const QVariant &data){
+const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const QString &prompt,
+                             const QVariant &data, TriggerEvent trigger_event){
     const Card *card = NULL;
 
     QVariant asked = pattern;
@@ -1005,10 +1008,9 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
     card = card->validateInResposing(player, &continuable);
 
     if(card){
-        bool foruse = prompt.contains("-Use");
         if(card->getTypeId() != Card::Skill){
             const CardPattern *card_pattern = Sanguosha->getPattern(pattern);
-            if((card_pattern == NULL || card_pattern->willThrow()) && !foruse)
+            if((card_pattern == NULL || card_pattern->willThrow()) && trigger_event != NonTrigger)
                 throwCard(card);
         }else if(card->willThrow())
             throwCard(card);
@@ -1019,9 +1021,7 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
         CardStar card_ptr = card;
         QVariant card_star = QVariant::fromValue(card_ptr);
 
-        if(foruse);
-        else if(!card->inherits("DummyCard") && !pattern.startsWith(".")
-            && !prompt.toLower().contains("discard")){
+        if(trigger_event == CardResponsed || trigger_event == JinkUsed){
             LogMessage log;
             log.card_str = card->toString();
             log.from = player;
@@ -1029,18 +1029,25 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
             sendLog(log);
 
             player->playCardEffect(card);
-
-
-            thread->trigger(CardResponsed, player, card_star);
-        }else{
+        }else if(trigger_event == CardDiscarded){
             LogMessage log;
             log.type = "$DiscardCard";
             log.from = player;
-            log.card_str = QString::number(card->getEffectiveId());
-            sendLog(log);
-            thread->trigger(CardDiscarded, player, card_star);
-        }
+            QList<int> to_discard;
+            if(card->isVirtualCard())
+                to_discard.append(card->getSubcards());
+            else
+                to_discard << card->getEffectiveId();
 
+            foreach(int card_id, to_discard){
+                if(log.card_str.isEmpty())
+                    log.card_str = QString::number(card_id);
+                else
+                    log.card_str += "+" + QString::number(card_id);
+            }
+            sendLog(log);
+        }
+        thread->trigger(trigger_event, player, card_star);
     }else if(continuable)
         return askForCard(player, pattern, prompt);
 
@@ -1218,6 +1225,11 @@ void Room::setPlayerMark(ServerPlayer *player, const QString &mark, int value){
 void Room::setPlayerCardLock(ServerPlayer *player, const QString &name){
     player->setCardLocked(name);
     player->invoke("cardLock", name);
+}
+
+void Room::clearPlayerCardLock(ServerPlayer *player){
+    player->setCardLocked(".");
+    player->invoke("cardLock", ".");
 }
 
 void Room::setPlayerStatistics(ServerPlayer *player, const QString &property_name, const QVariant &value){
@@ -3877,7 +3889,7 @@ void Room::showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer
     if(only_viewer)
         doNotify(player, S_COMMAND_SHOW_CARD, show_str);
     else
-        doBroadcastNotify(m_players, S_COMMAND_SHOW_CARD, show_str);
+        doBroadcastNotify(S_COMMAND_SHOW_CARD, show_str);
 }
 
 void Room::showAllCards(ServerPlayer *player, ServerPlayer *to){
@@ -3888,13 +3900,9 @@ void Room::showAllCards(ServerPlayer *player, ServerPlayer *to){
     gongxinArgs[3] = false;
     bool isUnicast = (to != NULL);
     if (isUnicast)
-        doNotify(to, S_COMMAND_SKILL_GONGXIN, gongxinArgs);
+        doNotify(to, S_COMMAND_SHOW_ALL_CARDS, gongxinArgs);
     else{
-        QList<ServerPlayer*> toshow;
-        foreach(ServerPlayer *sp, m_players)
-            if(sp != player)
-                toshow << sp;
-        doBroadcastNotify(toshow, S_COMMAND_SKILL_GONGXIN, gongxinArgs);
+        doBroadcastNotify(S_COMMAND_SHOW_ALL_CARDS, gongxinArgs, player);
     }
 }
 

@@ -216,7 +216,7 @@ public:
 class Leiji: public TriggerSkill{
 public:
     Leiji():TriggerSkill("leiji"){
-        events << CardResponsed;
+        events << JinkUsed << CardResponsed;
         view_as_skill = new LeijiViewAsSkill;
     }
 
@@ -225,10 +225,11 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *zhangjiao, QVariant &data) const{
-        CardStar card_star = data.value<CardStar>();
-        if(!card_star->inherits("Jink"))
-            return false;
-
+        if(event == CardResponsed){
+            CardStar card_star = data.value<CardStar>();
+            if(!card_star->inherits("Jink"))
+                return false;
+        }
         Room *room = zhangjiao->getRoom();
         room->askForUseCard(zhangjiao, "@@leiji", "@leiji");
 

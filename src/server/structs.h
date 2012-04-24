@@ -128,6 +128,8 @@ struct JudgeStruct{
 };
 
 enum TriggerEvent{
+    NonTrigger,
+
     GameStart,
     TurnStart,
     PhaseChange,
@@ -164,6 +166,8 @@ enum TriggerEvent{
     SlashProceed,
     SlashHit,
     SlashMissed,
+
+    JinkUsed,
 
     CardAsked,
     CardonUse,

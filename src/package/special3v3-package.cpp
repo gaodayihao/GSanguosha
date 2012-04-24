@@ -100,7 +100,7 @@ public:
         QString prompt = prompt_list.join(":");
 
         player->tag["Judge"] = data;
-        const Card *card = room->askForCard(player, "@huanshi", prompt, data);
+        const Card *card = room->askForCard(player, "@huanshi", prompt, data, CardDiscarded);
 
         if(card){
             room->playSkillEffect(objectName());
