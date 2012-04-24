@@ -471,7 +471,7 @@ void DaheCard::use(Room *room, ServerPlayer *bgm_zhangfei, const QList<ServerPla
 
 class DaheViewAsSkill: public OneCardViewAsSkill{
 public:
-    DaheViewAsSkill():OneCardViewAsSkill("dahe_pindian"){
+    DaheViewAsSkill():OneCardViewAsSkill("dahe"){
 
     }
 
