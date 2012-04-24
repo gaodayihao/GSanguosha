@@ -166,6 +166,8 @@ sgs.ai_skill_askforag.manjuan = function(self, card_ids)
 	return cards[#cards]:getEffectiveId()
 end
 
+
+sgs.ai_skill_invoke.hengmao = sgs.ai_skill_invoke.longpo
 local dahe_skill={}
 dahe_skill.name="dahe"
 table.insert(sgs.ai_skills,dahe_skill)
