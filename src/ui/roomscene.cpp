@@ -240,7 +240,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
             self_box->hide();
 
             if(circular){
-                enemy_box->setPos(-361, -343);
+                enemy_box->setPos(-381, -323);
                 self_box->setPos(201, -90);
             }else{
                 enemy_box->setPos(-216, -327);
