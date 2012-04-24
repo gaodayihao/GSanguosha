@@ -504,7 +504,7 @@ void Room::slashEffect(const SlashEffectStruct &effect){
 
 void Room::slashResult(const SlashEffectStruct &effect, const Card *jink){
     SlashEffectStruct result_effect = effect;
-    if(effect.to->hasFlag("DaheTarget") && jink && jink->getSuit() != Card::Heart){
+    if(effect.to->hasFlag("dahe") && jink && jink->getSuit() != Card::Heart){
         LogMessage log;
         bool nosuitjink = jink->getEffectiveId() == -1;
         log.type = nosuitjink ? "$DaheEffect_nosuit" : "$DaheEffect";

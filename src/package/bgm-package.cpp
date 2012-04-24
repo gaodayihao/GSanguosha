@@ -453,20 +453,13 @@ DaheCard::DaheCard(){
 }
 
 bool DaheCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    if(!targets.isEmpty())
-        return false;
-
-    if(to_select->isKongcheng())
-        return false;
-
-    return true;
+    return to_select != Self && targets.isEmpty() && !to_select->isKongcheng();
 }
 
 void DaheCard::use(Room *room, ServerPlayer *bgm_zhangfei, const QList<ServerPlayer *> &targets) const{
     ServerPlayer *target = targets.first();
     room->playSkillEffect("dahe", 1);
     bgm_zhangfei->pindian(target, "dahe", this);
-
 }
 
 class DaheViewAsSkill: public OneCardViewAsSkill{
@@ -495,28 +488,32 @@ public:
     Dahe():TriggerSkill("dahe"){
         events << PindianFinished << PhaseChange;
         view_as_skill = new DaheViewAsSkill;
+        default_choice = "yes";
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-        Room *room = player->getRoom();
+    virtual bool trigger(TriggerEvent event, ServerPlayer *zhangfei, QVariant &data) const{
+        Room *room = zhangfei->getRoom();
         if(event == PindianFinished){
             PindianStar pindian = data.value<PindianStar>();
-            if(pindian->reason != "dahe")
+            if(pindian->reason != objectName())
                 return false;
 
             if(pindian->isSuccess()){
-                room->playSkillEffect("dahe", 2);
+                room->playSkillEffect(objectName(), 2);
                 QList<ServerPlayer *> targets = room->getAlivePlayers();
                 foreach(ServerPlayer *p, targets){
                     if(p->getHp() > pindian->from->getHp())
                         targets.removeOne(p);
                 }
-                ServerPlayer *target = room->askForPlayerChosen(player, targets, "dahe");
-                target->obtainCard(pindian->to_card);
-                pindian->to->setFlags("DaheTarget");
+                QString choice = room->askForChoice(zhangfei, objectName(), "yes+no");
+                if(choice == "yes"){
+                    ServerPlayer *target = room->askForPlayerChosen(zhangfei, targets, objectName());
+                    target->obtainCard(pindian->to_card);
+                }
+                pindian->to->setFlags(objectName());
             }
             else{
-                room->playSkillEffect("dahe", 3);
+                room->playSkillEffect(objectName(), 3);
                 if(!pindian->from->isKongcheng()){
                     room->showAllCards(pindian->from);
                     room->askForDiscard(pindian->from, objectName(), 1);
@@ -527,8 +524,8 @@ public:
             if(player->getPhase() != Player::NotActive)
                 return false;
             foreach(ServerPlayer *sp, room->getAlivePlayers())
-                if(sp->hasFlag("DaheTarget"))
-                    room->setPlayerFlag(sp, "-DaheTarget");
+                if(sp->hasFlag(objectName()))
+                    room->setPlayerFlag(sp, "-" + objectName());
         }
 
         return false;
