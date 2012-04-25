@@ -312,6 +312,9 @@ RoomScene::RoomScene(QMainWindow *main_window)
 
         if(ServerInfo.DisableChat)
             chat_edit_widget->hide();
+
+        chat_box->setEnabled(false);
+        chat_box_widget->setFlag(QGraphicsItem::ItemIsMovable);
     }
 
     {
@@ -331,6 +334,8 @@ RoomScene::RoomScene(QMainWindow *main_window)
             log_box->resize(chat_box->width(), 210);
             log_box_widget->setPos(367, -246);
         }
+
+        log_box_widget->setFlag(QGraphicsItem::ItemIsMovable);
     }
 
     {
