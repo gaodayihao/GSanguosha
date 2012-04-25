@@ -58,9 +58,6 @@ void Room::initCallbacks(){
     m_requestResponsePair[S_COMMAND_CHOOSE_DIRECTION] = S_COMMAND_MULTIPLE_CHOICE;
     m_requestResponsePair[S_COMMAND_SHOW_ALL_CARDS] = S_COMMAND_SKILL_GONGXIN;
 
-    //init notify client pair
-    m_notifyInteractionPair[S_COMMAND_SHOW_ALL_CARDS] = S_COMMAND_SKILL_GONGXIN;
-
     // client request handlers
     m_callbacks[S_COMMAND_SURRENDER] = &Room::processRequestSurrender;
     m_callbacks[S_COMMAND_CHEAT] = &Room::processRequestCheat;
@@ -700,9 +697,6 @@ ServerPlayer* Room::getRaceResult(QList<ServerPlayer*> &players, QSanProtocol::C
 
 bool Room::doNotify(ServerPlayer* player, QSanProtocol::CommandType command, const Json::Value &arg)
 {
-    if(m_notifyInteractionPair.contains(command))
-        command = m_notifyInteractionPair[command];
-
     QSanGeneralPacket packet(S_SERVER_NOTIFICATION, command);
     packet.setMessageBody(arg);
     player->invoke(&packet);
@@ -2506,6 +2500,14 @@ void Room::processResponse(ServerPlayer *player, const QSanGeneralPacket *packet
 
             player->setClientReply(packet->getMessageBody());
             player->m_isClientResponseReady = true;
+            // Warning: the statement below must be the last one before releasing the lock!!!
+            // Any statement after this statement will totally compromise the synchronization
+            // because getRaceResult will then be able to acquire the lock, reading a non-null
+            // raceWinner and proceed with partial data. The current implementation is based on
+            // the assumption that the following line is ATOMIC!!!
+            // @todo: Find a Qt atomic semantic or use _asm to ensure the following line is atomic
+            // on a multi-core machine. This is the core to the whole synchornization mechanism for
+            // broadcastRaceRequest.
             _m_raceWinner = player;
             // the _m_semRoomMutex.release() signal is in getRaceResult();
             _m_semRaceRequest.release();

@@ -196,7 +196,7 @@ void RoomThread::addPlayerSkills(ServerPlayer *player, bool invoke_game_start){
 }
 
 void RoomThread::constructTriggerTable(const GameRule *rule){
-    foreach(ServerPlayer *player, room->getPlayers()){
+    foreach(ServerPlayer *player, room->m_players){
         addPlayerSkills(player, false);
     }
 
@@ -277,7 +277,6 @@ void RoomThread::action3v3(ServerPlayer *player){
 }
 
 void RoomThread::run(){
-
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
 
     if(setjmp(env) == GameOver){

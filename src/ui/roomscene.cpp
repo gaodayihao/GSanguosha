@@ -2517,7 +2517,7 @@ void RoomScene::onGameOver(){
 
     QDialog *dialog = new QDialog(main_window);
 //    dialog->resize(540, 638);
-    dialog->setFixedSize(540, 630);
+    dialog->setFixedSize(540, 638);
     dialog->setWindowTitle(victory ? tr("Victory") : tr("Failure"));
 
     QGroupBox *winner_box = new QGroupBox(tr("Winner(s)"));
