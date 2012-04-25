@@ -1032,6 +1032,9 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
             sendLog(log);
 
             player->playCardEffect(card);
+
+            if(trigger_event == JinkUsed)
+                thread->trigger(CardResponsed, player, card_star);
         }else if(trigger_event == CardDiscarded){
             LogMessage log;
             log.type = "$DiscardCard";
