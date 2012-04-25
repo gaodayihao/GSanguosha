@@ -2516,7 +2516,8 @@ void RoomScene::onGameOver(){
 #endif
 
     QDialog *dialog = new QDialog(main_window);
-    dialog->resize(500, 600);
+//    dialog->resize(540, 638);
+    dialog->setFixedSize(540, 630);
     dialog->setWindowTitle(victory ? tr("Victory") : tr("Failure"));
 
     QGroupBox *winner_box = new QGroupBox(tr("Winner(s)"));
@@ -2884,10 +2885,12 @@ void RoomScene::fillTable(QTableWidget *table, const QList<const ClientPlayer *>
         item->setText(QString::number(statistics->recover));
         table->setItem(i, 7, item);
 
-        table->setColumnWidth(4, 50);
-        table->setColumnWidth(5, 50);
-        table->setColumnWidth(6, 50);
-        table->setColumnWidth(7, 50);
+        table->setColumnWidth(2, 50);
+        table->setColumnWidth(3, 55);
+        table->setColumnWidth(4, 40);
+        table->setColumnWidth(5, 40);
+        table->setColumnWidth(6, 40);
+        table->setColumnWidth(7, 40);
     }
 }
 
