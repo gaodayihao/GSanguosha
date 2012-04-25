@@ -2806,8 +2806,8 @@ void RoomScene::doScript(){
 }
 
 void RoomScene::fillTable(QTableWidget *table, const QList<const ClientPlayer *> &players){
-    // table->setColumnCount(9);
-    table->setColumnCount(4);
+    table->setColumnCount(8);
+//    table->setColumnCount(4);
     table->setRowCount(players.length());
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -2819,7 +2819,7 @@ void RoomScene::fillTable(QTableWidget *table, const QList<const ClientPlayer *>
         else
             labels << tr("Role");
 
-    //    labels << tr("Designation") << tr("Kill") << tr("Damage") << tr("Save") << tr("Recover");
+    labels /*<< tr("Designation")*/ << tr("Kill") << tr("Damage") << tr("Save") << tr("Recover");
     }
     table->setHorizontalHeaderLabels(labels);
 
@@ -2858,32 +2858,32 @@ void RoomScene::fillTable(QTableWidget *table, const QList<const ClientPlayer *>
         if(!player->isAlive())
             item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
         table->setItem(i, 3, item);
-/*
+
         StatisticsStruct *statistics = player->getStatistics();
-        item = new QTableWidgetItem;
-        QString designations;
-        foreach(QString designation, statistics->designation){
-            designations.append(Sanguosha->translate(designation) + ", ");
-        }
-        designations.remove(designations.length()-3, 2);
-        table->setItem(i, 4, item);
+//        item = new QTableWidgetItem;
+//        QString designations;
+//        foreach(QString designation, statistics->designation){
+//            designations.append(Sanguosha->translate(designation) + ", ");
+//        }
+//        designations.remove(designations.length()-3, 2);
+//        table->setItem(i, 4, item);
 
         item = new QTableWidgetItem;
         item->setText(QString::number(statistics->kill));
-        table->setItem(i, 5, item);
+        table->setItem(i, 4, item);
 
         item = new QTableWidgetItem;
         item->setText(QString::number(statistics->damage));
-        table->setItem(i, 6, item);
+        table->setItem(i, 5, item);
 
         item = new QTableWidgetItem;
         item->setText(QString::number(statistics->save));
-        table->setItem(i, 7, item);
+        table->setItem(i, 6, item);
 
         item = new QTableWidgetItem;
         item->setText(QString::number(statistics->recover));
-        table->setItem(i, 8, item);
-*/
+        table->setItem(i, 7, item);
+
     }
 }
 

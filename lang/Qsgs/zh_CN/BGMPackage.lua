@@ -59,4 +59,5 @@ return {
 	["$dahe3"] = "闪过了……",	
 	["$DaheEffect"] = "%from 的技能大喝被触发，%to 使用的 %card 无效",
 	["$DaheEffect_nosuit"] = "%from 的技能大喝被触发，%to 使用的 <font color=yellow><b>闪[无色]</b></font> 无效",
+	["@dahe-jink"] = "%src 使用了【杀】，请使用一张【闪】（由于 %dest 的技能【%arg】被触发，你本次使用的非红桃【闪】将无效）",
 }

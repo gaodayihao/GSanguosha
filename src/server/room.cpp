@@ -509,10 +509,11 @@ void Room::slashEffect(const SlashEffectStruct &effect){
 void Room::slashResult(const SlashEffectStruct &effect, const Card *jink){
     SlashEffectStruct result_effect = effect;
     if(effect.to->hasFlag("dahe") && jink && jink->getSuit() != Card::Heart){
+        ServerPlayer *bgm_zhangfei = findPlayerBySkillName("dahe", true);
         LogMessage log;
         bool nosuitjink = jink->getEffectiveId() == -1;
         log.type = nosuitjink ? "$DaheEffect_nosuit" : "$DaheEffect";
-        log.from = effect.from;
+        log.from = bgm_zhangfei;
         log.to << effect.to;
         log.card_str = nosuitjink ? QString() : jink->getEffectIdString();
         sendLog(log);

@@ -407,7 +407,20 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
             SlashEffectStruct effect = data.value<SlashEffectStruct>();
 
             QString slasher = effect.from->objectName();
-            const Card *jink = room->askForCard(effect.to, "jink", "slash-jink:" + slasher, JinkUsed);
+
+            const Card *jink;
+            if(effect.to->hasFlag("dahe")){
+                ServerPlayer *bgm_zhangfei = room->findPlayerBySkillName("dahe", true);
+                jink = room->askForCard(effect.to, "jink",
+                                        QString("@dahe-jink:%1:%2:%3")
+                                        .arg(slasher)
+                                        .arg(bgm_zhangfei->objectName())
+                                        .arg(objectName()),
+                                        data,
+                                        JinkUsed);
+            }
+            else
+                jink = room->askForCard(effect.to, "jink", "slash-jink:" + slasher, data, JinkUsed);
             room->slashResult(effect, jink);
 
             break;
