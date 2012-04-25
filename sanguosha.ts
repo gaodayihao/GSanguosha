@@ -2870,7 +2870,7 @@
     <message>
         <location filename="src/util/recorder.cpp" line="111"/>
         <source>Warning</source>
-        <translation type="unfinished">警告</translation>
+        <translation>警告</translation>
     </message>
     <message>
         <location filename="src/util/recorder.cpp" line="111"/>
