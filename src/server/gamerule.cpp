@@ -299,6 +299,7 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
 
                 room->useCard(use, false);
 
+                room->setPlayerStatistics(dying.who, "recover", 1);
                 if(player != dying.who && dying.who->getHp() > 0)
                     room->setPlayerStatistics(player, "save", 1);
             }
@@ -310,9 +311,6 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
             if(player->getHp() <= 0 && player->isAlive()){
                 DyingStruct dying = data.value<DyingStruct>();
                 room->killPlayer(player, dying.damage);
-
-                if(dying.damage && dying.damage->from)
-                    room->setPlayerStatistics(dying.damage->from, "kill", 1);
             }
 
             break;
