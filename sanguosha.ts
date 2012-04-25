@@ -3319,7 +3319,7 @@
     <message>
         <location filename="src/ui/roomscene.cpp" line="2822"/>
         <source>Recover</source>
-        <translation>回复</translation>
+        <translation>恢复</translation>
     </message>
     <message>
         <location filename="src/ui/roomscene.cpp" line="2974"/>

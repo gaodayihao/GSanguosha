@@ -2884,6 +2884,10 @@ void RoomScene::fillTable(QTableWidget *table, const QList<const ClientPlayer *>
         item->setText(QString::number(statistics->recover));
         table->setItem(i, 7, item);
 
+        table->setColumnWidth(4, 50);
+        table->setColumnWidth(5, 50);
+        table->setColumnWidth(6, 50);
+        table->setColumnWidth(7, 50);
     }
 }
 

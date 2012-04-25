@@ -1247,7 +1247,7 @@ void Room::setPlayerStatistics(ServerPlayer *player, const QString &property_nam
         return;
 
     player->setStatistics(statistics);
-    QString prompt = property_name + ":";
+    QString prompt = QString("%1.%2:").arg(player->objectName()).arg(property_name);
 
     bool ok;
     int add = value.toInt(&ok);
@@ -1256,7 +1256,7 @@ void Room::setPlayerStatistics(ServerPlayer *player, const QString &property_nam
     else
         prompt += value.toString();
 
-    player->invoke("setStatistics", prompt);
+    broadcastInvoke("setStatistics", prompt);
 }
 
 void Room::setCardFlag(const Card *card, const QString &flag, ServerPlayer *who){
