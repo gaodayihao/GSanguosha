@@ -27,7 +27,7 @@ using namespace QSanProtocol::Utils;
 Client *ClientInstance = NULL;
 
 Client::Client(QObject *parent, const QString &filename)
-    :QObject(parent), m_isDiscardActionRefusable(true),
+    :QObject(parent), m_isDiscardActionRefusable(true), isCardShowOrPindian(false), WillDiscard(false),
     status(NotActive), alive_count(1), swap_pile(0)
 {
     ClientInstance = this;
@@ -764,7 +764,9 @@ void Client::_askForCardOrUseCard(const Json::Value &cardUsage){
     Q_ASSERT(isStringArray(cardUsage, 0, 1));
     card_pattern = toQString(cardUsage[0]);
     QStringList texts = toQString(cardUsage[1]).split(":");
-
+    //when there will discard
+    if(card_pattern.contains(".") && !card_pattern.contains("|"))
+        WillDiscard = true;
     if(texts.isEmpty()){
         return;
     }else
@@ -1048,6 +1050,7 @@ int Client::alivePlayerCount() const{
 
 void Client::onPlayerResponseCard(const Card *card){
     isCardShowOrPindian = false;
+    WillDiscard = false;
     if(card)
         replyToServer(S_COMMAND_RESPONSE_CARD, toJsonString(card->toString()));
         //request(QString("responseCard %1").arg(card->toString()));
