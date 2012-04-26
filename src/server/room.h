@@ -315,7 +315,7 @@ private:
         // Stores the expected client response for each server request, any unmatched client response will be discarded.
 
     bool _m_isFirstSurrenderRequest; // We allow the first surrender poll to go through regardless of the timer.
-    QTime _m_timeSinceLastSurrenderRequest; // Timer used to ensure that surrender poll is not initiated to frequently
+    QTime _m_timeSinceLastSurrenderRequest; // Timer used to ensure that surrender polls are not initiated too frequently
 
     //helper variables for race request function
     bool _m_raceStarted;
