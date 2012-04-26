@@ -412,7 +412,7 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
                                         QString("@dahe-jink:%1:%2:%3")
                                         .arg(slasher)
                                         .arg(bgm_zhangfei->objectName())
-                                        .arg(objectName()),
+                                        .arg("dahe"),
                                         data,
                                         JinkUsed);
             }
