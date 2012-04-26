@@ -9,6 +9,7 @@
 ZhihengCard::ZhihengCard(){
     target_fixed = true;
     once = true;
+    owner_discarded = true;
 }
 
 void ZhihengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const{
@@ -154,6 +155,7 @@ void KurouCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
 LijianCard::LijianCard(){
     once = true;
     mute = true;
+    owner_discarded = true;
 }
 
 bool LijianCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -191,6 +193,7 @@ void LijianCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
 
 QingnangCard::QingnangCard(){
     once = true;
+    owner_discarded = true;
 }
 
 bool QingnangCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
