@@ -183,6 +183,7 @@ public:
 
     // public fields
     bool m_isDiscardActionRefusable;
+    bool isCardShowOrPindian;
     bool m_canDiscardEquip;
     int discard_num;
     QString skill_name;

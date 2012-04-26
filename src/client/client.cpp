@@ -1047,6 +1047,7 @@ int Client::alivePlayerCount() const{
 }
 
 void Client::onPlayerResponseCard(const Card *card){
+    isCardShowOrPindian = false;
     if(card)
         replyToServer(S_COMMAND_RESPONSE_CARD, toJsonString(card->toString()));
         //request(QString("responseCard %1").arg(card->toString()));
@@ -1455,6 +1456,7 @@ void Client::askForSinglePeach(const Json::Value &arg){
 }
 
 void Client::askForCardShow(const Json::Value &requestor){
+    isCardShowOrPindian = true;
     if (!requestor.isString()) return;
     QString name = Sanguosha->translate(toQString(requestor));
     prompt_doc->setHtml(tr("%1 request you to show one hand card").arg(name));
@@ -1601,6 +1603,7 @@ void Client::askForPindian(const Json::Value &ask_str){
         prompt_doc->setHtml(tr("%1 ask for you to play a card to pindian").arg(requestor));
     }
 
+    isCardShowOrPindian = true;
     m_isUseCard = false;
     card_pattern = ".";
     m_isDiscardActionRefusable = false;
