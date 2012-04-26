@@ -554,7 +554,7 @@
     <message>
         <location filename="src/client/client.cpp" line="1601"/>
         <source>%1 ask for you to play a card to pindian</source>
-        <translation>%1 要求你打出一张卡牌已用于拼点</translation>
+        <translation>%1 要求你打出一张卡牌以用于拼点</translation>
     </message>
     <message>
         <location filename="src/client/client.cpp" line="1613"/>
