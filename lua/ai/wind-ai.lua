@@ -138,8 +138,6 @@ function sgs.ai_skill_invoke.jushou(self, data)
 	return self:isWeak()
 end
 
-sgs.ai_skill_invoke.fengfa = sgs.ai_skill_invoke.longpo
-
 sgs.ai_skill_invoke.liegong = function(self, data)
 	local effect = data:toSlashEffect()
 	return not self:isFriend(effect.to)
@@ -432,9 +430,9 @@ guhuo_skill.getTurnUseCard=function(self)
 		end
 	end
 
-	local card_str = self:getGuhuoCard("Peach", self.player, true)
+	local card_str = self:getGuhuoCard("Peach", self.player, true) 
 	if card_str then return sgs.Card_Parse(card_str) end
-	
+
 	local slash_str = self:getGuhuoCard("Slash", self.player, true) or self:getGuhuoCard("Analeptic", self.player, true)
 	if slash_str and self:slashIsAvailable() and (self.player:canSlashWithoutCrossbow() or self:isEquip("Crossbow")) then return sgs.Card_Parse(slash_str) end
 
@@ -446,13 +444,12 @@ guhuo_skill.getTurnUseCard=function(self)
 			break
 		end
 	end
-
 	for i=1, #guhuos do
 		local forbiden = guhuos[i]
 		forbid = sgs.Sanguosha:cloneCard(forbiden, sgs.Card_NoSuit, 0)
 		if self.player:isLocked(forbid) then table.remove(forbiden, #guhuos) end
 	end
-	
+
 	self:sortByUseValue(cards, true)
 	for _,card in ipairs(cards) do
 		if (card:inherits("Slash") and self:getCardsNum("Slash", self.player, "h")>=2 and not self:isEquip("Crossbow"))

@@ -42,7 +42,7 @@ function SmartAI:canLiuli(other, another)
 end
 
 function SmartAI:slashIsEffective(slash, to)
-	if to:hasSkill("zuixiang") and to:isLocked(slash) then return false end
+    if to:hasSkill("zuixiang") and to:isLocked(slash) then return false end
 	if to:hasSkill("yizhong") and not to:getArmor() then
 		if slash:isBlack() then
 			return false
@@ -68,7 +68,7 @@ function SmartAI:slashIsEffective(slash, to)
 		if armor:objectName() == "renwang_shield" then
 			return not slash:isBlack()
 		elseif armor:objectName() == "vine" then
-			return nature ~= sgs.DamageStruct_Normal
+			return nature ~= sgs.DamageStruct_Normal 
 		end
 	end
 
@@ -292,14 +292,6 @@ sgs.ai_skill_cardask["slash-jink"] = function(self, data, pattern, target)
 		if not effect.slash:hasFlag("drank") then
 			if target:hasSkill("mengjin") and self.player:hasSkill("jijiu") then return "." end
 		end
-		if self.player:hasFlag("DaheTarget") then
-			for _, card in ipairs(self:getCards("Jink")) do
-				if card:getSuit() == sgs.Card_Heart then
-					return card:getId()
-				end
-			end
-			return "."
-		end
 		if not (self.player:getHandcardNum() == 1 and self:hasSkills(sgs.need_kongcheng)) and not target:hasSkill("qianxi") then
 			if self:isEquip("Axe", target) then
 				if self:hasSkills(sgs.lose_equip_skill, target) and target:getEquips():length() > 1 then return "." end
@@ -410,7 +402,7 @@ end
 sgs.ai_skill_invoke.ice_sword=function(self, data)
 	local damage = data:toDamage()
 	local target = damage.to
-	if damage.card:hasFlag("drank") then return false end
+	if damage.card:hasFlag("drank") then return false end	
 	if self:isFriend(target) then
 		if self:isWeak(target) then return true
 		elseif target:getLostHp()<1 then return false end
@@ -510,7 +502,7 @@ end
 
 function sgs.ai_cardsview.spear(class_name, player)
 	if class_name == "Slash" then
-		local cards = player:getCards("he")
+		local cards = player:getCards("he")	
 		cards = sgs.QList2Table(cards)
 		for _, acard in ipairs(cards) do
 			if acard:inherits("Slash") then return end
@@ -526,7 +518,7 @@ function sgs.ai_cardsview.spear(class_name, player)
 
 		local suit1 = newcards[1]:getSuitString()
 		local card_id1 = newcards[1]:getEffectiveId()
-
+	
 		local suit2 = newcards[2]:getSuitString()
 		local card_id2 = newcards[2]:getEffectiveId()
 
@@ -601,6 +593,7 @@ sgs.ai_skill_invoke.eight_diagram = function(self, data)
 		if aplayer:getHp() < 1 and not aplayer:hasSkill("buqu") then dying = 1 break end
 	end
 	if handang and self:isFriend(handang) and dying > 0 then return false end
+	if self.player:hasFlag("dahe") then return false end
 	if sgs.hujiasource and not self:isFriend(sgs.hujiasource) then return false end
 	if sgs.lianlisource and not self:isFriend(sgs.lianlisource) then return false end
 	if self.player:hasSkill("tiandu") then return true end
@@ -751,7 +744,7 @@ function SmartAI:useCardDuel(duel, use)
 		local n2 = target:getHandcardNum()
 		if target:hasSkill("wushuang") then n2 = n2*2 end
 		local useduel
-		if target and self:objectiveLevel(target) > 3 and self:hasTrickEffective(duel, target)
+		if target and self:objectiveLevel(target) > 3 and self:hasTrickEffective(duel, target) 
 			and not self:cantbeHurt(target) then
 			if n1 >= n2 then
 				useduel = true

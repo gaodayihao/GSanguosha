@@ -6,9 +6,9 @@ sgs.ai_skill_invoke.qianxi = function(self, data)
 	local damage = data:toDamage()
 	local target = damage.to
 	if self:isFriend(target) then return false end
-	if self:hasSkills(sgs.masochism_skill,target) or self:hasSkills(sgs.recover_skill,target) or self:hasSkills("longhun|buqu",target) then return true end
+	if self:hasSkills(sgs.masochism_skill,target) or self:hasSkills(sgs.recover_skill,target) or self:hasSkills("longhun|longhunEx|buqu",target) then return true end
 	if damage.card:hasFlag("drank") then return false end
-	return (target:getMaxHp() - target:getHp()) < 2
+	return (target:getMaxHp() - target:getHp()) < 2 
 end
 
 sgs.ai_skill_invoke.fuli = true
@@ -32,7 +32,7 @@ sgs.ai_skill_playerchosen.miji = function(self, targets)
 	targets = sgs.QList2Table(targets)
 	self:sort(targets, "defense")
 	for _, target in ipairs(targets) do
-		if self:isFriend(target) then return target end
+		if self:isFriend(target) then return target end 
 	end
 end
 
@@ -60,7 +60,7 @@ sgs.ai_skill_choice.jiangchi = function(self, choices)
 	if slashnum > 1 or (slashnum > 0 and goodtarget == 0) then needburst = 1 end
 	self:sort(self.enemies,"defense")
 	if goodtarget == 0 or self.player:isSkipped(sgs.Player_Play) then return "jiang" end
-	
+		
 	for _,enemy in ipairs(self.enemies) do
 		local def=sgs.getDefense(enemy)
 		local amr=enemy:getArmor()
@@ -86,7 +86,7 @@ sgs.ai_skill_choice.jiangchi = function(self, choices)
 		elseif eff and def<8 and needburst > 0 then return "chi"
 		end
 	end
-	
+
 	return "cancel"
 end
 
@@ -207,6 +207,7 @@ end
 
 sgs.ai_skill_invoke.zhuiyi = function(self, data)
 	local damage = data:toDamageStar()
+	local exclude = self.player
 	if damage and damage.from then exclude = damage.from end
 	
 	local friends = self:getFriendsNoself()
@@ -214,7 +215,7 @@ sgs.ai_skill_invoke.zhuiyi = function(self, data)
 	return #friends > 0
 end
 
-sgs.ai_skill_playerchosen.zhuiyi = function(self, targets)  	
+sgs.ai_skill_playerchosen.zhuiyi = function(self, targets)	
 	targets = sgs.QList2Table(targets)
 	self:sort(targets,"defense")
 	for _, friend in ipairs(self.friends_noself) do
@@ -302,7 +303,7 @@ qice_skill.getTurnUseCard=function(self)
 	local aoe
 	local i
 	local good, bad = 0, 0
-	local caocao = self.room:findPlayerBySkillName("jianxiong")
+	local caocao = self.room:findPlayerBySkillName("jianxiong") 
 	local qicetrick = "savage_assault|archery_attack|ex_nihilo|god_salvation"
 	local qicetricks = qicetrick:split("|")
 	for i=1, #qicetricks do

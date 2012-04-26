@@ -351,8 +351,6 @@ sgs.ai_view_as.wusheng = function(card, player, card_place)
 	end
 end
 
-sgs.ai_skill_invoke.guayin = sgs.ai_skill_invoke.guixiang
-
 local wusheng_skill={}
 wusheng_skill.name="wusheng"
 table.insert(sgs.ai_skills,wusheng_skill)
@@ -701,8 +699,8 @@ end
 sgs.ai_skill_use_func.FanjianCard=function(card,use,self)
 	self:sort(self.enemies, "hp")
 			
-	for _, enemy in ipairs(self.enemies) do
-		if self:objectiveLevel(enemy) <= 3 or self:cantbeHurt(enemy) or enemy:getMark("@fog") > 0 then
+	for _, enemy in ipairs(self.enemies) do		
+		if self:objectiveLevel(enemy) <= 3 or self:cantbeHurt(enemy) or enemy:getMark("@fog") > 0 then						
 		elseif (not enemy:hasSkill("qingnang")) or (enemy:getHp() == 1 and enemy:getHandcardNum() == 0 and not enemy:getEquips()) then
 			use.card = card
 			if use.to then use.to:append(enemy) end
@@ -872,7 +870,7 @@ end
 sgs.ai_skill_use_func.JieyinCard=function(card,use,self)
 	self:sort(self.friends_noself, "hp")
 	local lord = self.room:getLord()
-	if self:isFriend(lord) and not sgs.isLordHealthy() and lord:isWounded() and lord:getGeneral():isMale() then
+	if self:isFriend(lord) and not sgs.isLordHealthy()  and lord:getGeneral():isMale() and lord:isWounded() then
 		use.card=card
 		if use.to then use.to:append(lord) end
 		return
@@ -880,7 +878,7 @@ sgs.ai_skill_use_func.JieyinCard=function(card,use,self)
 	for _, friend in ipairs(self.friends_noself) do
 		if friend:getGeneral():isMale() and friend:isWounded() and
 			not (friend:hasSkill("longhun") and friend:getCards("he"):length()>2 ) and
-			not (friend:hasSkill("hunzi") and friend:getMark("hunzi") == 0 and (friend:getSeat() - self.player:getSeat()) % (global_room:alivePlayerCount()) < 3) then
+			not (friend:hasSkill("hunzi") and friend:getMark("hunzi") == 0 and (friend:getSeat() - self.player:getSeat()) % (global_room:alivePlayerCount()) < 3) then 
 			use.card=card
 			if use.to then use.to:append(friend) end
 			return
@@ -943,7 +941,7 @@ sgs.ai_skill_use_func.QingnangCard=function(card,use,self)
 		use.card=card
 		if use.to then use.to:append(lord) end
 		return
-	end
+	end	
 	for _, friend in ipairs(self.friends) do
 		if friend:isWounded() and
 			not (friend:hasSkill("longhun") and self:getAllPeachNum() > 0) and

@@ -13,6 +13,7 @@ sgs.ai_skill_invoke.huantong = function(self, data)
 	elseif math.random(0, 1) == 0 then return true else return false end
 end
 
+sgs.ai_skill_invoke.ptzijian = sgs.ai_skill_invoke.huantong
 --AI for BGM Diaochan
 --code by clarkcyt and William915
 
@@ -134,7 +135,6 @@ end
 
 sgs.ai_skill_invoke.manjuan = true
 sgs.ai_skill_invoke.zuixiang = true
-sgs.ai_skill_invoke.ptzijian = sgs.ai_skill_invoke.huantong
 
 sgs.ai_skill_askforag.manjuan = function(self, card_ids)
 	local cards = {}
@@ -166,9 +166,6 @@ sgs.ai_skill_askforag.manjuan = function(self, card_ids)
 	return cards[#cards]:getEffectiveId()
 end
 
--- AI for bgm_zhangfei
-
-sgs.ai_skill_invoke.hengmao = sgs.ai_skill_invoke.longpo
 local dahe_skill={}
 dahe_skill.name="dahe"
 table.insert(sgs.ai_skills,dahe_skill)
@@ -231,6 +228,17 @@ sgs.ai_skill_playerchosen.dahe = function(self, targets)
 	end
 	for _, target in ipairs(targets) do
 		if self:isFriend(target) then return target end 
+	end
+end
+
+sgs.ai_skill_cardask["@dahe-jink"] = function(self, data, pattern, target)
+	if self.player:hasFlag("dahe") then
+		for _, card in ipairs(self:getCards("Jink")) do
+			if card:getSuit() == sgs.Card_Heart then
+				return card:getId()
+			end
+		end
+			return "."
 	end
 end
 

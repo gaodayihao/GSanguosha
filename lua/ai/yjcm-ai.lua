@@ -201,7 +201,7 @@ end
 
 sgs.ai_skill_playerchosen.xuanhuo = function(self, targets)
 	for _, player in sgs.qlist(targets) do
-		if (player:getHandcardNum() <= 2 or player:getHp() < 2) and self:isFriend(player)
+		if (player:getHandcardNum() <= 2 or player:getHp() < 2) and self:isFriend(player) 
 			and not player:hasFlag("xuanhuo_target") and not self:needKongcheng(player) and not player:hasSkill("manjuan") then
 			return player
 		end
@@ -462,15 +462,14 @@ xianzhen_skill.getTurnUseCard=function(self)
 
 	local max_card = self:getMaxCard()
 	local slashNum=self:getCardsNum("Slash")
-	if max_card then
+	if max_card then 
 		local max_point = max_card:getNumber()
 		if max_card:inherits("Slash") then slashNum=slashNum-1 end
 	end
-	
+
 	self:sort(self.enemies, "hp")
 
 	for _, enemy in ipairs(self.enemies) do
-
 		local enemy_max_card = self:getMaxCard(enemy)
 		if enemy_max_card and max_point and max_point > enemy_max_card:getNumber() and slashNum > 1 then
 
@@ -490,7 +489,7 @@ xianzhen_skill.getTurnUseCard=function(self)
 		end
 	end
 	self:sortByUseValue(cards, true)
-	if self:getOverflow()>0  then
+	if self:getOverflow()>0	then
 		for _, enemy in ipairs(self.enemies) do
 			if not (enemy:hasSkill("kongcheng") and enemy:getHandcardNum() == 1) and not enemy:isKongcheng() and not enemy:hasSkill("tuntian") then
 				local card_id = cards[1]:getEffectiveId()
@@ -528,7 +527,7 @@ sgs.ai_skill_use_func.XianzhenCard=function(card,use,self)
 			return
 		end
 	end
-	if self:getOverflow()>0  then
+	if self:getOverflow()>0	then
 		for _, enemy in ipairs(self.enemies) do
 			if use.to then
 				use.to:append(enemy)

@@ -411,7 +411,6 @@ sgs.ai_skill_invoke.shuangxiong=function(self,data)
 	if self.player:isSkipped(sgs.Player_Play) or self.player:getHp() < 2 then
 		return false
 	end
-
 	local target = 0
 	local cards=self.player:getCards("h")
 	cards=sgs.QList2Table(cards)
@@ -427,10 +426,10 @@ sgs.ai_skill_invoke.shuangxiong=function(self,data)
 	handnum=handnum/2
 	self:sort(self.enemies, "hp")
 	for _, enemy in ipairs(self.enemies) do
-		if (self:getCardsNum("Slash", enemy)+enemy:getHp()<=handnum) and (self:getCardsNum("Slash")>=self:getCardsNum("Slash", enemy))
+		if (self:getCardsNum("Slash", enemy)+enemy:getHp()<=handnum) and (self:getCardsNum("Slash")>=self:getCardsNum("Slash", enemy)) 
 			and self:objectiveLevel(enemy) > 3 and not self:cantbeHurt(enemy) and enemy:getMark("@fog") < 1 then target = target + 1 end
 	end
-
+	
 	return self.player:getHandcardNum()>=self.player:getHp() and target > 0
 end
 

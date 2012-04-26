@@ -38,14 +38,14 @@ fan_skill.getTurnUseCard=function(self)
 	local cards = self.player:getCards("h")	
 	cards=sgs.QList2Table(cards)
 	local slash_card
-
+	
 	for _,card in ipairs(cards)  do
 		if card:inherits("Slash") and not (card:inherits("FireSlash") or card:inherits("ThunderSlash")) then
 			slash_card = card
 			break
 		end
 	end
-
+	
 	if not slash_card  then return nil end
 	local suit = slash_card:getSuitString()
 	local number = slash_card:getNumberString()
@@ -53,9 +53,9 @@ fan_skill.getTurnUseCard=function(self)
 	local card_str = ("fire_slash:fan[%s:%s]=%d"):format(suit, number, card_id)
 	local fireslash = sgs.Card_Parse(card_str)
 	assert(fireslash)
-
+	
 	return fireslash
-
+		
 end
 
 function sgs.ai_weapon_value.fan(self, enemy)
@@ -199,7 +199,7 @@ function SmartAI:isGoodChainPartner(player)
 	end
 	if player:hasSkill("buqu") or (self:hasSkills("yiji|jieming|guixin",player) and player:getHp() > 1) or
 		(self.player:hasSkill("niepan") and self.player:getMark("@@nirvana") > 0) or 
-		player:hasSkill("fuli") and player:getMark("@laoji") > 0 then
+			player:hasSkill("fuli") and player:getMark("@laoji") > 0 then  
 		return true
 	end
 	return false

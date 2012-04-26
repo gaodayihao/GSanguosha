@@ -1,4 +1,12 @@
 
+sgs.ai_skill_invoke.longpo = function(self, data)
+	if math.random(0, 1) == 0 then return true else return false end
+end
+
+sgs.ai_skill_invoke.hengmao = sgs.ai_skill_invoke.longpo
+
+sgs.ai_skill_invoke.fengfa = sgs.ai_skill_invoke.longpo
+
 local longhunEx_skill={}
 longhunEx_skill.name="longhunEx"
 table.insert(sgs.ai_skills, longhunEx_skill)
