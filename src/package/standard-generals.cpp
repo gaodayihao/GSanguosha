@@ -55,8 +55,14 @@ public:
         room->playSkillEffect(objectName());
         QVariant tohelp = QVariant::fromValue((PlayerStar)caocao);
         foreach(ServerPlayer *liege, lieges){
-            const Card *jink = room->askForCard(liege, "jink", "@hujia-jink:" + caocao->objectName(), tohelp);
+            const Card *jink = room->askForCard(liege, "jink", "@hujia-jink:" + caocao->objectName(), tohelp, NonTrigger);
             if(jink){
+                LogMessage log;
+                log.type = "#Hujia";
+                log.from = liege;
+                log.to << caocao;
+                log.arg = objectName();
+                room->sendLog(log);
                 room->provide(jink);
                 return true;
             }
@@ -512,8 +518,14 @@ public:
 
         QVariant tohelp = QVariant::fromValue((PlayerStar)liubei);
         foreach(ServerPlayer *liege, lieges){
-            const Card *slash = room->askForCard(liege, "slash", "@jijiang-slash:" + liubei->objectName(), tohelp);
+            const Card *slash = room->askForCard(liege, "slash", "@jijiang-slash:" + liubei->objectName(), tohelp, NonTrigger);
             if(slash){
+                LogMessage log;
+                log.type = "#Jijiang";
+                log.from = liege;
+                log.to << liubei;
+                log.arg = "jijiang";
+                room->sendLog(log);
                 room->provide(slash);
                 return true;
             }

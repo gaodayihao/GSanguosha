@@ -16,6 +16,7 @@ return {
 	["hujia:accept"] = "帮他护驾",
 	["hujia:ignore"] = "不护驾",
 	["@hujia-jink"] = "请打出一张【闪】以帮 %src 护驾",
+	["#Hujia"] = "%from 响应了 %to 的【%arg】",
 
 	["#zhangliao"] = "前将军",
 	["zhangliao"] = "张辽",
@@ -77,6 +78,7 @@ return {
 	["jijiang:accept"] = "响应激将",
 	["jijiang:ignore"] = "不响应",
 	["@jijiang-slash"] = "请打出一张【杀】以相应主公的【激将】",
+	["#Jijiang"] = "%from 响应了 %to 的【%arg】",
 
 	["#guanyu"] = "美髯公",
 	["guanyu"] = "关羽",

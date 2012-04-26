@@ -277,8 +277,14 @@ void JijiangCard::use(Room *room, ServerPlayer *liubei, const QList<ServerPlayer
 
     QVariant tohelp = QVariant::fromValue((PlayerStar)liubei);
     foreach(ServerPlayer *liege, lieges){
-        slash = room->askForCard(liege, "slash", "@jijiang-slash:" + liubei->objectName(), tohelp);
+        slash = room->askForCard(liege, "slash", "@jijiang-slash:" + liubei->objectName(), tohelp, NonTrigger);
         if(slash){
+            LogMessage log;
+            log.type = "#Jijiang";
+            log.from = liege;
+            log.to << liubei;
+            log.arg = "jijiang";
+            room->sendLog(log);
             CardUseStruct card_use;
             card_use.card = slash;
             card_use.from = liubei;
