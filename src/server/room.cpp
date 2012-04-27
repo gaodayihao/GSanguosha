@@ -992,8 +992,9 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
         }else{
             bool success = doRequest(player, S_COMMAND_RESPONSE_CARD, toJsonArray(pattern, prompt));
             Json::Value clientReply = player->getClientReply();
-            if (success && !clientReply.isNull())
+            if (success && !clientReply.isNull()){
                 card = Card::Parse(toQString(clientReply));
+            }
         }
     }
 
@@ -1257,6 +1258,8 @@ void Room::setPlayerStatistics(ServerPlayer *player, const QString &property_nam
 }
 
 void Room::setCardFlag(const Card *card, const QString &flag, ServerPlayer *who){
+    if(flag.isEmpty()) return;
+
     card->setFlags(flag);
 
     if(!card->isVirtualCard())
@@ -1264,6 +1267,8 @@ void Room::setCardFlag(const Card *card, const QString &flag, ServerPlayer *who)
 }
 
 void Room::setCardFlag(int card_id, const QString &flag, ServerPlayer *who){
+    if(flag.isEmpty()) return;
+
     Sanguosha->getCard(card_id)->setFlags(flag);
 
     QString pattern = QString::number(card_id) + ":" + flag;

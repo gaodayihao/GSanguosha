@@ -196,7 +196,7 @@ public:
                     draw_card = true;
                 else{
                     QString prompt = "double-sword-card:" + effect.from->getGeneralName();
-                    const Card *card = room->askForCard(effect.to, ".", prompt, NULL, CardDiscarded);
+                    const Card *card = room->askForCard(effect.to, ".", prompt, QVariant(), CardDiscarded);
                     if(!card)
                         draw_card = true;
                 }
@@ -260,7 +260,7 @@ public:
             return false;
 
         Room *room = player->getRoom();
-        const Card *card = room->askForCard(player, "slash", "blade-slash:" + effect.to->objectName(), NULL, NonTrigger);
+        const Card *card = room->askForCard(player, "slash", "blade-slash:" + effect.to->objectName(), QVariant(), NonTrigger);
         if(card){
             // if player is drank, unset his flag
             if(player->hasFlag("drank"))
@@ -794,7 +794,7 @@ void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
     if(on_effect){
         QString prompt = QString("collateral-slash-Use:%1:%2")
                 .arg(source->objectName()).arg(victims.first()->objectName());
-        const Card *slash = room->askForCard(killer, "slash", prompt, NULL, NonTrigger);
+        const Card *slash = room->askForCard(killer, "slash", prompt, QVariant(), NonTrigger);
         if (victims.first()->isDead()){
             if (source->isDead()){
                 if(killer->isAlive() && killer->getWeapon()){

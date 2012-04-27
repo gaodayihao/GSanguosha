@@ -595,7 +595,6 @@ public:
 
                 DyingStruct dying = room->getTag("JiefanTarget").value<DyingStruct>();
                 ServerPlayer *target = dying.who;
-                room->removeTag("JiefanTarget");
                 Peach *peach = new Peach(damage.card->getSuit(), damage.card->getNumber());
                 peach->setSkillName(objectName());
                 CardUseStruct use;
@@ -609,7 +608,11 @@ public:
             return false;
         }
         else{
-            if(!room->getTag("JiefanTarget").isNull() && !room->getTag("JiefanSlash").isNull()){
+            if(room->getTag("JiefanSlash").isNull())
+                return false;
+            CardUseStruct use = data.value<CardUseStruct>();
+            int id = room->getTag("JiefanSlash").toInt();
+            if(id == use.card->getEffectiveId()){
                 room->removeTag("JiefanTarget");
                 room->removeTag("JiefanSlash");
             }
