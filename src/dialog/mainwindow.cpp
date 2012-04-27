@@ -167,6 +167,7 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionStart_Server_triggered()
 {
+    Config.CountDownSeconds = Config.value("CountDownSeconds", 3).toInt();
     ServerDialog *dialog = new ServerDialog(this);
     if(!dialog->config())
         return;
@@ -675,6 +676,7 @@ void MainWindow::on_actionAcknowledgement_triggered()
 
 void MainWindow::on_actionPC_Console_Start_triggered()
 {
+    Config.CountDownSeconds = 0;
     ServerDialog *dialog = new ServerDialog(this);
     dialog->ensureEnableAI();
     if(!dialog->config())

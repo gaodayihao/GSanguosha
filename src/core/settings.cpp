@@ -57,7 +57,7 @@ void Settings::init(){
         TextEditColor = QColor(value("TextEditColor", "white").toString());
     }
 
-    CountDownSeconds = value("CountDownSeconds", 5).toInt();
+    CountDownSeconds = value("CountDownSeconds", 3).toInt();
     GameMode = value("GameMode", "02p").toString();
 
 
