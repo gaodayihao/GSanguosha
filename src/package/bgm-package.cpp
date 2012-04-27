@@ -281,11 +281,9 @@ public:
         }
 
         room->fillAG(toGainList, sp_pangtong);
-        int id = room->askForAG(sp_pangtong, toGainList, true, objectName());
+        int id = room->askForAG(sp_pangtong, toGainList, false, objectName());
         if(id != -1)
             room->moveCardTo(Sanguosha->getCard(id), sp_pangtong, Player::Hand, true);
-        else
-            sp_pangtong->setFlags("-ManjuanInvoke");
 
         sp_pangtong->invoke("clearAG");
     }
