@@ -2101,6 +2101,8 @@ void RoomScene::updateStatus(Client::Status status){
         }
 
     case Client::AskForSkillInvoke:{
+            dashboard->disableAllCards();
+
             QString skill_name = ClientInstance->getSkillNameToInvoke();
             foreach(QAbstractButton *button, skill_buttons){
                 if(button->objectName() == skill_name){
