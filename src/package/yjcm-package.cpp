@@ -188,117 +188,83 @@ public:
 class Wuyan: public TriggerSkill{
 public:
     Wuyan():TriggerSkill("wuyan"){
-        events << CardEffect << CardEffected;
+        events << DamagedProceed << Predamage;
         frequency = Compulsory;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return true;
-    }
-
-    virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
-        CardEffectStruct effect = data.value<CardEffectStruct>();
-
-        if(effect.to == effect.from)
-            return false;
-
-        if(effect.card->getTypeId() == Card::Trick){
-            Room *room = player->getRoom();
-
-            if((effect.from && effect.from->hasSkill(objectName()))){
-                LogMessage log;
-                log.type = "#WuyanBad";
-                log.from = effect.from;
-                log.to << effect.to;
-                log.arg = effect.card->objectName();
-                log.arg2 = objectName();
-
-                room->sendLog(log);
-
-                room->playSkillEffect(objectName());
-
-                room->setEmotion(effect.from, QString("skill/%1").arg(objectName()));
-                return true;
-            }
-
-            if(effect.to->hasSkill(objectName()) && effect.from){
+    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+        DamageStruct damage = data.value<DamageStruct>();
+        Room *room = player->getRoom();
+        if(damage.card->getTypeId() == Card::Trick){
+            if(event == DamagedProceed){
                 LogMessage log;
                 log.type = "#WuyanGood";
-                log.from = effect.to;
-                log.to << effect.from;
-                log.arg = effect.card->objectName();
+                log.from = player;
+                log.arg = damage.card->objectName();
                 log.arg2 = objectName();
-
                 room->sendLog(log);
-
                 room->playSkillEffect(objectName());
-
-
-                room->setEmotion(effect.to, QString("skill/%1").arg(objectName()));
-                return true;
             }
+
+            if(event == Predamage){
+                LogMessage log;
+                log.type = "#WuyanBad";
+                log.from = player;
+                log.arg = damage.card->objectName();
+                log.arg2 = objectName();
+                room->sendLog(log);
+                room->playSkillEffect(objectName());
+            }
+
+            return true;
         }
 
         return false;
     }
 };
 
-JujianCard::JujianCard(){
-    once = true;
-    owner_discarded = true;
-}
-
-void JujianCard::onEffect(const CardEffectStruct &effect) const{
-    int n = subcardsLength();
-    effect.to->drawCards(n);
-
-    if(n == 3){
-        QSet<Card::CardType> types;
-
-        foreach(int card_id, effect.card->getSubcards()){
-            const Card *card = Sanguosha->getCard(card_id);
-            types << card->getTypeId();
-        }
-
-        if(types.size() == 1){
-            Room *room = effect.from->getRoom();
-
-            LogMessage log;
-            log.type = "#JujianRecover";
-            log.from = effect.from;
-            const Card *card = Sanguosha->getCard(subcards.first());
-            log.arg = card->getType();
-            room->sendLog(log);
-
-            RecoverStruct recover;
-            recover.card = this;
-            recover.who = effect.from;
-            room->recover(effect.from, recover);
-        }
-    }
-}
-
-class Jujian: public ViewAsSkill{
+class Jujian: public PhaseChangeSkill{
 public:
-    Jujian():ViewAsSkill("jujian"){
-
+    Jujian():PhaseChangeSkill("jujian"){
     }
 
-    virtual bool viewFilter(const QList<CardItem *> &selected, const CardItem *to_select) const{
-        return selected.length() < 3;
-    }
+    virtual bool onPhaseChange(ServerPlayer *xushu) const{
+        if(xushu->getPhase() == Player::Finish){
+            Room *room = xushu->getRoom();
+            if(!xushu->isKongcheng() && room->askForSkillInvoke(xushu, objectName())){
+                if(room->askForCard(xushu, ".NoBasic", "@jujian-discard", NULL, CardDiscarded)){
+                    room->playSkillEffect(objectName());
+                    ServerPlayer *target = room->askForPlayerChosen(xushu, room->getOtherPlayers(xushu), objectName());
 
-    virtual bool isEnabledAtPlay(const Player *player) const{
-        return ! player->hasUsed("JujianCard");
-    }
+                    QStringList choices;
+                    QString choice;
+                    choices << "draw";
+                    if(target->isWounded())
+                        choices << "recover";
+                    if(target->isChained() || !target->faceUp())
+                        choices << "reset";
 
-    virtual const Card *viewAs(const QList<CardItem *> &cards) const{
-        if(cards.isEmpty())
-            return NULL;
+                    if(choices.length() == 1)
+                        choice = "draw";
+                    else
+                        choice = room->askForChoice(target, objectName(), choices.join("+"));
 
-        JujianCard *card = new JujianCard;
-        card->addSubcards(cards);
-        return card;
+                    if(choice == "draw")
+                        target->drawCards(2);
+                    else if(choice == "recover"){
+                        RecoverStruct recover;
+                        recover.who = xushu;
+                        room->recover(target, recover);
+                    }
+                    else if(choice == "reset"){
+                        room->setPlayerProperty(target, "chained", false);
+                        if(!target->faceUp())
+                            target->turnOver();
+                    }
+                }
+            }
+        }
+        return false;
     }
 };
 
@@ -454,45 +420,44 @@ public:
             CardMoveStar move = data.value<CardMoveStar>();
             if(move->from_place == Player::Equip)
                 lingtong->tag["InvokeXuanfeng"] = true;
+            if(lingtong->getPhase() == Player::Discard){
+                if(move->to_place == Player::DiscardedPile){
+                    lingtong->addMark("xuanfeng");
+                    if(lingtong->getMark("xuanfeng") == 2){
+                        lingtong->tag["InvokeXuanfeng"] = true;
+                    }
+                }
+            }
         }else if(event == CardLostDone && lingtong->tag.value("InvokeXuanfeng", false).toBool()){
             lingtong->tag.remove("InvokeXuanfeng");
+            lingtong->setMark("xuanfeng", 0);
             Room *room = lingtong->getRoom();
 
-            QString choice = room->askForChoice(lingtong, objectName(), "slash+damage+nothing");
+            QString choice = room->askForChoice(lingtong, objectName(), "discard+nothing");
 
 
-            if(choice == "slash"){
+        if(choice == "discard"){
+                room->playSkillEffect(objectName());
                 QList<ServerPlayer *> targets;
-                foreach(ServerPlayer *target, room->getAlivePlayers()){
-                    if(lingtong->canSlash(target, false))
+                foreach(ServerPlayer *target, room->getOtherPlayers(lingtong)){
+                    if(!target->isNude())
                         targets << target;
                 }
 
-                ServerPlayer *target = room->askForPlayerChosen(lingtong, targets, "xuanfeng-slash");
-
-                Slash *slash = new Slash(Card::NoSuit, 0);
-                slash->setSkillName(objectName());
-
-                CardUseStruct card_use;
-                card_use.card = slash;
-                card_use.from = lingtong;
-                card_use.to << target;
-                room->useCard(card_use, false);
-            }else if(choice == "damage"){
-                room->playSkillEffect(objectName());
-
-                QList<ServerPlayer *> players = room->getOtherPlayers(lingtong), targets;
-                foreach(ServerPlayer *p, players){
-                    if(lingtong->distanceTo(p) <= 1)
-                        targets << p;
+                ServerPlayer *first = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
+                int first_id = -1;
+                int second_id = -1;
+                if(first){
+                    first_id = room->askForCardChosen(lingtong, first, "he", "xuanfeng");
+                    room->throwCard(first_id, first);
+                    if(first->isNude())
+                        targets.removeOne(first);
                 }
-
-                ServerPlayer *target = room->askForPlayerChosen(lingtong, targets, "xuanfeng-damage");
-
-                DamageStruct damage;
-                damage.from = lingtong;
-                damage.to = target;
-                room->damage(damage);
+                ServerPlayer *second = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
+                if(second){
+                    second_id = room->askForCardChosen(lingtong, second, "he", "xuanfeng");
+                    room->throwCard(second_id, second);
+                }
             }
         }
 
@@ -987,7 +952,6 @@ YJCMPackage::YJCMPackage():Package("YJCM"){
     gaoshun->addSkill(new Xianzhen);
     gaoshun->addSkill(new Jiejiu);
 
-    addMetaObject<JujianCard>();
     addMetaObject<MingceCard>();
     addMetaObject<GanluCard>();
     addMetaObject<XianzhenCard>();
