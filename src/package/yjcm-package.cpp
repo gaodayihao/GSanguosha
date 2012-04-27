@@ -409,10 +409,7 @@ class Xuanfeng: public TriggerSkill{
 public:
     Xuanfeng():TriggerSkill("xuanfeng"){
         events << CardLost << CardLostDone;
-    }
-
-    virtual QString getDefaultChoice(ServerPlayer *) const{
-        return "nothing";
+        default_choice = "nothing";
     }
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *lingtong, QVariant &data) const{
@@ -433,30 +430,30 @@ public:
             lingtong->setMark("xuanfeng", 0);
             Room *room = lingtong->getRoom();
 
+            QList<ServerPlayer *> targets;
+            foreach(ServerPlayer *target, room->getOtherPlayers(lingtong)){
+                if(!target->isNude())
+                    targets << target;
+            }
+            if(targets.isEmpty())
+                return false;
+
             QString choice = room->askForChoice(lingtong, objectName(), "discard+nothing");
 
 
-        if(choice == "discard"){
+            if(choice == "discard"){
                 room->playSkillEffect(objectName());
-                QList<ServerPlayer *> targets;
-                foreach(ServerPlayer *target, room->getOtherPlayers(lingtong)){
-                    if(!target->isNude())
-                        targets << target;
-                }
 
-                ServerPlayer *first = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
-                int first_id = -1;
-                int second_id = -1;
-                if(first){
-                    first_id = room->askForCardChosen(lingtong, first, "he", "xuanfeng");
-                    room->throwCard(first_id, first);
-                    if(first->isNude())
-                        targets.removeOne(first);
-                }
-                ServerPlayer *second = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
-                if(second){
-                    second_id = room->askForCardChosen(lingtong, second, "he", "xuanfeng");
-                    room->throwCard(second_id, second);
+                ServerPlayer *target;
+                int card_id = -1;
+                for(int i = 0;i < 2;i ++){
+                    target = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
+                    if(target){
+                        card_id = room->askForCardChosen(lingtong, target, "he", "xuanfeng");
+                        room->throwCard(card_id, target);
+                        if(target->isNude())
+                            targets.removeOne(target);
+                    }
                 }
             }
         }
