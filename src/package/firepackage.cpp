@@ -539,7 +539,7 @@ public:
 FirePackage::FirePackage()
     :Package("fire")
 {
-    General *xunyu, *dianwei, *wolong, *pangtong, *taishici, *yuanshao, *shuangxiong, *pangde;
+    General *xunyu, *dianwei, *wolong, *pangtong, *taishici, *yuanshao, *yanliangwenchou, *pangde;
 
     xunyu = new General(this, "xunyu", "wei", 3);
     xunyu->addSkill(new Quhu);
@@ -568,8 +568,8 @@ FirePackage::FirePackage()
     yuanshao->addSkill(new Luanji);
     yuanshao->addSkill(new Skill("xueyi$", Skill::Compulsory));
 
-    shuangxiong = new General(this, "shuangxiong", "qun");
-    shuangxiong->addSkill(new Shuangxiong);
+    yanliangwenchou = new General(this, "yanliangwenchou", "qun");
+    yanliangwenchou->addSkill(new Shuangxiong);
 
     pangde = new General(this, "pangde", "qun");
     pangde->addSkill(new Mengjin);

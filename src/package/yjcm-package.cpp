@@ -243,54 +243,59 @@ bool JujianCard::targetFilter(const QList<const Player *> &targets, const Player
 
 void JujianCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.from->getRoom();
-    if(room->askForCard(effect.from, ".NoBasic", "@jujian-discard", QVariant(), CardDiscarded)){
-        QStringList choices;
-        QString choice;
-        choices << "draw";
-        if(effect.to->isWounded())
-            choices << "recover";
-        if(effect.to->isChained() || !effect.to->faceUp())
-            choices << "reset";
 
-        if(choices.length() == 1)
-            choice = "draw";
-        else
-            choice = room->askForChoice(effect.to, "jujian", choices.join("+"));
+    QStringList choices;
+    QString choice;
+    choices << "draw";
+    if(effect.to->isWounded())
+        choices << "recover";
+    if(effect.to->isChained() || !effect.to->faceUp())
+        choices << "reset";
 
-        if(choice == "draw"){
-            effect.to->drawCards(2);
-            room->playSkillEffect("jujian", 2);
-        }
-        else if(choice == "recover"){
-            RecoverStruct recover;
-            recover.who = effect.from;
-            room->recover(effect.to, recover);
-            room->playSkillEffect("jujian", 1);
-        }
-        else if(choice == "reset"){
-            room->setPlayerProperty(effect.to, "chained", false);
-            if(!effect.to->faceUp())
-                effect.to->turnOver();
-            room->playSkillEffect("jujian", 1);
-        }
+    if(choices.length() == 1)
+        choice = "draw";
+    else
+        choice = room->askForChoice(effect.to, "jujian", choices.join("+"));
+
+    if(choice == "draw"){
+        effect.to->drawCards(2);
+        room->playSkillEffect("jujian", 2);
+    }
+    else if(choice == "recover"){
+        RecoverStruct recover;
+        recover.who = effect.from;
+        room->recover(effect.to, recover);
+        room->playSkillEffect("jujian", 1);
+    }
+    else if(choice == "reset"){
+        room->setPlayerProperty(effect.to, "chained", false);
+        if(!effect.to->faceUp())
+            effect.to->turnOver();
+        room->playSkillEffect("jujian", 1);
     }
 }
 
-class JujianViewAsSkill: public ZeroCardViewAsSkill{
+class JujianViewAsSkill: public OneCardViewAsSkill{
 public:
-    JujianViewAsSkill():ZeroCardViewAsSkill("jujian"){
+    JujianViewAsSkill():OneCardViewAsSkill("jujian"){
     }
 
-    virtual const Card *viewAs() const{
-        return new JujianCard;
+    virtual const Card *viewAs(CardItem *card_item) const{
+        JujianCard *card = new JujianCard;
+        card->addSubcard(card_item->getFilteredCard());
+        return card;
+    }
+
+    virtual bool viewFilter(const CardItem *to_select) const{
+        return !to_select->getCard()->inherits("BasicCard");
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
         return false;
     }
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
-        return  pattern == "@@jujian";
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
+        return pattern == "@@jujian";
     }
 };
 

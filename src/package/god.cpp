@@ -337,7 +337,7 @@ public:
             }
 
             int index = 1;
-            if(room->findPlayer("caocao+shencaocao+shencc"))
+            if(room->findPlayer("caocao+shencaocao+weiwudi"))
                 index = 3;
 
             room->playSkillEffect(objectName(), index);
