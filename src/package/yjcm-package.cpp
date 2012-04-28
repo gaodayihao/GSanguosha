@@ -242,8 +242,6 @@ bool JujianCard::targetFilter(const QList<const Player *> &targets, const Player
 void JujianCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.from->getRoom();
     if(room->askForCard(effect.from, ".NoBasic", "@jujian-discard", QVariant(), CardDiscarded)){
-        room->playSkillEffect("jujian");
-
         QStringList choices;
         QString choice;
         choices << "draw";
@@ -257,17 +255,21 @@ void JujianCard::onEffect(const CardEffectStruct &effect) const{
         else
             choice = room->askForChoice(effect.to, "jujian", choices.join("+"));
 
-        if(choice == "draw")
+        if(choice == "draw"){
             effect.to->drawCards(2);
+            room->playSkillEffect("jujian", 2);
+        }
         else if(choice == "recover"){
             RecoverStruct recover;
             recover.who = effect.from;
             room->recover(effect.to, recover);
+            room->playSkillEffect("jujian", 1);
         }
         else if(choice == "reset"){
             room->setPlayerProperty(effect.to, "chained", false);
             if(!effect.to->faceUp())
                 effect.to->turnOver();
+            room->playSkillEffect("jujian", 1);
         }
     }
 }
