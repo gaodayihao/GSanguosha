@@ -204,6 +204,7 @@ public:
                 log.arg2 = objectName();
                 room->sendLog(log);
                 room->playSkillEffect(objectName());
+                room->setEmotion(player, "skill/wuyan");
             }
 
             if(event == Predamage){
@@ -214,6 +215,7 @@ public:
                 log.arg2 = objectName();
                 room->sendLog(log);
                 room->playSkillEffect(objectName());
+                room->setEmotion(player, "skill/wuyan");
             }
 
             return true;
