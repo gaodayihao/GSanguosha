@@ -195,7 +195,7 @@ public:
     virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         Room *room = player->getRoom();
-        if(damage.card->getTypeId() == Card::Trick){
+        if(damage.card && damage.card->getTypeId() == Card::Trick){
             if(event == DamagedProceed){
                 LogMessage log;
                 log.type = "#WuyanGood";
@@ -223,16 +223,19 @@ public:
     }
 };
 
-class Jujian: public PhaseChangeSkill{
+class Jujian: public TriggerSkill{
 public:
-    Jujian():PhaseChangeSkill("jujian"){
+    Jujian():TriggerSkill("jujian"){
+        events << PhaseChange;
     }
 
-    virtual bool onPhaseChange(ServerPlayer *xushu) const{
+    virtual bool trigger(TriggerEvent , ServerPlayer *xushu, QVariant &data) const{
+        if(!xushu->hasSkill(objectName()))
+            return false;
         if(xushu->getPhase() == Player::Finish){
             Room *room = xushu->getRoom();
             if(!xushu->isKongcheng() && room->askForSkillInvoke(xushu, objectName())){
-                if(room->askForCard(xushu, ".NoBasic", "@jujian-discard", NULL, CardDiscarded)){
+                if(room->askForCard(xushu, ".NoBasic", "@jujian-discard", data, CardDiscarded)){
                     room->playSkillEffect(objectName());
                     ServerPlayer *target = room->askForPlayerChosen(xushu, room->getOtherPlayers(xushu), objectName());
 
@@ -447,6 +450,9 @@ public:
                 ServerPlayer *target;
                 int card_id = -1;
                 for(int i = 0;i < 2;i ++){
+                    if(i == 1)
+                        if(!room->askForSkillInvoke(lingtong, objectName()))
+                            break;
                     target = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
                     if(target){
                         card_id = room->askForCardChosen(lingtong, target, "he", "xuanfeng");

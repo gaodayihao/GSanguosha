@@ -774,7 +774,6 @@ public:
 class Room : public QThread{
 public:
 	explicit Room(QObject *parent, const char *mode);
-	QString createLuaState();
 	ServerPlayer *addSocket(ClientSocket *socket);
 	bool isFull() const;
 	bool isFinished() const;

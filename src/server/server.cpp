@@ -1049,12 +1049,6 @@ Room *Server::createNewRoom(){
     new_room->setTag("RoomID",RoomID); // set room id
     new_room->setTag("RoomOwnerScreenName"," "); // set blank tag
     new_room->setTag("DrawPileCount",QString::number(new_room->getDrawPileCount())); // set draw pile count
-    QString error_msg = new_room->createLuaState();
-
-    if(!error_msg.isEmpty()){
-        QMessageBox::information(NULL, tr("Lua scripts error"), error_msg);
-        return NULL;
-    }
 
     current = new_room;
     rooms.insert(current);

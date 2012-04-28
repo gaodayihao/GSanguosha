@@ -234,9 +234,6 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
     case HpLost:{
             int lose = data.toInt();
 
-            if(room->getCurrent()->hasSkill("jueqing"))
-                return true;
-
             LogMessage log;
             log.type = "#LoseHp";
             log.from = player;
@@ -440,9 +437,6 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
 
                 damage.damage ++;
             }
-
-            if(effect.to->hasSkill("jueqing") || effect.to->getGeneralName() == "zhangchunhua")
-                damage.damage ++;
 
             damage.from = effect.from;
             damage.to = effect.to;
@@ -730,11 +724,6 @@ bool HulaoPassMode::trigger(TriggerEvent event, ServerPlayer *player, QVariant &
                 }
             }else
                 player->drawCards(player->getSeat() + 1, false);
-
-            if(player->getGeneralName() == "zhangchunhua"){
-                if(qrand() % 3 == 0)
-                    room->killPlayer(player);
-            }
 
             return false;
         }
