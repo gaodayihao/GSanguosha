@@ -3208,7 +3208,12 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
             QVariant data = QVariant::fromValue(move_star);
             thread->trigger(CardLost, first, data);
         }
+
+        first->setFlags("-cmoving");
+        second->setFlags("-cmoving");
         thread->trigger(CardLostDone,first);
+        first->setFlags("cmoving");
+        second->setFlags("cmoving");
     }
 
     if(card2){
@@ -3218,7 +3223,11 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
             QVariant data = QVariant::fromValue(move_star);
             thread->trigger(CardLost, second, data);
         }
+        first->setFlags("-cmoving");
+        second->setFlags("-cmoving");
         thread->trigger(CardLostDone,second);
+        first->setFlags("cmoving");
+        second->setFlags("cmoving");
     }
 
     if(card2){
@@ -3235,7 +3244,11 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
             QVariant data = QVariant::fromValue(move_star);
             thread->trigger(CardGot, first, data);
         }
+        first->setFlags("-cmoving");
+        second->setFlags("-cmoving");
         thread->trigger(CardGotDone,first);
+        first->setFlags("cmoving");
+        second->setFlags("cmoving");
     }
 
     if(card1){
@@ -3245,11 +3258,10 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
             QVariant data = QVariant::fromValue(move_star);
             thread->trigger(CardGot, second, data);
         }
+        first->setFlags("-cmoving");
+        second->setFlags("-cmoving");
         thread->trigger(CardGotDone,second);
     }
-
-    first->setFlags("-cmoving");
-    second->setFlags("-cmoving");
 }
 
 void Room::moveSomeCards(ServerPlayer *from, ServerPlayer *to, ServerPlayer *select, const QString &flag,
@@ -3258,56 +3270,42 @@ void Room::moveSomeCards(ServerPlayer *from, ServerPlayer *to, ServerPlayer *sel
     setPlayerFlag(to, "cmoving");
 
     CardMoveStruct move;
-    QList<int> cards;
-    QList<Player::Place> places;
 
     move.from = from;
     move.to = to;
     move.to_place = Player::Hand;
 
-    for(int i = 0; i < n; i++){
+    int i;
+    for(i = 0; i < n; i++){
         if((flag == "he" && from->isNude())
            ||(flag == "h" && from->isKongcheng())
            ||(flag == "hej" && from->isAllNude()))
             break;
         int id;
         id = askForCardChosen(select, from, flag, reason);
-        cards << id;
-        places << getCardPlace(id);
         moveCardTo(Sanguosha->getCard(id),
                    to,
                    Player::Hand,
                    getCardPlace(id) == Player::Hand ? false : true);
-    }
 
-    if(cards.isEmpty()){
-        setPlayerFlag(from, "-cmoving");
-        setPlayerFlag(to, "-cmoving");
-        return;
-    }
-
-    for(int i = 0; i < cards.length(); i++){
-        move.from_place = places.at(i);
-        move.card_id = cards.at(i);
-        move.open = places.at(i) == Player::Hand ? false : true;
+        move.from_place = getCardPlace(id);
+        move.card_id = id;
+        move.open = getCardPlace(id) == Player::Hand ? false : true;
         CardMoveStar move_star = &move;
         QVariant data = QVariant::fromValue(move_star);
         thread->trigger(CardLost, from, data);
-    }
-    thread->trigger(CardLostDone,from);
-
-    for(int i = 0; i < cards.length(); i++){
-        move.from_place = places.at(i);
-        move.card_id = cards.at(i);
-        move.open = places.at(i) == Player::Hand ? false : true;
-        CardMoveStar move_star = &move;
-        QVariant data = QVariant::fromValue(move_star);
         thread->trigger(CardGot, to, data);
     }
-    thread->trigger(CardGotDone,to);
 
     setPlayerFlag(from, "-cmoving");
     setPlayerFlag(to, "-cmoving");
+
+    if(i == 0){
+        return;
+    }
+
+    thread->trigger(CardLostDone,from);
+    thread->trigger(CardGotDone,to);
 }
 
 QString CardMoveStruct::toString() const{

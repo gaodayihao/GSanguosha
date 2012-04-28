@@ -293,7 +293,7 @@ public:
                 return false;
         }
         else if(event == CardDrawing){
-            if(room->getTag("FirstRound").toBool())
+            if(sp_pangtong->tag.value("FirstDraw", false).toBool())
                 return false;
 
             card_id = data.toInt();
