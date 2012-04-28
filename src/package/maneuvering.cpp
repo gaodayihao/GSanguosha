@@ -163,7 +163,7 @@ public:
             Room *room = damage.to->getRoom();
 
             room->getThread()->delay(1200);
-            room->setEmotion(player, QString("weapon/%1").arg(objectName()));
+            room->setEmotion(damage.to, QString("weapon/%1").arg(objectName()));
             room->getThread()->delay(400);
 
             LogMessage log;

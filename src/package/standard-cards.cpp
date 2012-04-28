@@ -389,7 +389,7 @@ public:
             log.arg = objectName();
             room->sendLog(log);
 
-            room->setEmotion(player, QString("weapon/%1").arg(objectName()));
+            room->setEmotion(effect.to, QString("weapon/%1").arg(objectName()));
             room->getThread()->delay(1500);
 
             room->slashResult(effect, NULL);
