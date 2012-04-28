@@ -140,7 +140,7 @@ public:
 
             int hp = target->isAlive() ? target->getHp() : 0;
             hp = qMax(0, hp);
-            int n = qMin(hp, diaochan->getCards("he").length());
+            int n = qMin(hp, diaochan->getCardCount(true));
             room->moveSomeCards(diaochan, target, diaochan, "he", n, objectName());
             room->removeTag("LihunTarget");
         }
