@@ -58,15 +58,14 @@ void Settings::init(){
     }
 
     CountDownSeconds = value("CountDownSeconds", 3).toInt();
-    GameMode = value("GameMode", "02p").toString();
+    GameMode = value("GameMode", "08p").toString();
 
 
     if(!contains("BanPackages")){
         QStringList banlist;
         banlist << "nostalgia" << "yitian" << "wisdom" << "test"
-                << "disaster" << "god" << "ngod" <<"YJCM" << "YJCM2012"
-                << "yitian_cards" << "sp" << "sp_cards"
-                << "BGM" << "Special3v3"
+                << "disaster"<< "ngod" << "yitian_cards"
+                << "Special3v3"
                 << "joy" << "joy_equip" ;
 
         setValue("BanPackages", banlist);

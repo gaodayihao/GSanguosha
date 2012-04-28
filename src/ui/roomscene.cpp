@@ -78,7 +78,7 @@ static RoomLayout *GetRoomLayout(){
     static NormalRoomLayout normal;
     static CircularRoomLayout circular;
 
-    if(Config.value("CircularView", false).toBool()){
+    if(Config.value("CircularView", true).toBool()){
         return &circular;
     }else
         return &normal;
@@ -98,7 +98,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
 
     room_layout = GetRoomLayout();
 
-    bool circular = Config.value("CircularView", false).toBool();
+    bool circular = Config.value("CircularView", true).toBool();
 
     // create photos
     int i;
@@ -649,7 +649,7 @@ QList<QPointF> RoomScene::getPhotoPositions() const{
                              - dashboard->boundingRect().height()*(1-stretch_y)/2);
 
 
-    if(!Config.value("CircularView",false).toBool())
+    if(!Config.value("CircularView", true).toBool())
     {
         stretch_x = 1;
         stretch_y = 1;
@@ -1073,7 +1073,7 @@ void RoomScene::viewDiscards(){
 
         int start = (mid - width)/2;
         int y     = room_layout->discard.y() - 140;
-        if(!Config.value("CircularView", false).toBool())
+        if(!Config.value("CircularView", true).toBool())
         {
             width = 0;
             start = room_layout->discard.x();
@@ -3076,7 +3076,7 @@ void RoomScene::doGongxin(const QList<int> &card_ids, bool enable_heart, bool en
 }
 
 void RoomScene::createStateItem(){
-    bool circular = Config.value("CircularView", false).toBool();
+    bool circular = Config.value("CircularView", true).toBool();
 
     QPixmap state("image/system/state.png");
 
@@ -4158,7 +4158,7 @@ void RoomScene::reLayout(QMatrix matrix)
 {
     if(matrix.m11()>1)matrix.setMatrix(1,0,0,1,matrix.dx(),matrix.dy());
     view_transform = matrix;
-    //if(!Config.value("circularView",false).toBool())
+    //if(!Config.value("CircularView", true).toBool())
     //    if(!game_started)return;
 
     QPoint pos = QPoint(dashboard->getMidPosition(),0);
@@ -4182,7 +4182,7 @@ void RoomScene::reLayout(QMatrix matrix)
     pos.rx()-= padding_left;
     pos.ry()+=padding_top;
 
-    if(!Config.value("circularView",false).toBool())
+    if(!Config.value("CircularView", true).toBool())
     {
         pos.ry() = state_item->y();
         pos.rx() = state_item->x()-padding_left;
