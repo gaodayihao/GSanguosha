@@ -3257,6 +3257,8 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
 
 void Room::moveSomeCards(ServerPlayer *from, ServerPlayer *to, ServerPlayer *select, const QString &flag,
                          int n, const QString &reason){
+    if(n < 1)
+        return;
 
     CardMoveStruct move;
 
