@@ -54,7 +54,8 @@ return {
 	["xueyi"] = "血裔",
 	[":xueyi"] = "<b>主公技</b>，<b>锁定技</b>，场上每有一名其他群雄角色存活，你的手牌上限便+2",
 
-	["#shuangxiong"] = "虎狼兄弟",
+	["#yanliangwenchou"] = "虎狼兄弟",
+	["yanliangwenchou"] = "颜良文丑",
 	["shuangxiong"] = "双雄",
 	[":shuangxiong"] = "摸牌阶段，你可以放弃摸牌，改为进行一次判定，你获得此判定牌，且此回合你的每张与该判定牌不同颜色的手牌均可当【决斗】使用",
 	["shuangxiong:yes"] = "选择放弃摸牌并进行一次判定：获得此判定牌并且此回合可以将任意一张与该判定牌不同颜色的手牌当【决斗】使用",
@@ -100,7 +101,7 @@ return {
 	["~yuanshao"] = "老天不助我袁家呀！",
 	["~taishici"] = "大丈夫，当带三尺之剑，立不世之功！",
 	["~pangde"] = "四面都是水，我命休矣……",
-	["~shuangxiong"] = "这红脸长须大将是？",
+	["~yanliangwenchou"] = "这红脸长须大将是？",
 
 	-- CV
 	-- illustrator

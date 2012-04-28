@@ -11,15 +11,15 @@ return {
 	["@yitian-sword"] = "您在回合外获得了一张【杀】，您可以此时将此【杀】打出",
 
 	-- 神曹操内测第三版
-	["#shencc"] = "超世之英杰",
-	["shencc"] = "魏武帝",
-	["guixin2"] = "归心",
-	[":guixin2"] = "回合结束阶段，你可以做以下二选一：\
+	["#weiwudi"] = "超世之英杰",
+	["weiwudi"] = "魏武帝",
+	["weiwudi_guixin"] = "归心",
+	[":weiwudi_guixin"] = "回合结束阶段，你可以做以下二选一：\
       1. 永久改变一名其他角色的势力\
       2. 永久获得一项未上场或已死亡角色的主公技。(获得后即使你不是主公仍然有效)",
-	["guixin2:yes"] = "永久改变一名其他角色的势力或永久获得一项未上场或已死亡角色的主公技",
-	["guixin2:modify"] = "永久改变一名其他角色的势力",
-	["guixin2:obtain"] = "永久获得一项未上场或已死亡角色的主公技",
+	["weiwudi_guixin:yes"] = "永久改变一名其他角色的势力或永久获得一项未上场或已死亡角色的主公技",
+	["weiwudi_guixin:modify"] = "永久改变一名其他角色的势力",
+	["weiwudi_guixin:obtain"] = "永久获得一项未上场或已死亡角色的主公技",
 
 	["fanji"] = "反计",
 	[":fanji"] = "若其他角色使用的一张以你为唯一目标的非延时锦囊牌在结算完之后进入弃牌堆，你可以立即获得它",
@@ -214,9 +214,9 @@ return {
 	[":jinshen"] = "锁定技，你不能成为【乐不思蜀】与【兵粮寸断】的目标。",
 
 -- CV&Designer
-	["designer:shencc"] = "官方内测第三版",
-	["illustrator:shencc"] = "三国志大战",
-	["cv:shencc"] = "",
+	["designer:weiwudi"] = "官方内测第三版",
+	["illustrator:weiwudi"] = "三国志大战",
+	["cv:weiwudi"] = "",
 
 	["designer:caochong"] = "太阳神上",
 	["illustrator:caochong"] = "三国志大战",
