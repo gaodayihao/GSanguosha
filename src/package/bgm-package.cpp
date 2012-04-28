@@ -139,28 +139,9 @@ public:
                 return false;
 
             int hp = target->isAlive() ? target->getHp() : 0;
-            if(diaochan->getCards("he").length() <= hp){
-                foreach(const Card *card, diaochan->getCards("he")){
-                    room->moveCardTo(card,
-                                     target,
-                                     Player::Hand,
-                                     room->getCardPlace(card->getEffectiveId()) == Player::Hand ? false : true);
-                }
-            }
-            else{
-                int i;
-                for(i = 0; i < hp; i++){
-                    if(diaochan->isNude())
-                        return false;
-
-                    int card_id = room->askForCardChosen(diaochan, diaochan, "he", objectName());
-                    const Card *card = Sanguosha->getCard(card_id);
-                    room->moveCardTo(card,
-                                     target,
-                                     Player::Hand,
-                                     room->getCardPlace(card_id) == Player::Hand ? false : true);
-                }
-            }
+            hp = qMax(0, hp);
+            int n = qMin(hp, diaochan->getCards("he").length());
+            room->moveSomeCards(diaochan, target, diaochan, "he", n, objectName());
             room->removeTag("LihunTarget");
         }
 

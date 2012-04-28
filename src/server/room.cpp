@@ -3252,6 +3252,64 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
     second->setFlags("-cmoving");
 }
 
+void Room::moveSomeCards(ServerPlayer *from, ServerPlayer *to, ServerPlayer *select, const QString &flag,
+                         int n, const QString &reason){
+    setPlayerFlag(from, "cmoving");
+    setPlayerFlag(to, "cmoving");
+
+    CardMoveStruct move;
+    QList<int> cards;
+    QList<Player::Place> places;
+
+    move.from = from;
+    move.to = to;
+    move.to_place = Player::Hand;
+
+    for(int i = 0; i < n; i++){
+        if((flag == "he" && from->isNude())
+           ||(flag == "h" && from->isKongcheng())
+           ||(flag == "hej" && from->isAllNude()))
+            break;
+        int id;
+        id = askForCardChosen(select, from, flag, reason);
+        cards << id;
+        places << getCardPlace(id);
+        moveCardTo(Sanguosha->getCard(id),
+                   to,
+                   Player::Hand,
+                   getCardPlace(id) == Player::Hand ? false : true);
+    }
+
+    if(cards.isEmpty()){
+        setPlayerFlag(from, "-cmoving");
+        setPlayerFlag(to, "-cmoving");
+        return;
+    }
+
+    for(int i = 0; i < cards.length(); i++){
+        move.from_place = places.at(i);
+        move.card_id = cards.at(i);
+        move.open = places.at(i) == Player::Hand ? false : true;
+        CardMoveStar move_star = &move;
+        QVariant data = QVariant::fromValue(move_star);
+        thread->trigger(CardLost, from, data);
+    }
+    thread->trigger(CardLostDone,from);
+
+    for(int i = 0; i < cards.length(); i++){
+        move.from_place = places.at(i);
+        move.card_id = cards.at(i);
+        move.open = places.at(i) == Player::Hand ? false : true;
+        CardMoveStar move_star = &move;
+        QVariant data = QVariant::fromValue(move_star);
+        thread->trigger(CardGot, to, data);
+    }
+    thread->trigger(CardGotDone,to);
+
+    setPlayerFlag(from, "-cmoving");
+    setPlayerFlag(to, "-cmoving");
+}
+
 QString CardMoveStruct::toString() const{
     static QMap<Player::Place, QString> place2str;
     if(place2str.isEmpty()){

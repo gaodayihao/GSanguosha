@@ -227,6 +227,8 @@ public:
     void moveCardTo(const Card *card, ServerPlayer *to, Player::Place place, bool open = true);
     void doMove(const CardMoveStruct &move, const QSet<ServerPlayer *> &scope);
     void ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyCard *card1, const DummyCard *card2, Player::Place place, bool open = false);
+    void moveSomeCards(ServerPlayer *from, ServerPlayer *to, ServerPlayer *select, const QString &flag,
+                       int n, const QString &reason);
 
 
     // interactive methods

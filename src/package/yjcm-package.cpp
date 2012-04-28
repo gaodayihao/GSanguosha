@@ -407,63 +407,10 @@ void XuanhuoCard::onEffect(const CardEffectStruct &effect) const{
             room->useCard(use);
         }
         else
-            goto give;
+            room->moveSomeCards(effect.to, effect.from, effect.from, "he", 2, "xuanhuo");
     }
-    else{
-give:
-        RoomThread *thread = room->getThread();
-        CardMoveStruct move1, move2;
-        Player::Place first_place;
-        Player::Place second_place;
-        bool open1, open2;
-
-        room->setPlayerFlag(effect.from, "cmoving");
-        room->setPlayerFlag(effect.to, "cmoving");
-
-        int first_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanhuo");
-        first_place = room->getCardPlace(first_id);
-        open1 = first_place == Player::Hand ? false : true;
-        room->moveCardTo(Sanguosha->getCard(first_id), effect.from, Player::Hand, open1);
-        int second_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanhuo");
-        second_place = room->getCardPlace(second_id);
-        open2 = second_place == Player::Hand ? false : true;
-        room->moveCardTo(Sanguosha->getCard(second_id), effect.from, Player::Hand, open2);
-
-        move1.from = effect.to;
-        move1.to = effect.from;
-        move1.to_place = Player::Hand;
-        move1.from_place = first_place;
-        move1.open = open1;
-        move1.card_id = first_id;
-
-        move2.from = effect.to;
-        move2.to = effect.from;
-        move2.to_place = Player::Hand;
-        move2.from_place = second_place;
-        move2.open = open2;
-        move2.card_id = second_id;
-
-        CardMoveStar move_star = &move1;
-        QVariant data = QVariant::fromValue(move_star);
-        thread->trigger(CardLost, move1.from, data);
-
-        move_star = &move2;
-        data = QVariant::fromValue(move_star);
-        thread->trigger(CardLost, move2.from, data);
-        thread->trigger(CardLostDone,move2.from);
-
-        move_star = &move1;
-        data = QVariant::fromValue(move_star);
-        thread->trigger(CardGot, move1.to, data);
-
-        move_star = &move2;
-        data = QVariant::fromValue(move_star);
-        thread->trigger(CardGot, move1.to, data);
-        thread->trigger(CardGotDone,move2.to);
-
-        room->setPlayerFlag(effect.from, "-cmoving");
-        room->setPlayerFlag(effect.to, "-cmoving");
-    }
+    else
+        room->moveSomeCards(effect.to, effect.from, effect.from, "he", 2, "xuanhuo");
 }
 
 class XuanhuoViewAsSkill: public ZeroCardViewAsSkill{
