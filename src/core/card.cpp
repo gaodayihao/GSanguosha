@@ -453,16 +453,15 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     QVariant data = QVariant::fromValue(card_use);
     RoomThread *thread = room->getThread();
 
+    thread->trigger(CardonUse, player, data);
+    CardUseStruct use = data.value<CardUseStruct>();
+
     LogMessage log;
-    log.from = player;
-    log.to = card_use.to;
+    log.from = use.from;
+    log.to = use.to;
     log.type = "#UseCard";
     log.card_str = toString();
     room->sendLog(log);
-
-    thread->trigger(CardonUse, player, data);
-
-    CardUseStruct use = data.value<CardUseStruct>();
 
     thread->trigger(CardUsed, use.from, data);
 
