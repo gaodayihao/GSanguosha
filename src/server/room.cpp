@@ -3193,13 +3193,14 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
 
     first->setFlags("cmoving");
     second->setFlags("cmoving");
-
     if(card1){
         first->addToPile("#temp_pile", card1, open);
     }
     if(card2){
         second->addToPile("#temp_pile", card2, open);
     }
+    first->setFlags("-cmoving");
+    second->setFlags("-cmoving");
 
     if(card1){
         foreach(int card_id,card1->getSubcards()){
@@ -3209,11 +3210,7 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
             thread->trigger(CardLost, first, data);
         }
 
-        first->setFlags("-cmoving");
-        second->setFlags("-cmoving");
         thread->trigger(CardLostDone,first);
-        first->setFlags("cmoving");
-        second->setFlags("cmoving");
     }
 
     if(card2){
@@ -3223,19 +3220,19 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
             QVariant data = QVariant::fromValue(move_star);
             thread->trigger(CardLost, second, data);
         }
-        first->setFlags("-cmoving");
-        second->setFlags("-cmoving");
         thread->trigger(CardLostDone,second);
-        first->setFlags("cmoving");
-        second->setFlags("cmoving");
     }
 
+    first->setFlags("cmoving");
+    second->setFlags("cmoving");
     if(card2){
         moveCardTo(card2, first, place, open);
     }
     if(card1){
         moveCardTo(card1, second, place, open);
     }
+    first->setFlags("-cmoving");
+    second->setFlags("-cmoving");
 
     if(card2){
         foreach(int card_id,card2->getSubcards()){
@@ -3244,11 +3241,7 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
             QVariant data = QVariant::fromValue(move_star);
             thread->trigger(CardGot, first, data);
         }
-        first->setFlags("-cmoving");
-        second->setFlags("-cmoving");
         thread->trigger(CardGotDone,first);
-        first->setFlags("cmoving");
-        second->setFlags("cmoving");
     }
 
     if(card1){
@@ -3258,16 +3251,12 @@ void Room::ExchangeCards(ServerPlayer *first, ServerPlayer *second, const DummyC
             QVariant data = QVariant::fromValue(move_star);
             thread->trigger(CardGot, second, data);
         }
-        first->setFlags("-cmoving");
-        second->setFlags("-cmoving");
         thread->trigger(CardGotDone,second);
     }
 }
 
 void Room::moveSomeCards(ServerPlayer *from, ServerPlayer *to, ServerPlayer *select, const QString &flag,
                          int n, const QString &reason){
-    setPlayerFlag(from, "cmoving");
-    setPlayerFlag(to, "cmoving");
 
     CardMoveStruct move;
 
@@ -3281,12 +3270,18 @@ void Room::moveSomeCards(ServerPlayer *from, ServerPlayer *to, ServerPlayer *sel
            ||(flag == "h" && from->isKongcheng())
            ||(flag == "hej" && from->isAllNude()))
             break;
+
         int id;
         id = askForCardChosen(select, from, flag, reason);
+
+        setPlayerFlag(from, "cmoving");
+        setPlayerFlag(to, "cmoving");
         moveCardTo(Sanguosha->getCard(id),
                    to,
                    Player::Hand,
                    getCardPlace(id) == Player::Hand ? false : true);
+        setPlayerFlag(from, "-cmoving");
+        setPlayerFlag(to, "-cmoving");
 
         move.from_place = getCardPlace(id);
         move.card_id = id;
@@ -3296,9 +3291,6 @@ void Room::moveSomeCards(ServerPlayer *from, ServerPlayer *to, ServerPlayer *sel
         thread->trigger(CardLost, from, data);
         thread->trigger(CardGot, to, data);
     }
-
-    setPlayerFlag(from, "-cmoving");
-    setPlayerFlag(to, "-cmoving");
 
     if(i == 0){
         return;
