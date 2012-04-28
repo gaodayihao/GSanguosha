@@ -605,13 +605,14 @@ void TianxiangCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.to->getRoom();
     DamageStruct damage = effect.from->tag["TianxiangDamage"].value<DamageStruct>();
     damage.to = effect.to;
-    if(room->getTag("chaining").toBool() && damage.chain)
-        room->setPlayerFlag(effect.from, "no-chainChange");
     damage.chain = true;
+    room->setPlayerFlag(damage.to, "TianxiangTarget");
     room->damage(damage);
 
-    if(damage.to->isAlive())
+    if(damage.to->isAlive() && damage.to->hasFlag("TianxiangTarget")){
         damage.to->drawCards(damage.to->getLostHp());
+        room->setPlayerFlag(damage.to, "-TianxiangTarget");
+    }
 }
 
 class TianxiangViewAsSkill: public OneCardViewAsSkill{
@@ -643,7 +644,7 @@ public:
 class Tianxiang: public TriggerSkill{
 public:
     Tianxiang():TriggerSkill("tianxiang"){
-        events << Predamaged;
+        events << Predamaged << DamageComplete;
 
         view_as_skill = new TianxiangViewAsSkill;
     }
@@ -652,10 +653,18 @@ public:
         return 2;
     }
 
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target->hasFlag("TianxiangTarget") || TriggerSkill::triggerable(target);
+    }
+
     virtual bool trigger(TriggerEvent event, ServerPlayer *xiaoqiao, QVariant &data) const{
-        if(!xiaoqiao->isKongcheng()){
+        Room *room = xiaoqiao->getRoom();
+        if(event == DamageComplete && xiaoqiao->isAlive()){
+            xiaoqiao->drawCards(xiaoqiao->getLostHp());
+            room->setPlayerFlag(xiaoqiao, "-TianxiangTarget");
+        }
+        else if(xiaoqiao->hasSkill(objectName()) && !xiaoqiao->isKongcheng()){
             DamageStruct damage = data.value<DamageStruct>();
-            Room *room = xiaoqiao->getRoom();
 
             xiaoqiao->tag["TianxiangDamage"] = QVariant::fromValue(damage);
             if(room->askForUseCard(xiaoqiao, "@@tianxiang", "@tianxiang-card"))

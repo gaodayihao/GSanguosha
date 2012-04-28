@@ -327,7 +327,6 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
 
             break;
         }
-
     case DamageComplete:{
             if(room->getMode() == "02_1v1" && player->isDead()){
                 QString new_general = player->tag["1v1ChangeGeneral"].toString();
@@ -335,43 +334,35 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
                     changeGeneral1v1(player);
             }
 
+            DamageStruct damage = data.value<DamageStruct>();
             bool chained = player->isChained();
-            if(!chained)
+            if(!chained || damage.nature == DamageStruct::Normal)
                 break;
 
-            DamageStruct damage = data.value<DamageStruct>();
-            if(damage.nature != DamageStruct::Normal){
-                room->setPlayerProperty(player, "chained", false);
+            room->setPlayerProperty(player, "chained", false);
+            // iron chain effect
+            if(room->getTag("chaining").isNull())
+            {
+                room->setTag("chaining", true);
 
-                // iron chain effect
-                if(room->getTag("chaining").isNull())
-                {
-                    room->setTag("chaining", true);
+                QList<ServerPlayer *> chained_players = room->getAllPlayers();
+                foreach(ServerPlayer *chained_player, chained_players){
+                    if(chained_player->isChained()){
+                        room->getThread()->delay();
 
-                    QList<ServerPlayer *> chained_players = room->getAllPlayers();
-                    foreach(ServerPlayer *chained_player, chained_players){
-                        if(chained_player->isChained()){
-                            room->getThread()->delay();
+                        LogMessage log;
+                        log.type = "#IronChainDamage";
+                        log.from = chained_player;
+                        room->sendLog(log);
 
-                            LogMessage log;
-                            log.type = "#IronChainDamage";
-                            log.from = chained_player;
-                            room->sendLog(log);
+                        DamageStruct chain_damage = damage;
+                        chain_damage.to = chained_player;
+                        chain_damage.chain = true;
 
-                            DamageStruct chain_damage = damage;
-                            chain_damage.to = chained_player;
-                            chain_damage.chain = true;
-
-                            room->damage(chain_damage);
-                            if(chained_player->hasFlag("no-chainChange")){
-                                room->setPlayerFlag(chained_player, "-no-chainChange");
-                                continue;
-                            }
-                            room->setPlayerProperty(chained_player, "chained", false);
-                        }
+                        room->damage(chain_damage);
                     }
-                    room->removeTag("chaining");
                 }
+                room->removeTag("chaining");
             }
 
             break;

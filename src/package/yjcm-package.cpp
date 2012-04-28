@@ -205,8 +205,6 @@ public:
                 room->sendLog(log);
                 room->playSkillEffect(objectName());
                 room->setEmotion(player, "skill/wuyan");
-                if(room->getTag("chaining").toBool() && damage.chain)
-                    room->setPlayerFlag(player, "no-chainChange");
             }
 
             if(event == Predamage){

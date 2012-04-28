@@ -905,9 +905,6 @@ public:
             room->sendLog(log);
 
             room->setEmotion(player, QString("skill/%1").arg(objectName()));
-
-            if(room->getTag("chaining").toBool() && damage.chain)
-                room->setPlayerFlag(player, "no-chainChange");
             return true;
         }else
             return false;
