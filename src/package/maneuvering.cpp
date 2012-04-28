@@ -119,22 +119,24 @@ public:
 class FanSkill: public WeaponSkill{
 public:
     FanSkill():WeaponSkill("fan"){
-        events << SlashEffect;
+        events << CardonUse;
     }
 
     virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
-        SlashEffectStruct effect = data.value<SlashEffectStruct>();
-        if(!effect.slash->getSkillName().isEmpty() && effect.slash->getSubcards().length() > 0)
+        CardUseStruct use = data.value<CardUseStruct>();
+        if(use.card->objectName() != "slash"
+                || (!use.card->getSkillName().isEmpty() && use.card->getSubcards().length() > 0))
             return false;
 
-        if(effect.nature == DamageStruct::Normal){
-            if(player->getRoom()->askForSkillInvoke(player, objectName(), data)){
-                effect.nature = DamageStruct::Fire;
+        if(player->getRoom()->askForSkillInvoke(player, objectName(), data)){
+            Card *card = Sanguosha->cloneCard("fire_slash", use.card->getSuit(), use.card->getNumber());
+            card->addSubcard(use.card);
+            card->setSkillName(objectName());
+            use.card = card;
 
-                player->getRoom()->setEmotion(player, QString("weapon/%1").arg(objectName()));
+            player->getRoom()->setEmotion(player, QString("weapon/%1").arg(objectName()));
 
-                data = QVariant::fromValue(effect);
-            }
+            data = QVariant::fromValue(use);
         }
 
         return false;
