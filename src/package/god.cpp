@@ -889,7 +889,7 @@ public:
         return target->getMark("@fog") > 0;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if(damage.nature != DamageStruct::Thunder){
             Room *room = player->getRoom();
@@ -905,6 +905,9 @@ public:
             room->sendLog(log);
 
             room->setEmotion(player, QString("skill/%1").arg(objectName()));
+
+            if(room->getTag("chaining").toBool() && damage.chain)
+                room->setPlayerFlag(player, "no-chainChange");
             return true;
         }else
             return false;
