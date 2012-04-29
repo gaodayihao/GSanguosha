@@ -866,7 +866,8 @@ public:
                     if(liushan->isKongcheng())
                         return false;
 
-                    room->askForDiscard(liushan, "fangquan", 1);
+                    if(!room->askForDiscard(liushan, "fangquan", 1, true))
+                        return false;
 
                     ServerPlayer *player = room->askForPlayerChosen(liushan, room->getOtherPlayers(liushan), objectName());
 
@@ -882,8 +883,18 @@ public:
                     log.to << player;
                     room->sendLog(log);
 
-                    player->gainAnExtraTurn(liushan);
+                    room->setPlayerFlag(liushan, "Fangquan_invoke");
+                    room->setPlayerFlag(player, "Fangquan_target");
                 }
+
+                break;
+            }
+
+        case Player::NotActive: {
+                if(liushan->hasFlag("Fangquan_invoke"))
+                    foreach(ServerPlayer *sp, liushan->getRoom()->getOtherPlayers(liushan))
+                        if(sp->hasFlag("Fangquan_target"))
+                            sp->gainAnExtraTurn(liushan);
 
                 break;
             }
