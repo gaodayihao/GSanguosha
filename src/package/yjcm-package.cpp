@@ -357,14 +357,18 @@ public:
         }else if(event == Damaged){
             DamageStruct damage = data.value<DamageStruct>();
             ServerPlayer *source = damage.from;
-            if(source && source != player && room->askForSkillInvoke(player,objectName(), data)){
-                room->playSkillEffect(objectName(), qrand() % 2 + 3);
+            if(source && source != player){
+                for(int i = 0; i < damage.damage; i++){
+                    if(!room->askForSkillInvoke(player,objectName(), data))
+                        continue;
+                    room->playSkillEffect(objectName(), qrand() % 2 + 3);
 
-                const Card *card = room->askForCard(source, ".", "@enyuan", QVariant(), NonTrigger);
-                if(card){
-                    player->obtainCard(card);
-                }else{
-                    room->loseHp(source);
+                    const Card *card = room->askForCard(source, ".", "@enyuan", QVariant(), NonTrigger);
+                    if(card){
+                        player->obtainCard(card);
+                    }else{
+                        room->loseHp(source);
+                    }
                 }
             }
         }
