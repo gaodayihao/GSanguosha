@@ -126,7 +126,7 @@ void ServerPlayer::clearPrivatePiles(){
 }
 
 void ServerPlayer::bury(){
-    clearFlags();
+    room->clearPlayerFlags(this);
     clearHistory();
     throwAllCards();
     throwAllMarks();
@@ -914,7 +914,7 @@ void ServerPlayer::gainAnExtraTurn(ServerPlayer *clearflag){
     room->setCurrent(this);
     room->removeTag("Zhichi");
     if(clearflag)
-        clearflag->clearFlags();
+        room->clearPlayerFlags(clearflag);
     room->getThread()->trigger(TurnStart, this);
     if(clearflag)
         clearflag->clearHistory();
