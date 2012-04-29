@@ -3281,6 +3281,10 @@ void Room::moveSomeCards(ServerPlayer *from, ServerPlayer *to, ServerPlayer *sel
         int id;
         id = askForCardChosen(select, from, flag, reason);
 
+        move.from_place = getCardPlace(id);
+        move.card_id = id;
+        move.open = getCardPlace(id) == Player::Hand ? false : true;
+
         setPlayerFlag(from, "cmoving");
         setPlayerFlag(to, "cmoving");
         moveCardTo(Sanguosha->getCard(id),
@@ -3290,9 +3294,6 @@ void Room::moveSomeCards(ServerPlayer *from, ServerPlayer *to, ServerPlayer *sel
         setPlayerFlag(from, "-cmoving");
         setPlayerFlag(to, "-cmoving");
 
-        move.from_place = getCardPlace(id);
-        move.card_id = id;
-        move.open = getCardPlace(id) == Player::Hand ? false : true;
         CardMoveStar move_star = &move;
         QVariant data = QVariant::fromValue(move_star);
         thread->trigger(CardLost, from, data);
