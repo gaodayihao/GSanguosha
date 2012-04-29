@@ -460,7 +460,7 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     log.from = use.from;
     log.to = use.to;
     log.type = "#UseCard";
-    log.card_str = toString();
+    log.card_str = use.card->toString();
     room->sendLog(log);
 
     thread->trigger(CardUsed, use.from, data);

@@ -87,7 +87,7 @@ PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, co
 
         else if(emotion.contains("/spear"))
         {
-            pma->moveBy(-190, -180);
+            pma->moveBy(-90, -80);
             pma->setScale(1.3);
         }
 
