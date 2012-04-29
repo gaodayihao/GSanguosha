@@ -394,7 +394,7 @@ void XuanhuoCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.from->getRoom();
     QList<ServerPlayer *> targets;
     QString choice;
-    foreach(ServerPlayer *victim, room->getOtherPlayers(effect.from)){
+    foreach(ServerPlayer *victim, room->getOtherPlayers(effect.to)){
         if(effect.to->canSlash(victim))
             targets << victim;
     }
@@ -518,9 +518,12 @@ public:
                     }
                 }
             }
-        }else if(event == CardLostDone && lingtong->tag.value("InvokeXuanfeng", false).toBool()){
-            lingtong->tag.remove("InvokeXuanfeng");
+        }else if(event == CardLostDone){
             lingtong->setMark("xuanfeng", 0);
+             if(!lingtong->tag.value("InvokeXuanfeng", false).toBool())
+                 return false;
+
+            lingtong->tag.remove("InvokeXuanfeng");
             Room *room = lingtong->getRoom();
 
             QList<ServerPlayer *> targets;
