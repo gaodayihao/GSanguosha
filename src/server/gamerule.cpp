@@ -126,7 +126,7 @@ void GameRule::onPhaseChange(ServerPlayer *player) const{
                 room->setPlayerFlag(player, "-drank");
             }
 
-            player->clearFlags();
+            room->clearPlayerFlags(player);
             player->clearHistory();
 
             return;

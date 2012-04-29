@@ -58,6 +58,7 @@ Client::Client(QObject *parent, const QString &filename)
     m_callbacks[S_COMMAND_SHOW_CARD] = &Client::showCard;
     //callbacks["showCard"] = &Client::showCard;
     callbacks["setMark"] = &Client::setMark;
+    callbacks["clearPlayerFlags"] = &Client::clearPlayerFlags;
     callbacks["doFilter"] = &Client::doFilter;
     callbacks["log"] = &Client::log;
     callbacks["speak"] = &Client::speak;
@@ -1370,6 +1371,11 @@ void Client::setMark(const QString &mark_str){
 
     ClientPlayer *player = getPlayer(who);
     player->setMark(mark, value);
+}
+
+void Client::clearPlayerFlags(const QString &player_name){
+    ClientPlayer *player = getPlayer(player_name);
+    player->clearFlags();
 }
 
 void Client::doFilter(const QString &){

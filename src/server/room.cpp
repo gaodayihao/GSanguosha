@@ -1214,6 +1214,11 @@ void Room::setPlayerFlag(ServerPlayer *player, const QString &flag){
     broadcast(QString("#%1 flags %2").arg(player->objectName()).arg(flag));
 }
 
+void Room::clearPlayerFlags(ServerPlayer *player){
+    player->clearFlags();
+    broadcastInvoke("clearPlayerFlags", player->objectName());
+}
+
 void Room::setPlayerProperty(ServerPlayer *player, const char *property_name, const QVariant &value){
     player->setProperty(property_name, value);
     broadcastProperty(player, property_name);
