@@ -591,7 +591,7 @@ QList<QPointF> RoomScene::getPhotoPositions() const{
         nine = 1;
     }
 
-    if(Config.value("CircularView").toBool()){
+    if(Config.value("CircularView", true).toBool()){
         cxw=1;
         cxw2=0;
     }

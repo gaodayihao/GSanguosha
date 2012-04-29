@@ -2153,15 +2153,15 @@ time_t Room::getCommandTimeout(QSanProtocol::CommandType command)
     if (Config.OperationNoLimit) return UINT_MAX;
     else if (command == S_COMMAND_CHOOSE_GENERAL)
     {
-        return (Config.S_CHOOSE_GENERAL_TIMEOUT + 1) * 1000;
+        return (Config.S_CHOOSE_GENERAL_TIMEOUT + 6) * 1000;
     }
     else if (command == S_COMMAND_SKILL_GUANXING)
     {
-        return (Config.S_GUANXING_TIMEOUT + 1) * 1000;
+        return (Config.S_GUANXING_TIMEOUT + 2) * 1000;
     }
     else
     {
-        return (Config.OperationTimeout + 1) * 1000;
+        return (Config.OperationTimeout + 2) * 1000;
     }
 }
 
