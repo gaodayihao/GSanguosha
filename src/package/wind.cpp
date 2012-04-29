@@ -659,7 +659,7 @@ public:
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *xiaoqiao, QVariant &data) const{
         Room *room = xiaoqiao->getRoom();
-        if(event == DamageComplete && xiaoqiao->isAlive()){
+        if(event == DamageComplete && xiaoqiao->isAlive() && xiaoqiao->hasFlag("TianxiangTarget")){
             xiaoqiao->drawCards(xiaoqiao->getLostHp());
             room->setPlayerFlag(xiaoqiao, "-TianxiangTarget");
         }
