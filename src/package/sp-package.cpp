@@ -217,7 +217,7 @@ public:
             log.arg2 = objectName();
             room->sendLog(log);
 
-            room->playSkillEffect("yongsi", x);
+            room->playSkillEffect("yongsi", qrand() % 2 + 1);
 
         }else if(event == PhaseChange && yuanshu->getPhase() == Player::Discard){
             int x = getKingdoms(yuanshu);
@@ -269,6 +269,7 @@ public:
                 log.arg2 = objectName();
                 room->sendLog(log);
             }
+            room->playSkillEffect("yongsi", qrand() % 2 + 3);
         }
 
         return false;
