@@ -663,7 +663,7 @@ public:
             xiaoqiao->drawCards(xiaoqiao->getLostHp());
             room->setPlayerFlag(xiaoqiao, "-TianxiangTarget");
         }
-        else if(xiaoqiao->hasSkill(objectName()) && !xiaoqiao->isKongcheng()){
+        else if(event == Predamaged && xiaoqiao->hasSkill(objectName()) && !xiaoqiao->isKongcheng()){
             DamageStruct damage = data.value<DamageStruct>();
 
             xiaoqiao->tag["TianxiangDamage"] = QVariant::fromValue(damage);
