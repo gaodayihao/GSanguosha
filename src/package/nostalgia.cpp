@@ -112,12 +112,53 @@ public:
     }
 };
 
+class NosLieren: public TriggerSkill{
+public:
+    NosLieren():TriggerSkill("nos_lieren"){
+        events << Damage;
+    }
+
+    virtual bool trigger(TriggerEvent , ServerPlayer *zhurong, QVariant &data) const{
+        DamageStruct damage = data.value<DamageStruct>();
+        ServerPlayer *target = damage.to;
+        if(damage.card && damage.card->inherits("Slash") && !zhurong->isKongcheng()
+            && !target->isKongcheng() && target != zhurong){
+            Room *room = zhurong->getRoom();
+            if(room->askForSkillInvoke(zhurong, objectName(), data)){
+                room->playSkillEffect("lieren", 1);
+
+                bool success = zhurong->pindian(target, "lieren", NULL);
+                if(success)
+                    room->playSkillEffect("lieren", 2);
+                else{
+                    room->playSkillEffect("lieren", 3);
+                    return false;
+                }
+
+                if(!target->isNude()){
+                    int card_id = room->askForCardChosen(zhurong, target, "he", objectName());
+                    if(room->getCardPlace(card_id) == Player::Hand)
+                        room->moveCardTo(Sanguosha->getCard(card_id), zhurong, Player::Hand, false);
+                    else
+                        room->obtainCard(zhurong, card_id);
+                }
+            }
+        }
+
+        return false;
+    }
+};
+
 NostalGeneralPackage::NostalGeneralPackage()
     :Package("nostal_general")
 {
     General *nos_zhouyu = new General(this, "nos_zhouyu", "wu", 3);
     nos_zhouyu->addSkill(new NosFanjian);
     nos_zhouyu->addSkill("yingzi");
+
+    General *nos_zhurong = new General(this, "nos_zhurong", "shu", 4, false);
+    nos_zhurong->addSkill("juxiang");
+    nos_zhurong->addSkill(new NosLieren);
 
     addMetaObject<NosFanjianCard>();
 }
