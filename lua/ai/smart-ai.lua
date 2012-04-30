@@ -70,16 +70,16 @@ function setInitialTables()
 	sgs.target = 				{loyalist = nil, rebel = nil, renegade = nil } -- obsolete
 	sgs.discard_pile =			global_room:getDiscardPile()
 	sgs.draw_pile = 			global_room:getDrawPile()
-	sgs.lose_equip_skill = 		"xiaoji|xuanfeng"
+	sgs.lose_equip_skill = 		"xiaoji|xuanfeng|nos_xuanfeng"
 	sgs.need_kongcheng = 		"lianying|kongcheng"
-	sgs.masochism_skill = 		"fankui|jieming|yiji|ganglie|enyuan|fangzhu|guixin"
+	sgs.masochism_skill = 		"fankui|jieming|yiji|ganglie|enyuan|nos_enyuan|fangzhu|guixin"
 	sgs.wizard_skill = 			"guicai|guidao|jilve|tiandu"
 	sgs.wizard_harm_skill = 	"guicai|guidao|jilve"
 	sgs.priority_skill = 		"dimeng|haoshi|qingnang|jizhi|guzheng|qixi|jieyin|guose|duanliang|jujian|fanjian|lijian|manjuan|lihun"
 	sgs.save_skill = 			"jijiu|buyi|jiefan|chunlao"
-	sgs.exclusive_skill = 		"huilei|duanchang|enyuan|wuhun|buqu|yiji|ganglie|guixin|jieming|miji"
+	sgs.exclusive_skill = 		"huilei|duanchang|enyuan|nos_enyuan|wuhun|buqu|yiji|ganglie|guixin|jieming|miji"
 	sgs.cardneed_skill =        "paoxiao|tianyi|xianzhen|shuangxiong|jizhi|guose|duanliang|qixi|qingnang|" ..
-								"jieyin|renjie|zhiheng|rende|jujian|guicai|guidao|jilve|longhun|wusheng|longdan"
+								"jieyin|renjie|zhiheng|rende|jujian|nos_jujian|guicai|guidao|jilve|longhun|wusheng|longdan"
 	sgs.drawpeach_skill =       "tuxi|qiaobian"
 	sgs.recover_skill =         "rende|kuanggu|zaiqi|jieyin|qingnang|yinghun"
 	
@@ -319,7 +319,7 @@ function SmartAI:getUsePriority(card)
 		return v
 	end
 
-	if self.player:hasSkill("wuyan") then
+	if self.player:hasSkill("wuyan") or self.player:hasSkill("nos_wuyan") then
 		if card:inherits("Slash") then
 			v = 4
 
@@ -421,7 +421,7 @@ function SmartAI:getDynamicUsePriority(card)
 				elseif self:isWeak() then dynamic_value = 15
 				else dynamic_value = 12
 				end
-			elseif use_card:inherits("JujianCard") then
+			elseif use_card:inherits("JujianCard") or use_card:inherits("NosJujianCard") then
 				if not self.player:isWounded() then dynamic_value = 0
 				else dynamic_value = 7.5
 				end
@@ -2884,7 +2884,7 @@ function SmartAI:getDamagedEffects(self, player)
 	if (player:getHp() > 1 or player:hasSkill("buqu")) and self:hasSkills(sgs.masochism_skill, player) then
 		local attacker = self.room:getCurrent()
 		if self:isEnemy(attacker, player) and attacker:getHp() <= 1 then
-			if self:hasSkills("ganglie|enyuan", player) then return true end
+			if self:hasSkills("ganglie|enyuan|nos_enyuan", player) then return true end
 		end
 		
 		if player:hasSkill("jieming") then
@@ -3383,7 +3383,7 @@ function SmartAI:getAoeValueTo(card, to , from)
 			if to:hasSkill("jieming") then
 				value = value + self:getJiemingChaofeng(to) * 3
 			end
-			if to:hasSkill("ganglie") or to:hasSkill("fankui") or to:hasSkill("enyuan") then
+			if to:hasSkill("ganglie") or to:hasSkill("fankui") or to:hasSkill("enyuan") or tu:hasSkill("nos_enyuan") then
 				if not self:isFriend(from, to) then
 					value = value + 10
 				else
@@ -3473,6 +3473,11 @@ function SmartAI:hasTrickEffective(card, player)
 				(card:inherits("Duel") or card:inherits("FireAttack") or card:inherits("ArcheryAttack") or card:inherits("SavageAssault")) then
 			return false end
 		end
+		if self.player:hasSkill("nos_wuyan") then
+			if card:inherits("TrickCard") and not
+				(card:inherits("DelayedTrick") or card:inherits("GodSalvation") or card:inherits("AmazingGrace")) then
+			return false end
+		end
 	end
 	return true
 end
@@ -3484,9 +3489,19 @@ function SmartAI:useTrickCard(card, use)
 		if not (card:inherits("AOE") or card:inherits("DelayedTrick")) then return end
 	end
 	if card:inherits("AOE") then
+		if self.player:hasSkill("nos_wuyan") then return end
 		if self.player:hasSkill("wuyan") then return end
 		if self.role == "loyalist" and sgs.turncount < 2 and card:inherits("ArcheryAttack") then return end
 		if self.role == "rebel" and sgs.turncount < 2 and card:inherits("SavageAssault") then return end
+		local others = self.room:getOtherPlayers(self.player)
+		others = sgs.QList2Table(others)
+		local aval = #others
+		for _, other in ipairs(others) do
+			if self.room:isProhibited(self.player, other, card) then
+				aval = aval -1
+			end
+		end
+		if aval < 1 then return end
 		local good = self:getAoeValue(card,self.player)
 		if good > 0 then
 			use.card = card

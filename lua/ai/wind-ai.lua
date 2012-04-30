@@ -330,7 +330,7 @@ sgs.ai_skill_use["@@tianxiang"] = function(self, data)
 	for _, enemy in ipairs(self.enemies) do
 		if (enemy:getHp() <= dmg.damage) then
 
-		if (enemy:getHandcardNum() <= 2) or self:hasSkills("guose|leiji|ganglie|enyuan|qingguo|wuyan|kongcheng", enemy)
+		if (enemy:getHandcardNum() <= 2) or self:hasSkills("guose|leiji|ganglie|enyuan|nos_enyuan|qingguo|wuyan|nos_wuyan|kongcheng", enemy)
 			or enemy:containsTrick("indulgence") then return "@TianxiangCard="..card_id.."->"..enemy:objectName() end
 		end
 	end
@@ -351,7 +351,7 @@ sgs.ai_skill_use["@@tianxiang"] = function(self, data)
 		if (enemy:getLostHp() <= 1) or dmg.damage>1 then
 
 		if (enemy:getHandcardNum() <= 2)
-			or enemy:containsTrick("indulgence") or self:hasSkills("guose|leiji|ganglie|enyuan|qingguo|wuyan|kongcheng", enemy)
+			or enemy:containsTrick("indulgence") or self:hasSkills("guose|leiji|ganglie|nos_enyuan|enyuan|qingguo|nos_wuyan|wuyan|kongcheng", enemy)
 			then return "@TianxiangCard="..card_id.."->"..enemy:objectName() end
 		end
 	end

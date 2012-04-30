@@ -74,7 +74,7 @@ void NosFanjianCard::onEffect(const CardEffectStruct &effect) const{
 
     int card_id = zhouyu->getRandomHandCardId();
     const Card *card = Sanguosha->getCard(card_id);
-    Card::Suit suit = room->askForSuit(target, "nos_fanjian");
+    Card::Suit suit = room->askForSuit(target, "fanjian");
 
     LogMessage log;
     log.type = "#ChooseSuit";
@@ -336,6 +336,9 @@ NosXuanhuoCard::NosXuanhuoCard(){
 void NosXuanhuoCard::onEffect(const CardEffectStruct &effect) const{
     effect.to->obtainCard(this);
 
+    if(effect.to->isNude())
+        return;
+
     Room *room = effect.from->getRoom();
     room->playSkillEffect("xuanhuo");
     int card_id = room->askForCardChosen(effect.from, effect.to, "he", objectName());
@@ -344,7 +347,7 @@ void NosXuanhuoCard::onEffect(const CardEffectStruct &effect) const{
     room->moveCardTo(card, effect.from, Player::Hand, is_public ? true : false);
 
     QList<ServerPlayer *> targets = room->getOtherPlayers(effect.to);
-    ServerPlayer *target = room->askForPlayerChosen(effect.from, targets, objectName());
+    ServerPlayer *target = room->askForPlayerChosen(effect.from, targets, "nos_xuanhuo");
     if(target != effect.from)
         room->moveCardTo(card, target, Player::Hand, false);
 }

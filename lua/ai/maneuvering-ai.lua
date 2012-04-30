@@ -265,6 +265,11 @@ function SmartAI:useCardIronChain(card, use)
 		end
 	end
 	
+	if self.player:hasSkill("nos_wuyan") then
+		if use.to then assert(use.to:length() < 3) end
+		return
+	end
+	
 	if #friendtargets > 1 then
 		if use.to then use.to:append(friendtargets[1]) end
 		if use.to then use.to:append(friendtargets[2]) end
@@ -305,7 +310,7 @@ sgs.ai_use_priority.IronChain = 2.8
 sgs.dynamic_value.benefit.IronChain = true
 
 function SmartAI:useCardFireAttack(fire_attack, use)  
-	if self.player:hasSkill("wuyan") then return end
+	if self.player:hasSkill("wuyan") or self.player:hasSkill("nos_wuyan") then return end
 	local lack = {
 		spade = true,
 		club = true,

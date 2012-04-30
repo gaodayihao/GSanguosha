@@ -678,6 +678,8 @@ function SmartAI:useCardAmazingGrace(card, use)
 	if #self.friends >= #self.enemies or (self:hasSkills(sgs.need_kongcheng) and self.player:getHandcardNum() == 1)
 		or self.player:hasSkill("jizhi") then
 		use.card = card
+	elseif self.player:hasSkill("nos_wuyan") then
+		use.card = card
 	end
 end
 
@@ -688,6 +690,11 @@ sgs.ai_use_priority.AmazingGrace = 1
 function SmartAI:useCardGodSalvation(card, use)
 	local good, bad = 0, 0
 
+	if self.player:hasSkill("nos_wuyan") and self.player:isWounded() then
+		use.card = card
+		return
+	end
+	
 	for _, friend in ipairs(self.friends) do
 		if friend:isWounded() then
 			good = good + 10/(friend:getHp())
@@ -718,7 +725,7 @@ local function factorial(n)
 end
 
 function SmartAI:useCardDuel(duel, use)
-	if self.player:hasSkill("wuyan") then return end
+	if self.player:hasSkill("wuyan") or self.player:hasSkill("nos_wuyan") then return end
 	self:sort(self.enemies,"handcard")
 	local enemies = self:exclude(self.enemies, duel)
 	local friends = self:exclude(self.friends_noself, duel)
@@ -917,6 +924,7 @@ end
 
 function SmartAI:useCardSnatchOrDismantlement(card, use)
 	local name = card:objectName()
+	if self.player:hasSkill("nos_wuyan") then return end
 	local players = self.room:getOtherPlayers(self.player)
 	local tricks
 	players = self:exclude(players, card)
@@ -1077,6 +1085,7 @@ end
 sgs.dynamic_value.control_card.Dismantlement = true
 
 function SmartAI:useCardCollateral(card, use)
+	if self.player:hasSkill("nos_wuyan") then return end
 	self:sort(self.enemies,"threat")
 
 	for _, friend in ipairs(self.friends_noself) do
@@ -1181,7 +1190,7 @@ function SmartAI:useCardIndulgence(card, use)
 	
 	local enemies = self:exclude(self.enemies, card)
 	for _, enemy in ipairs(enemies) do
-		if self:hasSkills("lijian|fanjian",enemy) and not enemy:containsTrick("indulgence") and not enemy:isKongcheng() and enemy:faceUp() and self:objectiveLevel(enemy) > 3 then
+		if self:hasSkills("lijian|fanjian|nos_fanjian",enemy) and not enemy:containsTrick("indulgence") and not enemy:isKongcheng() and enemy:faceUp() and self:objectiveLevel(enemy) > 3 then
 			use.card = card
 			if use.to then use.to:append(enemy) end
 			return

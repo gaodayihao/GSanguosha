@@ -1052,7 +1052,7 @@ sgs.ai_skill_use_func.LijianCard=function(card,use,self)
 		end
 		if friend_maxSlash then
 			local safe = false
-			if (first:hasSkill("ganglie") or first:hasSkill("fankui") or first:hasSkill("enyuan")) then
+			if (first:hasSkill("ganglie") or first:hasSkill("fankui") or first:hasSkill("enyuan") or first:hasSkill("nos_enyuan")) then
 				if (first:getHp()<=1 and first:getHandcardNum()==0) then safe=true end
 			elseif (self:getCardsNum("Slash", friend_maxSlash) >= self:getCardsNum("Slash", first)) then safe=true end
 			if safe then return friend_maxSlash end
@@ -1070,7 +1070,7 @@ sgs.ai_skill_use_func.LijianCard=function(card,use,self)
 		for _, enemy in ipairs(self.enemies) do
 			--if zhugeliang_kongcheng and #males==1 and self:damageIsEffective(zhugeliang_kongcheng, sgs.DamageStruct_Normal, males[1]) 
 				--then table.insert(males, zhugeliang_kongcheng) end
-			if enemy:getGeneral():isMale() and not enemy:hasSkill("wuyan") then
+			if enemy:getGeneral():isMale() and (not enemy:hasSkill("wuyan") and not enemy:hasSkill("nos_wuyan")) then
 				if enemy:hasSkill("kongcheng") and enemy:isKongcheng() then	zhugeliang_kongcheng=enemy
 				else
 					if #males == 0 and self:hasTrickEffective(duel, enemy) then table.insert(males, enemy)
@@ -1097,11 +1097,11 @@ sgs.ai_skill_use_func.LijianCard=function(card,use,self)
 				if self.player:isLord() or sgs.isRolePredictable() then 
 					local friend_maxSlash = findFriend_maxSlash(self,first)
 					if friend_maxSlash then second=friend_maxSlash end
-				elseif (lord:getGeneral():isMale()) and (not lord:hasSkill("wuyan")) then 
+				elseif (lord:getGeneral():isMale()) and (not lord:hasSkill("wuyan") and not lord:hasSkill("nos_wuyan")) then 
 					if (self.role=="rebel") and (not first:isLord()) and self:damageIsEffective(lord, sgs.DamageStruct_Normal, first) then
 						second = lord
 					else
-						if ((self.role=="loyalist" or (self.role=="renegade") and not (first:hasSkill("ganglie") and first:hasSkill("enyuan"))))
+						if ((self.role=="loyalist" or (self.role=="renegade") and not (first:hasSkill("ganglie") and first:hasSkill("enyuan") or first:hasSkill("nos_enyuan"))))
 							and	( self:getCardsNum("Slash", first)<=self:getCardsNum("Slash", second)) then
 							second = lord
 						end
