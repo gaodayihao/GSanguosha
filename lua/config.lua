@@ -30,6 +30,7 @@ config = {
         "YJCM2012",
         "Special3v3",
         "BGM",
+		"NostalGeneral",
         "Yitian",
         "Wisdom",
         "Test";

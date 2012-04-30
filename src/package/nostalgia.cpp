@@ -60,4 +60,67 @@ NostalgiaPackage::NostalgiaPackage()
     moon_spear->setParent(this);
 }
 
-ADD_PACKAGE(Nostalgia);
+NosFanjianCard::NosFanjianCard(){
+    once = true;
+    mute = true;
+}
+
+void NosFanjianCard::onEffect(const CardEffectStruct &effect) const{
+    ServerPlayer *zhouyu = effect.from;
+    ServerPlayer *target = effect.to;
+    Room *room = zhouyu->getRoom();
+
+    room->playSkillEffect("fanjian");
+
+    int card_id = zhouyu->getRandomHandCardId();
+    const Card *card = Sanguosha->getCard(card_id);
+    Card::Suit suit = room->askForSuit(target, "nos_fanjian");
+
+    LogMessage log;
+    log.type = "#ChooseSuit";
+    log.from = target;
+    log.arg = Card::Suit2String(suit);
+    room->sendLog(log);
+
+    room->showCard(zhouyu, card_id);
+    room->getThread()->delay();
+
+    if(card->getSuit() != suit){
+        DamageStruct damage;
+        damage.card = NULL;
+        damage.from = zhouyu;
+        damage.to = target;
+
+        room->damage(damage);
+    }
+
+    target->obtainCard(card);
+}
+
+class NosFanjian:public ZeroCardViewAsSkill{
+public:
+    NosFanjian():ZeroCardViewAsSkill("nos_fanjian"){
+
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->isKongcheng() && ! player->hasUsed("NosFanjianCard");
+    }
+
+    virtual const Card *viewAs() const{
+        return new NosFanjianCard;
+    }
+};
+
+NostalGeneralPackage::NostalGeneralPackage()
+    :Package("nostal_general")
+{
+    General *nos_zhouyu = new General(this, "nos_zhouyu", "wu", 3);
+    nos_zhouyu->addSkill(new NosFanjian);
+    nos_zhouyu->addSkill("yingzi");
+
+    addMetaObject<NosFanjianCard>();
+}
+
+ADD_PACKAGE(NostalGeneral)
+ADD_PACKAGE(Nostalgia)
