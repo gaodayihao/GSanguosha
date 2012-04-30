@@ -539,7 +539,24 @@ public:
     }
 
     virtual bool viewFilter(const CardItem *to_select) const{
-        return to_select->getFilteredCard()->getTypeId() == Card::Equip;
+        const Card *card = to_select->getFilteredCard();
+
+        if(card->getTypeId() != Card::Equip)
+            return false;
+
+        switch(ClientInstance->getStatus()){
+        case Client::Playing:{
+            if(card == Self->getWeapon() && card->objectName() == "crossbow")
+                return Self->canSlashWithoutCrossbow();
+            else
+                return true;
+            }
+
+        default:
+            break;
+        }
+
+        return true;
     }
 
     const Card *viewAs(CardItem *card_item) const{

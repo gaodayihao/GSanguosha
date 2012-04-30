@@ -1210,8 +1210,12 @@ public:
         case Client::Playing:{
                 if(Self->isWounded() && card->getSuit() == Card::Heart)
                     return true;
-                else if(Slash::IsAvailable(Self) && card->getSuit() == Card::Diamond)
-                    return true;
+                else if(Slash::IsAvailable(Self) && card->getSuit() == Card::Diamond){
+                    if(card == Self->getWeapon() && card->objectName() == "crossbow")
+                        return Self->canSlashWithoutCrossbow();
+                    else
+                        return true;
+                }
                 else
                     return false;
             }
@@ -1362,8 +1366,12 @@ public:
         case Client::Playing:{
                 if(Self->isWounded() && card->getSuit() == Card::Heart)
                     return true;
-                else if(Slash::IsAvailable(Self) && card->getSuit() == Card::Diamond)
-                    return true;
+                else if(Slash::IsAvailable(Self) && card->getSuit() == Card::Diamond){
+                    if(card == Self->getWeapon() && card->objectName() == "crossbow")
+                        return Self->canSlashWithoutCrossbow();
+                    else
+                        return true;
+                }
                 else
                     return false;
             }

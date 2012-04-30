@@ -563,10 +563,19 @@ public:
         if(!card->isRed())
             return false;
 
-        if(card == Self->getWeapon() && card->objectName() == "crossbow")
-            return Self->canSlashWithoutCrossbow();
-        else
-            return true;
+        switch(ClientInstance->getStatus()){
+        case Client::Playing:{
+            if(card == Self->getWeapon() && card->objectName() == "crossbow")
+                return Self->canSlashWithoutCrossbow();
+            else
+                return true;
+            }
+
+        default:
+            break;
+        }
+
+        return true;
     }
 
     virtual const Card *viewAs(CardItem *card_item) const{

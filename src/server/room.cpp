@@ -2162,11 +2162,11 @@ time_t Room::getCommandTimeout(QSanProtocol::CommandType command)
     }
     else if (command == S_COMMAND_SKILL_GUANXING)
     {
-        return (Config.S_GUANXING_TIMEOUT + 2) * 1000;
+        return (Config.S_GUANXING_TIMEOUT  + 6) * 1000;
     }
     else
     {
-        return (Config.OperationTimeout + 2) * 1000;
+        return (Config.OperationTimeout + 6) * 1000;
     }
 }
 
