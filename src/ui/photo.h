@@ -97,7 +97,7 @@ private:
     Pixmap *back_icon;
     QList<Pixmap *> phases;
     QProgressBar *progress_bar;
-    int timer_id;
+    int timer_id, tick;
     QGraphicsPixmapItem *emotion_item, *frame_item;
     QGraphicsSimpleTextItem *skill_name_item;
     QGraphicsRectItem *avatar_area, *small_avatar_area;

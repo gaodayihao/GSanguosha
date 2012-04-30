@@ -441,7 +441,9 @@ NostalGeneralPackage::NostalGeneralPackage()
 
     General *nos_zhurong = new General(this, "nos_zhurong", "shu", 4, false);
     nos_zhurong->addSkill("juxiang");
+    nos_zhurong->addSkill("#sa_avoid_juxiang");
     nos_zhurong->addSkill(new NosLieren);
+
 
     General *nos_xushu = new General(this, "nos_xushu", "shu", 3);
     nos_xushu->addSkill(new NosWuyan);

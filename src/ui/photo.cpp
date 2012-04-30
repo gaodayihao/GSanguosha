@@ -59,6 +59,7 @@ Photo::Photo()
     progress_bar->setMaximumWidth(pixmap.width());
     progress_bar->setTextVisible(false);
     timer_id = 0;
+    tick = 0;
 
     QGraphicsProxyWidget *widget = new QGraphicsProxyWidget(this);
     widget->setWidget(progress_bar);
@@ -166,8 +167,10 @@ void Photo::showProcessBar(){
     progress_bar->setValue(0);
     progress_bar->show();
 
-    if(ServerInfo.OperationTimeout != 0)
-        timer_id = startTimer(500);
+    if(ServerInfo.OperationTimeout != 0){
+        timer_id = startTimer(200);
+        tick = 0;
+    }
 }
 
 void Photo::hideProcessBar(){
@@ -177,6 +180,7 @@ void Photo::hideProcessBar(){
     if(timer_id != 0){
         killTimer(timer_id);
         timer_id = 0;
+        tick = 0;
     }
 }
 
@@ -247,14 +251,20 @@ void Photo::hideEmotion(){
 }
 
 void Photo::timerEvent(QTimerEvent *event){
-    int step = 100 / double(ServerInfo.OperationTimeout * 5);
+    int timeout = ServerInfo.OperationTimeout;
+    if(ClientInstance->getStatus() == Client::AskForGuanxing)
+        timeout = Config.S_GUANXING_TIMEOUT;
+
+    tick ++;
+    int step = 100 / double(timeout * 5);
     int new_value = progress_bar->value() + step;
-    new_value = qMin(progress_bar->maximum(), new_value);
+    new_value = qMin(progress_bar->maximum(), tick * step);
     progress_bar->setValue(new_value);
 
     if(new_value == progress_bar->maximum()){
         killTimer(event->timerId());
         timer_id = 0;
+        tick = 0;
     }
 }
 
