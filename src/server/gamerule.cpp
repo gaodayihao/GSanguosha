@@ -587,7 +587,9 @@ void GameRule::changeGeneral1v1(ServerPlayer *player) const{
     if(player->isChained())
         room->setPlayerProperty(player, "chained", false);
 
+    player->tag["FirstDraw"] = true;
     player->drawCards(4);
+    player->tag.remove("FirstDraw");
 }
 
 void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const{
