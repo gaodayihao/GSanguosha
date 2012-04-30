@@ -272,6 +272,33 @@ end
 
 sgs.ai_playerchosen_intention.fangquan = -40
 
+sgs.ai_skill_discard.fangquan = function(self, discard_num, optional, include_equip)
+	local to_discard = {}
+	local cards = sgs.QList2Table(self.player:getHandcards())
+	local all_peaches = 0
+	for _, card in ipairs(cards) do
+		if card:inherits("Peach") then
+			all_peaches = all_peaches + 1
+		end
+	end
+	if all_peaches >= 2 and self:getOverflow() <= 0 then return {} end
+	self:sortByKeepValue(cards)
+	cards = sgs.reverse(cards)
+
+	for i = #cards, 1, -1 do
+		local card = cards[i]
+		if not card:inherits("Peach") and not self.player:isJilei(card) then
+			table.insert(to_discard, card:getEffectiveId())
+			table.remove(cards, i)
+			break;
+		end
+	end	
+	if #to_discard < 1 then return {} 
+	else
+		return to_discard
+	end
+end
+
 local tiaoxin_skill={}
 tiaoxin_skill.name="tiaoxin"
 table.insert(sgs.ai_skills, tiaoxin_skill)

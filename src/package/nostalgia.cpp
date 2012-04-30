@@ -336,11 +336,11 @@ NosXuanhuoCard::NosXuanhuoCard(){
 void NosXuanhuoCard::onEffect(const CardEffectStruct &effect) const{
     effect.to->obtainCard(this);
 
+    Room *room = effect.from->getRoom();
+    room->playSkillEffect("xuanhuo");
     if(effect.to->isNude())
         return;
 
-    Room *room = effect.from->getRoom();
-    room->playSkillEffect("xuanhuo");
     int card_id = room->askForCardChosen(effect.from, effect.to, "he", objectName());
     const Card *card = Sanguosha->getCard(card_id);
     bool is_public = room->getCardPlace(card_id) != Player::Hand;

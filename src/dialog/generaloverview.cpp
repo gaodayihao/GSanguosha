@@ -268,9 +268,7 @@ void GeneralOverview::playEffect()
 #include "client.h"
 void GeneralOverview::on_tableWidget_itemDoubleClicked(QTableWidgetItem* item)
 {
-    if(!ServerInfo.FreeChoose)
-        return;
-    if(Self){
+    if(ServerInfo.FreeChoose && Self){
         int row = ui->tableWidget->currentRow();
         if(row >= 0){
             QString general_name = ui->tableWidget->item(row, 0)->data(Qt::UserRole).toString();
