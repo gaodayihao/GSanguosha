@@ -859,13 +859,13 @@ function SmartAI:getValuableCard(who)
 	self:sort(self.friends, "hp")
 	local friend 
 	if #self.friends > 0 then friend = self.friends[1] end
-	if friend and self:isWeak(friend) and who:inMyAttackRange(friend) and not who:hasSkill("xuanfeng") then
+	if friend and self:isWeak(friend) and who:inMyAttackRange(friend) and not who:hasSkill("nos_xuanfeng") then
 		if weapon and who:distanceTo(friend) > 1 and not 
 			(weapon and weapon:inherits("MoonSpear") and who:hasSkill("keji") and who:getHandcardNum() > 5) then return weapon:getEffectiveId() end
 		if offhorse and who:distanceTo(friend) > 1 then return offhorse:getEffectiveId() end
 	end
 
-	if defhorse and not who:hasSkill("xuanfeng") then
+	if defhorse and not who:hasSkill("nos_xuanfeng") then
 		for _,friend in ipairs(self.friends) do
 			if friend:distanceTo(who) == friend:getAttackRange()+1 then
 				return defhorse:getEffectiveId()
@@ -873,7 +873,7 @@ function SmartAI:getValuableCard(who)
 		end
 	end
 
-	if armor and self:evaluateArmor(armor,who)>3 and not who:hasSkill("xuanfeng") then
+	if armor and self:evaluateArmor(armor,who)>3 and not who:hasSkill("nos_xuanfeng") then
 		return armor:getEffectiveId()
 	end
 

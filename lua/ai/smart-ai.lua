@@ -319,11 +319,19 @@ function SmartAI:getUsePriority(card)
 		return v
 	end
 
-	if self.player:hasSkill("wuyan") or self.player:hasSkill("nos_wuyan") then
+	if self.player:hasSkill("wuyan") then
 		if card:inherits("Slash") then
 			v = 4
 
 		elseif card:inherits("Duel") or card:inherits("FireAttack") or card:inherits("ArcheryAttack") or card:inherits("SavageAssault") then v = 0
+		end
+		if v then return v else return sgs.ai_use_priority[class_name] end
+	end
+	if self.player:hasSkill("nos_wuyan") then
+		if card:inherits("Slash") then
+			v = 4
+
+		elseif card:inherits("Collateral") or card:inherits("Dismantlement") or card:inherits("Snatch") or card:inherits("IronChain") then v = 0
 		end
 		if v then return v else return sgs.ai_use_priority[class_name] end
 	end
@@ -3264,6 +3272,10 @@ function SmartAI:aoeIsEffective(card, to)
 	end
 	
 	if to:hasSkill("wuyan") then
+		return false
+	end
+	
+	if self.player:hasSkill("nos_wuyan") then
 		return false
 	end
 	
