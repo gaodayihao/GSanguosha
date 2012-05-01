@@ -260,6 +260,8 @@ public:
             return false;
 
         Room *room = player->getRoom();
+        int blade = player->getWeapon()->getEffectiveId();
+        room->setCardFlag(blade, "isUsing");
         const Card *card = room->askForCard(player, "slash", "blade-slash:" + effect.to->objectName(), QVariant(), NonTrigger);
         if(card){
             // if player is drank, unset his flag
@@ -276,7 +278,7 @@ public:
             room->useCard(use, false);
 
         }
-
+        room->setCardFlag(blade, "-isUsing");
         return false;
     }
 };

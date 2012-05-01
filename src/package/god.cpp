@@ -1214,7 +1214,7 @@ public:
                     if(card == Self->getWeapon() && card->objectName() == "crossbow")
                         return Self->canSlashWithoutCrossbow();
                     else
-                        return true;
+                        return !card->hasFlag("isUsing");
                 }
                 else
                     return false;
@@ -1370,7 +1370,7 @@ public:
                     if(card == Self->getWeapon() && card->objectName() == "crossbow")
                         return Self->canSlashWithoutCrossbow();
                     else
-                        return true;
+                        return !card->hasFlag("isUsing");
                 }
                 else
                     return false;

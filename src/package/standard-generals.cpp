@@ -563,19 +563,7 @@ public:
         if(!card->isRed())
             return false;
 
-        switch(ClientInstance->getStatus()){
-        case Client::Playing:{
-            if(card == Self->getWeapon() && card->objectName() == "crossbow")
-                return Self->canSlashWithoutCrossbow();
-            else
-                return true;
-            }
-
-        default:
-            break;
-        }
-
-        return true;
+        return EquipCard::CanUseInViewAsSkill(card);
     }
 
     virtual const Card *viewAs(CardItem *card_item) const{

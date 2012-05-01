@@ -110,6 +110,22 @@ void EquipCard::onUninstall(ServerPlayer *player) const{
 
 }
 
+bool EquipCard::CanUseInViewAsSkill(const Card *card){
+    switch(ClientInstance->getStatus()){
+    case Client::Playing:{
+        if(card == Self->getWeapon() && card->objectName() == "crossbow")
+            return Self->canSlashWithoutCrossbow();
+        else
+            return !card->hasFlag("isUsing");
+        }
+
+    default:
+        break;
+    }
+
+    return !card->hasFlag("isUsing");
+}
+
 QString GlobalEffect::getSubtype() const{
     return "global_effect";
 }

@@ -50,14 +50,14 @@ private:
 class EquipCard:public Card{
     Q_OBJECT
 
-    Q_ENUMS(Location);
+    Q_ENUMS(Location)
 
 public:
     enum Location {
         WeaponLocation,
         ArmorLocation,
         DefensiveHorseLocation,
-        OffensiveHorseLocation,
+        OffensiveHorseLocation
     };
 
     EquipCard(Suit suit, int number):Card(suit, number, true), skill(NULL){}
@@ -72,6 +72,8 @@ public:
 
     virtual void onInstall(ServerPlayer *player) const;
     virtual void onUninstall(ServerPlayer *player) const;
+
+    static bool CanUseInViewAsSkill(const Card *card);
 
     virtual Location location() const = 0;
     virtual QString label() const = 0;
