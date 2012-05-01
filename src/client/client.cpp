@@ -999,6 +999,8 @@ void Client::onPlayerChoosePlayer(const Player *player){
 }
 
 void Client::trust(){
+    if(ClientInstance->getStatus() != Client::Playing && ClientInstance->getStatus() != Client::NotActive)
+        emit dotimeout();
     request("trust .");
 
     if(Self->getState() == "trust")

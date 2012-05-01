@@ -212,6 +212,8 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(ClientInstance, SIGNAL(card_used()), this, SLOT(hideDiscards()));
     connect(ClientInstance, SIGNAL(start_in_xs()), this, SLOT(startInXs()));
 
+    connect(ClientInstance, SIGNAL(dotimeout()), this, SLOT(doTimeout()));
+
     {
         guanxing_box = new GuanxingBox;
         guanxing_box->hide();

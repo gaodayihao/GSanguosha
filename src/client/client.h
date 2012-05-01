@@ -303,6 +303,8 @@ signals:
 
     void assign_asked();
     void start_in_xs();
+
+    void dotimeout();
 };
 
 extern Client *ClientInstance;
