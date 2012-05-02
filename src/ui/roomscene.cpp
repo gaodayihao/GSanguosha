@@ -353,8 +353,6 @@ RoomScene::RoomScene(QMainWindow *main_window)
             log_box->resize(chat_box->width(), 210);
             log_box_widget->setPos(367, -246);
         }
-
-        log_box_widget->setFlag(QGraphicsItem::ItemIsMovable);
     }
 
     {
@@ -549,6 +547,8 @@ void RoomScene::createReplayControlBar(){
 
 void RoomScene::adjustItems(QMatrix matrix){
     if(matrix.m11()>1)matrix.setMatrix(1,0,0,1,matrix.dx(),matrix.dy());
+
+    dashboard->setWidth((main_window->width()-10)/ matrix.m11()) ;
 
     qreal dashboard_width = dashboard->boundingRect().width();
     qreal x = - dashboard_width/2;
@@ -3752,26 +3752,17 @@ void RoomScene::doAnimation(const QString &name, const QStringList &args){
         (this->*func)(name, args);
 }
 
-void RoomScene::adjustDashboard(bool expand){
+void RoomScene::adjustDashboard(){
     int texture_width = dashboard->getTextureWidth();
     int window_width = main_window->width()-10;
 
-    int width = expand ? qMax(texture_width, window_width) : qMin(texture_width, window_width);
-    dashboard->setWidth(width);
-    Config.setValue("UI/ExpandDashboard", expand);
+    QAction *action = qobject_cast<QAction *>(sender());
+    if(action){
+        bool expand = action->isChecked();
+        int width = expand ? qMax(texture_width, window_width) : qMin(texture_width, window_width);
+        dashboard->setWidth(width);
+    }
 }
-
-//void RoomScene::adjustDashboard(){
-//    int texture_width = dashboard->getTextureWidth();
-//    int window_width = main_window->width()-10;
-
-//    QAction *action = qobject_cast<QAction *>(sender());
-//    if(action){
-//        bool expand = action->isChecked();
-//        int width = expand ? qMax(texture_width, window_width) : qMin(texture_width, window_width);
-//        dashboard->setWidth(width);
-//    }
-//}
 
 void RoomScene::showServerInformation()
 {
