@@ -3753,11 +3753,14 @@ void RoomScene::doAnimation(const QString &name, const QStringList &args){
 }
 
 void RoomScene::adjustDashboard(){
+    int texture_width = dashboard->getTextureWidth();
+    int window_width = main_window->width()-10;
+
     QAction *action = qobject_cast<QAction *>(sender());
     if(action){
         bool expand = action->isChecked();
-        dashboard->setWidth(expand ? main_window->width()-10 : 0);
-        //adjustItems();
+        int width = expand ? qMax(texture_width, window_width) : qMin(texture_width, window_width);
+        dashboard->setWidth(width);
     }
 }
 
@@ -4155,6 +4158,7 @@ void RoomScene::adjustPrompt()
 
 void RoomScene::reLayout(QMatrix matrix)
 {
+
     if(matrix.m11()>1)matrix.setMatrix(1,0,0,1,matrix.dx(),matrix.dy());
     view_transform = matrix;
     //if(!Config.value("CircularView", true).toBool())

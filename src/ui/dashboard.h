@@ -60,6 +60,7 @@ public:
     int getRightPosition();
     int getMidPosition();
     int getButtonWidgetWidth() const;
+    int getTextureWidth() const;
 
 public slots:
     void updateAvatar();
