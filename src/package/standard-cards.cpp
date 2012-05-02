@@ -575,11 +575,10 @@ public:
         QString asked = data.toString();
         if(asked == "jink"){
             Room *room = player->getRoom();
-            if(room->getTag("Invoked").isNull() && room->askForSkillInvoke(player, objectName())){
+            if(room->askForSkillInvoke(player, objectName())){
                 room->setEmotion(player, QString("armor/%1").arg(objectName()));
 
                 JudgeStruct judge;
-                room->setTag("Invoked", data);
                 judge.pattern = QRegExp("(.*):(heart|diamond):(.*)");
                 judge.good = true;
                 judge.reason = objectName();
