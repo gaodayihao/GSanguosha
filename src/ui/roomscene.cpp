@@ -2413,9 +2413,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
 
     if(newStatus != Client::NotActive){
         if(focused)
-        {
             focused->hideProcessBar();
-        }
 
         QApplication::alert(main_window);
     }
@@ -3614,6 +3612,17 @@ void RoomScene::moveFocus(const QString &who){
                 focused->setFrame(Photo::SOSR);
             else
                 focused->setFrame(Photo::Responsing);
+        }
+    }
+    ClientPlayer *self = ClientInstance->getPlayer(who);
+    if((self == Self || self->getState() != "online") && focused){
+        focused->hideProcessBar();
+        if(focused->getPlayer()->getPhase() == Player::NotActive || focused->getPlayer()->getPhase() == Player::Finish){
+            if(focused->getPlayer()->getHp() <= 0 && focused->getPlayer()->isAlive()
+                    && focused->getPlayer()->getMaxHP()>0)
+                focused->setFrame(Photo::SOS);
+            else
+                focused->setFrame(Photo::NoFrame);
         }
     }
 }
