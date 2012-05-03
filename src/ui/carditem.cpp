@@ -36,11 +36,17 @@ CardItem::CardItem(const Card *card)
 
     avatar = NULL;
 
+
     owner_text = new QGraphicsSimpleTextItem(this);
-    QPen pen(Qt::black);
-    pen.setWidthF(0.5);
+    QPen pen(Qt::yellow);
+    pen.setWidthF(0.3);
+    owner_text->setFont(Config.TinyFont);
+#ifdef Q_OS_WIN32
+    static QFont card_desc_font("SimSun", 9, QFont::Normal);
+    owner_text->setFont(card_desc_font);
+#endif
     owner_text->setPen(pen);
-    owner_text->setBrush(Qt::yellow);
+    owner_text->setBrush(Qt::black);
     owner_text->hide();
 }
 
