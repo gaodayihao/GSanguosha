@@ -579,6 +579,8 @@ void GameRule::changeGeneral1v1(ServerPlayer *player) const{
                           QString("%1:%2").arg(player->objectName()).arg(new_general),
                           player);
 
+    player->loseAllSkills();
+
     if(!player->faceUp())
         player->turnOver();
 
