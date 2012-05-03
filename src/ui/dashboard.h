@@ -6,12 +6,14 @@
 #include "player.h"
 #include "skill.h"
 #include "sprite.h"
+#include "protocol.h"
 
 #include <QPushButton>
 #include <QComboBox>
 #include <QGraphicsLinearLayout>
 #include <QLineEdit>
 #include <QProgressBar>
+#include <QMutex>
 
 class Dashboard : public Pixmap
 {
@@ -25,7 +27,11 @@ public:
     QGraphicsProxyWidget *addWidget(QWidget *widget, int x, int y, bool from_left);
     QPushButton *createButton(const QString &name);
     QPushButton *addButton(const QString &name, int x, bool from_left);
-    QProgressBar *addProgressBar();
+
+    //Progress bar functions
+    void hideProgressBar();
+    void showProgressBar();
+    void changeProgress(QSanProtocol::Countdown countdown);
 
     void setTrust(bool trust);
     void addCardItem(CardItem *card_item);
@@ -75,6 +81,12 @@ protected:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
+    // ui controls
+    QProgressBar m_progressBar;
+
+    // sync objects
+    QMutex m_mutex;
+
 private:
     QPixmap left_pixmap, right_pixmap;
     QGraphicsRectItem *left, *middle, *right;
@@ -104,6 +116,9 @@ private:
 
     //for animated effects
     EffectAnimation *animations;
+
+    // UI control creation
+    void _addProgressBar();
 
     // for parts creation
     void createLeft();

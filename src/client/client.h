@@ -180,6 +180,20 @@ public:
     void attachSkill(const QString &skill_name);
     void detachSkill(const QString &skill_name);
 
+    inline void setCountdown(QSanProtocol::Countdown countdown)
+    {
+        m_mutexCountdown.lockInline();
+        m_countdown = countdown;
+        m_mutexCountdown.unlockInline();
+    }
+    inline QSanProtocol::Countdown getCountdown()
+    {
+        m_mutexCountdown.lockInline();
+        QSanProtocol::Countdown countdown = m_countdown;
+        m_mutexCountdown.unlockInline();
+        return countdown;
+    }
+
     void changeReady(const QString &);
     void clearGX(const QString &);
 
@@ -191,8 +205,7 @@ public:
     int discard_num;
     QString skill_name;
     QList<const Card*> discarded_list;
-    QDialog *ask_dialog;
-    QStringList players_to_choose;   
+    QStringList players_to_choose;
 
 public slots:
     void createroom();
@@ -209,6 +222,13 @@ public slots:
     void fillRobots();
     void arrange(const QStringList &order);
     void onPlayerReplyGongxin(int card_id = -1);
+
+protected:
+    // operation countdown
+    QSanProtocol::Countdown m_countdown;
+    // sync objects
+    QMutex m_mutexCountdown;
+
 private:
     ClientSocket *socket;
     Status status;
@@ -237,7 +257,9 @@ private:
     void _askForCardOrUseCard(const Json::Value&);
 
 private slots:
-    void processCommand(const QString &cmd);
+    void processServerPacket(QString &cmd);
+    void processServerPacket(char *cmd);
+    bool processServerRequest(const QSanProtocol::QSanGeneralPacket& packet);
     void processReply(char *reply);
     void notifyRoleChange(const QString &new_role);
     void onPlayerChooseSuit();
@@ -252,10 +274,19 @@ signals:
     void error_message(const QString &msg);
     void player_added(ClientPlayer *new_player);
     void player_removed(const QString &player_name);
+    // choice signal
     void generals_got(const QStringList &generals);
+    void kingdoms_got(const QStringList &kingdoms);
+    void suits_got(const QStringList &suits);
+    void options_got(const QString &skillName, const QStringList &options);
+    void cards_got(const ClientPlayer *player, const QString &flags, const QString &reason);
+    void roles_got(const QString &scheme, const QStringList &roles);
+    void directions_got();
+    void orders_got(QSanProtocol::Game3v3ChooseOrderCommand reason);
+
     void seats_arranged(const QList<const ClientPlayer*> &seats);
     void hp_changed(const QString &who, int delta, DamageStruct::Nature nature, bool losthp);
-    void status_changed(Client::Status new_status);
+    void status_changed(Client::Status oldStatus, Client::Status newStatus);
     void avatars_hiden();
     void pile_cleared();
     void player_killed(const QString &who);

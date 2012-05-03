@@ -563,8 +563,10 @@ void Photo::setFrame(FrameType type){
 void Photo::updatePhase(){
     if(player->getPhase() != Player::NotActive)
         setFrame(Playing);
-    else
+    else{
         setFrame(NoFrame);
+        progress_bar->hide();
+    }
 }
 
 static bool CompareByNumber(const Card *card1, const Card *card2){

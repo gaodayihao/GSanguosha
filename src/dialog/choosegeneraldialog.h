@@ -32,12 +32,15 @@ public:
     explicit ChooseGeneralDialog(const QStringList &general_names,
                                  QWidget *parent);
 
+public slots:
+    void done(int);
+
 protected:
     virtual void timerEvent(QTimerEvent *);
+    QDialog *m_freeChooseDialog;
 
 private:
     QProgressBar *progress_bar;
-    QDialog *free_chooser;
 
 private slots:
     void freeChoose();
