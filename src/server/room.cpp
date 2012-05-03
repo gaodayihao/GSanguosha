@@ -3578,6 +3578,7 @@ void Room::askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, bool up_
 //            foreach (int card_id, cards)
 //                draw_pile->prepend(card_id);
 //            return;
+            zhuge->invoke("clearGX");
             return askForGuanxing(zhuge, cards, up_only);
         }
 
