@@ -1062,7 +1062,7 @@ bool Room::askForUseCard(ServerPlayer *player, const QString &pattern, const QSt
     }
     else
     {
-        askForUseCard(player, pattern, prompt);
+        return askForUseCard(player, pattern, prompt);
     }
     if (isCardUsed && card_use.isValid()){
         QVariant decisionData = QVariant::fromValue(card_use);
@@ -1094,7 +1094,7 @@ int Room::askForAG(ServerPlayer *player, const QList<int> &card_ids, bool refusa
         bool success = doRequest(player, S_COMMAND_AMAZING_GRACE, refusable);
         Json::Value clientReply = player->getClientReply();
         if(!success)
-            askForAG(player, card_ids, refusable, reason);
+            return askForAG(player, card_ids, refusable, reason);
         if (!clientReply.isInt() || !card_ids.contains(clientReply.asInt()))
             card_id = refusable ? -1 : card_ids.first();
         else card_id = clientReply.asInt();
@@ -3409,7 +3409,7 @@ void Room::activate(ServerPlayer *player, CardUseStruct &card_use){
         }
 
         if(!success)
-            activate(player, card_use);
+            return activate(player, card_use);
         if (clientReply.isNull()) return;
 
         card_use.from = player;
@@ -3578,7 +3578,7 @@ void Room::askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, bool up_
 //            foreach (int card_id, cards)
 //                draw_pile->prepend(card_id);
 //            return;
-            askForGuanxing(zhuge, cards, up_only);
+            return askForGuanxing(zhuge, cards, up_only);
         }
 
         Json::Value clientReply = zhuge->getClientReply();
@@ -3715,7 +3715,7 @@ ServerPlayer *Room::askForPlayerChosen(ServerPlayer *player, const QList<ServerP
             choice = findChild<ServerPlayer *>(clientReply.asCString());
         }
         if(!success)
-            choice = askForPlayerChosen(player, targets, skillName);
+            return askForPlayerChosen(player, targets, skillName);
     }
     if(choice){
         QVariant data=QString("%1:%2:%3").arg("playerChosen").arg(skillName).arg(choice->objectName());
