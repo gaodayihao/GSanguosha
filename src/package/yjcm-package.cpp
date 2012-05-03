@@ -255,9 +255,11 @@ void JujianCard::onEffect(const CardEffectStruct &effect) const{
     else
         choice = room->askForChoice(effect.to, "jujian", choices.join("+"));
 
-    if(choice == "draw"){
-        effect.to->drawCards(2);
-        room->playSkillEffect("jujian", 2);
+    if(choice == "reset"){
+        room->setPlayerProperty(effect.to, "chained", false);
+        if(!effect.to->faceUp())
+            effect.to->turnOver();
+        room->playSkillEffect("jujian", 1);
     }
     else if(choice == "recover"){
         RecoverStruct recover;
@@ -265,11 +267,9 @@ void JujianCard::onEffect(const CardEffectStruct &effect) const{
         room->recover(effect.to, recover);
         room->playSkillEffect("jujian", 1);
     }
-    else if(choice == "reset"){
-        room->setPlayerProperty(effect.to, "chained", false);
-        if(!effect.to->faceUp())
-            effect.to->turnOver();
-        room->playSkillEffect("jujian", 1);
+    else{
+        effect.to->drawCards(2);
+        room->playSkillEffect("jujian", 2);
     }
 }
 

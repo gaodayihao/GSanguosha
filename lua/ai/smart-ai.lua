@@ -1135,8 +1135,7 @@ end
 function sgs.gameProcess(room)
 	local rebel_num = sgs.current_mode_players["rebel"]
 	local loyal_num = sgs.current_mode_players["loyalist"]
-	if sgs.turncount < 2 then return "neutral"
-	elseif rebel_num == 0 and loyal_num> 0 then return "loyalist"
+	if rebel_num == 0 and loyal_num> 0 then return "loyalist"
 	elseif loyal_num == 0 and rebel_num > 1 then return "rebel" end
 	local loyal_value, rebel_value = 0, 0, 0
 	local health = sgs.isLordHealthy()
@@ -1266,7 +1265,7 @@ function SmartAI:objectiveLevel(player)
 					return 5
 				end
 			end
-		elseif process == "neutral" then return 0
+		elseif process == "neutral" or sgs.turncount < 2 then return 0
 		elseif process:match("rebel") then
 			if sgs.evaluatePlayerRole(player) == "rebel" then 
 				if process == "rebel" then return 5 else return 3 end
@@ -2606,6 +2605,9 @@ function SmartAI:askForSinglePeach(dying)
 	if self.player:isLocked(forbid) or dying:isLocked(forbid) then return "." end
 	if self:isFriend(dying) then
 		if self:needDeath(dying) then return "." end
+		if (self.player:objectName() == dying:objectName()) then
+			card_str = self:getCardId("Analeptic") or self:getCardId("Peach")
+		end
 		local buqu = dying:getPile("buqu")
 		local weaklord = 0
 		if not buqu:isEmpty() then
@@ -2620,10 +2622,10 @@ function SmartAI:askForSinglePeach(dying)
 			end
 			if not same then return "." end
 		end
-		if (self.player:objectName() == dying:objectName()) then
-			card_str = self:getCardId("Analeptic") or self:getCardId("Peach")
-		elseif dying:isLord() then
+		
+		if dying:isLord() then
 			card_str = self:getCardId("Peach")
+		elseif self:doNotSave(dying) then return "."
 		else
 			for _, friend in ipairs(self.friends_noself) do
 				if friend:getHp() == 1 and friend:isLord() and not friend:hasSkill("buqu") then  weaklord = weaklord + 1 end
@@ -3483,8 +3485,10 @@ function SmartAI:getAoeValueTo(card, to , from)
 			end
 		end
 
-		if to:getHp() > 0 then
+		if to:getHp() > 1 then
 			value = value - 20
+		else
+			value = value -30
 		end
 
 		if self:isFriend(from, to) then

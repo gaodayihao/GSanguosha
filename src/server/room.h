@@ -174,7 +174,7 @@ public:
                                 ResponseVerifyFunction validateFunc = NULL, void* funcArg = NULL);
 
     //Verification functions
-    bool verifyNullificationResponse(ServerPlayer*, const Json::Value&, void*);
+//    bool verifyNullificationResponse(ServerPlayer*, const Json::Value&, void*);
 
     void acquireSkill(ServerPlayer *player, const Skill *skill, bool open = true);
     void acquireSkill(ServerPlayer *player, const QString &skill_name, bool open = true);
@@ -359,13 +359,6 @@ private:
     void doScript(const QString &script);
 
     //helper functions and structs
-    struct _NullificationAiHelper
-    {
-        const TrickCard* m_trick;
-        ServerPlayer* m_from;
-        ServerPlayer* m_to;
-    };
-    bool _askForNullification(const TrickCard *trick, ServerPlayer *from, ServerPlayer *to, bool positive, _NullificationAiHelper helper);
     void _setupChooseGeneralRequestArgs(ServerPlayer *player);
 
 private slots:
