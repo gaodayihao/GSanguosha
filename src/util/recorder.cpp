@@ -325,7 +325,7 @@ void Replayer::run(){
     nondelays << "addPlayer" << "removePlayer" << "speak";
 
     foreach(Pair pair, pairs){
-        if(pair.cmd.startsWith("["))
+        if(pair.cmd.startsWith("[") || pair.cmd.startsWith("disableAG"))
             continue;
         int delay = qMin(pair.elapsed - last, 1500);
         last = pair.elapsed;
