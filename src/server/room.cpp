@@ -299,12 +299,13 @@ void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason){
     QVariant data = QVariant::fromValue(reason);
     if(reason && reason->from)
         setPlayerStatistics(reason->from, "kill", 1);
-    thread->trigger(GameOverJudge, victim, data);
 
 
     broadcastProperty(victim, "role");
     thread->delay(300);
     broadcastInvoke("killPlayer", victim->objectName());
+
+    if (thread->trigger(GameOverJudge, victim, data)) return;
 
     thread->trigger(Death, victim, data);
     victim->loseAllSkills();
@@ -399,8 +400,6 @@ void Room::gameOver(const QString &winner){
         db->saveResult(m_players, winner);
     }
 
-    broadcastInvoke("gameOver", QString("%1:%2").arg(winner).arg(all_roles.join("+")));
-
     // save records
     if(Config.ContestMode){
         bool only_lord = Config.value("Contest/OnlySaveLordRecord", true).toBool();
@@ -455,6 +454,11 @@ void Room::gameOver(const QString &winner){
             }
         }
     }
+
+    Json::Value arg(Json::arrayValue);
+    arg[0] = toJsonString(winner);
+    arg[1] = toJsonArray(all_roles);
+    doBroadcastNotify(S_COMMAND_GAME_OVER, arg);
 }
 
 void Room::slashEffect(const SlashEffectStruct &effect){
@@ -3665,7 +3669,7 @@ void Room::askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, bool up_
         top_cards = cards;
     }else{
         Json::Value guanxingArgs(Json::arrayValue);
-        guanxingArgs[0] = toJsonIntArray(cards);
+        guanxingArgs[0] = toJsonArray(cards);
         guanxingArgs[1] = up_only;
         bool success = doRequest(zhuge, S_COMMAND_SKILL_GUANXING, guanxingArgs, true);
 
@@ -3742,7 +3746,7 @@ void Room::doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target){
     Json::Value gongxinArgs(Json::arrayValue);
     gongxinArgs[0] = toJsonString(target->objectName());
     gongxinArgs[1] = true;
-    gongxinArgs[2] = toJsonIntArray(target->handCards());
+    gongxinArgs[2] = toJsonArray(target->handCards());
     gongxinArgs[3] = target->hasSkill("hongyan");
     bool success = doRequest(shenlvmeng, S_COMMAND_SKILL_GONGXIN, gongxinArgs, true);
 
@@ -3829,7 +3833,7 @@ ServerPlayer *Room::askForPlayerChosen(ServerPlayer *player, const QList<ServerP
 }
 
 void Room::_setupChooseGeneralRequestArgs(ServerPlayer *player){
-    Json::Value options = toJsonStringArray(player->getSelected());
+    Json::Value options = toJsonArray(player->getSelected());
     if(!Config.EnableBasara)
         options.append(toJsonString(QString("%1(lord)").arg(getLord()->getGeneralName())));
     else
@@ -3845,7 +3849,7 @@ QString Room::askForGeneral(ServerPlayer *player, const QStringList &generals, Q
 
     if(player->isOnline())
     {
-        Json::Value options = toJsonStringArray(generals);
+        Json::Value options = toJsonArray(generals);
         bool success = doRequest(player, S_COMMAND_CHOOSE_GENERAL, options, true);
         //executeCommand(player, "askForGeneral", "chooseGeneralCommand", generals.join("+"), ".");
 
@@ -4065,7 +4069,7 @@ void Room::showAllCards(ServerPlayer *player, ServerPlayer *to){
     Json::Value gongxinArgs(Json::arrayValue);
     gongxinArgs[0] = toJsonString(player->objectName());
     gongxinArgs[1] = false;
-    gongxinArgs[2] = toJsonIntArray(player->handCards());
+    gongxinArgs[2] = toJsonArray(player->handCards());
     gongxinArgs[3] = false;
     bool isUnicast = (to != NULL);
     if (isUnicast)
@@ -4093,7 +4097,7 @@ bool Room::askForYiji(ServerPlayer *guojia, QList<int> &cards){
             return false;
     }else{
 
-        bool success = doRequest(guojia, S_COMMAND_SKILL_YIJI, toJsonIntArray(cards), true);
+        bool success = doRequest(guojia, S_COMMAND_SKILL_YIJI, toJsonArray(cards), true);
 
         //Validate client response
         Json::Value clientReply = guojia->getClientReply();
@@ -4167,7 +4171,7 @@ QString Room::askForRole(ServerPlayer *player, const QStringList &roles, const Q
     QStringList squeezed = roles.toSet().toList();
     Json::Value arg(Json::arrayValue);
     arg[0] = toJsonString(scheme);
-    arg[1] = toJsonStringArray(squeezed);
+    arg[1] = toJsonArray(squeezed);
     bool success = doRequest(player, S_COMMAND_CHOOSE_ROLE_3V3, arg, true);
     Json::Value clientReply = player->getClientReply();
     QString result = "abstain";

@@ -455,6 +455,7 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
 
             QString winner = getWinner(player);
             if(!winner.isNull()){
+                player->bury();
                 room->gameOver(winner);
                 return true;
             }

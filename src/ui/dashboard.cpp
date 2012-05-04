@@ -458,7 +458,7 @@ void Dashboard::_addProgressBar()
     widget->setParentItem(middle);
     widget->setPos(300, - 25);
 
-    connect(&m_progressBar, SIGNAL(timedOut()), this, SLOT(onProgressBarTimedOut()));
+    connect(&m_progressBar, SIGNAL(timedOut()), this, SIGNAL(progressBarTimedOut()));
     m_progressBar.hide();
 }
 
