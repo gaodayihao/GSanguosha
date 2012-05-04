@@ -402,7 +402,6 @@ bool RoomThread::trigger(TriggerEvent event, ServerPlayer *target, QVariant &dat
         }
     }
 
-    delay(1);
     // pop event stack
     event_stack.pop_back();
 

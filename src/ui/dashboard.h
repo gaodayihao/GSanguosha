@@ -7,6 +7,7 @@
 #include "skill.h"
 #include "sprite.h"
 #include "protocol.h"
+#include "TimedProgressBar.h"
 
 #include <QPushButton>
 #include <QComboBox>
@@ -30,8 +31,7 @@ public:
 
     //Progress bar functions
     void hideProgressBar();
-    void showProgressBar();
-    void changeProgress(QSanProtocol::Countdown countdown);
+    void showProgressBar(QSanProtocol::Countdown countdown);
 
     void setTrust(bool trust);
     void addCardItem(CardItem *card_item);
@@ -69,6 +69,7 @@ public:
     int getTextureWidth() const;
 
 public slots:
+    inline void onProgressBarTimedOut() { emit progressBarTimedOut(); }
     void updateAvatar();
     void updateSmallAvatar();
     void updateReadyItem(bool visible);
@@ -82,7 +83,7 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
     // ui controls
-    QProgressBar m_progressBar;
+    QSanCommandProgressBar m_progressBar;
 
     // sync objects
     QMutex m_mutex;
@@ -149,6 +150,7 @@ private slots:
 signals:
     void card_selected(const Card *card);
     void card_to_use();
+    void progressBarTimedOut();
 };
 
 #endif // DASHBOARD_H
