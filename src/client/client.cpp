@@ -278,7 +278,7 @@ void Client::disconnectFromHost(){
 
 typedef char buffer_t[1024];
 
-void Client::processServerPacket(QString &cmd){
+void Client::processServerPacket(const QString &cmd){
     processServerPacket(cmd.toAscii().data());
 }
 
@@ -1657,7 +1657,6 @@ void Client::speak(const QString &speak_data){
 }
 
 void Client::moveFocus(const Json::Value &focus){
-    QString test = toQString(focus);
     emit focus_moved(QString(focus.asCString()));
 }
 
