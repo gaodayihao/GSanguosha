@@ -248,8 +248,8 @@ public:
 	void playCardEffect(const Card *card) const;
 	void playCardEffect(const char *card_name) const;
 	int getRandomHandCardId() const;
+	const Card *getRandomHandCard() const;
 	void obtainCard(const Card *card, bool unhide = true);
-	void obtainCard(const Card *card);
 	void throwAllEquips();
 	void throwAllHandCards();
 	void throwAllCards();
