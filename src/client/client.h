@@ -194,7 +194,6 @@ public:
     }
 
     void changeReady(const QString &);
-    void clearGX(const QString &);
 
     // public fields
     bool m_isDiscardActionRefusable;
@@ -334,8 +333,6 @@ signals:
 
     void assign_asked();
     void start_in_xs();
-
-    void gx_cleared();
 };
 
 extern Client *ClientInstance;

@@ -160,7 +160,6 @@ Client::Client(QObject *parent, const QString &filename)
     callbacks["revealGeneral"] = &Client::revealGeneral;
 
     callbacks["changeReady"] = &Client::changeReady;
-    callbacks["clearGX"] = &Client::clearGX;
 
     m_isUseCard = false;
 
@@ -1890,8 +1889,4 @@ void Client::ready(){
 
 void Client::changeReady(const QString &){
     Self->changeReady();
-}
-
-void Client::clearGX(const QString &){
-    gx_cleared();
 }

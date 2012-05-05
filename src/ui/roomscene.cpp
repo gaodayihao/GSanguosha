@@ -245,7 +245,6 @@ RoomScene::RoomScene(QMainWindow *main_window)
         guanxing_box->setZValue(9.0);
 
         connect(ClientInstance, SIGNAL(guanxing(QList<int>,bool)), guanxing_box, SLOT(doGuanxing(QList<int>,bool)));
-        connect(ClientInstance, SIGNAL(gx_cleared()), guanxing_box, SLOT(clear()));
 
         if(circular)
             guanxing_box->moveBy(-120, 0);

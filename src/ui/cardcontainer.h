@@ -78,11 +78,11 @@ class GuanxingBox: public Pixmap{
 public:
     GuanxingBox();
     void reply();
+    void clear();
 
 public slots:
     void doGuanxing(const QList<int> &card_ids, bool up_only);
     void adjust();
-    void clear();
 
 private:
     QList<CardItem *> up_items, down_items;
