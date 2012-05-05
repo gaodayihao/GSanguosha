@@ -29,7 +29,7 @@ public:
         int card_id = room->askForCardChosen(player, target, "h", objectName());
 
         room->playSkillEffect(objectName());
-        room->moveCardTo(Sanguosha->getCard(card_id), player, Player::Hand, false);
+        room->obtainCard(player, card_id, false);
     }
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
@@ -81,8 +81,8 @@ void LihunCard::onEffect(const CardEffectStruct &effect) const{
     effect.to->setFlags("LihunTarget");
     DummyCard *cd = effect.to->wholeHandCards();
     if(cd)
-        room->moveCardTo(cd, effect.from, Player::Hand, false);
-    delete cd;
+        room->obtainCard(effect.from, cd, false);
+    cd->deleteLater();
 }
 
 class LihunSelect: public OneCardViewAsSkill{
