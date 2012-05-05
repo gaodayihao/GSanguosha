@@ -225,7 +225,6 @@ void Replayer::initCommandPair(){
         m_commandMapping["askForCardChosen"]    = S_COMMAND_CHOOSE_CARD;
         m_commandMapping["askForOrder"]         = S_COMMAND_CHOOSE_ORDER;
         m_commandMapping["askForRole"]          = S_COMMAND_CHOOSE_ROLE_3V3;
-        m_commandMapping["gameOver"]            = S_COMMAND_GAME_OVER;
     }
 
     if(m_packetTypeMapping.isEmpty()){
@@ -254,8 +253,7 @@ void Replayer::initCommandPair(){
                  << S_COMMAND_PINDIAN
                  << S_COMMAND_CHOOSE_CARD
                  << S_COMMAND_CHOOSE_ORDER
-                 << S_COMMAND_CHOOSE_ROLE_3V3
-                 << S_COMMAND_GAME_OVER;
+                 << S_COMMAND_CHOOSE_ROLE_3V3;
         m_packetTypeMapping[S_SERVER_NOTIFICATION] = commands;
 
         commands.clear();
@@ -327,8 +325,8 @@ void Replayer::run(){
     nondelays << "addPlayer" << "removePlayer" << "speak";
 
     foreach(Pair pair, pairs){
-        if(pair.cmd.startsWith("["))
-            continue;
+//        if(pair.cmd.startsWith("["))
+//            continue;
         int delay = qMin(pair.elapsed - last, 1500);
         last = pair.elapsed;
 
