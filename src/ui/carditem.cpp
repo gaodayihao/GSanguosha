@@ -36,18 +36,17 @@ CardItem::CardItem(const Card *card)
 
     avatar = NULL;
 
+    owner_text_back = new QGraphicsSimpleTextItem(this);
+    QPen back_pen(Qt::black);
+    back_pen.setWidthF(3);
+    owner_text_back->setPen(back_pen);
+    owner_text_back->hide();
 
     owner_text = new QGraphicsSimpleTextItem(this);
-    QPen pen(Qt::yellow);
-    pen.setWidthF(0.3);
-    owner_text->setFont(Config.TinyFont);
-#ifdef Q_OS_WIN32
-    static QFont card_desc_font("SimSun", 9, QFont::Normal);
-    owner_text->setFont(card_desc_font);
-#endif
+    QPen pen(QColor(228,213,160));
     owner_text->setPen(pen);
-    owner_text->setBrush(Qt::black);
     owner_text->hide();
+
 }
 
 CardItem::CardItem(const QString &general_name)
@@ -325,9 +324,15 @@ void CardItem::writeCardDesc(QString desc)
 
          owner_text->setPos(x, y);
          owner_text->show();
+
+         owner_text_back->setText(desc);
+         owner_text_back->setPos(x, y);
+         owner_text_back->show();
+
      }
 }
 
 void CardItem::deleteCardDesc(){
     owner_text->hide();
+    owner_text_back->hide();
 }

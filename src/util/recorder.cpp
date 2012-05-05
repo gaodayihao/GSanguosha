@@ -153,7 +153,7 @@ QString &Replayer::commandProceed(QString &cmd){
 }
 
 QString &Replayer::commandTranslation(QString &cmd){
-    if(cmd.startsWith("setStatistics") && !cmd.contains(".")){
+    if((cmd.startsWith("setStatistics") && !cmd.contains(".")) || cmd.startsWith("disableAG")){
         m_isOldVersion = true;
         cmd = QString();
     }
@@ -225,6 +225,7 @@ void Replayer::initCommandPair(){
         m_commandMapping["askForCardChosen"]    = S_COMMAND_CHOOSE_CARD;
         m_commandMapping["askForOrder"]         = S_COMMAND_CHOOSE_ORDER;
         m_commandMapping["askForRole"]          = S_COMMAND_CHOOSE_ROLE_3V3;
+        m_commandMapping["gameOver"]            = S_COMMAND_GAME_OVER;
     }
 
     if(m_packetTypeMapping.isEmpty()){
@@ -232,35 +233,36 @@ void Replayer::initCommandPair(){
 
         commands << S_COMMAND_CHOOSE_GENERAL
                  << S_COMMAND_CHOOSE_PLAYER
-                << S_COMMAND_CHOOSE_ROLE
-                << S_COMMAND_CHOOSE_DIRECTION
-                << S_COMMAND_EXCHANGE_CARD
-                << S_COMMAND_ASK_PEACH
-                << S_COMMAND_SKILL_GUANXING
-                << S_COMMAND_SKILL_GONGXIN
-                << S_COMMAND_SKILL_YIJI
-                << S_COMMAND_PLAY_CARD
-                << S_COMMAND_DISCARD_CARD
-                << S_COMMAND_CHOOSE_SUIT
-                << S_COMMAND_CHOOSE_KINGDOM
-                << S_COMMAND_RESPONSE_CARD
-                << S_COMMAND_USE_CARD
-                << S_COMMAND_INVOKE_SKILL
-                << S_COMMAND_MULTIPLE_CHOICE
-                << S_COMMAND_NULLIFICATION
-                << S_COMMAND_SHOW_CARD
-                << S_COMMAND_AMAZING_GRACE
-                << S_COMMAND_PINDIAN
-                << S_COMMAND_CHOOSE_CARD
-                << S_COMMAND_CHOOSE_ORDER
-                << S_COMMAND_CHOOSE_ROLE_3V3;
+                 << S_COMMAND_CHOOSE_ROLE
+                 << S_COMMAND_CHOOSE_DIRECTION
+                 << S_COMMAND_EXCHANGE_CARD
+                 << S_COMMAND_ASK_PEACH
+                 << S_COMMAND_SKILL_GUANXING
+                 << S_COMMAND_SKILL_GONGXIN
+                 << S_COMMAND_SKILL_YIJI
+                 << S_COMMAND_PLAY_CARD
+                 << S_COMMAND_DISCARD_CARD
+                 << S_COMMAND_CHOOSE_SUIT
+                 << S_COMMAND_CHOOSE_KINGDOM
+                 << S_COMMAND_RESPONSE_CARD
+                 << S_COMMAND_USE_CARD
+                 << S_COMMAND_INVOKE_SKILL
+                 << S_COMMAND_MULTIPLE_CHOICE
+                 << S_COMMAND_NULLIFICATION
+                 << S_COMMAND_SHOW_CARD
+                 << S_COMMAND_AMAZING_GRACE
+                 << S_COMMAND_PINDIAN
+                 << S_COMMAND_CHOOSE_CARD
+                 << S_COMMAND_CHOOSE_ORDER
+                 << S_COMMAND_CHOOSE_ROLE_3V3
+                 << S_COMMAND_GAME_OVER;
         m_packetTypeMapping[S_SERVER_NOTIFICATION] = commands;
 
         commands.clear();
         commands << S_COMMAND_SHOW_CARD
-                << S_COMMAND_MOVE_FOCUS
-                << S_COMMAND_INVOKE_SKILL
-                << S_COMMAND_SKILL_GONGXIN;
+                 << S_COMMAND_MOVE_FOCUS
+                 << S_COMMAND_INVOKE_SKILL
+                 << S_COMMAND_SKILL_GONGXIN;
         m_packetTypeMapping[S_SERVER_REQUEST] = commands;
     }
 }
@@ -325,7 +327,7 @@ void Replayer::run(){
     nondelays << "addPlayer" << "removePlayer" << "speak";
 
     foreach(Pair pair, pairs){
-        if(pair.cmd.startsWith("[") || pair.cmd.startsWith("disableAG"))
+        if(pair.cmd.startsWith("["))
             continue;
         int delay = qMin(pair.elapsed - last, 1500);
         last = pair.elapsed;

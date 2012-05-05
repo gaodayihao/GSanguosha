@@ -65,7 +65,7 @@ protected:
 private:
     const Card *card, *filtered_card;
     QPixmap suit_pixmap, icon_pixmap, number_pixmap, cardsuit_pixmap, small_suit_pixmap;
-    QGraphicsSimpleTextItem *owner_text;
+    QGraphicsSimpleTextItem *owner_text, *owner_text_back;
     QPointF home_pos;
     QGraphicsPixmapItem *frame, *avatar;
     bool auto_back, frozen;
