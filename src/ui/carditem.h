@@ -34,7 +34,7 @@ public:
     void hideFrame();
     void setAutoBack(bool auto_back);
     void changeGeneral(const QString &general_name);
-    void writeCardDesc(QString desc);
+    void writeCardDesc(QString card_owner);
     void deleteCardDesc();
 
     void select();
@@ -64,8 +64,7 @@ protected:
 
 private:
     const Card *card, *filtered_card;
-    QPixmap suit_pixmap, icon_pixmap, number_pixmap, cardsuit_pixmap, small_suit_pixmap;
-    QGraphicsSimpleTextItem *owner_text, *owner_text_back;
+    QPixmap suit_pixmap, icon_pixmap, number_pixmap, cardsuit_pixmap, small_suit_pixmap, *owner_pixmap;
     QPointF home_pos;
     QGraphicsPixmapItem *frame, *avatar;
     bool auto_back, frozen;

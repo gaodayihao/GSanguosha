@@ -36,16 +36,7 @@ CardItem::CardItem(const Card *card)
 
     avatar = NULL;
 
-    owner_text_back = new QGraphicsSimpleTextItem(this);
-    QPen back_pen(Qt::black);
-    back_pen.setWidthF(3);
-    owner_text_back->setPen(back_pen);
-    owner_text_back->hide();
-
-    owner_text = new QGraphicsSimpleTextItem(this);
-    QPen pen(QColor(228,213,160));
-    owner_text->setPen(pen);
-    owner_text->hide();
+    owner_pixmap = NULL;
 
 }
 
@@ -309,30 +300,38 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     if(card){
         painter->drawPixmap(0, 14, cardsuit_pixmap);
         painter->drawPixmap(0, 2, number_pixmap);
+        if(owner_pixmap)painter->drawPixmap(0,0,*owner_pixmap);
     }
 }
 
 
-void CardItem::writeCardDesc(QString desc)
+void CardItem::writeCardDesc(QString card_owner)
 {
      if(card){
-         owner_text->setText(desc);
+         int x, y;
+         x=(93-card_owner.toLocal8Bit().length()*6)/2;
+         y=120;
+         owner_pixmap = new QPixmap(pixmap.size());
+         owner_pixmap->fill(QColor(0,0,0,0));
+         QPainter painter(owner_pixmap);
 
-         QRectF owner_rect = owner_text->boundingRect();
-         qreal x = (pixmap.width() - owner_rect.width())/2;
-         qreal y = pixmap.height() - owner_rect.height() - 7;
+#ifdef Q_OS_WIN32
+         static QFont card_desc_font("SimSun", 9, QFont::Normal);
+         painter.setFont(card_desc_font);
+         painter.setPen(Qt::black);
+#endif
 
-         owner_text->setPos(x, y);
-         owner_text->show();
+         painter.drawText(x, y-1, card_owner);
+         painter.drawText(x, y+1, card_owner);
+         painter.drawText(x-1, y, card_owner);
+         painter.drawText(x+1, y, card_owner);
 
-         owner_text_back->setText(desc);
-         owner_text_back->setPos(x, y);
-         owner_text_back->show();
-
+         painter.setPen(QColor(228,213,160));
+         painter.drawText(x, y, card_owner);
      }
 }
 
 void CardItem::deleteCardDesc(){
-    owner_text->hide();
-    owner_text_back->hide();
+    delete owner_pixmap;
+    owner_pixmap = NULL;
 }
