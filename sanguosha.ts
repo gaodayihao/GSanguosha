@@ -4146,6 +4146,16 @@ P = 你自己, R = 你所在的房间</translation>
         <translation>禁用场景模式</translation>
     </message>
     <message>
+        <location filename="src/ui/startscene.cpp" line="158"/>
+        <source>Same Mode is enabled</source>
+        <translation>启用同将模式</translation>
+    </message>
+    <message>
+        <location filename="src/ui/startscene.cpp" line="159"/>
+        <source>Same Mode is disabled</source>
+        <translation>禁用同将模式</translation>
+    </message>
+    <message>
         <location filename="src/ui/startscene.cpp" line="162"/>
         <source>Basara Mode is enabled</source>
         <translation>暗将模式已开启</translation>

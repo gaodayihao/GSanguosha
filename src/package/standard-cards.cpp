@@ -590,7 +590,6 @@ public:
                     jink->setSkillName(objectName());
                     room->provide(jink);
                     room->setEmotion(player, "good");
-                    room->broadcastInvoke("playAudio", objectName());
 
                     return true;
                 }else
