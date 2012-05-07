@@ -12,7 +12,7 @@ end
 
 sgs.ai_skill_use["@@jujian"] = function(self, prompt)
 	local needfriend = 0
-	local nobasiccard = 1
+	local nobasiccard = -1
 	local cards = self.player:getHandcards()
 	cards = sgs.QList2Table(cards)
 	self:sortByKeepValue(cards, true)
