@@ -17,7 +17,7 @@ sgs.ai_skill_use["@@jujian"] = function(self, prompt)
 	cards = sgs.QList2Table(cards)
 	self:sortByKeepValue(cards, true)
 	for _,card in ipairs(cards) do
-		if card:getTypeId() ~= sgs.Card_Basic and not self.player:isLocked(card) then nobasiccard = card:getEffectiveId() end
+		if card:getTypeId() ~= sgs.Card_Basic and not self.player:isJilei(card) then nobasiccard = card:getEffectiveId() end
 	end
 	for _, friend in ipairs(self.friends_noself) do
 		if friend:isWounded() or not friend:faceUp() 
