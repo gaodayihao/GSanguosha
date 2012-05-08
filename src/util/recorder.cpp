@@ -144,7 +144,7 @@ QString &Replayer::commandProceed(QString &cmd){
             bool ok = false;
             cmd.toInt(&ok);
 
-            if(!cmd.startsWith("\"") && !cmd.startsWith("[") && !ok)
+            if(!cmd.startsWith("\"") && !cmd.startsWith("[") && !cmd.contains("+") && !ok)
                 cmd = "\"" + cmd +"\"";
         }
     }
@@ -163,6 +163,7 @@ QString &Replayer::commandTranslation(QString &cmd){
             m_isOldVersion = true;
             cmd.remove(command);
             cmd.remove(' ');
+            cmd.remove('\n');
 
             commandProceed(cmd);
 
@@ -225,6 +226,7 @@ void Replayer::initCommandPair(){
         m_commandMapping["askForCardChosen"]    = S_COMMAND_CHOOSE_CARD;
         m_commandMapping["askForOrder"]         = S_COMMAND_CHOOSE_ORDER;
         m_commandMapping["askForRole"]          = S_COMMAND_CHOOSE_ROLE_3V3;
+        m_commandMapping["gameOver"]            = S_COMMAND_GAME_OVER;
     }
 
     if(m_packetTypeMapping.isEmpty()){
@@ -253,7 +255,8 @@ void Replayer::initCommandPair(){
                  << S_COMMAND_PINDIAN
                  << S_COMMAND_CHOOSE_CARD
                  << S_COMMAND_CHOOSE_ORDER
-                 << S_COMMAND_CHOOSE_ROLE_3V3;
+                 << S_COMMAND_CHOOSE_ROLE_3V3
+                 << S_COMMAND_GAME_OVER;
         m_packetTypeMapping[S_SERVER_NOTIFICATION] = commands;
 
         commands.clear();
@@ -325,8 +328,8 @@ void Replayer::run(){
     nondelays << "addPlayer" << "removePlayer" << "speak";
 
     foreach(Pair pair, pairs){
-//        if(pair.cmd.startsWith("["))
-//            continue;
+        if(pair.cmd.startsWith("[") && m_isOldVersion && !pair.cmd.contains("3,35"))
+            continue;
         int delay = qMin(pair.elapsed - last, 1500);
         last = pair.elapsed;
 
