@@ -440,6 +440,8 @@ RoomScene::RoomScene(QMainWindow *main_window)
     animations = new EffectAnimation();
     drawPile = NULL;
     view_transform = QMatrix();
+
+    inReplay = ClientInstance->isReplaying;
 }
 
 void RoomScene::createControlButtons(){
@@ -3560,6 +3562,15 @@ void RoomScene::freeze(){
 }
 
 void RoomScene::moveFocus(const QString &who, Countdown countdown){
+    if(inReplay){
+        if (m_choiceDialog != NULL && m_choiceDialog->isVisible())
+        {
+            m_choiceDialog->hide();
+        }
+        prompt_box->disappear();
+        ClientInstance->getPromptDoc()->clear();
+        dashboard->hideProgressBar();
+    }
     Photo *photo = name2photo[who];
     if(photo){
         if(focused != photo && focused){

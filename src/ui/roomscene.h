@@ -236,6 +236,7 @@ private:
     ChatWidget *chat_widget;
     RoomLayout *room_layout;
 
+    bool inReplay;
 #ifdef AUDIO_SUPPORT
     QSharedMemory *memory;
 #endif

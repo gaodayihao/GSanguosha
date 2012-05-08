@@ -197,13 +197,15 @@ public:
 
     // public fields
     bool m_isDiscardActionRefusable;
-    bool isCardShowOrPindian;
-    bool WillDiscard;
     bool m_canDiscardEquip;
     int discard_num;
     QString skill_name;
     QList<const Card*> discarded_list;
     QStringList players_to_choose;
+
+    bool isCardShowOrPindian;
+    bool WillDiscard;
+    bool isReplaying;
 
 public slots:
     void createroom();

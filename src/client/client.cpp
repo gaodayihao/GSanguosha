@@ -172,12 +172,14 @@ Client::Client(QObject *parent, const QString &filename)
     players << Self;
 
     if(!filename.isEmpty()){
+        isReplaying = true;
         socket = NULL;
         recorder = NULL;
 
         replayer = new Replayer(this, filename);
         connect(replayer, SIGNAL(command_parsed(QString)), this, SLOT(processServerPacket(QString)));
     }else{
+        isReplaying = false;
         socket = new NativeClientSocket;
         socket->setParent(this);
 
