@@ -328,7 +328,8 @@ void Replayer::run(){
     nondelays << "addPlayer" << "removePlayer" << "speak";
 
     foreach(Pair pair, pairs){
-        if(pair.cmd.startsWith("[") && m_isOldVersion && !pair.cmd.contains("3,35"))
+        if(pair.cmd.startsWith("[") && m_isOldVersion && !pair.cmd.contains("3,35")
+                && !pair.cmd.contains("3,5") )
             continue;
         int delay = qMin(pair.elapsed - last, 1500);
         last = pair.elapsed;
