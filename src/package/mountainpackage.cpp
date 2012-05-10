@@ -254,15 +254,9 @@ public:
             damage->from->clearPrivatePiles();
             if(damage->from->getHp() <= 0 )
                 room->loseHp(damage->from,0);
-            QString kingdom = damage->from->getKingdom();
+            room->setPlayerMark(damage->from, "@duanchang", 1);
 
-            QString to_transfigure = damage->from->getGeneral()->isMale() ? "sujiang" : "sujiangf";
-            room->setPlayerProperty(damage->from, "general", to_transfigure);
-            if(damage->from->getGeneral2())
-                room->setPlayerProperty(damage->from, "general2", to_transfigure);
-            room->setPlayerProperty(damage->from, "kingdom", kingdom);
-
-            room->resetAI(damage->from);
+            //room->resetAI(damage->from);
         }
 
         return false;

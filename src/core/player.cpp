@@ -283,8 +283,8 @@ bool Player::isLord() const{
 }
 
 bool Player::hasSkill(const QString &skill_name) const{
-    return hasInnateSkill(skill_name)
-            || acquired_skills.contains(skill_name);
+    return (hasInnateSkill(skill_name)
+            || acquired_skills.contains(skill_name)) && getMark("@duanchang") < 1;
 }
 
 bool Player::hasInnateSkill(const QString &skill_name) const{
@@ -298,6 +298,9 @@ bool Player::hasInnateSkill(const QString &skill_name) const{
 }
 
 bool Player::hasLordSkill(const QString &skill_name) const{
+    if(getMark("@duanchang") > 0)
+        return false;
+
     if(acquired_skills.contains(skill_name))
         return true;
 

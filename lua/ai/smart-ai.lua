@@ -2912,6 +2912,8 @@ end
 local function prohibitUseDirectly(card, player)
 	if player:isLocked(card) or player:isJilei(card) then return true end
 	
+	if player:getMark("@duanchang") > 0 then return false end
+	
 	local _, flist = sgs.getSkillLists(player)
 	for _, askill in ipairs(flist) do
 		local callback = sgs.ai_filterskill_filter[askill]
@@ -2932,6 +2934,8 @@ local function cardsView(class_name, player)
 end
 
 local function isCompulsoryView(card, class_name, player, card_place)
+	if player:getMark("@duanchang") > 0 then return end
+
 	local _, flist = sgs.getSkillLists(player)
 	for _, askill in ipairs(flist) do
 		local callback = sgs.ai_filterskill_filter[askill]
@@ -2943,6 +2947,8 @@ local function isCompulsoryView(card, class_name, player, card_place)
 end
 
 local function getSkillViewCard(card, class_name, player, card_place)
+	if player:getMark("@duanchang") > 0 then return false end
+
 	local vlist = sgs.getSkillLists(player)
 	for _, askill in ipairs(vlist) do
 		local callback = sgs.ai_view_as[askill]
@@ -3312,6 +3318,7 @@ function SmartAI:useSkillCard(card,use)
 		end
 	end
 	if shit - self.player:getHp() > self:getAllPeachNum() then use.card = nil end
+	if self.player:getMark("@duanchang") > 0 then use.card = nil end
 end
 
 function SmartAI:useBasicCard(card, use)
