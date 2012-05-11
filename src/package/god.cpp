@@ -920,9 +920,10 @@ public:
             if(player->getPhase() == Player::Discard){
                 CardStar card = data.value<CardStar>();
                 int n = card->subcardsLength();
-                if(n > 0)
+                if(n > 0){
                     player->getRoom()->playSkillEffect(objectName());
                     player->gainMark("@bear", n);
+                }
             }
         }else if(event == DamageDone){
             DamageStruct damage = data.value<DamageStruct>();
