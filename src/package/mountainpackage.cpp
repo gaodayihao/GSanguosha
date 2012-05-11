@@ -739,8 +739,9 @@ public:
 
             CardMoveStar move = data.value<CardMoveStar>();
 
-            if(move->card_id == room->getTag("QiaobianCost").toInt())
-                return false;
+            if(!room->getTag("QiaobianCost").isNull())
+                if(move->card_id == room->getTag("QiaobianCost").toInt())
+                    return false;
 
             guzheng << move->card_id;
 
