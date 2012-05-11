@@ -37,7 +37,7 @@ bool QiaobianCard::targetFilter(const QList<const Player *> &targets, const Play
 
 void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlayer *> &targets) const{
     if(zhanghe->getPhase() == Player::Discard){
-        room->setTag("QiaobianCost", this->getSubcards().first());
+        room->setTag("QiaobianCost", QVariant::fromValue(getSubcards().first()));
         room->playSkillEffect("qiaobian", 4);
     }
 
