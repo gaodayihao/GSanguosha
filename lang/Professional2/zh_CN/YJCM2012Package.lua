@@ -44,7 +44,7 @@ return {
 	[":qianxi"] = "每当你使用【杀】对距离为1的目标角色造成伤害时，你可以进行一次判定，若判定结果不为红桃，你防止此伤害，改为令其减1点体力上限。",
 	["#Qianxi"] = "%from 的【%arg】生效，%to 将受到技能影响",
 
-	["#liaohua"] = "历经沧桑",
+	["#liaohua"] = "历尽沧桑",
 	["liaohua"] = "廖化",
 	["designer:liaohua"] = "桃花僧",
 	["illustrator:liaohua"] = "天空之城",
@@ -61,7 +61,7 @@ return {
 	["fuhun"] = "父魂",
 	[":fuhun"] = "摸牌阶段，你可以放弃摸牌，改为亮出牌堆顶的两张牌并获得之。若亮出的牌不为同一颜色，则你获得“武圣”、“咆哮”直到回合结束。",
 
-	["#chengpu"] = "三朝之臣",
+	["#chengpu"] = "三朝虎臣",
 	["chengpu"] = "程普",
 	["designer:chengpu"] = "仲达与孔明",
 	["illustrator:chengpu"] = "G.G.G.",

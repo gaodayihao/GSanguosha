@@ -37,7 +37,7 @@ bool QiaobianCard::targetFilter(const QList<const Player *> &targets, const Play
 
 void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlayer *> &targets) const{
     if(zhanghe->getPhase() == Player::Discard){
-        room->setTag("QiaobianCast", this->getSubcards().first());
+        room->setTag("QiaobianCost", this->getSubcards().first());
         room->playSkillEffect("qiaobian", 4);
     }
 
@@ -139,8 +139,8 @@ public:
         case Player::Start:
         case Player::Finish:return false;
         case Player::NotActive:{
-             if(!room->getTag("QiaobianCast").isNull())
-                 room->removeTag("QiaobianCast");
+             if(!room->getTag("QiaobianCost").isNull())
+                 room->removeTag("QiaobianCost");
              return false;
         }
 
@@ -739,7 +739,7 @@ public:
 
             CardMoveStar move = data.value<CardMoveStar>();
 
-            if(move->card_id == room->getTag("QiaobianCast").toInt())
+            if(move->card_id == room->getTag("QiaobianCost").toInt())
                 return false;
 
             guzheng << move->card_id;
