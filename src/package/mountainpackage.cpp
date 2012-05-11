@@ -36,6 +36,11 @@ bool QiaobianCard::targetFilter(const QList<const Player *> &targets, const Play
 }
 
 void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlayer *> &targets) const{
+    if(zhanghe->getPhase() == Player::Discard){
+        room->setTag("QiaobianCast", this->getSubcards().first());
+        room->playSkillEffect("qiaobian", 4);
+    }
+
     room->throwCard(this, zhanghe);
 
     if(zhanghe->getPhase() == Player::Draw){
@@ -85,8 +90,6 @@ void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlay
     }
     else if(zhanghe->getPhase() == Player::Judge)
         room->playSkillEffect("qiaobian", 1);
-    else
-        room->playSkillEffect("qiaobian", 4);
 }
 
 class QiaobianViewAsSkill: public OneCardViewAsSkill{
@@ -134,8 +137,12 @@ public:
         switch(zhanghe->getPhase()){
         case Player::RoundStart:
         case Player::Start:
-        case Player::Finish:
-        case Player::NotActive: return false;
+        case Player::Finish:return false;
+        case Player::NotActive:{
+             if(!room->getTag("QiaobianCast").isNull())
+                 room->removeTag("QiaobianCast");
+             return false;
+        }
 
         case Player::Judge: return room->askForUseCard(zhanghe, "@qiaobian", "@qiaobian-judge");
         case Player::Draw: return room->askForUseCard(zhanghe, "@qiaobian", "@qiaobian-draw");
@@ -731,6 +738,10 @@ public:
             QVariantList guzheng = erzhang->tag["Guzheng"].toList();
 
             CardMoveStar move = data.value<CardMoveStar>();
+
+            if(move->card_id == room->getTag("QiaobianCast").toInt())
+                return false;
+
             guzheng << move->card_id;
 
             erzhang->tag["Guzheng"] = guzheng;

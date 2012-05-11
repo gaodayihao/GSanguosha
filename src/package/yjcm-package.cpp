@@ -335,23 +335,17 @@ public:
                 move->from->setFlags("EnyuanTarget");
         }
         else if(event == CardGotDone){
-            if(player->getMark("enyuan") >= 2 && room->askForSkillInvoke(player,objectName(), data)){
-                ServerPlayer *target = NULL;
-                foreach(ServerPlayer *other, room->getOtherPlayers(player)){
-                    if(other->hasFlag("EnyuanTarget")){
-                        target = other;
-                        break;
-                    }
-                }
-                room->drawCards(target,1);
-                room->playSkillEffect(objectName(), qrand() % 2 + 1);
-
-            }
+            ServerPlayer *target = NULL;
             foreach(ServerPlayer *other, room->getOtherPlayers(player)){
                 if(other->hasFlag("EnyuanTarget")){
                     other->setFlags("-EnyuanTarget");
+                    target = other;
                     break;
                 }
+            }
+            if(player->getMark("enyuan") >= 2 && target && room->askForSkillInvoke(player,objectName(), data)){
+                room->drawCards(target,1);
+                room->playSkillEffect(objectName(), qrand() % 2 + 1);
             }
             room->setPlayerMark(player, "enyuan", 0);
         }else if(event == Damaged){
