@@ -547,4 +547,4 @@ SPPackage::SPPackage()
     addMetaObject<WeidiCard>();
 }
 
-ADD_PACKAGE(SP);
+ADD_PACKAGE(SP)

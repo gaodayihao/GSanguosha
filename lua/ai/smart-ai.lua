@@ -2619,7 +2619,9 @@ function SmartAI:askForSinglePeach(dying)
 			end
 			if not same then return "." end
 		end
-		
+		if (self.player:objectName() == dying:objectName()) then
+			card_str = self:getCardId("Analeptic") or self:getCardId("Peach")
+		end
 		if dying:isLord() then
 			card_str = self:getCardId("Peach")
 		elseif self:doNotSave(dying) then return "."
@@ -2633,9 +2635,6 @@ function SmartAI:askForSinglePeach(dying)
 			if weaklord < 1 or self:getAllPeachNum() > 1 then
 				card_str = self:getCardId("Peach") 
 			end
-		end
-		if (self.player:objectName() == dying:objectName()) then
-			card_str = self:getCardId("Analeptic") or self:getCardId("Peach")
 		end
 	end
 	return card_str or "."

@@ -140,9 +140,8 @@ void ServerPlayer::throwAllCards(){
     if(!card)
         card = new DummyCard;
     QList<const Card *> equips = getEquips();
-    if(!equips.isEmpty())
-        foreach(const Card *equip, equips)
-            card->addSubcard(equip);
+    foreach(const Card *equip, equips)
+        card->addSubcard(equip);
     if(card->subcardsLength() > 0){
         room->throwCard(card, this);
     }
