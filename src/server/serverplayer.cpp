@@ -143,7 +143,7 @@ void ServerPlayer::throwAllCards(){
     if(!equips.isEmpty())
         foreach(const Card *equip, equips)
             card->addSubcard(equip);
-    if(card != NULL){
+    if(card->subcardsLength() > 0){
         room->throwCard(card, this);
     }
     card->deleteLater();
