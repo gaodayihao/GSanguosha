@@ -2,6 +2,8 @@
 #include "room.h"
 #include "engine.h"
 #include "gamerule.h"
+#include "scenerule.h"
+#include "scenario.h"
 #include "ai.h"
 #include "jsonutils.h"
 #include "settings.h"
@@ -199,12 +201,10 @@ void RoomThread::addPlayerSkills(ServerPlayer *player, bool invoke_game_start){
     }
 }
 
-void RoomThread::constructTriggerTable(const GameRule *rule){
-    foreach(ServerPlayer *player, room->m_players){
-        addPlayerSkills(player, false);
+void RoomThread::constructTriggerTable(){
+    foreach(ServerPlayer *player, room->getPlayers()){
+        addPlayerSkills(player, true);
     }
-
-    addTriggerSkill(rule);
 }
 
 static const int GameOver = 1;
@@ -287,10 +287,27 @@ void RoomThread::run(){
         return;
     }
 
-    // start game, draw initial 4 cards
-    foreach(ServerPlayer *player, room->getPlayers()){
-        trigger(GameStart, player);
+    GameRule *game_rule;
+    if(room->getMode() == "04_1v3")
+        game_rule = new HulaoPassMode(this);
+    else if(Config.EnableScene)	//changjing
+        game_rule = new SceneRule(this);	//changjing
+    else
+        game_rule = new GameRule(this);
+
+    addTriggerSkill(game_rule);
+    if (Config.EnableBasara) addTriggerSkill(new BasaraMode(this));
+
+    if(room->getScenario() != NULL){
+        const ScenarioRule *rule = room->getScenario()->getRule();
+        if(rule)
+            addTriggerSkill(rule);
     }
+
+    // start game, draw initial 4 cards
+    QVariant roomdata = QVariant::fromValue<RoomStar>(room);
+    trigger(GameStart, NULL, roomdata);
+    constructTriggerTable();
 
     if(room->mode == "06_3v3"){
         run3v3();
@@ -371,7 +388,7 @@ static bool CompareByPriority(const TriggerSkill *a, const TriggerSkill *b){
 }
 
 bool RoomThread::trigger(TriggerEvent event, ServerPlayer *target, QVariant &data){
-    Q_ASSERT(QThread::currentThread() == this);
+    //Q_ASSERT(QThread::currentThread() == this);
 
     // push it to event stack
     EventTriplet triplet(event, target, &data);

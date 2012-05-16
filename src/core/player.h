@@ -21,7 +21,7 @@ class Player : public QObject
 
     Q_PROPERTY(QString screenname READ screenName WRITE setScreenName)
     Q_PROPERTY(int hp READ getHp WRITE setHp)
-    Q_PROPERTY(int maxhp READ getMaxHP WRITE setMaxHP)
+    Q_PROPERTY(int maxhp READ getMaxHp WRITE setMaxHp)
     Q_PROPERTY(QString kingdom READ getKingdom WRITE setKingdom)
     Q_PROPERTY(bool wounded READ isWounded STORED false)
     Q_PROPERTY(QString role READ getRole WRITE setRole)
@@ -51,7 +51,7 @@ class Player : public QObject
 
 public:
     enum Phase {RoundStart, Start, Judge, Draw, Play, Discard, Finish, NotActive};
-    enum Place {Hand, Equip, Judging, Special, DiscardedPile, DrawPile};
+    enum Place {Hand, Equip, Judging, Special, DiscardPile, DrawPile, PlaceTakeoff, PlaceUnknown};
     enum Role {Lord, Loyalist, Rebel, Renegade};
 
     explicit Player(QObject *parent);
@@ -63,9 +63,7 @@ public:
     int getHp() const;
     void setHp(int hp);
     int getMaxHp() const;
-    int getMaxHP() const;
     void setMaxHp(int max_hp);
-    void setMaxHP(int max_hp);
     int getLostHp() const;
     bool isWounded() const;
     General::Gender getGender() const;

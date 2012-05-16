@@ -89,7 +89,10 @@ return {
 	["mingce:use"] = "视为对其攻击范围内的另一名由你指定的角色使用一张【杀】",
 	["mingce:draw"] = "摸一张牌",
 	["#ZhichiDamaged"] = "%from 受到了伤害，本回合内【杀】和非延时锦囊都将对其无效",
-	 ["#ZhichiAvoid"] = "%from 的锁定技【%arg】被触发，【杀】和非延时锦囊对其无效",
+	["#ZhichiAvoid"] = "%from 的锁定技【%arg】被触发，【杀】和非延时锦囊对其无效",
+	
+	["#zhonghui"] = "桀骜的野心家",
+	["zhonghui"] = "钟会",
 
 	["designer:caozhi"] = "foxear",
 	["designer:yujin"] = "城管无畏",
@@ -101,6 +104,7 @@ return {
 	["designer:wuguotai"] = "章鱼咬你哦",
 	["designer:gaoshun"] = "羽柴文理",
 	["designer:chengong"] = "Kaycent",
+	["designer:zhonghui"] = "韩旭",
 
 	["cv:caozhi"] = "官方",
 	["$jiushi1"] = "置酒高殿上，亲友从我游。",
@@ -151,6 +155,7 @@ return {
 	["~xusheng"] = "盛不能奋身出命，不亦辱乎…",
 	["~xushu"] = "娘……孩儿不孝……向您……请罪……",
 	["~yujin"] = "我……无颜面对丞相了……",
+	["~zhonghui"] = "",
 
 	-- illustrator
 	["illustrator:caozhi"] = "木美人",
@@ -163,4 +168,5 @@ return {
 	["illustrator:wuguotai"] = "zoo",
 	["illustrator:chengong"] = "黑月乱",
 	["illustrator:gaoshun"] = "鄧Sir",
+	["illustrator:zhonghui"] = "雪君S",
 }

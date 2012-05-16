@@ -66,7 +66,8 @@ public:
     AI *getAI() const;
     AI *getSmartAI() const;
 
-    bool isOnline() const;
+    bool isOnline() const; // @todo: better rename this to be re
+    inline bool isOffline() const { return getState() == "robot" || getState() == "offline"; }
 
     virtual int aliveCount() const;
     virtual int getHandcardNum() const;
@@ -90,7 +91,6 @@ public:
     QString findReasonable(const QStringList &generals, bool no_unreasonable = false);
     void clearSelected();
 
-    int getGeneralMaxHP() const;
     int getGeneralMaxHp() const;
     virtual QString getGameMode() const;
 
@@ -99,6 +99,7 @@ public:
     void marshal(ServerPlayer *player) const;
 
     void addToPile(const QString &pile_name, const Card *card, bool open = true);
+    void addToPile(const QString &pile_name, QList<int> card_ids, bool open = true);
     void addToPile(const QString &pile_name, int card_id, bool open = true);
     void gainAnExtraTurn(ServerPlayer *clearflag = NULL);
 
@@ -146,6 +147,7 @@ protected:
 private:
     ClientSocket *socket;
     QList<const Card *> handcards;
+    QList<const Card *> m_takenOffCards;
     Room *room;
     AI *ai;
     AI *trust_ai;

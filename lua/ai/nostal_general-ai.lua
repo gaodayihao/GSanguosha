@@ -1,7 +1,7 @@
-local nos_fanjian_skill={}
-nos_fanjian_skill.name="nos_fanjian"
-table.insert(sgs.ai_skills,nos_fanjian_skill)
-nos_fanjian_skill.getTurnUseCard=function(self)
+local nosfanjian_skill={}
+nosfanjian_skill.name="nosfanjian"
+table.insert(sgs.ai_skills,nosfanjian_skill)
+nosfanjian_skill.getTurnUseCard=function(self)
 	if self.player:isKongcheng() then return nil end
 	if self.player:usedTimes("NosFanjianCard")>0 then return nil end
 
@@ -28,9 +28,9 @@ sgs.ai_card_intention.NosFanjianCard = sgs.ai_card_intention.FanjianCard
 
 sgs.dynamic_value.damage_card.NosFanjianCard = true
 
-sgs.ai_chaofeng.nos_zhouyu = sgs.ai_chaofeng.zhouyu
+sgs.ai_chaofeng.noszhouyu = sgs.ai_chaofeng.zhouyu
 
-sgs.ai_skill_invoke.nos_lieren = sgs.ai_skill_invoke.lieren
+sgs.ai_skill_invoke.noslieren = sgs.ai_skill_invoke.lieren
 
 sgs.ai_skill_cardask["@enyuanheart"] = function(self)
 	local cards = self.player:getHandcards()
@@ -42,14 +42,14 @@ sgs.ai_skill_cardask["@enyuanheart"] = function(self)
 	return "."
 end
 
-function sgs.ai_slash_prohibit.nos_enyuan(self)
+function sgs.ai_slash_prohibit.nosenyuan(self)
 	if self:isWeak() then return true end
 end
 
-nos_xuanhuo_skill={}
-nos_xuanhuo_skill.name="nos_xuanhuo"
-table.insert(sgs.ai_skills,nos_xuanhuo_skill)
-nos_xuanhuo_skill.getTurnUseCard=function(self)
+nosxuanhuo_skill={}
+nosxuanhuo_skill.name="nosxuanhuo"
+table.insert(sgs.ai_skills,nosxuanhuo_skill)
+nosxuanhuo_skill.getTurnUseCard=function(self)
 	if not self.player:hasUsed("NosXuanhuoCard") then
 		return sgs.Card_Parse("@NosXuanhuoCard=.")
 	end
@@ -96,7 +96,7 @@ sgs.ai_skill_use_func.NosXuanhuoCard = function(card, use, self)
 	end
 end
 
-sgs.ai_skill_playerchosen.nos_xuanhuo = function(self, targets)
+sgs.ai_skill_playerchosen.nosxuanhuo = function(self, targets)
 	for _, player in sgs.qlist(targets) do
 		if (player:getHandcardNum() <= 2 or player:getHp() < 2) and self:isFriend(player) and not player:hasFlag("xuanhuo_target") then
 			return player
@@ -104,17 +104,17 @@ sgs.ai_skill_playerchosen.nos_xuanhuo = function(self, targets)
 	end
 end
 
-sgs.nos_fazheng_suit_value = 
+sgs.nosfazheng_suit_value = 
 {
 	heart = 3.9
 }
 
-sgs.ai_chaofeng.nos_fazheng = -3
+sgs.ai_chaofeng.nosfazheng = -3
 
-nos_jujian_skill={}
-nos_jujian_skill.name="nos_jujian"
-table.insert(sgs.ai_skills,nos_jujian_skill)
-nos_jujian_skill.getTurnUseCard=function(self)
+nosjujian_skill={}
+nosjujian_skill.name="nosjujian"
+table.insert(sgs.ai_skills,nosjujian_skill)
+nosjujian_skill.getTurnUseCard=function(self)
 	if not self.player:hasUsed("NosJujianCard") then return sgs.Card_Parse("@NosJujianCard=.") end
 end
 
@@ -208,7 +208,7 @@ sgs.ai_card_intention.NosJujianCard = -100
 
 sgs.dynamic_value.benefit.NosJujianCard = true
 
-sgs.ai_skill_choice.nos_xuanfeng = function(self, choices)
+sgs.ai_skill_choice.nosxuanfeng = function(self, choices)
 	self:sort(self.enemies, "defense")
 	local slash = sgs.Card_Parse(("slash[%s:%s]"):format(sgs.Card_NoSuit, 0))
 	for _, enemy in ipairs(self.enemies) do

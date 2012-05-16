@@ -165,22 +165,31 @@ sgs.ai_skill_invoke.luoyi=function(self,data)
 	if self.player:isSkipped(sgs.Player_Play) then return false end
 	local cards=self.player:getHandcards()
 	cards=sgs.QList2Table(cards)
-
+	local slashtarget = 0
+	local dueltarget = 0
+	self:sort(self.enemies,"hp")
 	for _,card in ipairs(cards) do
 		if card:inherits("Slash") then
-
 			for _,enemy in ipairs(self.enemies) do
-				if self.player:canSlash(enemy, true) and
-				self:slashIsEffective(card, enemy) and
-				( (not enemy:getArmor()) or (enemy:getArmor():objectName()=="renwang_shield") or (enemy:getArmor():objectName()=="vine") ) and
-				enemy:getHandcardNum()< 2 then
-					if not self.player:containsTrick("indulgence") then
-						self:speak("luoyi")
-						return true
+				if self.player:canSlash(enemy, true) and self:slashIsEffective(card, enemy) and self:objectiveLevel(enemy) > 3 then
+					if self:getCardsNum("Jink", enemy) < 1 or (self:isEquip("Axe") and self.player:getCards("he"):length() > 4) then
+						slashtarget = slashtarget + 1
 					end
 				end
 			end
 		end
+		if card:inherits("Duel") then
+			for _, enemy in ipairs(self.enemies) do
+				if self:getCardsNum("Slash") >= self:getCardsNum("Slash", enemy) 
+				and self:objectiveLevel(enemy) > 3 and not self:cantbeHurt(enemy) and enemy:getMark("@fog") < 1 then 
+					dueltarget = dueltarget + 1 
+				end
+			end
+		end
+	end		
+	if (slashtarget+dueltarget) > 0 then
+		self:speak("luoyi")
+		return true
 	end
 	return false
 end
@@ -189,7 +198,8 @@ sgs.xuchu_keep_value =
 {
 	Peach 			= 6,
 	Analeptic 		= 5.8,
-	Jink 			= 5.7,
+	Jink 			= 5.2,
+	Duel            = 5.5,
 	FireSlash 		= 5.6,
 	Slash 			= 5.4,
 	ThunderSlash 	= 5.5,	
@@ -1057,7 +1067,7 @@ sgs.ai_skill_use_func.LijianCard=function(card,use,self)
 		end
 		if friend_maxSlash then
 			local safe = false
-			if (first:hasSkill("ganglie") or first:hasSkill("fankui") or first:hasSkill("enyuan") or first:hasSkill("nos_enyuan")) then
+			if (first:hasSkill("ganglie") or first:hasSkill("fankui") or first:hasSkill("enyuan") or first:hasSkill("nosenyuan")) then
 				if (first:getHp()<=1 and first:getHandcardNum()==0) then safe=true end
 			elseif (self:getCardsNum("Slash", friend_maxSlash) >= self:getCardsNum("Slash", first)) then safe=true end
 			if safe then return friend_maxSlash end
@@ -1075,7 +1085,7 @@ sgs.ai_skill_use_func.LijianCard=function(card,use,self)
 		for _, enemy in ipairs(self.enemies) do
 			--if zhugeliang_kongcheng and #males==1 and self:damageIsEffective(zhugeliang_kongcheng, sgs.DamageStruct_Normal, males[1]) 
 				--then table.insert(males, zhugeliang_kongcheng) end
-			if enemy:getGeneral():isMale() and (not enemy:hasSkill("wuyan") and not enemy:hasSkill("nos_wuyan")) then
+			if enemy:getGeneral():isMale() and (not enemy:hasSkill("wuyan") and not enemy:hasSkill("noswuyan")) then
 				if enemy:hasSkill("kongcheng") and enemy:isKongcheng() then	zhugeliang_kongcheng=enemy
 				else
 					if #males == 0 and self:hasTrickEffective(duel, enemy) then table.insert(males, enemy)
@@ -1102,11 +1112,11 @@ sgs.ai_skill_use_func.LijianCard=function(card,use,self)
 				if self.player:isLord() or sgs.isRolePredictable() then 
 					local friend_maxSlash = findFriend_maxSlash(self,first)
 					if friend_maxSlash then second=friend_maxSlash end
-				elseif (lord:getGeneral():isMale()) and (not lord:hasSkill("wuyan") and not lord:hasSkill("nos_wuyan")) then 
+				elseif (lord:getGeneral():isMale()) and (not lord:hasSkill("wuyan") and not lord:hasSkill("noswuyan")) then 
 					if (self.role=="rebel") and (not first:isLord()) and self:damageIsEffective(lord, sgs.DamageStruct_Normal, first) then
 						second = lord
 					else
-						if ((self.role=="loyalist" or (self.role=="renegade") and not (first:hasSkill("ganglie") and first:hasSkill("enyuan") or first:hasSkill("nos_enyuan"))))
+						if ((self.role=="loyalist" or (self.role=="renegade") and not (first:hasSkill("ganglie") and first:hasSkill("enyuan") or first:hasSkill("nosenyuan"))))
 							and	( self:getCardsNum("Slash", first)<=self:getCardsNum("Slash", second)) then
 							second = lord
 						end

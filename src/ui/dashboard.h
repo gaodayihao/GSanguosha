@@ -8,6 +8,7 @@
 #include "sprite.h"
 #include "protocol.h"
 #include "TimedProgressBar.h"
+#include "GeneralCardContainerUI.h"
 
 #include <QPushButton>
 #include <QComboBox>
@@ -16,7 +17,7 @@
 #include <QProgressBar>
 #include <QMutex>
 
-class Dashboard : public Pixmap
+class Dashboard : public PlayerCardContainer
 {
     Q_OBJECT
 
@@ -34,8 +35,6 @@ public:
     void showProgressBar(QSanProtocol::Countdown countdown);
 
     void setTrust(bool trust);
-    void addCardItem(CardItem *card_item);
-    CardItem *takeCardItem(int card_id, Player::Place place);
     void setPlayer(const ClientPlayer *player);
     Pixmap *getAvatar();
     void selectCard(const QString &pattern, bool forward = true);
@@ -50,8 +49,9 @@ public:
     void enableCards();
     void enableAllCards();
 
-    void installEquip(CardItem *equip);
-    void installDelayedTrick(CardItem *card);
+    void adjustCards(bool playAnimation = true);
+
+    QList<CardItem*> removeCardItems(const QList<int> &card_ids, Player::Place place);
 
     // pending operations
     void startPending(const ViewAsSkill *skill);
@@ -60,6 +60,8 @@ public:
     const ViewAsSkill *currentSkill() const;
     const Card *pendingCard() const;
 
+    void selectCard(CardItem* item, bool isSelected);
+
     void killPlayer();
     void revivePlayer();
 
@@ -67,25 +69,36 @@ public:
     int getMidPosition();
     int getButtonWidgetWidth() const;
     int getTextureWidth() const;
-
+    static const int S_CARD_NORMAL_Y = 36;
+    static const int S_PENDING_OFFSET_Y = - 40;
 public slots:
     void updateAvatar();
     void updateSmallAvatar();
     void updateReadyItem(bool visible);
     void refresh();
     void doFilter();
-    void sortCards(int sort_type);
+    void sortCards(int sort_type, bool doAnmiation = true);
     void reverseSelection();
 
 protected:
+    bool _addCardItems(QList<CardItem*> &card_items, Player::Place place);
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
-
+    void _installEquip(CardItem *equip);
+    void _addHandCard(CardItem* card_item);
+    void _installDelayedTrick(CardItem *card);
+    void _adjustCards();
+    void _adjustCards(const QList<CardItem *> &list, int y);
     // ui controls
     QSanCommandProgressBar m_progressBar;
+    const static QRect S_EQUIP_CARD_MOVE_REGION;
+    const static QRect S_JUDGE_CARD_MOVE_REGION;
+    QRectF m_cardTakeOffRegion;
+    QRectF m_cardSpecialRegion;
 
     // sync objects
     QMutex m_mutex;
+    QMutex m_mutexEnableCards;
 
 private:
     QPixmap left_pixmap, right_pixmap;
@@ -93,7 +106,6 @@ private:
     QGraphicsItem *button_widget;
     int ex_width;
 
-    QList<CardItem*> card_items;
     CardItem *selected;
     Pixmap *avatar, *small_avatar;
     QGraphicsPixmapItem *kingdom, *ready_item;
@@ -102,6 +114,8 @@ private:
 
     int sort_type;
     QGraphicsSimpleTextItem *handcard_num;
+    QList<CardItem*> m_handCards;
+    QList<CardItem *> m_takenOffCards;
     QList<CardItem *> judging_area;
     QList<QGraphicsItem *> delayed_tricks;
     QGraphicsPixmapItem *death_item;
@@ -131,9 +145,6 @@ private:
     const Card *pending_card;
     const ViewAsSkill *view_as_skill;
     const FilterSkill *filter;
-
-    void adjustCards();
-    void adjustCards(const QList<CardItem *> &list, int y);
     void drawEquip(QPainter *painter, const CardItem *equip, int order);
     void setSelectedItem(CardItem *card_item);
     void drawHp(QPainter *painter) const;

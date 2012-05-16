@@ -266,8 +266,8 @@ QString ServerPlayer::findReasonable(const QStringList &generals, bool no_unreas
             if(Config.EnableHegemony)
             {
                 if(getGeneral())
-                    if(getGeneral()->getKingdom()
-                            != Sanguosha->getGeneral(name)->getKingdom())
+                    if((getGeneral()->getKingdom()
+                            != Sanguosha->getGeneral(name)->getKingdom()))
                         continue;
             }
         }
@@ -346,6 +346,10 @@ void ServerPlayer::removeCard(const Card *card, Place place){
             handcards.removeOne(card);
             break;
         }
+    case PlaceTakeoff: {
+            m_takenOffCards.removeOne(card);
+            break;
+        }
 
     case Equip: {
             const EquipCard *equip = qobject_cast<const EquipCard *>(card);
@@ -389,7 +393,10 @@ void ServerPlayer::addCard(const Card *card, Place place){
             handcards << card;
             break;
         }
-
+    case PlaceTakeoff: {
+            m_takenOffCards << card;
+            break;
+        }
     case Equip: {
             const EquipCard *equip = qobject_cast<const EquipCard *>(card);
             setEquip(equip);
@@ -745,7 +752,7 @@ ServerPlayer *ServerPlayer::getNextAlive() const{
     return next;
 }
 
-int ServerPlayer::getGeneralMaxHP() const{
+int ServerPlayer::getGeneralMaxHp() const{
     int max_hp = 0;
 
     if(getGeneral2() == NULL)
@@ -774,9 +781,6 @@ int ServerPlayer::getGeneralMaxHP() const{
     return max_hp;
 }
 
-int ServerPlayer::getGeneralMaxHp() const{
-    return getGeneralMaxHP();
-}
 QString ServerPlayer::getGameMode() const{
     return room->getMode();
 }
@@ -905,6 +909,15 @@ void ServerPlayer::addToPile(const QString &pile_name, int card_id, bool open){
     piles[pile_name] << card_id;
 
     room->moveCardTo(Sanguosha->getCard(card_id), this, Player::Special, open);
+}
+
+void ServerPlayer::addToPile(const QString &pile_name, QList<int> card_ids, bool open){
+    piles[pile_name].append(card_ids);
+    CardsMoveStruct move;
+    move.card_ids = card_ids;
+    move.to = this;
+    move.to_place = Player::Special;
+    room->moveCards(move, open, false);
 }
 
 void ServerPlayer::gainAnExtraTurn(ServerPlayer *clearflag){

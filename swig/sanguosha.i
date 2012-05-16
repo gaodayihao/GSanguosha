@@ -69,7 +69,7 @@ class Player: public QObject
 {
 public:
 	enum Phase {RoundStart, Start, Judge, Draw, Play, Discard, Finish, NotActive};
-	enum Place {Hand, Equip, Judging, Special, DiscardedPile, DrawPile};
+	enum Place {Hand, Equip, Judging, Special, DiscardPile, DrawPile, PlaceTakeoff, PlaceUnknown};
 	enum Role {Lord, Loyalist, Rebel, Renegade};
 
 	explicit Player(QObject *parent);
@@ -80,10 +80,8 @@ public:
 
 	// property setters/getters
 	int getHp() const;
-	void setHp(int hp);    
-	int getMaxHP() const;
+	void setHp(int hp);
 	int getMaxHp() const;
-	void setMaxHP(int max_hp);
 	void setMaxHp(int max_hp);
 	int getLostHp() const;
 	bool isWounded() const;
@@ -302,7 +300,6 @@ public:
 	QString findReasonable(const QStringList &generals, bool no_unreasonable = false);
 	void clearSelected();
 
-	int getGeneralMaxHP() const;
 	int getGeneralMaxHp() const;
 	virtual QString getGameMode() const;
 
@@ -393,11 +390,19 @@ struct CardUseStruct{
 };
 
 struct CardMoveStruct{
+	CardMoveStruct();
+	
 	int card_id;
 	Player::Place from_place, to_place;
 	ServerPlayer *from, *to;
+};
 
-	QString toString() const;
+struct CardsMoveStruct{
+	CardsMoveStruct();
+	
+	QList<int> card_ids;
+	Player::Place from_place, to_place;
+	Player *from, *to;
 };
 
 struct DyingStruct{
@@ -492,16 +497,17 @@ enum TriggerEvent{
     JinkUsed,
 
     CardAsked,
-	CardonUse,
+    CardonUse,
     CardUsed,
     CardResponsed,
     CardDiscarded,
-    CardMoving,
-    CardLost,
+    CardLostOnePiece,
+    CardLostOneTime,
+    CardGotOnePiece,
+    CardGotOneTime,
     CardLostDone,
-    CardGot,
     CardGotDone,
-	CardDrawing,
+    CardDrawing,
     CardDrawnDone,
 
     CardEffect,
@@ -509,6 +515,8 @@ enum TriggerEvent{
     CardFinished,
 
     ChoiceMade,
+	
+    NumOfEvents,
 };
 
 class Card: public QObject
@@ -667,7 +675,7 @@ public:
 	QMap<QString, QString> getAvailableModes() const;
 	QString getModeName(const char *mode) const;
 	int getPlayerCount(const char *mode) const;
-	void getRoles(const char *mode, char *roles) const;
+	QString getRoles(const char *mode) const;
 	QStringList getRoleList(const char *mode) const;
 	int getRoleIndex() const;
 
@@ -764,7 +772,7 @@ struct LogMessage{
 class RoomThread : public QThread{
 public:
 	explicit RoomThread(Room *room);
-	void constructTriggerTable(const GameRule *rule);
+	void constructTriggerTable();
 	bool trigger(TriggerEvent event, ServerPlayer *target, QVariant &data);
 	bool trigger(TriggerEvent event, ServerPlayer *target);
 
@@ -888,7 +896,6 @@ public:
 	void throwCard(const Card *card, ServerPlayer *who = NULL);
 	void throwCard(int card_id, ServerPlayer *who = NULL);
 	void moveCardTo(const Card *card, ServerPlayer *to, Player::Place place, bool open = true);
-	void doMove(const CardMoveStruct &move, const QSet<ServerPlayer *> &scope);
 
 	// interactive methods
 	void activate(ServerPlayer *player, CardUseStruct &card_use);

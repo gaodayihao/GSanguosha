@@ -7,20 +7,9 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 
-GrabCardItem::GrabCardItem(const Card *card)
-    :CardItem(card)
+CardContainer::CardContainer()
 {
-}
-
-void GrabCardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *){
-    if(!isFrozen())
-        emit grabbed();
-    goBack();
-}
-
-CardContainer::CardContainer() :
-    Pixmap("image/system/card-container.png", false)
-{
+    Pixmap::load("image/system/card-container.png", false);
     setFlag(ItemIsFocusable);
     setFlag(ItemIsMovable);
     close_button = new CloseButton;
@@ -30,47 +19,35 @@ CardContainer::CardContainer() :
 }
 
 void CardContainer::fillCards(const QList<int> &card_ids){
-    if(card_ids.isEmpty()){
-        show();
-        foreach(CardItem *item, items){
-            item->show();
-        }
-        return;
-    }
+    if(card_ids.isEmpty()) return;
     else if(!items.isEmpty()){
         items_stack.push(items);
-        foreach(CardItem *item, items){
-            item->hide();
-        }
         items.clear();
     }
+    QList<CardItem*> card_items = _createCards(card_ids);
 
     static const QPointF pos1(30, 40);
     static const QPointF pos2(30, 184);
     static const int card_width = 93;
     static const int skip = 102;
     static const qreal whole_width = skip * 4 + card_width;
+    items.append(card_items);
+    int n = items.length();
 
-    int i, n = card_ids.length();
-
-    if(n <= 10){
-        for(i=0; i<n; i++){
-            QPointF pos;
-            if(i<5){
+    for (int i = 0; i < n; i++) {
+        QPointF pos;
+        if(n <= 10){
+            if(i < 5){
                 pos = pos1;
                 pos.setX(pos.x() + i * skip);
             }else{
                 pos = pos2;
-                pos.setX(pos.x() + (i-5) * skip);
+                pos.setX(pos.x() + (i - 5) * skip);
             }
+        }else{
+            int half = n / 2 + 1;
+            qreal real_skip = whole_width / half;
 
-            addCardItem(card_ids.at(i), pos);
-        }
-    }else{
-        int half = n/2 + 1;
-        qreal real_skip = whole_width / half;
-        for(i=0; i<n; i++){
-            QPointF pos;
             if(i < half){
                 pos = pos1;
                 pos.setX(pos.x() + i * real_skip);
@@ -78,12 +55,20 @@ void CardContainer::fillCards(const QList<int> &card_ids){
                 pos = pos2;
                 pos.setX(pos.x() + (i-half) * real_skip);
             }
-
-            addCardItem(card_ids.at(i), pos);
         }
+        CardItem* item = items[i];
+        item->setPos(pos);
+        item->setHomePos(pos);
+        item->setOpacity(1.0);
+        item->setHomeOpacity(1.0);
+        item->setFlag(QGraphicsItem::ItemIsFocusable);
     }
+}
 
-    show();
+bool CardContainer::_addCardItems(QList<CardItem*> &card_items, Player::Place place){
+     // foreach(CardItem* card_item, card_items) card_item->setHomePos
+
+    return true;
 }
 
 void CardContainer::clear(){
@@ -94,7 +79,6 @@ void CardContainer::clear(){
     items.clear();
     if(!items_stack.isEmpty()){
         items = items_stack.pop();
-        items_stack.clear();
         fillCards();
     }
     else{
@@ -104,35 +88,38 @@ void CardContainer::clear(){
 }
 
 void CardContainer::freezeCards(bool is_frozen){
-    foreach(GrabCardItem *item, items){
+    foreach (CardItem *item, items){
         item->setFrozen(is_frozen);
     }
 }
 
-CardItem *CardContainer::take(const ClientPlayer *taker, int card_id){
-    CardItem *to_take = NULL;
+QList<CardItem*> CardContainer::removeCardItems(const QList<int> &card_ids, Player::Place place){
+    QList<CardItem*> result;
+    foreach (int card_id, card_ids)
+    {
+        CardItem *to_take = NULL;
 
-    foreach(GrabCardItem *item, items){
-        if(item->getCard()->getId() == card_id){
-            to_take = item;
-            break;
+        foreach (CardItem *item, items){
+            if(item->getCard()->getId() == card_id){
+                to_take = item;
+                break;
+            }
+        }
+
+        if(to_take == NULL) continue;
+
+        to_take->setEnabled(false);
+
+        CardItem *copy = new CardItem(to_take->getCard());
+        copy->setPos(mapToScene(to_take->pos()));
+        copy->setEnabled(false);
+        result.append(copy);
+
+        if(m_currentPlayer){
+            to_take->showAvatar(m_currentPlayer->getGeneral());
         }
     }
-
-    if(to_take == NULL)
-        return NULL;
-
-    to_take->setEnabled(false);
-
-    CardItem *copy = new CardItem(to_take->getCard());
-    copy->setPos(mapToScene(to_take->pos()));
-    copy->setEnabled(false);
-
-    if(taker){
-        to_take->showAvatar(taker->getGeneral());
-    }
-
-    return copy;
+    return result;
 }
 
 int CardContainer::getFirstEnabled() const{
@@ -146,14 +133,14 @@ int CardContainer::getFirstEnabled() const{
 
 void CardContainer::startChoose(){
     close_button->hide();
-    foreach(GrabCardItem *item, items){
-        connect(item, SIGNAL(grabbed()), this, SLOT(grabItem()));
+    foreach (CardItem *item, items){
+        connect(item, SIGNAL(leave_hover()), this, SLOT(grabItem()));
         connect(item, SIGNAL(double_clicked()), this, SLOT(chooseItem()));
     }
 }
 
 void CardContainer::startGongxin(){
-    foreach(GrabCardItem *item, items){
+    foreach (CardItem *item, items){
         if(item->getCard()->getSuit() == Card::Heart){
             connect(item, SIGNAL(double_clicked()), this, SLOT(gongxinItem()));
         }
@@ -161,7 +148,7 @@ void CardContainer::startGongxin(){
 }
 
 void CardContainer::startGongxinwithHongyan(){
-    foreach(GrabCardItem *item, items){
+    foreach(CardItem *item, items){
         if(item->getCard()->getSuit() == Card::Heart || item->getCard()->getSuit() == Card::Spade){
             connect(item, SIGNAL(double_clicked()), this, SLOT(gongxinItem()));
         }
@@ -191,17 +178,6 @@ void CardContainer::chooseItem(){
         card_item->disconnect(this);
         emit item_chosen(card_item->getCard()->getId());
     }
-}
-
-void CardContainer::addCardItem(int card_id, const QPointF &pos){
-    GrabCardItem *item = new GrabCardItem(Sanguosha->getCard(card_id));
-    item->setParentItem(this);
-
-    item->setPos(pos);
-    item->setHomePos(pos);
-    item->setFlag(QGraphicsItem::ItemIsFocusable);
-
-    items << item;
 }
 
 void CardContainer::gongxinItem(){
@@ -301,13 +277,13 @@ void GuanxingBox::adjust(){
     for(i=0; i<up_items.length(); i++){
         QPointF pos(start_x + i*skip, start_y1);
         up_items.at(i)->setHomePos(pos);
-        up_items.at(i)->goBack();
+        up_items.at(i)->goBack(false);
     }
 
-    for(i=0; i<down_items.length(); i++){
+    for(i = 0; i < down_items.length(); i++){
         QPointF pos(start_x + i*skip, start_y2);
         down_items.at(i)->setHomePos(pos);
-        down_items.at(i)->goBack();
+        down_items.at(i)->goBack(false);
     }
 }
 

@@ -28,7 +28,7 @@ public:
             room->throwCard(judge->card);
 
             judge->card = Sanguosha->getCard(card_id);
-            room->moveCardTo(judge->card, NULL, Player::Special);
+            room->moveCardTo(judge->card, NULL, Player::DiscardPile);
 
             LogMessage log;
             log.type = "$ChangedJudge";
@@ -416,7 +416,7 @@ public:
         Room *room = player->getRoom();
         int card_id = room->drawCard();
         const Card *card = Sanguosha->getCard(card_id);
-        room->moveCardTo(card, NULL, Player::Special, true);
+        room->moveCardTo(card, player, Player::PlaceTakeoff, true);
         room->getThread()->delay();
 
         player->obtainCard(card);

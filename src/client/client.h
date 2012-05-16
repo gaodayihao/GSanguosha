@@ -104,9 +104,11 @@ public:
     void playSkillEffect(const QString &play_str);
     void playCardEffect(const QString &play_str);
     void playAudio(const QString &name);
-    void clearPile(const QString &);
+    void resetPiles(const QString &);
     void setPileNumber(const QString &pile_num);
     void gameOver(const Json::Value &);
+    void loseCards(const Json::Value &);
+    void getCards(const Json::Value &);
     void killPlayer(const QString &player_name);
     void revivePlayer(const QString &player_name);
     void warn(const QString &);
@@ -132,9 +134,6 @@ public:
     void updateStateItem(const QString &state_str);
     void setStatistics(const QString &property_str);
     void setCardFlag(const QString &pattern_str);
-
-    void moveCard(const QString &move_str);
-    void moveNCards(const QString &move_str);
 
     void fillAG(const QString &cards_str);
     void takeAG(const QString &take_str);
@@ -256,6 +255,8 @@ private:
     void commandFormatWarning(const QString &str, const QRegExp &rx, const char *command);
 
     void _askForCardOrUseCard(const Json::Value&);
+    bool _loseSingleCard(int card_id, CardsMoveStruct move);
+    bool _getSingleCard(int card_id, CardsMoveStruct move);
 
 private slots:
     void processServerPacket(const QString &cmd);
@@ -289,7 +290,7 @@ signals:
     void hp_changed(const QString &who, int delta, DamageStruct::Nature nature, bool losthp);
     void status_changed(Client::Status oldStatus, Client::Status newStatus);
     void avatars_hiden();
-    void pile_cleared();
+    void pile_reset();
     void player_killed(const QString &who);
     void player_revived(const QString &who);
     void card_shown(const QString &player_name, int card_id);
@@ -310,18 +311,15 @@ signals:
     void game_over();
     void standoff();
 
-    void cards_drawed(const QList<const Card *> &cards);
-    void n_cards_drawed(ClientPlayer *player, int n);
-
-    void card_moved(const CardMoveStructForClient &move);
-    void n_cards_moved(int n, const QString &from, const QString &to);
+    void move_cards_lost(int moveId, QList<CardsMoveStruct> moves);
+    void move_cards_got(int moveId, QList<CardsMoveStruct> moves);
 
     void skill_attached(const QString &skill_name, bool from_left);
     void skill_detached(const QString &skill_name);
     void do_filter();
 
     void ag_filled(const QList<int> &card_ids);
-    void ag_taken(const ClientPlayer *taker, int card_id);
+    void ag_taken(ClientPlayer *taker, int card_id);
     void ag_cleared();
 
     void generals_filled(const QStringList &general_names);

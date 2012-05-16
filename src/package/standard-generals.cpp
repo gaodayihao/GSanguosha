@@ -291,7 +291,7 @@ public:
             room->throwCard(judge->card);
 
             judge->card = Sanguosha->getCard(card->getEffectiveId());
-            room->moveCardTo(judge->card, NULL, Player::Special);
+            room->moveCardTo(judge->card, NULL, Player::DiscardPile);
 
             LogMessage log;
             log.type = "$ChangedJudge";
@@ -695,12 +695,12 @@ public:
     KongchengEffect():TriggerSkill("#kongcheng-effect"){
         frequency = Compulsory;
 
-        events << CardLost;
+        events << CardLostOneTime;
     }
 
     virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
         if(player->isKongcheng()){
-            CardMoveStar move = data.value<CardMoveStar>();
+            CardsMoveStar move = data.value<CardsMoveStar>();
             if(move->from_place == Player::Hand)
                 player->getRoom()->playSkillEffect("kongcheng");
         }
@@ -915,14 +915,14 @@ public:
 class Lianying: public TriggerSkill{
 public:
     Lianying():TriggerSkill("lianying"){
-        events << CardLost;
+        events << CardLostOneTime;
 
         frequency = Frequent;
     }
 
     virtual bool trigger(TriggerEvent , ServerPlayer *luxun, QVariant &data) const{
         if(luxun->isKongcheng()){
-            CardMoveStar move = data.value<CardMoveStar>();
+            CardsMoveStar move = data.value<CardsMoveStar>();
 
             if(move->from_place == Player::Hand){
                 Room *room = luxun->getRoom();
@@ -1099,29 +1099,18 @@ public:
 class Xiaoji: public TriggerSkill{
 public:
     Xiaoji():TriggerSkill("xiaoji"){
-        events << CardLost
-               <<CardLostDone;
+        events << CardLostOnePiece;
 
         frequency = Frequent;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *sunshangxiang, QVariant &data) const{
-        if (event == CardLost){
-            CardMoveStar move = data.value<CardMoveStar>();
-            if(move->from_place == Player::Equip){
-                sunshangxiang->tag["InvokeXiaoji"] = true;
-                sunshangxiang->addMark("dc");
-            }
-        }else{
-            if(!sunshangxiang->tag.value("InvokeXiaoji", false).toBool())
-                return false;
-            sunshangxiang->tag.remove("InvokeXiaoji");
+    virtual bool trigger(TriggerEvent, ServerPlayer *sunshangxiang, QVariant &data) const{
+        CardMoveStar move = data.value<CardMoveStar>();
+        if(move->from_place == Player::Equip){
             Room *room = sunshangxiang->getRoom();
             if(room->askForSkillInvoke(sunshangxiang, objectName())){
                 room->playSkillEffect(objectName());
-                int n = sunshangxiang->getMark("dc");
-                sunshangxiang->drawCards(2*n);
-                sunshangxiang->setMark("dc", 0);
+                sunshangxiang->drawCards(2);
             }
         }
 
@@ -1216,7 +1205,8 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        if(Sanguosha->getBanPackages().contains("sp") && Sanguosha->getBanPackages().contains("BGM")) return false;
+        if (target == NULL) return false;
+        if(Sanguosha->getBanPackages().contains("BGM") || Sanguosha->getBanPackages().contains("sp")) return false;
         return GameStartSkill::triggerable(target) && target->getGeneralName() == "diaochan";
     }
 

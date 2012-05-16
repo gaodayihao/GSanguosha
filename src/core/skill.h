@@ -191,7 +191,7 @@ class SPConvertSkill: public GameStartSkill{
 public:
     SPConvertSkill(const QString &name, const QString &from, const QString &to);
 
-    virtual bool triggerable(const ServerPlayer *target) const;
+    virtual bool triggerable(const ServerPlayer *) const;
     virtual void onGameStart(ServerPlayer *player) const;
 
 private:
@@ -204,7 +204,7 @@ class TransfigureSkill: public GameStartSkill{
 public:
     TransfigureSkill(const QString &name, const QString &from, const QString &to, const QString &mark_willlose = QString());
 
-    virtual bool triggerable(const ServerPlayer *target) const;
+    virtual bool triggerable(const ServerPlayer *) const;
     virtual void onGameStart(ServerPlayer *player) const;
 
 private:
@@ -253,6 +253,7 @@ class MarkAssignSkill: public GameStartSkill{
 public:
     MarkAssignSkill(const QString &mark, int n);
 
+    virtual int getPriority() const;
     virtual void onGameStart(ServerPlayer *player) const;
 
 private:

@@ -3,6 +3,7 @@
 
 #include "photo.h"
 #include "dashboard.h"
+#include "DiscardPile.h"
 #include "card.h"
 #include "client.h"
 #include "aux-skills.h"
@@ -34,6 +35,7 @@ struct RoomLayout;
 #include <QThread>
 #include <QHBoxLayout>
 #include <QMutex>
+#include <QStack>
 
 class ScriptExecutor: public QDialog{
     Q_OBJECT
@@ -147,8 +149,10 @@ public:
 public slots:
     void addPlayer(ClientPlayer *player);
     void removePlayer(const QString &player_name);
-    void drawCards(const QList<const Card *> &cards);
-    void drawNCards(ClientPlayer *player, int n);
+    void loseCards(int moveId, QList<CardsMoveStruct> moves);
+    void getCards(int moveId, QList<CardsMoveStruct> moves);
+    void keepLoseCardLog(const CardsMoveStruct &move);
+    void keepGetCardLog(const CardsMoveStruct &move);
     // choice dialog
     void chooseGeneral(const QStringList &generals);
     void chooseSuit(const QStringList &suits);
@@ -159,6 +163,7 @@ public slots:
     void chooseRole(const QString &scheme, const QStringList &roles);
     void chooseDirection();
 
+    void bringToFront(QGraphicsItem* item);
     void arrangeSeats(const QList<const ClientPlayer*> &seats);
     void toggleDiscards();
     void enableTargets(const Card *card);
@@ -182,19 +187,24 @@ protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     virtual void keyReleaseEvent(QKeyEvent *event);
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+    QMutex m_roomMutex;
+    QMutex m_zValueMutex;
 
 private:
-    QMutex m_roomMutex;
+    QGraphicsItem* _m_last_front_item;
+    double _m_last_front_ZValue;
+    PlayerCardContainer* _getPlayerCardContainer(Player::Place place, Player* player);
+    QMap<int, QList<QList<CardItem*> > > _m_cardsMoveStash;
     Button* add_robot, *fill_robots, *ready_button;
     QList<Photo*> photos;
     QMap<QString, Photo*> name2photo;
     Photo *focused;
     CardItem *special_card;
-    bool viewing_discards;
     Dashboard *dashboard;
     Pixmap *avatar;
-    QQueue<CardItem*> discarded_queue;
-    QQueue<CardItem*> piled_discards;
+    DiscardPile *m_discardPile;
+    DrawPile *m_drawPile;
+    // QQueue<CardItem*> piled_discards;
     QMainWindow *main_window;
     QComboBox *role_combobox;
     IrregularButton *ok_button, *cancel_button, *discard_button;
@@ -250,13 +260,9 @@ private:
     Button *arrange_button;
     KOFOrderBox *enemy_box, *self_box;
 
-    CardItem *takeCardItem(ClientPlayer *src, Player::Place src_place, int card_id);
-    void putCardItem(const ClientPlayer *dest, Player::Place dest_place, CardItem *card_item, QString show_name = "");
     void useCard(const Card *card);
     void fillTable(QTableWidget *table, const QList<const ClientPlayer *> &players);
     void chooseSkillButton();
-
-    void putToDiscard(CardItem* item);
 
     void selectTarget(int order, bool multiple);
     void selectNextTarget(bool multiple);
@@ -293,9 +299,8 @@ private:
     void animateHpChange(const QString &name, const QStringList &args);
     void animatePopup(const QString &name, const QStringList &args);
     EffectAnimation *animations;
-    Pixmap *drawPile;
 
-    //re-layout attempts
+    // re-layout attempts
     bool game_started;
     QMatrix view_transform;
     void reLayout(QMatrix matrix = QMatrix());
@@ -304,6 +309,7 @@ private:
     void alignTo(QGraphicsItem *object, QPoint pos, const QString &flags);
 
 private slots:
+    void fillCards(const QList<int>& card_ids);
     void updateSkillButtons();
     void acquireSkill(const ClientPlayer *player, const QString &skill_name);
     void updateRoleComboBox(const QString &new_role);
@@ -329,14 +335,11 @@ private slots:
     void updateStateItem(const QString &roles);
     void adjustPrompt();
 
-    void clearPile();
+    void resetPiles();
     void removeLightBox();
 
     void showCard(const QString &player_name, int card_id);
     void viewDistance();
-
-    void viewDiscards();
-    void hideDiscards();
 
     void speak();
 
@@ -356,10 +359,7 @@ private slots:
     void onJoyDirectionClicked(int direction);
 #endif
 
-    void moveCard(const CardMoveStructForClient &move);
-    void moveNCards(int n, const QString &from, const QString &to);
-
-    void takeAmazingGrace(const ClientPlayer *taker, int card_id);
+    void takeAmazingGrace(ClientPlayer *taker, int card_id);
 
     void attachSkill(const QString &skill_name, bool from_left);
     void detachSkill(const QString &skill_name);

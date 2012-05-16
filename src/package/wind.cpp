@@ -144,7 +144,7 @@ public:
             player->obtainCard(judge->card);
 
             judge->card = Sanguosha->getCard(card->getEffectiveId());
-            room->moveCardTo(judge->card, NULL, Player::Special);
+            room->moveCardTo(judge->card, NULL, Player::DiscardPile);
 
             LogMessage log;
             log.type = "$ChangedJudge";
@@ -456,7 +456,7 @@ public:
     }
 
     virtual bool trigger(TriggerEvent , ServerPlayer *zhoutai, QVariant &) const{
-        if(!zhoutai->hasFlag("dying"))
+        if(zhoutai->hasFlag("dying"))
             Remove(zhoutai);
 
         return false;
@@ -474,23 +474,47 @@ public:
         Room *room = zhoutai->getRoom();
 
         if(event == Dying){
-            const QList<int> &buqu = zhoutai->getPile("buqu");
+            QString choice = room->askForChoice(zhoutai, objectName(), "alive+dead");
+            if(choice == "alive"){
+                room->setTag("Buqu", zhoutai->objectName());
+                room->playSkillEffect(objectName());
+                const QList<int> &buqu = zhoutai->getPile("buqu");
 
-            int need = 1 - zhoutai->getHp(); // the buqu cards that should be turned over
-            int n = need - buqu.length();
-            if(n > 0){
-                QList<int> card_ids = room->getNCards(n);
-                foreach(int card_id, card_ids){
-                    zhoutai->addToPile("buqu", card_id);
+                int need = 1 - zhoutai->getHp(); // the buqu cards that should be turned over
+                int n = need - buqu.length();
+                if(n > 0){
+                    QList<int> card_ids = room->getNCards(n);
+                    foreach(int card_id, card_ids){
+                        zhoutai->addToPile("buqu", card_id);
+                    }
+                }
+                const QList<int> &buqunew = zhoutai->getPile("buqu");
+                QList<int> duplicate_numbers;
+
+                QSet<int> numbers;
+                foreach(int card_id, buqunew){
+                    const Card *card = Sanguosha->getCard(card_id);
+                    int number = card->getNumber();
+
+                    if(numbers.contains(number)){
+                        duplicate_numbers << number;
+                    }else
+                        numbers << number;
+                }
+
+                if(duplicate_numbers.isEmpty()){
+                    room->setTag("Buqu", QVariant());
+                    return true;
                 }
             }
         }else if(event == AskForPeachesDone){
-            BuquRemove::Remove(zhoutai);
             const QList<int> &buqu = zhoutai->getPile("buqu");
 
             if(zhoutai->getHp() > 0)
                 return false;
-
+            if(room->getTag("Buqu").toString() != zhoutai->objectName())
+                return false;
+            room->setTag("Buqu", QVariant());
             QList<int> duplicate_numbers;
 
             QSet<int> numbers;
@@ -505,11 +529,8 @@ public:
             }
 
             if(duplicate_numbers.isEmpty()){
-                QString choice = room->askForChoice(zhoutai, objectName(), "alive+dead");
-                if(choice == "alive"){
-                    room->playSkillEffect(objectName());
-                    return true;
-                }
+                room->playSkillEffect(objectName());
+                return true;
             }else{
                 LogMessage log;
                 log.type = "#BuquDuplicate";
@@ -687,8 +708,8 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString guhuo_to, const QString 
     room->setTag("Guhuoing", true);
     room->setTag("GuhuoType", this->user_string);
 
-    yuji->addToPile("#guhuo_pile", this->getEffectiveId(), false);
-    room->moveCardTo(this, yuji, Player::Special, false);
+    //yuji->addToPile("#guhuo_pile", this->getEffectiveId(), false);
+    room->moveCardTo(this, yuji, Player::PlaceTakeoff, false);
 
     QList<ServerPlayer *> players = room->getOtherPlayers(yuji);
     QSet<ServerPlayer *> questioned;
@@ -729,6 +750,14 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString guhuo_to, const QString 
         room->sendLog(log);
     }
 
+    room->moveCardTo(this, NULL, Player::DiscardPile, true, false);
+
+    LogMessage log;
+    log.type = "$GuhuoResult";
+    log.from = yuji;
+    log.card_str = QString::number(subcards.first());
+    room->sendLog(log);
+
     bool success = false;
     if(questioned.isEmpty()){
         success = true;
@@ -758,19 +787,10 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString guhuo_to, const QString 
         }
     }
 
-    LogMessage log;
-    log.type = "$GuhuoResult";
-    log.from = yuji;
-    log.card_str = QString::number(subcards.first());
-    room->sendLog(log);
-
     room->setTag("Guhuoing", false);
     room->removeTag("GuhuoType");
 
     room->setEmotion(yuji, ".");
-
-    if(!success)
-        room->throwCard(this);
 
     return success;
 }
@@ -948,11 +968,10 @@ const Card *GuhuoCard::validateInResposing(ServerPlayer *yuji, bool *continuable
     log.arg2 = "guhuo";
     room->sendLog(log);
 
-    if(guhuo(yuji, log.toString(), to_guhuo)){
+    if (guhuo(yuji, log.toString(), to_guhuo)){
         const Card *card = Sanguosha->getCard(subcards.first());
         Card *use_card = Sanguosha->cloneCard(to_guhuo, card->getSuit(), card->getNumber());
         use_card->setSkillName("guhuo");
-        room->throwCard(this);
 
         return use_card;
     }else

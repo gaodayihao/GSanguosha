@@ -67,12 +67,76 @@ struct CardUseStruct{
 };
 
 struct CardMoveStruct{
+    inline CardMoveStruct()
+    {
+        from_place = Player::PlaceUnknown;
+        to_place = Player::PlaceUnknown;
+        from = NULL;
+        to = NULL;
+    }
     int card_id;
     Player::Place from_place, to_place;
-    ServerPlayer *from, *to;
+    QString from_player_name, to_player_name;
+    QString from_pile_name, to_pile_name;
+    Player *from, *to;
     bool open;
+    bool tryParse(const Json::Value&);
+    Json::Value toJsonValue() const;
+    inline bool isRelevant(Player* player)
+    {
+        return (player != NULL && (from == player || to == player));
+    }
+    inline bool hasSameSourceAs(const CardMoveStruct &move)
+    {
+        return (from == move.from) && (from_place == move.from_place) &&
+               (from_player_name == move.from_player_name) && (from_pile_name == move.from_pile_name);
+    }
+    inline bool hasSameDestinationAs(const CardMoveStruct &move)
+    {
+        return (to == move.to) && (to_place == move.to_place) &&
+               (to_player_name == move.to_player_name) && (to_pile_name == move.to_pile_name);
+    }
+};
 
-    QString toString() const;
+struct CardsMoveStruct{
+    inline CardsMoveStruct()
+    {
+        from_place = Player::PlaceUnknown;
+        to_place = Player::PlaceUnknown;
+        from = NULL;
+        to = NULL;
+    }
+    inline CardsMoveStruct(const QList<int> &ids, Player* to, Player::Place to_place)
+    {
+        this->card_ids = ids;
+        this->from_place = Player::PlaceUnknown;
+        this->to_place = to_place;
+        this->from = NULL;
+        this->to = to;
+    }
+    inline bool hasSameSourceAs(const CardsMoveStruct &move)
+    {
+        return (from == move.from) && (from_place == move.from_place) &&
+               (from_player_name == move.from_player_name) && (from_pile_name == move.from_pile_name);
+    }
+    inline bool hasSameDestinationAs(const CardsMoveStruct &move)
+    {
+        return (to == move.to) && (to_place == move.to_place) &&
+               (to_player_name == move.to_player_name) && (to_pile_name == move.to_pile_name);
+    }
+    QList<int> card_ids;
+    Player::Place from_place, to_place;
+    QString from_player_name, to_player_name;
+    QString from_pile_name, to_pile_name;
+    Player *from, *to;
+    bool open;
+    bool tryParse(const Json::Value&);
+    Json::Value toJsonValue() const;
+    inline bool isRelevant(const Player* player)
+    {
+        return (player != NULL && (from == player || to == player));
+    }
+    QList<CardMoveStruct> flatten();
 };
 
 struct DyingStruct{
@@ -180,10 +244,11 @@ enum TriggerEvent{
     CardUsed,
     CardResponsed,
     CardDiscarded,
-    CardMoving,
-    CardLost,
+    CardLostOnePiece,
+    CardLostOneTime,
+    CardGotOnePiece,
+    CardGotOneTime,
     CardLostDone,
-    CardGot,
     CardGotDone,
     CardDrawing,
     CardDrawnDone,
@@ -203,11 +268,14 @@ typedef JudgeStruct *JudgeStar;
 typedef DamageStruct *DamageStar;
 typedef PindianStruct *PindianStar;
 typedef const CardMoveStruct *CardMoveStar;
+typedef const CardsMoveStruct *CardsMoveStar;
 
 Q_DECLARE_METATYPE(DamageStruct)
 Q_DECLARE_METATYPE(CardEffectStruct)
 Q_DECLARE_METATYPE(SlashEffectStruct)
 Q_DECLARE_METATYPE(CardUseStruct)
+Q_DECLARE_METATYPE(CardsMoveStruct)
+Q_DECLARE_METATYPE(CardsMoveStar)
 Q_DECLARE_METATYPE(CardMoveStruct)
 Q_DECLARE_METATYPE(CardMoveStar)
 Q_DECLARE_METATYPE(CardStar)

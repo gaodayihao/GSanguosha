@@ -99,7 +99,7 @@ void NosFanjianCard::onEffect(const CardEffectStruct &effect) const{
 
 class NosFanjian:public ZeroCardViewAsSkill{
 public:
-    NosFanjian():ZeroCardViewAsSkill("nos_fanjian"){
+    NosFanjian():ZeroCardViewAsSkill("nosfanjian"){
 
     }
 
@@ -114,7 +114,7 @@ public:
 
 class NosLieren: public TriggerSkill{
 public:
-    NosLieren():TriggerSkill("nos_lieren"){
+    NosLieren():TriggerSkill("noslieren"){
         events << Damage;
     }
 
@@ -153,7 +153,7 @@ public:
 
 class NosWuyan: public TriggerSkill{
 public:
-    NosWuyan():TriggerSkill("nos_wuyan"){
+    NosWuyan():TriggerSkill("noswuyan"){
         events << CardEffect << CardEffected;
         frequency = Compulsory;
     }
@@ -247,7 +247,7 @@ void NosJujianCard::onEffect(const CardEffectStruct &effect) const{
 
 class NosJujian: public ViewAsSkill{
 public:
-    NosJujian():ViewAsSkill("nos_jujian"){
+    NosJujian():ViewAsSkill("nosjujian"){
 
     }
 
@@ -282,7 +282,7 @@ public:
 
 class NosEnyuan: public TriggerSkill{
 public:
-    NosEnyuan():TriggerSkill("nos_enyuan"){
+    NosEnyuan():TriggerSkill("nosenyuan"){
         events << HpRecover << Damaged;
         frequency = Compulsory;
     }
@@ -345,14 +345,14 @@ void NosXuanhuoCard::onEffect(const CardEffectStruct &effect) const{
     room->obtainCard(effect.from, card_id, room->getCardPlace(card_id) != Player::Hand);
 
     QList<ServerPlayer *> targets = room->getOtherPlayers(effect.to);
-    ServerPlayer *target = room->askForPlayerChosen(effect.from, targets, "nos_xuanhuo");
+    ServerPlayer *target = room->askForPlayerChosen(effect.from, targets, "nosxuanhuo");
     if(target != effect.from)
         room->obtainCard(target, card_id, false);
 }
 
 class NosXuanhuo: public OneCardViewAsSkill{
 public:
-    NosXuanhuo():OneCardViewAsSkill("nos_xuanhuo"){
+    NosXuanhuo():OneCardViewAsSkill("nosxuanhuo"){
 
     }
 
@@ -373,8 +373,8 @@ public:
 
 class NosXuanfeng: public TriggerSkill{
 public:
-    NosXuanfeng():TriggerSkill("nos_xuanfeng"){
-        events << CardLost << CardLostDone;
+    NosXuanfeng():TriggerSkill("nosxuanfeng"){
+        events << CardLostOneTime;
     }
 
     virtual QString getDefaultChoice(ServerPlayer *) const{
@@ -382,50 +382,48 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *lingtong, QVariant &data) const{
-        if(event == CardLost){
-            CardMoveStar move = data.value<CardMoveStar>();
+        if(event == CardLostOneTime){
+            CardsMoveStar move = data.value<CardsMoveStar>();
             if(move->from_place == Player::Equip)
-                lingtong->tag["InvokeNosXuanfeng"] = true;
-        }else if(event == CardLostDone && lingtong->tag.value("InvokeNosXuanfeng", false).toBool()){
-            lingtong->tag.remove("InvokeNosXuanfeng");
-            Room *room = lingtong->getRoom();
+            {
+                Room *room = lingtong->getRoom();
 
-            QString choice = room->askForChoice(lingtong, objectName(), "slash+damage+nothing");
+                QString choice = room->askForChoice(lingtong, objectName(), "slash+damage+nothing");
 
 
-            if(choice == "slash"){
-                room->playSkillEffect("xuanfeng");
-                QList<ServerPlayer *> targets;
-                foreach(ServerPlayer *target, room->getAlivePlayers()){
-                    if(lingtong->canSlash(target, false))
-                        targets << target;
+                if(choice == "slash"){
+                    QList<ServerPlayer *> targets;
+                    foreach(ServerPlayer *target, room->getAlivePlayers()){
+                        if(lingtong->canSlash(target, false))
+                            targets << target;
+                    }
+
+                    ServerPlayer *target = room->askForPlayerChosen(lingtong, targets, "xuanfeng-slash");
+
+                    Slash *slash = new Slash(Card::NoSuit, 0);
+                    slash->setSkillName("xuanfeng");
+
+                    CardUseStruct card_use;
+                    card_use.card = slash;
+                    card_use.from = lingtong;
+                    card_use.to << target;
+                    room->useCard(card_use, false);
+                }else if(choice == "damage"){
+                    room->playSkillEffect("xuanfeng");
+
+                    QList<ServerPlayer *> players = room->getOtherPlayers(lingtong), targets;
+                    foreach(ServerPlayer *p, players){
+                        if(lingtong->distanceTo(p) <= 1)
+                            targets << p;
+                    }
+
+                    ServerPlayer *target = room->askForPlayerChosen(lingtong, targets, "xuanfeng-damage");
+
+                    DamageStruct damage;
+                    damage.from = lingtong;
+                    damage.to = target;
+                    room->damage(damage);
                 }
-
-                ServerPlayer *target = room->askForPlayerChosen(lingtong, targets, "xuanfeng-slash");
-
-                Slash *slash = new Slash(Card::NoSuit, 0);
-                slash->setSkillName("xuanfeng");
-
-                CardUseStruct card_use;
-                card_use.card = slash;
-                card_use.from = lingtong;
-                card_use.to << target;
-                room->useCard(card_use, false);
-            }else if(choice == "damage"){
-                room->playSkillEffect("xuanfeng");
-
-                QList<ServerPlayer *> players = room->getOtherPlayers(lingtong), targets;
-                foreach(ServerPlayer *p, players){
-                    if(lingtong->distanceTo(p) <= 1)
-                        targets << p;
-                }
-
-                ServerPlayer *target = room->askForPlayerChosen(lingtong, targets, "xuanfeng-damage");
-
-                DamageStruct damage;
-                damage.from = lingtong;
-                damage.to = target;
-                room->damage(damage);
             }
         }
 
@@ -436,27 +434,27 @@ public:
 NostalGeneralPackage::NostalGeneralPackage()
     :Package("nostal_general")
 {
-    General *nos_zhouyu = new General(this, "nos_zhouyu", "wu", 3);
-    nos_zhouyu->addSkill(new NosFanjian);
-    nos_zhouyu->addSkill("yingzi");
+    General *noszhouyu = new General(this, "noszhouyu", "wu", 3);
+    noszhouyu->addSkill(new NosFanjian);
+    noszhouyu->addSkill("yingzi");
 
-    General *nos_zhurong = new General(this, "nos_zhurong", "shu", 4, false);
-    nos_zhurong->addSkill("juxiang");
-    nos_zhurong->addSkill("#sa_avoid_juxiang");
-    nos_zhurong->addSkill(new NosLieren);
+    General *noszhurong = new General(this, "noszhurong", "shu", 4, false);
+    noszhurong->addSkill("juxiang");
+    noszhurong->addSkill("#sa_avoid_juxiang");
+    noszhurong->addSkill(new NosLieren);
 
 
-    General *nos_xushu = new General(this, "nos_xushu", "shu", 3);
-    nos_xushu->addSkill(new NosWuyan);
-    nos_xushu->addSkill(new NosJujian);
+    General *nosxushu = new General(this, "nosxushu", "shu", 3);
+    nosxushu->addSkill(new NosWuyan);
+    nosxushu->addSkill(new NosJujian);
 
-    General *nos_fazheng = new General(this, "nos_fazheng", "shu", 3);
-    nos_fazheng->addSkill(new NosEnyuan);
+    General *nosfazheng = new General(this, "nosfazheng", "shu", 3);
+    nosfazheng->addSkill(new NosEnyuan);
     patterns.insert(".enyuan", new EnyuanPattern);
-    nos_fazheng->addSkill(new NosXuanhuo);
+    nosfazheng->addSkill(new NosXuanhuo);
 
-    General *nos_lingtong = new General(this, "nos_lingtong", "wu");
-    nos_lingtong->addSkill(new NosXuanfeng);
+    General *noslingtong = new General(this, "noslingtong", "wu");
+    noslingtong->addSkill(new NosXuanfeng);
 
     addMetaObject<NosFanjianCard>();
     addMetaObject<NosXuanhuoCard>();

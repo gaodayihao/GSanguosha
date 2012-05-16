@@ -84,6 +84,8 @@ void GameRule::onPhaseChange(ServerPlayer *player) const{
         }
 
     case Player::Discard:{
+        while (player->getHandcardNum() > player->getMaxCards())
+        {
             int discard_num = player->getHandcardNum() - player->getMaxCards();
             if(player->hasFlag("jilei")){
                 QSet<const Card *> jilei_cards;
@@ -109,8 +111,9 @@ void GameRule::onPhaseChange(ServerPlayer *player) const{
 
             if(discard_num > 0)
                 room->askForDiscard(player, "gamerule", discard_num);
-            break;
         }
+        break;
+    }
     case Player::Finish: {
 
             break;
@@ -158,36 +161,42 @@ void GameRule::setGameProcess(Room *room) const{
 }
 
 bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-    Room *room = player->getRoom();
+    Room *room;
+    if (player == NULL)
+        room = data.value<RoomStar>();
+    else
+        room = player->getRoom();
 
     if(room->getTag("SkipGameRule").toBool()){
         room->removeTag("SkipGameRule");
         return false;
     }
 
-    switch(event){
-    case GameStart: {
-        if(player->getGeneral()->getKingdom() == "god" && player->getGeneralName() != "anjiang"){
-                QString new_kingdom = room->askForKingdom(player);
-                room->setPlayerProperty(player, "kingdom", new_kingdom);
+    // Handle global events
+    if (player == NULL)
+    {
+        if (event == GameStart) {
+            foreach (ServerPlayer* player, room->getPlayers())
+            {
+                if(player->getGeneral()->getKingdom() == "god" && player->getGeneralName() != "anjiang"){
+                    QString new_kingdom = room->askForKingdom(player);
+                    room->setPlayerProperty(player, "kingdom", new_kingdom);
 
-                LogMessage log;
-                log.type = "#ChooseKingdom";
-                log.from = player;
-                log.arg = new_kingdom;
-                room->sendLog(log);
+                    LogMessage log;
+                    log.type = "#ChooseKingdom";
+                    log.from = player;
+                    log.arg = new_kingdom;
+                    room->sendLog(log);
+                }
             }
-
-        if(player->isLord())
             setGameProcess(room);
-
             room->setTag("FirstRound", true);
-            player->tag["FirstDraw"] = true;
-            player->drawCards(4, false);
-            player->tag.remove("FirstDraw");
-            break;
+            room->drawCards(room->getPlayers(), 4, false);
         }
+        return false;
+    }
 
+    switch(event){
     case TurnStart:{
             player = room->getCurrent();
             if(!player->faceUp())
@@ -224,7 +233,7 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
 
             room->setPlayerStatistics(player, "recover", recover);
 
-            int new_hp = qMin(player->getHp() + recover, player->getMaxHP());
+            int new_hp = qMin(player->getHp() + recover, player->getMaxHp());
             room->setPlayerProperty(player, "hp", new_hp);
             room->broadcastInvoke("hpChange", QString("%1:%2").arg(player->objectName()).arg(recover));
 
@@ -424,7 +433,7 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
                 log.arg = "analeptic";
                 room->sendLog(log);
 
-                damage.damage ++;
+                damage.damage++;
             }
 
             damage.from = effect.from;
@@ -501,7 +510,7 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
 
             JudgeStar judge = data.value<JudgeStar>();
             judge->card = Sanguosha->getCard(card_id);
-            room->moveCardTo(judge->card, NULL, Player::Special);
+            room->moveCardTo(judge->card, NULL, Player::DiscardPile);
 
             LogMessage log;
             log.type = "$InitialJudge";
@@ -700,28 +709,38 @@ HulaoPassMode::HulaoPassMode(QObject *parent)
 static int Transfiguration = 1;
 
 bool HulaoPassMode::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-    Room *room = player->getRoom();
+    Room *room;
+    if (player == NULL)
+        room = data.value<RoomStar>();
+    else
+        room = player->getRoom();
+    // Handle global events
+    if (player == NULL)
+    {
+        if (event == GameStart){
+            foreach (ServerPlayer* player, room->getPlayers())
+            {
+                if(player->isLord()){
+                    if(setjmp(env) == Transfiguration){
+                        player = room->getLord();
+                        room->transfigure(player, "shenlvbu2", true, true);
 
-    switch(event){
-    case GameStart:{
-            if(player->isLord()){
-                if(setjmp(env) == Transfiguration){
-                    player = room->getLord();
-                    room->transfigure(player, "shenlvbu2", true, true);
+                        QList<const Card *> tricks = player->getJudgingArea();
+                        foreach(const Card *trick, tricks)
+                            room->throwCard(trick);
 
-                    QList<const Card *> tricks = player->getJudgingArea();
-                    foreach(const Card *trick, tricks)
-                        room->throwCard(trick);
-
-                }else{
-                    player->drawCards(8, false);
-                }
-            }else
-                player->drawCards(player->getSeat() + 1, false);
+                    }else{
+                        player->drawCards(8, false);
+                    }
+                }else
+                    player->drawCards(player->getSeat() + 1, false);
+            }
 
             return false;
         }
+    }
 
+    switch(event){
     case CardUsed:{
             CardUseStruct use = data.value<CardUseStruct>();
             if(use.card->inherits("Weapon") && player->askForSkillInvoke("weapon_recast", data)){
@@ -820,7 +839,7 @@ BasaraMode::BasaraMode(QObject *parent)
 {
     setObjectName("basara_mode");
 
-    events << CardLost << Predamaged;
+    events << CardLostOnePiece << Predamaged;
 
     skill_mark["niepan"] = "@nirvana";
     skill_mark["smallyeyan"] = "@flame";
@@ -912,16 +931,19 @@ void BasaraMode::generalShowed(ServerPlayer *player, QString general_name) const
 }
 
 bool BasaraMode::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-    Room *room = player->getRoom();
-    player->tag["event"] = event;
-    player->tag["event_data"] = data;
+    Room *room;
+    if (player == NULL)
+        room = data.value<RoomStar>();
+    else
+        room = player->getRoom();
 
-    switch(event){
-    case GameStart:{
-        if(player->isLord()){
+    // Handle global events
+    if (player == NULL)
+    {
+        if (event == GameStart)
+        {
             if(Config.EnableHegemony)
                 room->setTag("SkipNormalDeathProcess", true);
-
             foreach(ServerPlayer* sp, room->getAlivePlayers())
             {
                 QString transfigure_str = QString("%1:%2").arg(sp->getGeneralName()).arg("anjiang");
@@ -947,9 +969,12 @@ bool BasaraMode::trigger(TriggerEvent event, ServerPlayer *player, QVariant &dat
                 sp->tag["roles"] = room->getTag(sp->objectName()).toStringList().join("+");
             }
         }
-
-        break;
     }
+
+    player->tag["event"] = event;
+    player->tag["event_data"] = data;
+
+    switch(event){
     case CardEffected:{
         if(player->getPhase() == Player::NotActive){
             CardEffectStruct ces = data.value<CardEffectStruct>();

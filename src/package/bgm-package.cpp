@@ -75,9 +75,6 @@ bool LihunCard::targetFilter(const QList<const Player *> &targets, const Player 
 void LihunCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.from->getRoom();
     effect.from->turnOver();
-//    foreach(const Card *cd, effect.to->getHandcards()){
-//        room->moveCardTo(cd, effect.from, Player::Hand, false);
-//    }
     effect.to->setFlags("LihunTarget");
     DummyCard *cd = effect.to->wholeHandCards();
     if(cd)
@@ -135,13 +132,12 @@ public:
                 }
             }
 
-            if(!target || target->isDead())
+            if(!target || target->getHp() < 1 || diaochan->isNude())
                 return false;
 
-            int hp = target->isAlive() ? target->getHp() : 0;
-            hp = qMax(0, hp);
-            int n = qMin(hp, diaochan->getCardCount(true));
-            room->moveSomeCards(diaochan, target, diaochan, "he", n, objectName());
+            room->selectSomeCardToMove(diaochan, target, diaochan, qMin(diaochan->getCardCount(true), target->getHp()),
+                                       "he",objectName());
+
             room->removeTag("LihunTarget");
         }
 
@@ -243,7 +239,7 @@ public:
 class Manjuan: public TriggerSkill{
 public:
     Manjuan(): TriggerSkill("manjuan"){
-        events << CardGot << CardDrawing;
+        events << CardGotOnePiece << CardDrawing;
         frequency = Frequent;
     }
 
@@ -254,9 +250,9 @@ public:
     void doManjuan(ServerPlayer *sp_pangtong, int card_id) const{
         Room *room = sp_pangtong->getRoom();
         sp_pangtong->setFlags("ManjuanInvoke");
-        QList<int> discardedPile = room->getDiscardPile(), toGainList;
+        QList<int> DiscardPile = room->getDiscardPile(), toGainList;
         const Card *card = Sanguosha->getCard(card_id);
-        foreach(int id, discardedPile){
+        foreach(int id, DiscardPile){
             const Card *cd = Sanguosha->getCard(id);
             if(cd->getNumber() == card->getNumber())
                 toGainList << id;
@@ -279,7 +275,7 @@ public:
         }
 
         int card_id = -1;
-        if(event == CardGot){
+        if(event == CardGotOnePiece){
             CardMoveStar move = data.value<CardMoveStar>();
             card_id = move->card_id;
             if(move->to_place == Player::Hand){
@@ -301,11 +297,11 @@ public:
         }
 
         if(sp_pangtong->getPhase() == Player::NotActive || !sp_pangtong->askForSkillInvoke(objectName(), data))
-            return event == CardGot ? false : true;
+            return event == CardGotOnePiece ? false : true;
 
         room->playSkillEffect(objectName());
         doManjuan(sp_pangtong, card_id);
-        return event == CardGot ? false : true;
+        return event == CardGotOnePiece ? false : true;
     }
 };
 
@@ -324,31 +320,34 @@ public:
         Room *room = player->getRoom();
 
         QList<int> ids = room->getNCards(3);
+        player->addToPile("dream", ids, true);
+        QSet<QString> lockedCategories;
         foreach(int id, ids){
             const Card *cd = Sanguosha->getCard(id);
-            room->moveCardTo(cd, NULL, Player::Special, true);
-            room->getThread()->delay();
-            player->addToPile("dream", id, true);
-            room->setPlayerCardLock(player, type[cd->getTypeId()]);
+            lockedCategories.insert(type[cd->getTypeId()]);
         }
+        foreach (QString s, lockedCategories)
+            room->setPlayerCardLock(player, s);
+        room->getThread()->delay();
 
         QList<int> zuixiang = player->getPile("dream");
         QSet<int> numbers;
+        bool zuixiangDone = false;
         foreach(int id, zuixiang){
             const Card *card = Sanguosha->getCard(id);
             if(numbers.contains(card->getNumber())){
-                foreach(int id, zuixiang){
-                    const Card *card = Sanguosha->getCard(id);
-                    room->moveCardTo(card, player, Player::Hand, true);
-                    player->addMark("zuixiangHasTrigger");
-                    room->setPlayerCardLock(player, ".");
-                }
-                return;
+                zuixiangDone = true;
+                break;
             }
-
             numbers.insert(card->getNumber());
         }
-
+        if (zuixiangDone)
+        {
+            player->addMark("zuixiangHasTrigger");
+            room->setPlayerCardLock(player, ".");
+            CardsMoveStruct move(zuixiang, player, Player::Hand);
+            room->moveCards(move, true);
+        }
     }
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *sp_pangtong, QVariant &data) const{

@@ -281,13 +281,16 @@ public:
 
                 room->playSkillEffect(objectName(), 1);
                 bool has_heart = false;
+                QList<int> card_ids;
 
-                for(i=0; i<x; i++){
+                for(i = 0; i < x; i++){
                     int card_id = room->drawCard();
-                    room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::Special, true);
-
+                    room->moveCardTo(Sanguosha->getCard(card_id), menghuo, Player::PlaceTakeoff, true);
+                    card_ids << card_id;
                     room->getThread()->delay();
+                }
 
+                foreach(int card_id, card_ids){
                     const Card *card = Sanguosha->getCard(card_id);
                     if(card->getSuit() == Card::Heart){
                         RecoverStruct recover;
@@ -302,7 +305,7 @@ public:
 
                 if(has_heart)
                     room->playSkillEffect(objectName(), 2);
-                else
+                else if(Config.SoundEffectMode == "Qsgs")
                     room->playSkillEffect(objectName(), 3);
 
                 return true;
@@ -330,7 +333,7 @@ public:
                  (use.card->getSubcards().length() == 1 &&
                   Sanguosha->getCard(use.card->getSubcards().first())->inherits("SavageAssault")))){
             Room *room = player->getRoom();
-            if(room->getCardPlace(use.card->getEffectiveId()) == Player::DiscardedPile){
+            if(room->getCardPlace(use.card->getEffectiveId()) == Player::DiscardPile){
                 // finding zhurong;
                 QList<ServerPlayer *> players = room->getAllPlayers();
                 foreach(ServerPlayer *p, players){
@@ -590,13 +593,17 @@ void DimengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
         room->askForDiscard(source, "dimeng", diff, false, true);
     }
 
-    DummyCard *card1 = a->wholeHandCards();
-    DummyCard *card2 = b->wholeHandCards();
-
-    room->ExchangeCards(a, b, card1, card2, Player::Hand, false);
-
-    delete card1;
-    delete card2;
+    QList<CardsMoveStruct> exchangeMove;
+    CardsMoveStruct move1;
+    move1.card_ids = a->handCards();
+    move1.to = b;
+    move1.to_place = Player::Hand;
+    CardsMoveStruct move2;
+    move2.card_ids = b->handCards();
+    move2.to = a;
+    move2.to_place = Player::Hand;
+    exchangeMove.push_back(move1);
+    exchangeMove.push_back(move2);
 
     LogMessage log;
     log.type = "#Dimeng";
@@ -605,6 +612,9 @@ void DimengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
     log.arg = QString::number(n1);
     log.arg2 = QString::number(n2);
     room->sendLog(log);
+
+    room->moveCards(exchangeMove, false);
+    room->getThread()->delay();
 }
 
 class Dimeng: public ZeroCardViewAsSkill{
@@ -795,7 +805,7 @@ public:
     }
 
     virtual QString getDefaultChoice(ServerPlayer *player) const{
-        if(player->getMaxHP() >= player->getHp() + 2)
+        if(player->getMaxHp() >= player->getHp() + 2)
             return "maxhp";
         else
             return "hp";

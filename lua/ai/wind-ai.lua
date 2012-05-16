@@ -163,7 +163,7 @@ sgs.ai_skill_cardask["@guidao-card"]=function(self, data)
 		if self:needRetrial(judge) then
 			self:sortByUseValue(cards, true)
 			if self:getUseValue(judge.card) > self:getUseValue(cards[1]) then
-				return "@GuidaoCard[" .. cards[1]:getSuitString() .. ":" .. card:getNumberString() .."]=" .. cards[1]:getId()
+				return "@GuidaoCard[" .. cards[1]:getSuitString() .. ":" .. cards[1]:getNumberString() .."]=" .. cards[1]:getId()
 			end
 		end
 	elseif self:needRetrial(judge) or self:getUseValue(judge.card) > self:getUseValue(sgs.Sanguosha:getCard(card_id)) then
@@ -330,7 +330,7 @@ sgs.ai_skill_use["@@tianxiang"] = function(self, data)
 	for _, enemy in ipairs(self.enemies) do
 		if (enemy:getHp() <= dmg.damage) then
 
-		if (enemy:getHandcardNum() <= 2) or self:hasSkills("guose|leiji|ganglie|enyuan|nos_enyuan|qingguo|wuyan|nos_wuyan|kongcheng", enemy)
+		if (enemy:getHandcardNum() <= 2) or self:hasSkills("guose|leiji|ganglie|enyuan|nosenyuan|qingguo|wuyan|noswuyan|kongcheng", enemy)
 			or enemy:containsTrick("indulgence") then return "@TianxiangCard="..card_id.."->"..enemy:objectName() end
 		end
 	end
@@ -351,7 +351,7 @@ sgs.ai_skill_use["@@tianxiang"] = function(self, data)
 		if (enemy:getLostHp() <= 1) or dmg.damage>1 then
 
 		if (enemy:getHandcardNum() <= 2)
-			or enemy:containsTrick("indulgence") or self:hasSkills("guose|leiji|ganglie|nos_enyuan|enyuan|qingguo|nos_wuyan|wuyan|kongcheng", enemy)
+			or enemy:containsTrick("indulgence") or self:hasSkills("guose|leiji|ganglie|nosenyuan|enyuan|qingguo|noswuyan|wuyan|kongcheng", enemy)
 			then return "@TianxiangCard="..card_id.."->"..enemy:objectName() end
 		end
 	end

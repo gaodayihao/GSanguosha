@@ -13,14 +13,18 @@ end
 sgs.ai_skill_use["@@jujian"] = function(self, prompt)
 	local needfriend = 0
 	local nobasiccard = -1
-	local cards = self.player:getHandcards()
+	local cards = self.player:getCards("he")
 	cards = sgs.QList2Table(cards)
-	self:sortByKeepValue(cards, true)
-	for _,card in ipairs(cards) do
-		if card:getTypeId() ~= sgs.Card_Basic and not self.player:isJilei(card) then nobasiccard = card:getEffectiveId() end
+	if self:isEquip("SilverLion") and self.player:isWounded() then
+		nobasiccard = self.player:getArmor():getId()
+	else
+		self:sortByKeepValue(cards)
+		for _,card in ipairs(cards) do
+			if card:getTypeId() ~= sgs.Card_Basic then nobasiccard = card:getEffectiveId() end
+		end
 	end
 	for _, friend in ipairs(self.friends_noself) do
-		if friend:isWounded() or not friend:faceUp() 
+		if self:isWeak(friend) or friend:getHandcardNum() < 2 or not friend:faceUp() 
 		or (friend:getArmor() and friend:getArmor():objectName() == "vine" and (friend:isChained() and not self:isGoodChainPartner(friend))) then
 			needfriend = needfriend + 1
 		end
@@ -33,7 +37,7 @@ sgs.ai_skill_use["@@jujian"] = function(self, prompt)
 		end
 	end
 	for _, friend in ipairs(self.friends_noself) do
-		if friend:getArmor() and friend:getArmor():objectName() == "vine" and (enemy:isChained() and not self:isGoodChainPartner(friend)) then
+		if friend:getArmor() and friend:getArmor():objectName() == "vine" and (friend:isChained() and not self:isGoodChainPartner(friend)) then
 			return "@JujianCard="..nobasiccard.."->"..friend:objectName()
 		end
 	end
@@ -602,3 +606,76 @@ end
 
 sgs.ai_use_value.XianzhenSlashCard = 9.2
 sgs.ai_use_priority.XianzhenSlashCard = 2.6
+
+sgs.ai_cardshow.quanji = function(self, requestor)
+	local index = 0
+	local result
+	local cards = self.player:getHandcards()
+	cards = sgs.QList2Table(cards)
+	self:sortByKeepValue(cards)
+
+	return cards[1]
+end
+
+sgs.ai_skill_choice.zili = function(self, choice)
+	if self.player:getHp() < self.player:getMaxHP()-1 then return "recover" end
+	return "draw"
+end
+
+local paiyi_skill={}
+paiyi_skill.name="paiyi"
+table.insert(sgs.ai_skills, paiyi_skill)
+paiyi_skill.getTurnUseCard = function(self)
+	if not (self.player:getPile("power"):isEmpty()
+		or self.player:hasUsed("PaiyiCard")) then
+		return sgs.Card_Parse("@PaiyiCard=.")
+	end
+end
+
+sgs.ai_skill_use_func.PaiyiCard = function(card, use, self)
+	local target
+	self:sort(self.friends_noself,"defense")
+	for _, friend in ipairs(self.friends_noself) do
+		if friend:getHandcardNum() < 2 and friend:getHandcardNum() + 1 < self.player:getHandcardNum() then
+			target = friend
+		end
+		if target then break end
+	end
+	if not target then
+		if self.player:getHandcardNum() < self.player:getHp() + self.player:getPile("power"):length() - 1 then
+			target = self.player
+		end
+	end
+	self:sort(self.friends_noself,"hp",true)
+	if not target then
+		for _, friend in ipairs(self.friends_noself) do
+			if friend:getHandcardNum() > 1 and friend:getHandcardNum() + 2 > self.player:getHandcardNum() 
+			and self:hasSkills("jieming|yiji|xinsheng|fangzhu|guixin",friend) then
+				target = friend
+			end
+			if target then break end
+		end
+	end
+	self:sort(self.enemies,"defense")
+	if not target then
+		for _, enemy in ipairs(self.enemies) do
+			if not self:hasSkills(sgs.masochism_skill,enemy) and not self:hasSkills("rende|jijiu",enemy)
+			and enemy:getHandcardNum() + 2 > self.player:getHandcardNum() then
+				target = enemy
+			end
+			if target then break end
+		end
+	end
+
+	if target then
+		use.card = sgs.Card_Parse("@PaiyiCard=.")
+		if use.to then
+			use.to:append(target)
+		end
+	end
+end
+
+sgs.ai_skill_askforag.paiyi = function(self, card_ids)
+	self.paiyi=card_ids[math.random(1,#card_ids)]
+	return self.paiyi
+end

@@ -287,7 +287,7 @@ public:
 class TuntianGet: public TriggerSkill{
 public:
     TuntianGet():TriggerSkill("#tuntian-get"){
-        events << CardLost << CardLostDone << FinishJudge;
+        events << CardLostOneTime << FinishJudge;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -295,17 +295,13 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-        if(event == CardLost){
-            CardMoveStar move = data.value<CardMoveStar>();
+        if(event == CardLostOneTime){
+            CardsMoveStar move = data.value<CardsMoveStar>();
 
-            if((move->from_place == Player::Hand || move->from_place == Player::Equip) && move->to!=player)
-                player->tag["InvokeTuntian"] = true;
-        }else if(event == CardLostDone){
-            if(!player->tag.value("InvokeTuntian", false).toBool())
-                return false;
-            player->tag.remove("InvokeTuntian");
+            if((move->from_place == Player::Hand || move->from_place == Player::Equip) &&
+                    player->getRoom()->getCurrent() != player
+                    && player->askForSkillInvoke("tuntian", data)){
 
-            if(player->askForSkillInvoke("tuntian", data)){
                 Room *room = player->getRoom();
                 room->playSkillEffect("tuntian");
 
@@ -717,7 +713,7 @@ public:
 class Guzheng: public TriggerSkill{
 public:
     Guzheng():TriggerSkill("guzheng"){
-        events << CardLost;
+        events << CardLostDone;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -734,16 +730,16 @@ public:
 
         if(erzhang == current)
             return false;
+
         if(current->getPhase() == Player::Discard){
             QVariantList guzheng = erzhang->tag["Guzheng"].toList();
 
-            CardMoveStar move = data.value<CardMoveStar>();
-
-            if(!room->getTag("QiaobianCost").isNull())
-                if(move->card_id == room->getTag("QiaobianCost").toInt())
-                    return false;
-
-            guzheng << move->card_id;
+            CardsMoveStar move = data.value<CardsMoveStar>();
+            foreach (int card_id, move->card_ids){
+                if(!room->getTag("QiaobianCost").isNull() && card_id == room->getTag("QiaobianCost").toInt())
+                    continue;
+                guzheng << card_id;
+            }
 
             erzhang->tag["Guzheng"] = guzheng;
         }
@@ -781,7 +777,7 @@ public:
         QList<int> cards;
         foreach(QVariant card_data, guzheng_cards){
             int card_id = card_data.toInt();
-            if(room->getCardPlace(card_id) == Player::DiscardedPile)
+            if(room->getCardPlace(card_id) == Player::DiscardPile)
                 cards << card_id;
         }
 
@@ -799,8 +795,14 @@ public:
             erzhang->invoke("clearAG");
 
             room->playSkillEffect("guzheng");
-            foreach(int card_id, cards)
-                erzhang->obtainCard(Sanguosha->getCard(card_id));
+
+            CardsMoveStruct move;
+            move.card_ids = cards;
+            move.to = erzhang;
+            move.to_place = Player::Hand;
+            QList<CardsMoveStruct> moves;
+            moves.append(move);
+            room->moveCards(moves, true, true);
         }
 
         return false;
@@ -948,7 +950,7 @@ public:
             room->sendLog(log);
 
             room->setPlayerMark(liushan, "ruoyu", 1);
-            room->setPlayerProperty(liushan, "maxhp", liushan->getMaxHP() + 1);
+            room->setPlayerProperty(liushan, "maxhp", liushan->getMaxHp() + 1);
 
             RecoverStruct recover;
             recover.who = liushan;

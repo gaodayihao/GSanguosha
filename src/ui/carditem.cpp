@@ -14,19 +14,13 @@
 #include <QGraphicsDropShadowEffect>
 
 CardItem::CardItem(const Card *card)
-    :Pixmap(card->getPixmapPath(), false), card(card), filtered_card(card), auto_back(true), frozen(false)
-
 {
-    Q_ASSERT(card != NULL);
+    setCard(card);
+    m_isSelected = false;
+    auto_back = true;
+    frozen = false;
 
-    suit_pixmap.load(QString("image/system/suit/%1.png").arg(card->getSuitString()));
-    small_suit_pixmap.load(QString("image/system/log/%1.png").arg(card->getSuitString()));
-    cardsuit_pixmap.load(QString("image/system/cardsuit/%1.png").arg(card->getSuitString()));
-    number_pixmap.load(QString("image/system/%1/%2.png").arg(card->isBlack()?"black":"red").arg(card->getNumberString()));
-    icon_pixmap.load(card->getIconPath());
     setTransformOriginPoint(pixmap.width()/2, pixmap.height()/2);
-
-    setToolTip(card->getDescription());
     setAcceptHoverEvents(true);
 
     QPixmap frame_pixmap("image/system/frame/good.png");
@@ -35,15 +29,64 @@ CardItem::CardItem(const Card *card)
     frame->hide();
 
     avatar = NULL;
-
     owner_pixmap = NULL;
 
+    m_opacityAtHome = 1.0;
+    m_currentAnimation = NULL;
+}
+
+void CardItem::setCard(const Card* card)
+{
+    if (card != NULL)
+    {
+        Pixmap::load(card->getPixmapPath(), false);
+        icon_pixmap.load(card->getIconPath());
+        suit_pixmap.load(QString("image/system/suit/%1.png").arg(card->getSuitString()));
+        small_suit_pixmap.load(QString("image/system/log/%1.png").arg(card->getSuitString()));
+        cardsuit_pixmap.load(QString("image/system/cardsuit/%1.png").arg(card->getSuitString()));
+        number_pixmap.load(QString("image/system/%1/%2.png").arg(card->isBlack()?"black":"red").arg(card->getNumberString()));
+        setToolTip(card->getDescription());
+    }
+    else
+    {
+        Pixmap::load("image/system/card-back.png");
+    }
+    m_card = card;
+    filtered_card = card;
+}
+
+void CardItem::setEnabled(bool enabled)
+{
+    if (enabled)
+    {
+        setHomeOpacity(1.0);
+        setOpacity(1.0);
+    }
+    else
+    {
+        setHomeOpacity(0.7);
+        setOpacity(0.7);
+    }
+    Pixmap::setEnabled(enabled);
+    goBack(true);
 }
 
 CardItem::CardItem(const QString &general_name)
-    :card(NULL), filtered_card(NULL), auto_back(true), frozen(false)
+    :m_card(NULL), filtered_card(NULL), auto_back(true), frozen(false)
 {
     changeGeneral(general_name);
+    m_currentAnimation = NULL;
+    m_opacityAtHome = 1.0;
+}
+
+CardItem::~CardItem()
+{
+    if (m_currentAnimation != NULL)
+    {
+        m_currentAnimation->stop();
+        delete m_currentAnimation;
+        m_currentAnimation = NULL;
+    }
 }
 
 void CardItem::changeGeneral(const QString &general_name){
@@ -60,7 +103,7 @@ void CardItem::changeGeneral(const QString &general_name){
 }
 
 const Card *CardItem::getCard() const{
-    return card;
+    return m_card;
 }
 
 void CardItem::filter(const FilterSkill *filter_skill){
@@ -68,7 +111,7 @@ void CardItem::filter(const FilterSkill *filter_skill){
         if(filter_skill->viewFilter(this))
             filtered_card = filter_skill->viewAs(this);
     }else
-        filtered_card = card;
+        filtered_card = m_card;
 }
 
 const Card *CardItem::getFilteredCard() const{
@@ -83,54 +126,67 @@ QPointF CardItem::homePos() const{
     return home_pos;
 }
 
-QAbstractAnimation* CardItem::goBack(bool kieru,bool fadein,bool fadeout){
-    if(home_pos == pos()){
-        if(kieru && home_pos != QPointF(-6, 8))
-            setOpacity(0.0);
-        return NULL;
+void CardItem::goBack(bool playAnimation, bool doFade){
+    if (playAnimation)
+    {
+        getGoBackAnimation(doFade);
+        if (m_currentAnimation != NULL)
+        {
+            m_currentAnimation->start();
+        }
     }
+    else
+    {
+        m_animationMutex.lock();
+        if (m_currentAnimation != NULL)
+        {
+            m_currentAnimation->stop();
+            delete m_currentAnimation;
+            m_currentAnimation = NULL;
+        }
+        setPos(homePos());
+        m_animationMutex.unlock();
+    }
+}
 
+QAbstractAnimation* CardItem::getGoBackAnimation(bool doFade)
+{
+    m_animationMutex.lock();
+    if (m_currentAnimation != NULL)
+    {
+        m_currentAnimation->stop();
+        delete m_currentAnimation;
+        m_currentAnimation = NULL;
+    }
     QPropertyAnimation *goback = new QPropertyAnimation(this, "pos");
     goback->setEndValue(home_pos);
     goback->setEasingCurve(QEasingCurve::OutQuad);
-    goback->setDuration(500);
+    goback->setDuration(Config.S_MOVE_CARD_ANIMATION_DURAION);
 
-    if(kieru){
+    if(doFade){
         QParallelAnimationGroup *group = new QParallelAnimationGroup;
 
         QPropertyAnimation *disappear = new QPropertyAnimation(this, "opacity");
-        if(fadein)disappear->setStartValue(0.0);
-        disappear->setEndValue(1.0);
-        if(fadeout)disappear->setEndValue(0.0);
-
-        disappear->setKeyValueAt(0.2, 1.0);
-        disappear->setKeyValueAt(0.8, 1.0);
-
-
-        qreal dx = home_pos.x()-pos().x();
-        qreal dy = home_pos.y()-pos().y();
-        int length = sqrt(dx*dx+dy*dy);
-
-
-        length = qBound(500/3,length,400);
-
-        goback->setDuration(length*3);
-        disappear->setDuration(length*3);
+        double middleOpacity = (m_opacityAtHome == 0.0) ? 1.0 : m_opacityAtHome;
+        disappear->setEndValue(m_opacityAtHome);
+        disappear->setKeyValueAt(0.2, middleOpacity);
+        disappear->setKeyValueAt(0.8, middleOpacity);
+        disappear->setDuration(Config.S_MOVE_CARD_ANIMATION_DURAION);
 
         group->addAnimation(goback);
         group->addAnimation(disappear);
 
-        // prevent the cover face bug
-        setEnabled(false);
-
-        group->start(QParallelAnimationGroup::DeleteWhenStopped);
-        return group;
-    }else
+        // card is disabled while moving
+        // setEnabled(false);
+        m_currentAnimation = group;
+    }
+    else
     {
         setOpacity(this->isEnabled() ? 1.0 : 0.7);
-        goback->start(QPropertyAnimation::DeleteWhenStopped);
-        return goback;
+        m_currentAnimation = goback;
     }
+    m_animationMutex.unlock();
+    return m_currentAnimation;
 }
 
 const QPixmap &CardItem::getSuitPixmap() const{
@@ -181,36 +237,8 @@ void CardItem::setAutoBack(bool auto_back){
     this->auto_back = auto_back;
 }
 
-static inline bool IsMultilayer(){
-    return Self && Self->getHandcardNum() > Config.MaxCards;
-}
-
-void CardItem::select(){
-    if(IsMultilayer())
-        frame->show();
-    else{
-        home_pos.setY(PendingY);
-        //setY(PendingY);
-        if(!hasFocus())goBack();
-    }
-}
-
-void CardItem::unselect(){
-    if(IsMultilayer())
-        frame->hide();
-    else{
-        home_pos.setY(NormalY);
-        //setY(NormalY);
-        if(!hasFocus())goBack();
-    }
-}
-
-bool CardItem::isPending() const{
-    return IsMultilayer() ? frame->isVisible() :home_pos.y() == PendingY;
-}
-
 bool CardItem::isEquipped() const{
-    return Self->hasEquip(card);
+    return Self->hasEquip(m_card);
 }
 
 
@@ -224,6 +252,11 @@ bool CardItem::isFrozen() const{
 
 CardItem *CardItem::FindItem(const QList<CardItem *> &items, int card_id){
     foreach(CardItem *item, items){
+        if (item->getCard() == NULL)
+        {
+            if (card_id == Card::S_UNKNOWN_CARD_ID) return item;
+            else continue;
+        }
         if(item->getCard()->getId() == card_id)
             return item;
     }
@@ -233,12 +266,12 @@ CardItem *CardItem::FindItem(const QList<CardItem *> &items, int card_id){
 
 void CardItem::reduceZ()
 {
-    if(this->zValue()>0)this->setZValue(this->zValue()-0.8);
+    if (this->zValue()>0) this->setZValue(this->zValue()-0.8);
 }
 
 void CardItem::promoteZ()
 {
-    if(this->zValue()<0)this->setZValue(this->zValue()+0.8);
+    if (this->zValue()<0) this->setZValue(this->zValue()+0.8);
 }
 
 void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *){
@@ -250,16 +283,10 @@ void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *){
 }
 
 void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *){
-    if(isFrozen())
-        return;
+    if (isFrozen()) return;
 
-    if(auto_back){
-        if(parentItem()){
-            if(y() < -80)
-                emit thrown();
-        }
-
-        goBack();
+    if (auto_back){
+        goBack(true, false);
     }else{
         emit released();
     }
@@ -297,7 +324,7 @@ void CardItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *)
 void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
     Pixmap::paint(painter, option, widget);
 
-    if(card){
+    if (m_card) {
         painter->drawPixmap(0, 14, cardsuit_pixmap);
         painter->drawPixmap(0, 2, number_pixmap);
         if(owner_pixmap)painter->drawPixmap(0,0,*owner_pixmap);
@@ -307,7 +334,7 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
 void CardItem::writeCardDesc(QString card_owner)
 {
-     if(card){
+     if(m_card){
          int x, y;
          x=(93-card_owner.toLocal8Bit().length()*6)/2;
          y=120;
@@ -328,10 +355,11 @@ void CardItem::writeCardDesc(QString card_owner)
 
          painter.setPen(QColor(228,213,160));
          painter.drawText(x, y, card_owner);
+         update();
      }
 }
 
-void CardItem::deleteCardDesc(){
+void CardItem::deleteCardDescription(){
     delete owner_pixmap;
     owner_pixmap = NULL;
 }

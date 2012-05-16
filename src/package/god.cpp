@@ -316,7 +316,7 @@ public:
 class Qinyin: public TriggerSkill{
 public:
     Qinyin():TriggerSkill("qinyin"){
-        events << CardLost << PhaseChange;
+        events << CardLostOnePiece << PhaseChange;
         default_choice = "down";
     }
 
@@ -348,9 +348,9 @@ public:
         if(shenzhouyu->getPhase() != Player::Discard)
             return false;
 
-        if(event == CardLost){
+        if(event == CardLostOnePiece){
             CardMoveStar move = data.value<CardMoveStar>();
-            if(move->to_place == Player::DiscardedPile){
+            if(move->to_place == Player::DiscardPile){
                 shenzhouyu->addMark("qinyin");
                 if(shenzhouyu->getMark("qinyin") == 2){
                     if(shenzhouyu->askForSkillInvoke(objectName()))
@@ -631,26 +631,29 @@ public:
 
         Room *room = shenzhuge->getRoom();
         room->playSkillEffect("qixing");
-        room->fillAG(stars, shenzhuge);
 
         int ai_delay = Config.AIDelay;
         Config.AIDelay = 0;
 
         int n = 0;
         while(!stars.isEmpty()){
+            room->fillAG(stars, shenzhuge);
             int card_id = room->askForAG(shenzhuge, stars, true, "qixing");
             if(card_id == -1)
+            {
+                shenzhuge->invoke("clearAG");
                 break;
+            }
 
             stars.removeOne(card_id);
-            ++ n;
+            ++n;
 
             room->obtainCard(shenzhuge, card_id, false);
+            shenzhuge->invoke("clearAG");
         }
 
         Config.AIDelay = ai_delay;
 
-        shenzhuge->invoke("clearAG");
 
         if(n == 0)
             return;
@@ -706,13 +709,12 @@ public:
 
     virtual void onGameStart(ServerPlayer *shenzhuge) const{
         shenzhuge->gainMark("@star", 7);
-        shenzhuge->drawCards(7);
-
-        QList<int> stars = shenzhuge->handCards().mid(0, 7);
-
-        foreach(int card_id, stars)
-            shenzhuge->addToPile("stars", card_id, false);
-
+        QList<int> stars;
+        for (int i = 0; i < 7; i++)
+        {
+            stars.push_back(shenzhuge->getRoom()->drawCard());
+        }
+        shenzhuge->addToPile("stars", stars, false);
         Qixing::Exchange(shenzhuge);
     }
 };
@@ -1288,7 +1290,7 @@ public:
 class JuejingEx: public TriggerSkill{
 public:
    JuejingEx():TriggerSkill("juejingEx"){
-        events << CardLost << CardGot << CardLostDone << CardGotDone
+        events << CardLostOneTime << CardGotOneTime
                 << CardDiscarded
                 << PhaseChange
                 << CardDrawnDone;
@@ -1298,33 +1300,20 @@ public:
     virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
         Room *room = player->getRoom();
         int HandcardNum = player->getHandcardNum();
+
         if(event == PhaseChange && player->getPhase()==Player::Draw){
             return true;
-        }
-        if(event == CardLost){
-            CardMoveStar move = data.value<CardMoveStar>();
 
-            if(move->from_place == Player::Hand)
-                player->tag["InvokeJuejingEx"] = true;
-        }else if(event == CardLostDone){
-            if(!player->tag.value("InvokeJuejingEx", false).toBool())
-                return false;
-            player->tag.remove("InvokeJuejingEx");
-            if(HandcardNum < 4){
+        }else if(event == CardLostOneTime){
+            CardsMoveStar move = data.value<CardsMoveStar>();
+            if(move->from_place == Player::Hand && HandcardNum < 4)
                 player->drawCards(4 - HandcardNum);
-            }
-        }else if(event == CardGot){
-            CardMoveStar move = data.value<CardMoveStar>();
 
-            if(move->to_place == Player::Hand && move->from!=player)
-                player->tag["InvokeJuejingEx"] = true;
-        }else if(event == CardGotDone){
-            if(!player->tag.value("InvokeJuejingEx", false).toBool())
-                return false;
-            player->tag.remove("InvokeJuejingEx");
-            if(HandcardNum > 4){
+        }else if(event == CardGotOneTime){
+            CardsMoveStar move = data.value<CardsMoveStar>();
+            if(move->to_place == Player::Hand && HandcardNum > 4)
                 room->askForDiscard(player,"juejingEx",HandcardNum - 4);
-            }
+
         }else{
             if(HandcardNum < 4){
                 player->drawCards(4 - HandcardNum);
