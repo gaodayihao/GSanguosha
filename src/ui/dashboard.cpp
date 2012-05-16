@@ -1019,7 +1019,6 @@ void Dashboard::stopPending(){
     pendings.clear();
     adjustCards(false);
     m_mutexEnableCards.unlock();
-    enableCards();
 }
 
 void Dashboard::onCardItemClicked(){
