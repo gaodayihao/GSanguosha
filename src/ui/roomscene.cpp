@@ -3595,6 +3595,7 @@ void RoomScene::doLightboxAnimation(const QString &, const QStringList &args){
     lightbox->setBrush(QColor(0x20, 0x20, 0x20));
     lightbox->setOpacity(0.8);
     lightbox->moveBy(-main_window->width()/2, -main_window->height()/2);
+    lightbox->setZValue(10086);
 
     QGraphicsTextItem *line = addText(word, Config.BigFont);
     line->setDefaultTextColor(Qt::white);
@@ -3603,6 +3604,7 @@ void RoomScene::doLightboxAnimation(const QString &, const QStringList &args){
 
     line->setParentItem(lightbox);
     line->setPos(lightbox->mapFromScene(line->x(), line->y()));
+    line->setZValue(lightbox->zValue()+1);
 
     QPropertyAnimation *appear = new QPropertyAnimation(line, "opacity");
     appear->setStartValue(0.0);
