@@ -3658,7 +3658,7 @@ void RoomScene::showIndicator(const QString &from, const QString &to){
     qreal x = qMin(start.x(), finish.x());
     qreal y = qMin(start.y(), finish.y());
     indicator->setPos(x, y);
-    indicator->setZValue(9.0);
+    indicator->setZValue(10086);
 
     addItem(indicator);
 

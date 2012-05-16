@@ -54,11 +54,6 @@ return {
 	["illustrator:sp_diaochan"] = "巴萨小马",
 	["SP-Diaochan"] = "SP貂蝉",
 
-	["#sp_diaochan"] = "绝世的舞姬",
-	["sp_diaochan"] = "SP貂蝉",
-	["illustrator:sp_diaochan"] = "巴萨小马",
-	["SP-Diaochan"] = "SP貂蝉",
-
 	["#sp_sunshangxiang"] = "梦醉良缘",
 	["sp_sunshangxiang"] = "SP孙尚香",
 	["illustrator:sp_sunshangxiang"] = "木美人",
