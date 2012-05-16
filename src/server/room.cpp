@@ -840,11 +840,11 @@ void Room::obtainCard(ServerPlayer *target, const Card *card, bool unhide){
     if(card == NULL)
         return;
 
-    moveCardTo(card, target, Player::Hand, unhide);
+    moveCardTo(card, target, Player::Hand, unhide, false);
 }
 
 void Room::obtainCard(ServerPlayer *target, int card_id, bool unhide){
-    moveCardTo(Sanguosha->getCard(card_id), target, Player::Hand, unhide);
+    moveCardTo(Sanguosha->getCard(card_id), target, Player::Hand, unhide, false);
 }
 
 bool Room::isCanceled(const CardEffectStruct &effect){
@@ -3035,7 +3035,7 @@ void Room::throwCard(const Card *card, ServerPlayer *who){
         sendLog(log);
     }
 
-    moveCardTo(card, NULL, Player::DiscardPile, true);
+    moveCardTo(card, NULL, Player::DiscardPile, true, false);
 
     if(who){
         CardStar card_ptr = card;

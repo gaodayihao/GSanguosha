@@ -574,11 +574,11 @@ void Dashboard::drawHp(QPainter *painter) const{
         }
     }
     else{
-        painter->drawPixmap(start_x + 1, 37, *magatama);
+        painter->drawPixmap(start_x + 1, skip, *magatama);
         QString text = QString("%1\n/\n%2").arg(QString::number(hp)).arg(QString::number(max_hp));
         painter->setPen(Qt::white);
         painter->setFont(Config.SmallFont);
-        QRectF name_rect(start_x + 1, skip + magatama->height() + 37, magatama->width(), 100);
+        QRectF name_rect(start_x + 1, skip*2 + magatama->height(), magatama->width(), 100);
         painter->drawText(name_rect, text, QTextOption(Qt::AlignHCenter));
     }
 }

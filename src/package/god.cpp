@@ -1304,7 +1304,7 @@ public:
         if(event == PhaseChange && player->getPhase()==Player::Draw){
             return true;
 
-        }else if(event == CardLostOneTime){
+        }else if(event == CardLostOneTime && player->getPhase() != Player::Discard){
             CardsMoveStar move = data.value<CardsMoveStar>();
             if(move->from_place == Player::Hand && HandcardNum < 4)
                 player->drawCards(4 - HandcardNum);
