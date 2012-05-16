@@ -349,7 +349,7 @@ void TransfigureSkill::onGameStart(ServerPlayer *player) const{
 
         const General *general = Sanguosha->getGeneral(to);
         const QString kingdom = general->getKingdom();
-        if(kingdom != player->getKingdom())
+        if(kingdom != player->getKingdom() && kingdom != "god")
             room->setPlayerProperty(player, "kingdom", kingdom);
     }
 }
