@@ -898,7 +898,8 @@ void Duel::onEffect(const CardEffectStruct &effect) const{
     room->setEmotion(first, "duel");
     room->setEmotion(second, "duel");
 
-    forever{
+    while(first->isAlive())
+    {
         if(second->hasSkill("wushuang")){
             room->playSkillEffect("wushuang");
             const Card *slash = room->askForCard(first, "slash", "@wushuang-slash-1:" + second->objectName());
@@ -918,15 +919,18 @@ void Duel::onEffect(const CardEffectStruct &effect) const{
         qSwap(first, second);
     }
 
-    DamageStruct damage;
-    damage.card = this;
-    if(second->isAlive())
-        damage.from = second;
-    else
-        damage.from = NULL;
-    damage.to = first;
+    if(first->isAlive())
+    {
+        DamageStruct damage;
+        damage.card = this;
+        if(second->isAlive())
+            damage.from = second;
+        else
+            damage.from = NULL;
+        damage.to = first;
 
-    room->damage(damage);
+        room->damage(damage);
+    }
 }
 
 Snatch::Snatch(Suit suit, int number):SingleTargetTrick(suit, number, true) {
