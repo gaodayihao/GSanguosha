@@ -1017,7 +1017,6 @@ void Dashboard::stopPending(){
     }
 
     pendings.clear();
-    adjustCards(false);
     m_mutexEnableCards.unlock();
 }
 

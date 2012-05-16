@@ -840,11 +840,11 @@ void Room::obtainCard(ServerPlayer *target, const Card *card, bool unhide){
     if(card == NULL)
         return;
 
-    moveCardTo(card, target, Player::Hand, unhide, false);
+    moveCardTo(card, target, Player::Hand, unhide);
 }
 
 void Room::obtainCard(ServerPlayer *target, int card_id, bool unhide){
-    moveCardTo(Sanguosha->getCard(card_id), target, Player::Hand, unhide, false);
+    moveCardTo(Sanguosha->getCard(card_id), target, Player::Hand, unhide);
 }
 
 bool Room::isCanceled(const CardEffectStruct &effect){
@@ -3035,7 +3035,7 @@ void Room::throwCard(const Card *card, ServerPlayer *who){
         sendLog(log);
     }
 
-    moveCardTo(card, NULL, Player::DiscardPile, true, false);
+    moveCardTo(card, NULL, Player::DiscardPile, true);
 
     if(who){
         CardStar card_ptr = card;
@@ -3084,16 +3084,8 @@ void Room::_fillMoveInfo(CardMoveStruct &move)
     move.from_place = getCardPlace(card_id);
     if (move.from) // Hand/Equip/Judge
     {
-        if (move.from->isAlive())
-        {
-            if (move.from_place == Player::Special) move.from_pile_name = move.from->getPileName(card_id);
-            move.from_player_name = move.from->objectName();
-        }
-        else
-        {
-            move = CardMoveStruct();
-            return;
-        }
+        if (move.from_place == Player::Special) move.from_pile_name = move.from->getPileName(card_id);
+        move.from_player_name = move.from->objectName();
     }
     if (move.to)
     {
@@ -3105,7 +3097,8 @@ void Room::_fillMoveInfo(CardMoveStruct &move)
         }
         else
         {
-            move = CardMoveStruct();
+            move.to = NULL;
+            move.to_place = Player::DiscardPile;
             return;
         }
     }
@@ -3113,7 +3106,6 @@ void Room::_fillMoveInfo(CardMoveStruct &move)
 
 void Room::_fillMoveInfo(CardsMoveStruct &moves, int card_index)
 {
-
     int card_id = moves.card_ids[card_index];
     moves.from = getCardOwner(card_id);
     moves.from_place = getCardPlace(card_id);
