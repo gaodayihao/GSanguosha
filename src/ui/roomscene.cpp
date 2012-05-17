@@ -1310,7 +1310,7 @@ void RoomScene::keepGetCardLog(const CardsMoveStruct &move)
         }
         if(hide > 0)
             log_box->appendLog("#MoveNCards", from_general, tos, QString(),
-                               QString::number(move.card_ids.length()-hide));
+                               QString::number(hide));
     }
     if(move.from_place == Player::Hand && move.to_place == Player::Hand)
     {

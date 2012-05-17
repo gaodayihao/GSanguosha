@@ -1052,6 +1052,7 @@ public:
 
 PaiyiCard::PaiyiCard(){
     once = true;
+    will_throw = false;
 }
 
 bool PaiyiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -1061,23 +1062,19 @@ bool PaiyiCard::targetFilter(const QList<const Player *> &targets, const Player 
     return true;
 }
 
-void PaiyiCard::onUse(Room *room, const CardUseStruct &card_use) const{
-    ServerPlayer *zhonghui = card_use.from;
-    ServerPlayer *target = card_use.to.first();
+void PaiyiCard::onEffect(const CardEffectStruct &effect) const{
+    ServerPlayer *zhonghui = effect.from;
+    ServerPlayer *target = effect.to;
+    Room *room = zhonghui->getRoom();
     QList<int> powers = zhonghui->getPile("power");
-    if(powers.isEmpty())
-        return ;
 
     int card_id;
     if(powers.length() == 1)
         card_id = powers.first();
     else{
         room->fillAG(powers, zhonghui);
-        card_id = room->askForAG(zhonghui, powers, true, "paiyi");
+        card_id = room->askForAG(zhonghui, powers, false, "paiyi");
         zhonghui->invoke("clearAG");
-
-        if(card_id == -1)
-            return;
     }
 
     room->throwCard(card_id);
