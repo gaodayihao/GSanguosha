@@ -495,7 +495,11 @@ int Player::getMaxCards() const{
         zongshi = kingdom_set.size();
     }
 
-    total = qMax(hp,0) + extra + juejing + xueyi + shenwei + zongshi;
+    int quanji = 0;
+    if(hasSkill("quanji"))
+        quanji = getPile("power").length();
+
+    total = qMax(hp,0) + extra + juejing + xueyi + shenwei + zongshi + quanji;
 
     return total;
 }

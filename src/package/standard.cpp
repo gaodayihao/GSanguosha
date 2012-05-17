@@ -76,7 +76,7 @@ void EquipCard::onUse(Room *room, const CardUseStruct &card_use) const{
 void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     const EquipCard *equipped = NULL;
     ServerPlayer *target = targets.value(0, source);
-    
+    if (room->getCardOwner(getId()) != source) return;
     switch(location()){
     case WeaponLocation: equipped = target->getWeapon(); break;
     case ArmorLocation: equipped = target->getArmor(); break;
@@ -84,18 +84,29 @@ void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
     case OffensiveHorseLocation: equipped = target->getOffensiveHorse(); break;
     }
 
-    if(equipped){
-        room->throwCard(equipped, source);
-    }
-
-    if(room->getCardOwner(this->getEffectiveId()) == target || this->objectName() == "gale-shell"){
+    if (room->getCardOwner(getId()) == source && room->getCardPlace(getId()) == Player::Hand)
+    {
+        QList<CardsMoveStruct> exchangeMove;
+        CardsMoveStruct move1;
+        move1.card_ids << getEffectiveId();
+        move1.to = source;
+        move1.to_place = Player::Equip;
+        exchangeMove.push_back(move1);
+        if(equipped)
+        {
+            CardsMoveStruct move2;
+            move2.card_ids << equipped->getEffectiveId();
+            move2.to = NULL;
+            move2.to_place = Player::DiscardPile;
+            exchangeMove.push_back(move2);
+        }
         LogMessage log;
         log.from = target;
         log.type = "$Install";
         log.card_str = QString::number(getEffectiveId());
         room->sendLog(log);
 
-        room->moveCardTo(this, target, Player::Equip, true);
+        room->moveCards(exchangeMove, true);
     }
 }
 

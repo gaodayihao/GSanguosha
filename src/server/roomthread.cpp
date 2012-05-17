@@ -191,14 +191,16 @@ RoomThread::RoomThread(Room *room)
 }
 
 void RoomThread::addPlayerSkills(ServerPlayer *player, bool invoke_game_start){
-    QVariant void_data;
+    bool invokeStart = false;
 
     foreach(const TriggerSkill *skill, player->getTriggerSkills()){
         addTriggerSkill(skill);
 
         if(invoke_game_start && skill->getTriggerEvents().contains(GameStart))
-            skill->trigger(GameStart, player, void_data);
+            invokeStart = true;
     }
+    if (invokeStart)
+        trigger(GameStart,player);
 }
 
 void RoomThread::constructTriggerTable(){
