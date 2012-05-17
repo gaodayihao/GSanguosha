@@ -657,12 +657,16 @@ public:
         room->broadcastInvoke("animate", "lightbox:$Zhiji:5000");
         room->getThread()->delay(5000);
 
-        if(room->askForChoice(jiangwei, objectName(), "recover+draw") == "recover"){
-            RecoverStruct recover;
-            recover.who = jiangwei;
-            room->recover(jiangwei, recover);
-        }else
+        if(jiangwei->isWounded())
+            if(room->askForChoice(jiangwei, objectName(), "recover+draw") == "recover"){
+                RecoverStruct recover;
+                recover.who = jiangwei;
+                room->recover(jiangwei, recover);
+            }else
+                room->drawCards(jiangwei, 2);
+        else
             room->drawCards(jiangwei, 2);
+
 
         room->setPlayerMark(jiangwei, "zhiji", 1);
         room->acquireSkill(jiangwei, "guanxing");

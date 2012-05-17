@@ -1033,11 +1033,14 @@ public:
 
         room->loseMaxHp(zhonghui);
 
-        if(room->askForChoice(zhonghui, objectName(), "recover+draw") == "recover"){
-            RecoverStruct recover;
-            recover.who = zhonghui;
-            room->recover(zhonghui, recover);
-        }else
+        if(zhonghui->isWounded())
+            if(room->askForChoice(zhonghui, objectName(), "recover+draw") == "recover"){
+                RecoverStruct recover;
+                recover.who = zhonghui;
+                room->recover(zhonghui, recover);
+            }else
+                room->drawCards(zhonghui, 2);
+        else
             room->drawCards(zhonghui, 2);
 
         room->setPlayerMark(zhonghui, "zili", 1);
