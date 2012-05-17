@@ -1052,6 +1052,7 @@ public:
 
 PaiyiCard::PaiyiCard(){
     once = true;
+    mute = true;
 }
 
 bool PaiyiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -1086,6 +1087,8 @@ void PaiyiCard::onUse(Room *room, const CardUseStruct &card_use) const{
     log.type = "#UseCard";
     log.card_str = card_use.card->toString();
     room->sendLog(log);
+
+    room->playSkillEffect("paiyi");
 
     room->drawCards(target, 2);
     if(target->getHandcardNum() > zhonghui->getHandcardNum()){
