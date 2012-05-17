@@ -1052,7 +1052,6 @@ public:
 
 PaiyiCard::PaiyiCard(){
     once = true;
-    will_throw = false;
 }
 
 bool PaiyiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
