@@ -1061,10 +1061,9 @@ bool PaiyiCard::targetFilter(const QList<const Player *> &targets, const Player 
     return true;
 }
 
-void PaiyiCard::onEffect(const CardEffectStruct &effect) const{
-    ServerPlayer *zhonghui = effect.from;
-    ServerPlayer *target = effect.to;
-    Room *room = zhonghui->getRoom();
+void PaiyiCard::onUse(Room *room, const CardUseStruct &card_use) const{
+    ServerPlayer *zhonghui = card_use.from;
+    ServerPlayer *target = card_use.to.first();
     QList<int> powers = zhonghui->getPile("power");
 
     int card_id;
@@ -1072,11 +1071,22 @@ void PaiyiCard::onEffect(const CardEffectStruct &effect) const{
         card_id = powers.first();
     else{
         room->fillAG(powers, zhonghui);
-        card_id = room->askForAG(zhonghui, powers, false, "paiyi");
+        card_id = room->askForAG(zhonghui, powers, true, "paiyi");
         zhonghui->invoke("clearAG");
+
+        if(card_id == -1)
+            return;
     }
 
     room->throwCard(card_id);
+
+    LogMessage log;
+    log.from = card_use.from;
+    log.to = card_use.to;
+    log.type = "#UseCard";
+    log.card_str = card_use.card->toString();
+    room->sendLog(log);
+
     room->drawCards(target, 2);
     if(target->getHandcardNum() > zhonghui->getHandcardNum()){
         DamageStruct damage;
