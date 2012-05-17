@@ -1300,14 +1300,17 @@ void RoomScene::keepGetCardLog(const CardsMoveStruct &move)
         QString from_general = move.from->getGeneralName();
         QStringList tos;
         tos << move.to->getGeneralName();
+        int hide = 0;
         foreach(int card_id, move.card_ids)
         {
             if(card_id != Card::S_UNKNOWN_CARD_ID)
                 log_box->appendLog("$MoveCard", from_general, tos, QString::number(card_id));
             else
-                log_box->appendLog("#MoveNCards", from_general, tos, QString(),
-                                   QString::number(move.card_ids.length()));
+                hide++;
         }
+        if(hide > 0)
+            log_box->appendLog("#MoveNCards", from_general, tos, QString(),
+                               QString::number(move.card_ids.length()-hide));
     }
     if(move.from_place == Player::Hand && move.to_place == Player::Hand)
     {

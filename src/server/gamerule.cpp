@@ -353,7 +353,12 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
             {
                 room->setTag("chaining", true);
 
-                QList<ServerPlayer *> chained_players = room->getAllPlayers();
+                QList<ServerPlayer *> chained_players;
+                if(room->getCurrent()->isDead())
+                    chained_players = room->getOtherPlayers(room->getCurrent());
+                else
+                    chained_players = room->getAllPlayers();
+
                 foreach(ServerPlayer *chained_player, chained_players){
                     if(chained_player->isChained()){
                         room->getThread()->delay();
