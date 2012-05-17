@@ -1791,7 +1791,7 @@ void RoomScene::useCard(const Card *card){
         item->setSelected(false);
         animations->effectOut(item);
     }
-    // enableTargets(NULL);
+    enableTargets(NULL);
 }
 
 void RoomScene::callViewAsSkill(){
