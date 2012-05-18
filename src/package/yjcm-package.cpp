@@ -508,6 +508,7 @@ public:
             if(move->from_place == Player::Equip ||
                     lingtong->tag.value("InvokeXuanfeng", false).toBool())
             {
+                lingtong->setMark("xuanfeng", 0);
                 lingtong->tag.remove("InvokeXuanfeng");
                 Room *room = lingtong->getRoom();
 
