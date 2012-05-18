@@ -199,7 +199,7 @@ public:
                     caoren->throwAllHandCards();
                 }
                 else{
-                    room->askForDiscard(caoren, objectName(), n, false, true);
+                    room->askForDiscard(caoren, objectName(), n, n, false, true);
                 }
             }
 
@@ -495,7 +495,7 @@ public:
                 room->playSkillEffect(objectName(), 3);
                 if(!pindian->from->isKongcheng()){
                     room->showAllCards(pindian->from);
-                    room->askForDiscard(pindian->from, objectName(), 1);
+                    room->askForDiscard(pindian->from, objectName(), 1, 1);
                 }
             }
         }

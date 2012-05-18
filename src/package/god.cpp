@@ -505,7 +505,7 @@ void ShenfenCard::use(Room *room, ServerPlayer *shenlvbu, const QList<ServerPlay
         if(player->getHandcardNum() <= 4)
             player->throwAllHandCards();
         else
-            room->askForDiscard(player, "shenfen", 4);
+            room->askForDiscard(player, "shenfen", 4, 4);
     }
 
     shenlvbu->turnOver();
@@ -1303,7 +1303,7 @@ public:
         if(HandcardNum < 4){
             shenzhao->drawCards(4 - HandcardNum);
         }else if(HandcardNum > 4){
-            room->askForDiscard(shenzhao,"juejingEx",HandcardNum - 4);
+            room->askForDiscard(shenzhao,"juejingEx",HandcardNum - 4, HandcardNum - 4);
         }
     }
 

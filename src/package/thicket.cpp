@@ -364,7 +364,7 @@ void YinghunCard::onEffect(const CardEffectStruct &effect) const{
         room->playSkillEffect("yinghun", 1);
 
         effect.to->drawCards(1);
-        room->askForDiscard(effect.to, "yinghun", 1, false, true);
+        room->askForDiscard(effect.to, "yinghun", 1, 1, false, true);
         good = true;
     }else{
         QString choice = room->askForChoice(effect.from, "yinghun", "d1tx+dxt1");
@@ -373,13 +373,13 @@ void YinghunCard::onEffect(const CardEffectStruct &effect) const{
 
             effect.to->drawCards(1);
             x = qMin(x, effect.to->getCardCount(true));
-            room->askForDiscard(effect.to, "yinghun", x, false, true);
+            room->askForDiscard(effect.to, "yinghun", x, x, false, true);
             good = false;
         }else{
             room->playSkillEffect("yinghun", 1);
 
             effect.to->drawCards(x);
-            room->askForDiscard(effect.to, "yinghun", 1, false, true);
+            room->askForDiscard(effect.to, "yinghun", 1, 1, false, true);
             good = true;
         }
     }
@@ -590,7 +590,7 @@ void DimengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
 
     int diff = qAbs(n1 - n2);
     if(diff != 0){
-        room->askForDiscard(source, "dimeng", diff, false, true);
+        room->askForDiscard(source, "dimeng", diff, diff, false, true);
     }
 
     QList<CardsMoveStruct> exchangeMove;
