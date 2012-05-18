@@ -4051,6 +4051,16 @@ void Room::takeAG(ServerPlayer *player, int card_id){
         CardMoveStar move_star = &move;
         QVariant data = QVariant::fromValue(move_star);
         thread->trigger(CardGotOnePiece, player, data);
+
+        CardsMoveStruct cards_move;
+        cards_move.from = NULL;
+        cards_move.from_place = Player::DrawPile;
+        cards_move.to = player;
+        cards_move.to_place = Player::Hand;
+        cards_move.card_ids << card_id;
+        CardsMoveStar moves_star = &cards_move;
+        data = QVariant::fromValue(moves_star);
+        thread->trigger(CardGotOneTime, player, data);
     }else{
         discard_pile->prepend(card_id);
         setCardMapping(card_id, NULL, Player::DiscardPile);

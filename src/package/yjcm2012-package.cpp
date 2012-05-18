@@ -89,9 +89,7 @@ public:
                 log.to << target;
                 room->sendLog(log);
 
-                room->setPlayerFlag(target, "SpecialDraw");
                 target->drawCards(x, false);
-                room->setPlayerFlag(target, "-SpecialDraw");
             }
         }
         return false;
