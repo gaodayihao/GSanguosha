@@ -1491,6 +1491,7 @@ void RoomScene::acquireSkill(const ClientPlayer *player, const QString &skill_na
     QGraphicsObject *dest = getAnimationObject(player->objectName());
     QGraphicsTextItem *item = new QGraphicsTextItem(Sanguosha->translate(skill_name), NULL, this);
     item->setFont(Config.BigFont);
+    item->setZValue(10086);
 
     QGraphicsDropShadowEffect *drop = new QGraphicsDropShadowEffect;
     drop->setBlurRadius(5);
