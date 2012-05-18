@@ -1293,7 +1293,8 @@ void RoomScene::keepGetCardLog(const CardsMoveStruct &move)
     if(move.from_place == Player::DiscardPile && move.to_place == Player::Hand)
     {
         QString to_general = move.to->getGeneralName();
-        log_box->appendLog("$RecycleCard", to_general, QStringList(), QString::number(move.card_ids.first()));
+        foreach(int card_id, move.card_ids)
+            log_box->appendLog("$RecycleCard", to_general, QStringList(), QString::number(card_id));
     }
     if(move.from && move.from_place != Player::Hand && move.to && move.from != move.to)
     {
@@ -2084,6 +2085,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
             discard_button->setEnabled(false);
 
             discard_skill->setNum(ClientInstance->discard_num);
+            discard_skill->setMinNum(ClientInstance->min_num);
             discard_skill->setIncludeEquip(ClientInstance->m_canDiscardEquip);
             dashboard->startPending(discard_skill);
             break;

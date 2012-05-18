@@ -486,50 +486,61 @@ public:
 class Xuanfeng: public TriggerSkill{
 public:
     Xuanfeng():TriggerSkill("xuanfeng"){
-        events << CardLostDone;
-        default_choice = "nothing";
+        events << CardLostOnePiece << CardLostOneTime << PhaseChange;
     }
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *lingtong, QVariant &data) const{
-        CardsMoveStar move = data.value<CardsMoveStar>();
-        if(move->from_place == Player::Equip ||
-                (lingtong->getPhase() == Player::Discard
-                 && move->to_place == Player::DiscardPile
-                 && move->card_ids.size() >= 2))
+        if(event == CardLostOnePiece){
+            CardMoveStar move = data.value<CardMoveStar>();
+            if(move->to_place == Player::DiscardPile && lingtong->getPhase() == Player::Discard){
+                lingtong->addMark("xuanfeng");
+                if(lingtong->getMark("xuanfeng") == 2){
+                    lingtong->tag["InvokeXuanfeng"] = true;
+                }
+            }
+        }
+        else if(event == PhaseChange){
+            lingtong->setMark("xuanfeng", 0);
+        }
+        else if(event == CardLostOneTime)
         {
-            Room *room = lingtong->getRoom();
-
-            QList<ServerPlayer *> targets;
-            foreach(ServerPlayer *sp,room->getOtherPlayers(lingtong))
-                if(!sp->isNude())
-                    targets << sp;
-            if(targets.isEmpty())
-                return false;
-
-            QString choice = room->askForChoice(lingtong, objectName(), "discard+nothing");
-
-
-            if(choice == "discard")
+            CardsMoveStar move = data.value<CardsMoveStar>();
+            if(move->from_place == Player::Equip ||
+                    lingtong->tag.value("InvokeXuanfeng", false).toBool())
             {
-                room->playSkillEffect(objectName());
+                lingtong->tag.remove("InvokeXuanfeng");
+                Room *room = lingtong->getRoom();
 
-                ServerPlayer *target;
-                int card_id = -1;
-                for(int i = 0;i < 2;i ++){
-                    if(i == 1)
-                        if(!room->askForSkillInvoke(lingtong, objectName()))
-                            break;
-                    target = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
-                    if(target){
-                        card_id = room->askForCardChosen(lingtong, target, "he", "xuanfeng");
-                        room->throwCard(card_id, target);
-                        if(target->isNude())
-                            targets.removeOne(target);
+                QList<ServerPlayer *> targets;
+                foreach(ServerPlayer *sp,room->getOtherPlayers(lingtong))
+                    if(!sp->isNude())
+                        targets << sp;
+                if(targets.isEmpty())
+                    return false;
+
+                QString choice = room->askForChoice(lingtong, objectName(), "discard+nothing");
+
+                if(choice == "discard")
+                {
+                    room->playSkillEffect(objectName());
+
+                    ServerPlayer *target;
+                    int card_id = -1;
+                    for(int i = 0;i < 2;i ++){
+                        if(i == 1)
+                            if(!room->askForSkillInvoke(lingtong, objectName()))
+                                break;
+                        target = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
+                        if(target){
+                            card_id = room->askForCardChosen(lingtong, target, "he", "xuanfeng");
+                            room->throwCard(card_id, target);
+                            if(target->isNude())
+                                targets.removeOne(target);
+                        }
                     }
                 }
             }
         }
-
         return false;
     }
 };

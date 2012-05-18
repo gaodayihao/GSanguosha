@@ -1289,37 +1289,42 @@ public:
 
 class JuejingEx: public TriggerSkill{
 public:
-   JuejingEx():TriggerSkill("juejingEx"){
+    JuejingEx():TriggerSkill("juejingEx"){
         events << CardLostOneTime << CardGotOneTime
-                << CardDiscarded
-                << PhaseChange
-                << CardDrawnDone;
+               << CardDiscarded
+               << PhaseChange
+               << CardDrawnDone;
         frequency = Compulsory;
     }
 
+    void dojuejingEx(ServerPlayer *shenzhao) const{
+        int HandcardNum = shenzhao->getHandcardNum();
+        Room *room = shenzhao->getRoom();
+        if(HandcardNum < 4){
+            shenzhao->drawCards(4 - HandcardNum);
+        }else if(HandcardNum > 4){
+            room->askForDiscard(shenzhao,"juejingEx",HandcardNum - 4);
+        }
+    }
+
+
     virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-        Room *room = player->getRoom();
-        int HandcardNum = player->getHandcardNum();
 
         if(event == PhaseChange && player->getPhase()==Player::Draw){
             return true;
 
         }else if(event == CardLostOneTime && player->getPhase() != Player::Discard){
             CardsMoveStar move = data.value<CardsMoveStar>();
-            if(move->from_place == Player::Hand && HandcardNum < 4)
-                player->drawCards(4 - HandcardNum);
+            if(move->from_place == Player::Hand)
+                dojuejingEx(player);
 
         }else if(event == CardGotOneTime){
             CardsMoveStar move = data.value<CardsMoveStar>();
-            if(move->to_place == Player::Hand && HandcardNum > 4)
-                room->askForDiscard(player,"juejingEx",HandcardNum - 4);
+            if(move->to_place == Player::Hand)
+                dojuejingEx(player);
 
         }else{
-            if(HandcardNum < 4){
-                player->drawCards(4 - HandcardNum);
-            }else if(HandcardNum > 4){
-                room->askForDiscard(player,"juejingEx",HandcardNum - 4);
-            }
+            dojuejingEx(player);
         }
         return false;
     }
