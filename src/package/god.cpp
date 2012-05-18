@@ -1323,7 +1323,7 @@ public:
             if(move->to_place == Player::Hand)
                 dojuejingEx(player);
 
-        }else{
+        }else if(player->getPhase() != Player::Discard){
             dojuejingEx(player);
         }
         return false;
