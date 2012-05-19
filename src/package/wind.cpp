@@ -267,6 +267,7 @@ void ShensuCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
     use.from = source;
     use.to = targets;
 
+    room->playSkillEffect("shensu");
     room->useCard(use);
 }
 
@@ -306,6 +307,10 @@ public:
             return card;
         }
     }
+
+    virtual int getEffectIndex(const ServerPlayer *, const Card *) const{
+        return 0;
+    }
 };
 
 class Shensu: public PhaseChangeSkill{
@@ -329,6 +334,10 @@ public:
         }
 
         return false;
+    }
+
+    virtual int getEffectIndex(const ServerPlayer *, const Card *) const{
+        return 0;
     }
 };
 
