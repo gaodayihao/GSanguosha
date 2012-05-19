@@ -15,9 +15,9 @@
 
 using namespace QSanProtocol;
 
-const QRect Dashboard::S_EQUIP_CARD_MOVE_REGION(0, 0,
+const QRect Dashboard::S_EQUIP_CARD_MOVE_REGION(0, -10,
     CardItem::S_NORMAL_CARD_WIDTH * 1.5, CardItem::S_NORMAL_CARD_HEIGHT);
-const QRect Dashboard::S_JUDGE_CARD_MOVE_REGION(0, 0,
+const QRect Dashboard::S_JUDGE_CARD_MOVE_REGION(0, -20,
     CardItem::S_NORMAL_CARD_WIDTH * 1.5, CardItem::S_NORMAL_CARD_HEIGHT);
 
 Dashboard::Dashboard(QGraphicsItem *button_widget)
@@ -385,7 +385,6 @@ void Dashboard::selectCard(CardItem* item, bool isSelected){
     else
         newPos.setY(newPos.y() - S_PENDING_OFFSET_Y);
     item->setHomePos(newPos);
-    item->setHomeOpacity(item->isEnabled() ? 1.0 : 0.7);
     //setY(PendingY);
     if (!hasFocus()) item->goBack(true);
     m_mutex.unlock();
@@ -722,7 +721,6 @@ void Dashboard::_adjustCards(){
     foreach (CardItem* card, m_handCards)
     {
         card->setSelected(false);
-        card->setHomeOpacity(card->isEnabled() ? 1.0 : 0.7);
     }
 
     int n = m_handCards.length();

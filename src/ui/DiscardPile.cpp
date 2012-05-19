@@ -5,19 +5,19 @@ QList<CardItem*> DiscardPile::removeCardItems(const QList<int> &card_ids, Player
 {
     QList<CardItem*> result;
     _m_mutex_pileCards.lock();    
-    foreach (int card_id, card_ids)
+    result = _createCards(card_ids);
+    _disperseCards(result, m_cardsDisplayRegion, Qt::AlignCenter, false);
+    foreach (CardItem* card, result)
     {
-        CardItem* card = NULL;
-        card = _createCard(card_id);
         for (int i = m_visibleCards.size() - 1; i >= 0; i--)
         {
-            if (m_visibleCards[i]->getCard()->getId() == card_id)
+            if (m_visibleCards[i]->getCard()->getId() == card->getId())
             {
                 card->setPos(m_visibleCards[i]->pos());
                 break;
             }
         }
-        result.append(card);
+
     }
     _m_mutex_pileCards.unlock();
     return result;
@@ -33,7 +33,9 @@ bool DiscardPile::_addCardItems(QList<CardItem*> &card_items, Player::Place plac
     {
         CardItem* toRemove = m_visibleCards.first();
         toRemove->setZValue(0.0);
-        m_dyingCards.append(toRemove);
+        toRemove->setHomeOpacity(0.0);
+        connect(toRemove, SIGNAL(onAnimationFinished), this, SLOT(_destroyCard()));
+        toRemove->goBack(true);
         m_visibleCards.removeFirst();
     }
     foreach (CardItem* card_item, m_visibleCards)
@@ -57,19 +59,6 @@ void DiscardPile::adjustCards()
     foreach (CardItem* card_item, m_visibleCards)
         animation->addAnimation(card_item->getGoBackAnimation(true));
     animation->start();
-}
-
-void DiscardPile::onAnimationFinished()
-{
-    _m_mutex_pileCards.lock();
-    foreach (CardItem* card, m_dyingCards)
-    {
-        card->setVisible(false);
-        scene()->removeItem(card);
-        // card->deleteLater();
-    }
-    m_dyingCards.clear();
-    _m_mutex_pileCards.unlock();
 }
 
 // @todo: adjust here!!!

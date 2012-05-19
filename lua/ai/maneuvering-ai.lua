@@ -22,6 +22,15 @@ sgs.weapon_range.Fan = 4
 sgs.ai_use_priority.Fan = 2.655
 sgs.ai_use_priority.Vine = 0.6
 
+sgs.ai_skill_invoke.fan = function(self, data)
+    local target = data:toSlashEffect().to
+    if self:isFriend(target) then
+      return target:isChained() and self:isGoodChainTarget(target)
+    else
+      return not (target:isChained() and not self:isGoodChainTarget(target))
+	end
+end
+
 sgs.ai_view_as.fan = function(card, player, card_place)
 	local suit = card:getSuitString()
 	local number = card:getNumberString()
