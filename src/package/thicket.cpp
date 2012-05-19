@@ -605,6 +605,8 @@ void DimengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
     exchangeMove.push_back(move1);
     exchangeMove.push_back(move2);
 
+    room->moveCards(exchangeMove, false);
+
     LogMessage log;
     log.type = "#Dimeng";
     log.from = a;
@@ -613,7 +615,6 @@ void DimengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
     log.arg2 = QString::number(n2);
     room->sendLog(log);
 
-    room->moveCards(exchangeMove, false);
     room->getThread()->delay();
 }
 

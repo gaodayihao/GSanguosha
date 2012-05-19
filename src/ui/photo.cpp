@@ -281,8 +281,14 @@ void Photo::showCard(int card_id){
 void Photo::updateAvatar(){
     if(player){
         const General *general = player->getAvatarGeneral();
-        avatar_area->setToolTip(general->getSkillDescription());
-        bool success = avatar.load(general->getPixmapPath("small"));
+        bool success;
+        if (general)
+        {
+            avatar_area->setToolTip(general->getSkillDescription());
+            success = avatar.load(general->getPixmapPath("small"));
+        }
+        else
+            success = false;
         QPixmap kingdom_icon(player->getKingdomIcon());
         kingdom_item->setPixmap(kingdom_icon);
         kingdom_frame.load(player->getKingdomFrame());
