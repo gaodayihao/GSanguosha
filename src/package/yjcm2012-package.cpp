@@ -315,7 +315,8 @@ public:
         DamageStruct damage = data.value<DamageStruct>();
 
         if(player->distanceTo(damage.to) == 1 && damage.card && damage.card->inherits("Slash") &&
-           player->askForSkillInvoke(objectName(), data)){
+                !damage.chain &&
+                player->askForSkillInvoke(objectName(), data)){
             room->playSkillEffect(objectName());
             JudgeStruct judge;
             judge.pattern = QRegExp("(.*):(heart):(.*)");
@@ -557,42 +558,38 @@ public:
 class Jiefan : public TriggerSkill{
 public:
     Jiefan():TriggerSkill("jiefan"){
-        events << Dying << DamageProceed << CardFinished;
+        events << AskForPeaches << DamageProceed << CardFinished;
     }
 
-    virtual bool triggerable(const ServerPlayer *) const{
-        return true;
-    }
+    virtual bool trigger(TriggerEvent event, ServerPlayer *handang, QVariant &data) const{
+        Room *room = handang->getRoom();
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-        Room *room = player->getRoom();
-
-        ServerPlayer *handang = room->findPlayerBySkillName(objectName());
-
-        if(event == Dying){
+        if(event == AskForPeaches && handang->getPhase() == Player::NotActive){
             DyingStruct dying = data.value<DyingStruct>();
-            if(!handang || !dying.savers.contains(handang) || dying.who->getHp() > 0 || handang->isNude() ||
-               room->getCurrent()->isDead() || !room->askForSkillInvoke(handang, objectName(), data))
-                return false;
-            room->playSkillEffect(objectName());
+            forever{
+                if(!dying.savers.contains(handang) || dying.who->getHp() > 0 || handang->isNude() ||
+                        room->getCurrent()->isDead() || !room->askForSkillInvoke(handang, objectName(), data))
+                    break;
+                room->playSkillEffect(objectName());
 
-            const Card *slash = room->askForCard(handang, "slash", "jiefan-slash-Use:" + dying.who->objectName(), data, NonTrigger);
+                const Card *slash = room->askForCard(handang, "slash", "jiefan-slash-Use:" + dying.who->objectName(), data, NonTrigger);
 
-            if(slash){
-                room->setTag("JiefanTarget", data);
-                room->setTag("JiefanSlash", slash->getEffectiveId());
-                room->setCardFlag(slash, "jiefan-slash");
-                CardUseStruct use;
-                use.card = slash;
-                use.from = handang;
-                use.to << room->getCurrent();
-                room->useCard(use);
+                if(slash){
+                    room->setTag("JiefanTarget", data);
+                    room->setTag("JiefanSlash", slash->getEffectiveId());
+                    room->setCardFlag(slash, "jiefan-slash");
+                    CardUseStruct use;
+                    use.card = slash;
+                    use.from = handang;
+                    use.to << room->getCurrent();
+                    room->useCard(use);
+                }
             }
         }
         else if(event == DamageProceed){
             DamageStruct damage = data.value<DamageStruct>();
             int id = room->getTag("JiefanSlash").toInt();
-            if(player->hasSkill(objectName()) && damage.card && damage.card->inherits("Slash")
+            if(damage.card && damage.card->inherits("Slash")
                 && !room->getTag("JiefanTarget").isNull()
                 && id == damage.card->getEffectiveId()){
 
@@ -767,9 +764,7 @@ ChunlaoCard::ChunlaoCard(){
 }
 
 void ChunlaoCard::use(Room *, ServerPlayer *source, const QList<ServerPlayer *> &) const{
-    foreach(int id, this->subcards){
-        source->addToPile("wine", id, true);
-    }
+    source->addToPile("wine", this->subcards, true);
 }
 
 class ChunlaoViewAsSkill:public ViewAsSkill{
@@ -807,41 +802,31 @@ public:
         view_as_skill = new ChunlaoViewAsSkill;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target->getRoom()->findPlayerBySkillName(objectName());
-    }
-
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-        Room *room = player->getRoom();
+    virtual bool trigger(TriggerEvent event, ServerPlayer *chengpu, QVariant &data) const{
+        Room *room = chengpu->getRoom();
         if(event == PhaseChange){
-            QList<ServerPlayer *>chengpus = room->findPlayersBySkillName(objectName());
-            foreach(ServerPlayer *chengpu, chengpus)
-                if(chengpu->getPhase() == Player::Finish && !chengpu->isKongcheng() && chengpu->getPile("wine").isEmpty())
-                    room->askForUseCard(chengpu, "@@chunlao", "@chunlao");
+            if(chengpu->getPhase() == Player::Finish && !chengpu->isKongcheng() && chengpu->getPile("wine").isEmpty())
+                room->askForUseCard(chengpu, "@@chunlao", "@chunlao");
         }
 
-
         if(event == AskForPeaches){
-            QList<ServerPlayer *>chengpus = room->findPlayersBySkillName(objectName());
             DyingStruct dying = data.value<DyingStruct>();
-            foreach(ServerPlayer *chengpu, chengpus){
-                while(!chengpu->getPile("wine").isEmpty() && dying.who->getHp() < 1
-                      && player == chengpu && chengpu->askForSkillInvoke(objectName(), data)){
-                    QList<int> cards = chengpu->getPile("wine");
-                    room->fillAG(cards, chengpu);
-                    int card_id = room->askForAG(chengpu, cards, true, objectName());
-                    room->broadcastInvoke("clearAG");
-                    if(card_id != -1){
-                        room->playSkillEffect(objectName());
-                        room->throwCard(card_id);
-                        Analeptic *analeptic = new Analeptic(Card::NoSuit, 0);
-                        analeptic->setSkillName(objectName());
-                        CardUseStruct use;
-                        use.card = analeptic;
-                        use.from = dying.who;
-                        use.to << dying.who;
-                        room->useCard(use);
-                    }
+            while(!chengpu->getPile("wine").isEmpty() && dying.who->getHp() < 1
+                  && chengpu->askForSkillInvoke(objectName(), data)){
+                QList<int> cards = chengpu->getPile("wine");
+                room->fillAG(cards, chengpu);
+                int card_id = room->askForAG(chengpu, cards, true, objectName());
+                room->broadcastInvoke("clearAG");
+                if(card_id != -1){
+                    room->playSkillEffect(objectName());
+                    room->throwCard(card_id);
+                    Analeptic *analeptic = new Analeptic(Card::NoSuit, 0);
+                    analeptic->setSkillName(objectName());
+                    CardUseStruct use;
+                    use.card = analeptic;
+                    use.from = dying.who;
+                    use.to << dying.who;
+                    room->useCard(use);
                 }
             }
         }
