@@ -67,14 +67,14 @@ void PlayerCardContainer::_doUpdate()
 }
 
 void PlayerCardContainer::_playMoveCardsAnimation(QList<CardItem*> &cards, bool destroyCards)
-{    
-    if (destroyCards)    
+{
+    if (destroyCards)
     {
         _mutex_cardsToBeDestroyed.lock();
         _cardsToBeDestroyed.append(cards);
         _mutex_cardsToBeDestroyed.unlock();
     }
-    
+
     QParallelAnimationGroup* animation = new QParallelAnimationGroup;
     foreach (CardItem* card_item, cards)
     {
@@ -82,6 +82,7 @@ void PlayerCardContainer::_playMoveCardsAnimation(QList<CardItem*> &cards, bool 
             connect(card_item, SIGNAL(movement_animation_finished()), this, SLOT(_destroyCard()));
         animation->addAnimation(card_item->getGoBackAnimation(true));
     }
+
     connect(animation, SIGNAL(finished()), this, SLOT(_doUpdate()));
     connect(animation, SIGNAL(finished()), this, SLOT(onAnimationFinished()));
     animation->start();
@@ -90,7 +91,7 @@ void PlayerCardContainer::_playMoveCardsAnimation(QList<CardItem*> &cards, bool 
 void PlayerCardContainer::addCardItems(QList<CardItem*> &card_items, Player::Place place)
 {
     foreach (CardItem* card_item, card_items)
-    {        
+    {
         card_item->setPos(mapFromScene(card_item->scenePos()));
         card_item->setParentItem(this);
     }

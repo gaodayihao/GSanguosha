@@ -12,13 +12,13 @@
 class DiscardPile: public PlayerCardContainer
 {
     Q_OBJECT
-public:    
+public:
     virtual QList<CardItem*> removeCardItems(const QList<int> &card_ids, Player::Place place);
     inline void setSize(QSize newSize)
     {
         setSize(newSize.width(), newSize.height());
     }
-    inline void setSize(double width, double height) 
+    inline void setSize(double width, double height)
     {
         m_cardsDisplayRegion = QRect(0, 0, width,height);
         m_numCardsVisible = width / CardItem::S_NORMAL_CARD_WIDTH;
@@ -38,7 +38,7 @@ class DrawPile: public PlayerCardContainer
 {
     Q_OBJECT
 public:
-    virtual QList<CardItem*> removeCardItems(const QList<int> &card_ids, Player::Place place);    
+    virtual QList<CardItem*> removeCardItems(const QList<int> &card_ids, Player::Place place);
 protected:
     static const QRect S_DISPLAY_CARD_REGION;
     virtual bool _addCardItems(QList<CardItem*> &card_items, Player::Place place);

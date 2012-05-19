@@ -8,7 +8,7 @@
 #include <QMutex>
 
 class PlayerCardContainer: public Pixmap
-{    
+{
     Q_OBJECT
 public:
     inline PlayerCardContainer() { _m_highestZ = 10000; }
@@ -21,7 +21,7 @@ protected:
     QList<CardItem*> _createCards(QList<int> card_ids);
     CardItem* _createCard(int card_id);
     void _disperseCards(QList<CardItem*> &cards, QRectF fillRegion, Qt::Alignment align, bool useHomePos);
-    void _playMoveCardsAnimation(QList<CardItem*> &cards, bool destroyCards);    
+    void _playMoveCardsAnimation(QList<CardItem*> &cards, bool destroyCards);
 protected slots:
     virtual void onAnimationFinished();
 private slots:
