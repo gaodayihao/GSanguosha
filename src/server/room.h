@@ -304,13 +304,13 @@ private:
         }
         inline bool operator == (const _MoveSourceClassifier &other) const
         {
-            return m_from == other.m_from && m_from_place == other.m_from_place &&
-                m_from_pile_name == other.m_from_pile_name && m_from_player_name == other.m_from_player_name;
+            return (m_from == other.m_from && m_from_place == other.m_from_place &&
+                m_from_pile_name == other.m_from_pile_name && m_from_player_name == other.m_from_player_name);
         }
         inline bool operator < (const _MoveSourceClassifier &other) const
         {
-            return m_from < other.m_from || m_from_place < other.m_from_place ||
-                m_from_pile_name < other.m_from_pile_name || m_from_player_name < other.m_from_player_name;
+            return ((int)m_from < (int)other.m_from || m_from_place < other.m_from_place ||
+                m_from_pile_name < other.m_from_pile_name || m_from_player_name < other.m_from_player_name);
         }
         Player* m_from;
         Player::Place m_from_place;
