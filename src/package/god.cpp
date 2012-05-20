@@ -675,13 +675,14 @@ public:
 
     static void DiscardStar(ServerPlayer *shenzhuge, int n){
         Room *room = shenzhuge->getRoom();
-        const QList<int> stars = shenzhuge->getPile("stars");
+        QList<int> stars = shenzhuge->getPile("stars");
 
         int i;
         for(i=0; i<n; i++){
             room->fillAG(stars, shenzhuge);
             int card_id = room->askForAG(shenzhuge, stars, false, "qixing-discard");
             room->throwCard(card_id);
+            stars.removeOne(card_id);
             shenzhuge->invoke("clearAG");
         }
     }
