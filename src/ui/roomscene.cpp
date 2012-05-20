@@ -3449,6 +3449,7 @@ QGraphicsObject *RoomScene::getAnimationObject(const QString &name) const{
 
 void RoomScene::doMovingAnimation(const QString &name, const QStringList &args){
     Pixmap *item = new Pixmap(QString("image/system/animation/%1.png").arg(name));
+    item->setZValue(10086);
     addItem(item);
 
     QPointF from = getAnimationObject(args.at(0))->scenePos();

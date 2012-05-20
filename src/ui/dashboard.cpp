@@ -121,6 +121,7 @@ void Dashboard::createRight(){
     }else{
         kingdom = new QGraphicsPixmapItem(right);
         kingdom->setPos(75, -4);
+        kingdom->setZValue(2.0);
     }
 
     ready_item = new QGraphicsPixmapItem(QPixmap("image/system/ready.png"), avatar);
