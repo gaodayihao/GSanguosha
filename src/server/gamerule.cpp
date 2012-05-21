@@ -949,8 +949,11 @@ bool BasaraMode::trigger(TriggerEvent event, ServerPlayer *player, QVariant &dat
     Room *room;
     if (player == NULL)
         room = data.value<RoomStar>();
-    else
+    else{
         room = player->getRoom();
+        player->tag["event"] = event;
+        player->tag["event_data"] = data;
+    }
 
     // Handle global events
     if (player == NULL)
@@ -985,9 +988,6 @@ bool BasaraMode::trigger(TriggerEvent event, ServerPlayer *player, QVariant &dat
             }
         }
     }
-
-    player->tag["event"] = event;
-    player->tag["event_data"] = data;
 
     switch(event){
     case CardEffected:{
