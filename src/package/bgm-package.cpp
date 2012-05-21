@@ -135,10 +135,29 @@ public:
             if(!target || target->getHp() < 1 || diaochan->isNude())
                 return false;
 
-            room->selectSomeCardToMove(diaochan, target, diaochan, qMin(diaochan->getCardCount(true), target->getHp()),
-                                       "he",objectName());
+            DummyCard *to_goback;
+            if(diaochan->getCardCount(true) <= target->getHp())
+            {
+                to_goback = diaochan->wholeHandCards();
+                if (!to_goback)
+                    to_goback = new DummyCard;
+                for (int i = 0;i < 4; i++)
+                    if(diaochan->getEquip(i))
+                        to_goback->addSubcard(diaochan->getEquip(i)->getEffectiveId());
+            }
+            else
+                to_goback = (DummyCard*)room->askForExchange(diaochan, "lihun", target->getHp(), true, "LihunGoBack");
 
-            room->removeTag("LihunTarget");
+            MoveNCardsStruct moveNcards;
+            moveNcards.from = diaochan;
+            moveNcards.to = target;
+            moveNcards.count = target->getHp();
+
+            target->tag["MoveNCards"] = QVariant::fromValue(moveNcards);
+            room->moveCardTo(to_goback,target, Player::Hand);
+            target->tag.remove("MoveNCards");
+            delete to_goback;
+
         }
 
         return false;

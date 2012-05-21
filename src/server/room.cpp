@@ -3160,15 +3160,16 @@ void Room::moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible, 
     _moveCards(all_sub_moves, forceMoveVisible, enforceOrigin);
     foreach (CardsMoveStruct cards_move, all_sub_moves)
     {
-        if (cards_move.from && cards_move.from_place != Player::PlaceTakeoff){
+        if (cards_move.from && cards_move.from_place != Player::PlaceTakeoff && !cards_move.from->hasFlag("CardMoving")){
             CardsMoveStar move_star = &cards_move;
             QVariant data = QVariant::fromValue(move_star);
             thread->trigger(CardLostDone, (ServerPlayer*)cards_move.from, data);
         }
     }
+
     foreach (CardsMoveStruct cards_move, all_sub_moves)
     {
-        if (cards_move.to && cards_move.to_place != Player::PlaceTakeoff){
+        if (cards_move.to && cards_move.to_place != Player::PlaceTakeoff && !cards_move.to->hasFlag("CardMoving")){
             CardsMoveStar move_star = &cards_move;
             QVariant data = QVariant::fromValue(move_star);
             thread->trigger(CardGotDone, (ServerPlayer*)cards_move.to, data);
@@ -3439,7 +3440,9 @@ void Room::selectSomeCardToMove(ServerPlayer *from,ServerPlayer *to, ServerPlaye
     CardsMoveStar move_star = &cards_move;
     QVariant data = QVariant::fromValue(move_star);
     thread->trigger(CardLostOneTime, from, data);
+    thread->trigger(CardLostDone, from, data);
     thread->trigger(CardGotOneTime, to, data);
+    thread->trigger(CardGotDone, to, data);
 }
 
 void Room::playSkillEffect(const QString &skill_name, int index){
@@ -3642,7 +3645,7 @@ bool Room::askForDiscard(ServerPlayer *player, const QString &reason, int discar
     return true;
 }
 
-const Card *Room::askForExchange(ServerPlayer *player, const QString &reason, int discard_num){
+const Card *Room::askForExchange(ServerPlayer *player, const QString &reason, int discard_num, bool include_equip, const QString &prompt){
     notifyMoveFocus(player, S_COMMAND_EXCHANGE_CARD);
     AI *ai = player->getAI();
     QList<int> to_exchange;
@@ -3650,7 +3653,12 @@ const Card *Room::askForExchange(ServerPlayer *player, const QString &reason, in
         // share the same callback interface
         to_exchange = ai->askForDiscard(reason, discard_num, false, false);
     }else{
-        bool success = doRequest(player, S_COMMAND_EXCHANGE_CARD, discard_num, true);
+        Json::Value exchange_str(Json::arrayValue);
+        exchange_str[0] = discard_num;
+        exchange_str[1] = include_equip;
+        exchange_str[2] = toJsonString(prompt);
+
+        bool success = doRequest(player, S_COMMAND_EXCHANGE_CARD, exchange_str, true);
         //@todo: also check if the player does have that card!!!
         Json::Value clientReply = player->getClientReply();
         if(!success || !clientReply.isArray() || (int)clientReply.size() != discard_num

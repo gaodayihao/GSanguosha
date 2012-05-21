@@ -20,7 +20,7 @@ sgs.ai_skill_use["@@jujian"] = function(self, prompt)
 	else
 		self:sortByKeepValue(cards)
 		for _,card in ipairs(cards) do
-			if card:getTypeId() ~= sgs.Card_Basic then nobasiccard = card:getEffectiveId() end
+			if card:getTypeId() ~= sgs.Card_Basic and not self.player:isJilei(card) then nobasiccard = card:getEffectiveId() end
 		end
 	end
 	for _, friend in ipairs(self.friends_noself) do
@@ -607,14 +607,15 @@ end
 sgs.ai_use_value.XianzhenSlashCard = 9.2
 sgs.ai_use_priority.XianzhenSlashCard = 2.6
 
-sgs.ai_skill_cardchosen.quanji = function(self)
-	local index = 0
-	local result
+sgs.ai_skill_discard.quanji = function(self)
+	local to_discard = {}
 	local cards = self.player:getHandcards()
 	cards = sgs.QList2Table(cards)
 	self:sortByKeepValue(cards)
-
-	return cards[1]
+	
+	table.insert(to_discard, cards[1]:getEffectiveId())
+	
+	return to_discard
 end
 
 sgs.ai_skill_choice.zili = function(self, choice)

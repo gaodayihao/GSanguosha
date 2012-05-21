@@ -197,6 +197,13 @@ struct PhaseChangeStruct{
     Player::Phase to;
 };
 
+struct MoveNCardsStruct{
+    MoveNCardsStruct();
+    ServerPlayer *from;
+    ServerPlayer *to;
+    int count;
+};
+
 enum TriggerEvent{
     NonTrigger,
 
@@ -286,5 +293,6 @@ Q_DECLARE_METATYPE(JudgeStar)
 Q_DECLARE_METATYPE(DamageStar)
 Q_DECLARE_METATYPE(PindianStar)
 Q_DECLARE_METATYPE(PhaseChangeStruct)
+Q_DECLARE_METATYPE(MoveNCardsStruct)
 
 #endif // STRUCTS_H

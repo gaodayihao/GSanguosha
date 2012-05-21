@@ -127,6 +127,11 @@ PhaseChangeStruct::PhaseChangeStruct()
     :from(Player::NotActive), to(Player::NotActive)
 {}
 
+
+MoveNCardsStruct::MoveNCardsStruct()
+    :from(NULL), to(NULL), count(0)
+{}
+
 CardUseStruct::CardUseStruct()
     :card(NULL), from(NULL)
 {

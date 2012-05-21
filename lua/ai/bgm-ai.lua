@@ -89,15 +89,38 @@ sgs.ai_skill_use_func.LihunCard = function(card,use,self)
 	end
 end
 
-sgs.ai_skill_cardchosen.lihun = function(self)
+sgs.ai_skill_discard.lihun = function(self, discard_num, optional, include_equip)
+	local to_discard = {}
+	local uninstalSilverLion = false
 	if self:isEquip("SilverLion") and self.player:isWounded() or self:evaluateArmor() < -5 then
-		return self.player:getArmor()
+		table.insert(to_discard, self.player:getArmor():getEffectiveId())
+		uninstalSilverLion = true
 	end
+	if #to_discard == discard_num then
+		return to_discard
+	end
+	
 	local shit = self:getCard("Shit")
-	if shit then return shit end
-	local cards = sgs.QList2Table(self.player:getHandcards())
+	if shit then
+		table.insert(to_discard, shit:getEffectiveId())
+	end
+	if #to_discard == discard_num then
+		return to_discard
+	end
+	
+	local cards = sgs.QList2Table(self.player:getCards("he"))
 	self:sortByKeepValue(cards)
-	return cards[1]
+	for i = 1, #cards, 1 do
+		local card = cards[i]
+		if not (uninstalSilverLion and card:inherits("SilverLion")) then
+			table.insert(to_discard, card:getEffectiveId())
+			if #to_discard == discard_num then
+				return to_discard
+			end
+		end
+	end
+	
+	if #to_discard < discard_num then return {} end
 end
 
 sgs.ai_use_value.LihunCard = 8.5

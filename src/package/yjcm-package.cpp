@@ -327,12 +327,22 @@ public:
         Room *room = player->getRoom();
 
         if(event == CardGotOneTime){
+            MoveNCardsStruct moveNcards = player->tag["MoveNCards"].value<MoveNCardsStruct>();
+            if(moveNcards.from && moveNcards.count >= 2 && !player->hasFlag("moveNcards")
+                    && room->askForSkillInvoke(player,objectName(),data))
+            {
+                room->setPlayerFlag(player, "moveNcards");
+                room->drawCards(moveNcards.from,1);
+                room->playSkillEffect(objectName(), qrand() % 2 + 1);
+                return false;
+            }
             CardsMoveStar move = data.value<CardsMoveStar>();
-            if (move->from != NULL && move->card_ids.size() >= 2
+            if (move->from != NULL && move->card_ids.size() >= 2 && !player->hasFlag("moveNcards")
                     && room->askForSkillInvoke(player,objectName(),data)){
                 room->drawCards((ServerPlayer*)move->from,1);
                 room->playSkillEffect(objectName(), qrand() % 2 + 1);
             }
+            room->setPlayerFlag(player, "-moveNcards");
         }else if(event == Damaged){
             DamageStruct damage = data.value<DamageStruct>();
             ServerPlayer *source = damage.from;
@@ -1008,7 +1018,13 @@ public:
 
             zhonghui->drawCards(1, false);
             if(!zhonghui->isKongcheng()){
-                int card_id = room->askForCardChosen(zhonghui, zhonghui, "h", objectName());
+                int card_id;
+                if(zhonghui->handCards().length() == 1){
+                    room->getThread()->delay(500);
+                    card_id = zhonghui->handCards().first();
+                }
+                else
+                    card_id = room->askForExchange(zhonghui, objectName(), 1, false, "QuanjiPush")->getSubcards().first();
                 zhonghui->addToPile("power", card_id);
             }
         }
