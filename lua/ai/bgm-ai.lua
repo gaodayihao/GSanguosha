@@ -91,32 +91,43 @@ end
 
 sgs.ai_skill_discard.lihun = function(self, discard_num, optional, include_equip)
 	local to_discard = {}
-	local uninstalSilverLion = false
-	if self:isEquip("SilverLion") and self.player:isWounded() or self:evaluateArmor() < -5 then
-		table.insert(to_discard, self.player:getArmor():getEffectiveId())
-		uninstalSilverLion = true
-	end
-	if #to_discard == discard_num then
-		return to_discard
-	end
-	
-	local shit = self:getCard("Shit")
-	if shit then
-		table.insert(to_discard, shit:getEffectiveId())
-	end
-	if #to_discard == discard_num then
-		return to_discard
-	end
 	
 	local cards = sgs.QList2Table(self.player:getCards("he"))
 	self:sortByKeepValue(cards)
-	for i = 1, #cards, 1 do
-		local card = cards[i]
-		if not (uninstalSilverLion and card:inherits("SilverLion")) then
-			table.insert(to_discard, card:getEffectiveId())
+	local card_ids = {}
+	for _,card in ipairs(cards) do
+		table.insert(card_ids, card:getEffectiveId())
+	end
+	
+	local temp = table.copyFrom(card_ids)
+	for i = 1, #temp, 1 do
+		local card = sgs.Sanguosha:getCard(temp[i])
+		if (self:isEquip("SilverLion") and self.player:isWounded()) and card:inherits("SilverLion") then
+			table.insert(to_discard, temp[i])
+			table.removeOne(card_ids, temp[i])
 			if #to_discard == discard_num then
 				return to_discard
 			end
+		end
+	end
+	
+	temp = table.copyFrom(card_ids)
+	for i = 1, #temp, 1 do
+		local card = sgs.Sanguosha:getCard(temp[i])
+		if card:inherits("Shit") then
+			table.insert(to_discard, temp[i])
+			table.removeOne(card_ids, temp[i])
+			if #to_discard == discard_num then
+				return to_discard
+			end
+		end
+	end
+	
+	for i = 1, #card_ids, 1 do
+		local card = sgs.Sanguosha:getCard(card_ids[i])
+		table.insert(to_discard, card_ids[i])
+		if #to_discard == discard_num then
+			return to_discard
 		end
 	end
 	
