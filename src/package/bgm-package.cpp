@@ -151,7 +151,7 @@ public:
             MoveNCardsStruct moveNcards;
             moveNcards.from = diaochan;
             moveNcards.to = target;
-            moveNcards.count = target->getHp();
+            moveNcards.count = to_goback->getSubcards().length();
 
             target->tag["MoveNCards"] = QVariant::fromValue(moveNcards);
             room->moveCardTo(to_goback,target, Player::Hand);
