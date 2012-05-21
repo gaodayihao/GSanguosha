@@ -1206,8 +1206,10 @@ public:
 
     virtual bool triggerable(const ServerPlayer *target) const{
         if (target == NULL) return false;
+        bool canInvoke = ServerInfo.GameMode.endsWith("p") || ServerInfo.GameMode.endsWith("pd") ||
+                ServerInfo.GameMode.endsWith("pz");
         if(Sanguosha->getBanPackages().contains("BGM") || Sanguosha->getBanPackages().contains("sp")) return false;
-        return GameStartSkill::triggerable(target) && target->getGeneralName() == "diaochan";
+        return GameStartSkill::triggerable(target) && target->getGeneralName() == "diaochan" && canInvoke;
     }
 
     virtual void onGameStart(ServerPlayer *player) const{

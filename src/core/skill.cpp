@@ -307,9 +307,11 @@ SPConvertSkill::SPConvertSkill(const QString &name, const QString &from, const Q
 
 bool SPConvertSkill::triggerable(const ServerPlayer *target) const{
     if (target == NULL) return false;
+    bool canInvoke = ServerInfo.GameMode.endsWith("p") || ServerInfo.GameMode.endsWith("pd") ||
+            ServerInfo.GameMode.endsWith("pz");
     QString package = Sanguosha->getGeneral(to)->getPackage();
     if(Sanguosha->getBanPackages().contains(package)) return false;
-    return GameStartSkill::triggerable(target) && target->getGeneralName() == from;
+    return GameStartSkill::triggerable(target) && target->getGeneralName() == from && canInvoke;
 }
 
 void SPConvertSkill::onGameStart(ServerPlayer *player) const{
@@ -333,9 +335,11 @@ TransfigureSkill::TransfigureSkill(const QString &name, const QString &from, con
 
 bool TransfigureSkill::triggerable(const ServerPlayer *target) const{
     if (target == NULL) return false;
+    bool canInvoke = ServerInfo.GameMode.endsWith("p") || ServerInfo.GameMode.endsWith("pd") ||
+            ServerInfo.GameMode.endsWith("pz");
     QString package = Sanguosha->getGeneral(to)->getPackage();
     if(Sanguosha->getBanPackages().contains(package)) return false;
-    return GameStartSkill::triggerable(target) && target->getGeneralName() == from;
+    return GameStartSkill::triggerable(target) && target->getGeneralName() == from && canInvoke;
 }
 
 void TransfigureSkill::onGameStart(ServerPlayer *player) const{
