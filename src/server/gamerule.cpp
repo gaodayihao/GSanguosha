@@ -725,6 +725,16 @@ bool HulaoPassMode::trigger(TriggerEvent event, ServerPlayer *player, QVariant &
         QList<const Card *> tricks = lord->getJudgingArea();
         foreach(const Card *trick, tricks)
             room->throwCard(trick);
+
+        if(room->alivePlayerCount() == room->getPlayers().count() && lord->getWeapon()
+                && lord->askForSkillInvoke("weapon_recast"))
+        {
+            lord->playCardEffect("@recast");
+            room->throwCard(lord->getWeapon());
+            lord->drawCards(1, false);
+        }
+
+
         break;
     }
 
