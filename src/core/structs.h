@@ -237,6 +237,7 @@ enum TriggerEvent{
     AskForPeachesDone,
     Death,
     GameOverJudge,
+    GameFinished,
 
     SlashEffect,
     SlashEffected,
@@ -265,6 +266,9 @@ enum TriggerEvent{
     CardFinished,
 
     ChoiceMade,
+
+    // For hulao pass only
+    StageChange,
 
     NumOfEvents
 };
