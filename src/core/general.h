@@ -19,7 +19,7 @@ class General : public QObject
     Q_PROPERTY(int maxhp READ getMaxHp CONSTANT)
     Q_PROPERTY(bool male READ isMale STORED false CONSTANT)
     Q_PROPERTY(bool female READ isFemale STORED false CONSTANT)
-    Q_PROPERTY(Gender gender READ getGender CONSTANT)
+    Q_PROPERTY(Gender gender READ getGender WRITE setGender)
     Q_PROPERTY(bool lord READ isLord CONSTANT)
     Q_PROPERTY(bool hidden READ isHidden CONSTANT)
 

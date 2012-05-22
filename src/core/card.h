@@ -50,6 +50,7 @@ public:
         Basic,
         Trick,
         Equip,
+        Generals
     };
 
     // constructor
@@ -75,7 +76,7 @@ public:
     Color getColor() const;
     bool isEquipped() const;
 
-    QString getPixmapPath() const;
+    virtual QString getPixmapPath() const;
     QString getIconPath() const;
     QString getPackage() const;
     QIcon getSuitIcon() const;
@@ -84,7 +85,7 @@ public:
     QString getName() const;
     QString getSkillName() const;
     void setSkillName(const QString &skill_name);
-    QString getDescription() const;
+    virtual QString getDescription() const;
     QString getEffectPath() const;
 
     bool isVirtualCard() const;

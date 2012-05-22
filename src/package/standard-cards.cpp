@@ -186,7 +186,7 @@ public:
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
         Room *room = player->getRoom();
 
-        if(effect.from->getGeneral()->isMale() != effect.to->getGeneral()->isMale()){
+        if(effect.from->getGeneral()->getGender() != effect.to->getGeneral()->getGender()){
             if(effect.from->askForSkillInvoke(objectName())){
                 bool draw_card = false;
 

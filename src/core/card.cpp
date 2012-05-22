@@ -240,9 +240,9 @@ void Card::setSkillName(const QString &name){
 }
 
 QString Card::getDescription() const{
-    QString desc = Sanguosha->translate(":" + objectName());
+    QString desc = Sanguosha->translate(":" + this->objectName());
     desc.replace("\n", "<br/>");
-    return tr("<b>[%1]</b> %2").arg(getName()).arg(desc);
+    return tr("<b>[%1]</b> %2").arg(this->getName()).arg(desc);
 }
 
 QString Card::toString() const{

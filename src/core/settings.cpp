@@ -218,6 +218,6 @@ void Settings::init(){
     }
 
     QStringList forbid_packages;
-    forbid_packages << "Special3v3";
+    forbid_packages << "Special3v3" << "ThreeKingdoms";
     setValue("ForbidPackages", forbid_packages.join("+"));
 }

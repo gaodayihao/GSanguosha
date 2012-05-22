@@ -34,7 +34,7 @@ CardOverview::CardOverview(QWidget *parent) :
 }
 
 void CardOverview::loadFromAll(){
-    int i, n = Sanguosha->getCardCount();
+    int i, n = Sanguosha->getCardCountWithoutSpecial();
     ui->tableWidget->setRowCount(n);
     for(i=0; i<n ;i++){
         const Card *card = Sanguosha->getCard(i);
@@ -85,7 +85,11 @@ void CardOverview::on_tableWidget_itemSelectionChanged()
     int row = ui->tableWidget->currentRow();
     int card_id = ui->tableWidget->item(row, 0)->data(Qt::UserRole).toInt();
     const Card *card = Sanguosha->getCard(card_id);
-    QString pixmap_path = QString("image/big-card/%1.png").arg(card->objectName());
+    QString pixmap_path;
+    if(!card->inherits("GeneralCard"))
+        pixmap_path = QString("image/big-card/%1.png").arg(card->objectName());
+    else
+        pixmap_path = QString("image/generals/card/%1.jpg").arg(card->objectName());
     ui->cardLabel->setPixmap(pixmap_path);
 
     ui->cardDescriptionBox->setText(card->getDescription());

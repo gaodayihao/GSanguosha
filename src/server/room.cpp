@@ -1687,6 +1687,22 @@ void Room::prepareForStart(){
             broadcastProperty(m_players.at(i), "role");
         }
 
+    }else if(mode == "03_3kingdoms"){
+        ServerPlayer *lord = m_players.at(qrand() % 3);
+        QStringList rolelist;
+        rolelist << "rebel" << "loyalist";
+        int i = 0;
+        for(i=0; i<3; i++){
+            ServerPlayer *player = m_players.at(i);
+            if(player == lord)
+                player->setRole("lord");
+            else{
+                QString role = rolelist.at(qrand() % rolelist.count());
+                rolelist.removeOne(role);
+                player->setRole(role);
+            }
+            broadcastProperty(player, "role");
+        }
     }else if(mode == "04_1v3"){
         ServerPlayer *lord = m_players.at(qrand() % 4);
         int i = 0;
@@ -2376,6 +2392,14 @@ void Room::run(){
         thread_1v1->start();
 
         connect(thread_1v1, SIGNAL(finished()), this, SLOT(startGame()));
+
+    }else if(mode == "03_3kingdoms"){
+        General *anjiang = (General *)Sanguosha->getGeneral("anjiang");
+        anjiang->setGender(General::Neuter);
+        foreach(ServerPlayer *player, m_players){
+            setPlayerProperty(player, "general", "anjiang");
+        }
+        startGame();
     }else if(mode == "04_1v3"){
         ServerPlayer *lord = m_players.first();
         setPlayerProperty(lord, "general", "shenlvbu1");
@@ -2918,7 +2942,7 @@ void Room::startGame(){
             broadcastInvoke("revealGeneral", QString("%1:%2").arg(player->objectName()).arg(player->getGeneralName()), player);
 
         if((Config.Enable2ndGeneral) && mode != "02_1v1" && mode != "06_3v3"
-                && mode != "04_1v3" && !Config.EnableBasara)
+                && mode != "03_3kingdoms" && mode != "04_1v3" && !Config.EnableBasara)
             broadcastProperty(player, "general2");
 
         broadcastProperty(player, "maxhp");
@@ -3456,7 +3480,7 @@ void Room::startTest(const QString &to_test){
     setProperty("to_test", to_test);
 }
 
-void Room::acquireSkill(ServerPlayer *player, const Skill *skill, bool open){
+void Room::acquireSkill(ServerPlayer *player, const Skill *skill, bool open, bool doAnimation){
     QString skill_name = skill->objectName();
     if(player->hasSkill(skill_name))
         return;
@@ -3471,6 +3495,10 @@ void Room::acquireSkill(ServerPlayer *player, const Skill *skill, bool open){
     if(skill->isVisible()){
         if(open){
             QString acquire_str = QString("%1:%2").arg(player->objectName()).arg(skill_name);
+            if(doAnimation)
+                acquire_str.append(":y");
+            else
+                acquire_str.append(":n");
             broadcastInvoke("acquireSkill", acquire_str);
         }
 
@@ -3481,10 +3509,10 @@ void Room::acquireSkill(ServerPlayer *player, const Skill *skill, bool open){
     }
 }
 
-void Room::acquireSkill(ServerPlayer *player, const QString &skill_name, bool open){
+void Room::acquireSkill(ServerPlayer *player, const QString &skill_name, bool open, bool doAnimation){
     const Skill *skill = Sanguosha->getSkill(skill_name);
     if(skill)
-        acquireSkill(player, skill, open);
+        acquireSkill(player, skill, open, doAnimation);
 }
 
 void Room::setTag(const QString &key, const QVariant &value){

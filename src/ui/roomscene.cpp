@@ -244,7 +244,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(ClientInstance, SIGNAL(focus_moved(QString, QSanProtocol::Countdown)), this, SLOT(moveFocus(QString, QSanProtocol::Countdown)));
     connect(ClientInstance, SIGNAL(emotion_set(QString,QString)), this, SLOT(setEmotion(QString,QString)));
     connect(ClientInstance, SIGNAL(skill_invoked(QString,QString)), this, SLOT(showSkillInvocation(QString,QString)));
-    connect(ClientInstance, SIGNAL(skill_acquired(const ClientPlayer*,QString)), this, SLOT(acquireSkill(const ClientPlayer*,QString)));
+    connect(ClientInstance, SIGNAL(skill_acquired(const ClientPlayer*,QString,bool)), this, SLOT(acquireSkill(const ClientPlayer*,QString,bool)));
     connect(ClientInstance, SIGNAL(animated(QString,QStringList)), this, SLOT(doAnimation(QString,QStringList)));
     connect(ClientInstance, SIGNAL(judge_result(QString,QString)), this, SLOT(showJudgeResult(QString,QString)));
     connect(ClientInstance, SIGNAL(role_state_changed(QString)),this, SLOT(updateStateItem(QString)));
@@ -630,6 +630,8 @@ QList<QPointF> RoomScene::getPhotoPositions() const{
     if(Config.value("CircularView", true).toBool()){
         cxw=1;
         cxw2=0;
+        if(player_count == 3)
+            eight = 1;
     }
 
     static int st = (player_count > 8 || nine == 1) ? 0 : 1;
@@ -648,7 +650,7 @@ QList<QPointF> RoomScene::getPhotoPositions() const{
 
     static int indices_table[][9] = {
         {4 }, // 2
-        {3, 5}, // 3
+        {3-cxw*2, 5+cxw*2}, // 3
         {2-cxw*2, 4, 6+cxw*2}, // 4
         {1, 3, 5, 7}, // 5
         {0, 2, 4, 6, 8}, // 6
@@ -1488,33 +1490,34 @@ void RoomScene::removeWidgetFromSkillDock(QWidget *widget){
     bar->removeWidget(widget);
 }
 
-void RoomScene::acquireSkill(const ClientPlayer *player, const QString &skill_name){
-    QGraphicsObject *dest = getAnimationObject(player->objectName());
-    QGraphicsTextItem *item = new QGraphicsTextItem(Sanguosha->translate(skill_name), NULL, this);
-    item->setFont(Config.BigFont);
-    item->setZValue(10086);
+void RoomScene::acquireSkill(const ClientPlayer *player, const QString &skill_name, bool animation){
+    if(animation){
+        QGraphicsObject *dest = getAnimationObject(player->objectName());
+        QGraphicsTextItem *item = new QGraphicsTextItem(Sanguosha->translate(skill_name), NULL, this);
+        item->setFont(Config.BigFont);
+        item->setZValue(10086);
 
-    QGraphicsDropShadowEffect *drop = new QGraphicsDropShadowEffect;
-    drop->setBlurRadius(5);
-    drop->setOffset(0);
-    drop->setColor(Qt::yellow);
-    item->setGraphicsEffect(drop);
+        QGraphicsDropShadowEffect *drop = new QGraphicsDropShadowEffect;
+        drop->setBlurRadius(5);
+        drop->setOffset(0);
+        drop->setColor(Qt::yellow);
+        item->setGraphicsEffect(drop);
 
-    QPropertyAnimation *move = new QPropertyAnimation(item, "pos");
-    QRectF rect = item->boundingRect();
-    move->setStartValue(QPointF(- rect.width()/2, - rect.height()/2));
-    move->setEndValue(dest->scenePos());
-    move->setDuration(1500);
+        QPropertyAnimation *move = new QPropertyAnimation(item, "pos");
+        QRectF rect = item->boundingRect();
+        move->setStartValue(QPointF(- rect.width()/2, - rect.height()/2));
+        move->setEndValue(dest->scenePos());
+        move->setDuration(1500);
 
-    move->start(QAbstractAnimation::DeleteWhenStopped);
-    connect(move, SIGNAL(finished()), item, SLOT(deleteLater()));
+        move->start(QAbstractAnimation::DeleteWhenStopped);
+        connect(move, SIGNAL(finished()), item, SLOT(deleteLater()));
 
-    QString type = "#AcquireSkill";
-    QString from_general = player->getGeneralName();
-    QString arg = skill_name;
+        QString type = "#AcquireSkill";
+        QString from_general = player->getGeneralName();
+        QString arg = skill_name;
 
-    log_box->appendLog(type, from_general, QStringList(), QString(), arg);
-
+        log_box->appendLog(type, from_general, QStringList(), QString(), arg);
+    }
     if(player == Self){
         addSkillButton(Sanguosha->getSkill(skill_name));
     }

@@ -82,6 +82,8 @@ bool Player::isWounded() const{
 }
 
 General::Gender Player::getGender() const{
+    if(ServerInfo.GameMode == "03_3kingdoms" && general && general->objectName() == "anjiang")
+        return General::Neuter;
     if(general)
         return general->getGender();
     else
@@ -300,7 +302,7 @@ bool Player::hasLordSkill(const QString &skill_name) const{
     if(mode == "06_3v3" || mode == "02_1v1")
         return false;
 
-    if(isLord() || ServerInfo.EnableHegemony)
+    if(isLord() || ServerInfo.EnableHegemony || mode == "03_3kingdoms")
         return hasInnateSkill(skill_name);
 
     if(hasSkill("weidi")){

@@ -52,7 +52,10 @@ Engine::Engine()
 
     QStringList package_names = GetConfigFromLuaState(lua, "package_names").toStringList();
     foreach(QString name, package_names)
-        addPackage(name);
+        if(name != "ThreeKingdoms")
+            addPackage(name);
+
+    addPackage("ThreeKingdoms");
 
     QStringList scene_names = GetConfigFromLuaState(lua, "scene_names").toStringList();
     foreach(QString name, scene_names)
@@ -65,6 +68,7 @@ Engine::Engine()
     //modes["02pbb"] = tr("2 players (using blance beam)");
     modes["02_1v1"] = tr("2 players (KOF style)");
     modes["03p"] = tr("3 players");
+    modes["03_3kingdoms"] = tr("3 players(3 kingdoms mode)");
     modes["04p"] = tr("4 players");
     modes["04_1v3"] = tr("4 players (Hulao Pass)");
     modes["05p"] = tr("5 players");
@@ -154,6 +158,10 @@ void Engine::addPackage(Package *package){
     package->setParent(this);
 
     QList<Card *> all_cards = package->findChildren<Card *>();
+
+    if (package->objectName() == "ThreeKingdoms")
+        _3KINGDOMS_GENERALS_CARD_COUNT = all_cards.count();
+
     foreach(Card *card, all_cards){
         card->setId(cards.length());
         cards << card;
@@ -207,7 +215,7 @@ QString Engine::translate(const QString &to_translate) const{
 int Engine::getRoleIndex() const{
     if(ServerInfo.GameMode == "06_3v3"){
         return 4;
-    }else if(ServerInfo.EnableHegemony){
+    }else if(ServerInfo.EnableHegemony || ServerInfo.GameMode == "03_3kingdoms"){
         return 5;
     }else
         return 1;
@@ -426,6 +434,8 @@ QString Engine::getRoles(const QString &mode) const{
 
     if(mode == "02_1v1"){
         return "ZN";
+    }else if(mode == "03_3kingdoms"){
+        return "ZCF";
     }else if(mode == "04_1v3"){
         return "ZFFF";
     }
@@ -505,6 +515,10 @@ QStringList Engine::getRoleList(const QString &mode) const{
 
 int Engine::getCardCount() const{
     return cards.length();
+}
+
+int Engine::getCardCountWithoutSpecial() const{
+    return cards.length() - _3KINGDOMS_GENERALS_CARD_COUNT;
 }
 
 QStringList Engine::getLords() const{
@@ -621,7 +635,7 @@ QStringList Engine::getRandomGenerals(int count, const QSet<QString> &ban_set) c
 }
 
 QList<int> Engine::getRandomCards() const{
-    bool exclude_disaters = false, using_new_3v3 = false;
+    bool exclude_disaters = false, using_new_3v3 = false, _3kingdoms = false;
 
     if(Config.GameMode == "06_3v3"){
         using_new_3v3 = Config.value("3v3/UsingNewMode", false).toBool();
@@ -631,6 +645,9 @@ QList<int> Engine::getRandomCards() const{
 
     if(Config.GameMode == "04_1v3")
         exclude_disaters = true;
+
+    if(Config.GameMode == "03_3kingdoms")
+        _3kingdoms = true;
 
     QList<int> list;
     foreach(Card *card, cards){
@@ -643,6 +660,11 @@ QList<int> Engine::getRandomCards() const{
             list << card->getId();
             list.removeOne(98);
         }
+
+        if(card->getPackage() == "ThreeKingdoms" && _3kingdoms){
+            list << card->getId();
+        }
+
         else if(!ban_package.contains(card->getPackage()))
             list << card->getId();
     }

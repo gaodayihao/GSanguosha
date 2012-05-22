@@ -72,6 +72,7 @@ public:
     void addSkills(const QList<const Skill *> &skills);
 
     int getCardCount() const;
+    int getCardCountWithoutSpecial() const;
     const Card *getCard(int index) const;
 
     QStringList getLords() const;
@@ -101,6 +102,9 @@ private:
     QMap<QString, QString> modes;
     QMap<QString, const CardPattern *> patterns;
     QMultiMap<QString, QString> related_skills;
+
+    // 3kingdoms
+    int _3KINGDOMS_GENERALS_CARD_COUNT;
 
     // special skills
     QList<const ProhibitSkill *> prohibit_skills;

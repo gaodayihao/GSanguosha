@@ -1695,18 +1695,20 @@ void Client::skillInvoked(const Json::Value &arg){
 }
 
 void Client::acquireSkill(const QString &acquire_str){
-    QRegExp rx("(\\w+):(\\w+)");
+    QRegExp rx("(\\w+):(\\w+):(\\w+)");
 
-    if(!rx.exactMatch(acquire_str))
+    if(!rx.exactMatch(acquire_str)){
         return;
+    }
 
     QStringList texts = rx.capturedTexts();
     ClientPlayer *who = getPlayer(texts.at(1));
     QString skill_name = texts.at(2);
+    bool animation = texts.at(3) == "y";
 
     who->acquireSkill(skill_name);
 
-    emit skill_acquired(who, skill_name);
+    emit skill_acquired(who, skill_name, animation);
 }
 
 void Client::animate(const QString &animate_str){

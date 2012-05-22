@@ -301,7 +301,7 @@ signals:
     void focus_moved(const QString &focus, QSanProtocol::Countdown countdown);
     void emotion_set(const QString &target, const QString &emotion);
     void skill_invoked(const QString &who, const QString &skill_name);
-    void skill_acquired(const ClientPlayer *player, const QString &skill_name);
+    void skill_acquired(const ClientPlayer *player, const QString &skill_name, bool animation);
     void animated(const QString &name, const QStringList &args);
     void text_spoken(const QString &text);
     void line_spoken(const QString &line);

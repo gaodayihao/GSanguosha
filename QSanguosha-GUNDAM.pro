@@ -47,6 +47,7 @@ SOURCES += \
 	src/dialog/halldialog.cpp \
         src/package/package.cpp\
 	src/package/exppattern.cpp \
+        src/package/threekingdoms.cpp \
 	src/package/firepackage.cpp \
 	src/package/god.cpp \
 	src/package/joypackage.cpp \
@@ -142,9 +143,9 @@ SOURCES += \
         src/jsoncpp/src/json_internalmap.inl \
         src/jsoncpp/src/json_internalarray.inl \
         swig/sanguosha_wrap.cxx \
-		src/ui/GeneralCardContainerUI.cpp \
-		src/ui/DiscardPile.cpp \
-		src/core/structs.cpp
+        src/ui/GeneralCardContainerUI.cpp \
+        src/ui/DiscardPile.cpp \
+        src/core/structs.cpp
 
 HEADERS += \
         src/client/aux-skills.h \
@@ -178,6 +179,7 @@ HEADERS += \
 	src/dialog/roleassigndialog.h \ 
 	src/dialog/scenario-overview.h \
 	src/package/exppattern.h \
+        src/package/threekingdoms.h \
 	src/package/firepackage.h \
 	src/package/god.h \
 	src/package/joypackage.h \
@@ -274,7 +276,7 @@ HEADERS += \
         src/jsoncpp/include/json/assertions.h \
 	src/ui/GeneralCardContainerUI.h \
 	src/ui/DiscardPile.h \
-	src/core/structs.h
+        src/core/structs.h
 	
 FORMS += \
         src/dialog/cardoverview.ui \

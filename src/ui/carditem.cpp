@@ -41,7 +41,9 @@ void CardItem::setCard(const Card* card)
 {
     if (card != NULL)
     {
-        Pixmap::load(card->getPixmapPath(), false);
+        Pixmap::load("image/system/card-back.png");
+//        Pixmap::load(card->getPixmapPath(), false);
+        card_pixmap.load(card->getPixmapPath());
         icon_pixmap.load(card->getIconPath());
         suit_pixmap.load(QString("image/system/suit/%1.png").arg(card->getSuitString()));
         small_suit_pixmap.load(QString("image/system/log/%1.png").arg(card->getSuitString()));
@@ -51,6 +53,7 @@ void CardItem::setCard(const Card* card)
     }
     else
     {
+        card_pixmap.load("image/system/card-back.png");
         Pixmap::load("image/system/card-back.png");
     }
     m_card = card;
@@ -313,14 +316,14 @@ void CardItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *)
     emit leave_hover();
 }
 
-void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
+void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *){
     if (!isEnabled())
     {
         painter->fillRect(this->boundingRect(), QColor(100, 100, 100, 255 * opacity()));
         painter->setOpacity(0.7);
     }
 
-    Pixmap::paint(painter, option, widget);
+    painter->drawPixmap(0, 0, 93, 130, card_pixmap);
 
     if (m_card) {
         painter->drawPixmap(0, 14, cardsuit_pixmap);

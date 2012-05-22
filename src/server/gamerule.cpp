@@ -702,6 +702,189 @@ QString GameRule::getWinner(ServerPlayer *victim) const{
     return winner;
 }
 
+ThreeKingdomsMode::ThreeKingdomsMode(QObject *parent)
+    :GameRule(parent)
+{
+    setObjectName("threekingdoms_mode");
+    events << CardDrawnDone << CardGotOnePiece << CardLostOnePiece;
+}
+
+bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+    Room *room;
+    if (player == NULL)
+        room = data.value<RoomStar>();
+    else
+        room = player->getRoom();
+
+    switch(event) {
+    case GameStart: {
+        // Handle global events
+        if (player == NULL)
+        {
+            room->setTag("FirstRound", true);
+            room->drawCards(room->getPlayers(), 4, false);
+            foreach(ServerPlayer *player, room->getPlayers())
+            {
+                room->acquireSkill(player, "usehero", true, false);
+                room->acquireSkill(player, "herorecast", true, false);
+                if (hasHeroCard(player))
+                    room->askForUseCard(player, "@prepare", "#prepare");
+                addHeroCardsToPile(player);
+            }
+            return false;
+        }
+        break;
+    }
+
+    case PhaseChange: {
+        switch(player->getPhase()){
+        case Player::NotActive:{
+            removeHeroCardsFlag(player);
+            QList<int> heros = player->getPile("heros");
+            heros.removeOne(player->getMark("hero"));
+
+            int willthrow = 2;
+
+            while(heros.count() > willthrow)
+            {
+                room->fillAG(heros, player);
+                int card_id = room->askForAG(player, heros, false, "throwhero");
+                heros.removeOne(card_id);
+                player->invoke("clearAG");
+                room->throwCard(card_id, player);
+            }
+            break;
+        }
+        default:
+            break;
+        }
+        break;
+    }
+
+    case CardDrawnDone:{
+        if(room->getTag("FirstRound").toBool())
+            break;
+
+        if(player->getPhase() == Player::Draw)
+            addHeroCardsFlag(player);
+
+        addHeroCardsToPile(player);
+        break;
+    }
+
+    case CardUsed:{
+        CardUseStruct use = data.value<CardUseStruct>();
+        if (use.card->inherits("Dismantlement"))
+        {
+            QString choice = room->askForChoice(player, objectName(), "throw+normal");
+            if(choice == "normal")
+                break;
+
+            room->throwCard(use.card);
+            ServerPlayer *target = use.to.first();
+            QList<int> heros = target->getPile("heros");
+            if(heros.isEmpty())
+                return false;
+
+            room->fillAG(heros, player);
+            int hero = room->askForAG(player, heros, true, objectName());
+            player->invoke("clearAG");
+
+            if (hero == -1)
+                return false;
+
+            room->setCardFlag(hero, "-justdraw");
+            room->throwCard(hero, target);
+
+            heros = player->getPile("heros");
+
+            if(heros.isEmpty())
+                return false;
+
+            room->fillAG(heros, player);
+            hero = room->askForAG(player, heros, false, objectName());
+            player->invoke("clearAG");
+            room->setCardFlag(hero, "-justdraw");
+            room->throwCard(hero, target);
+
+            return false;
+        }
+        break;
+    }
+
+    case CardGotOnePiece:{
+        CardMoveStar move = data.value<CardMoveStar>();
+        const Card *card = Sanguosha->getCard(move->card_id);
+        if(card->inherits("HeroCard"))
+            player->addToPile("heros", card);
+
+        break;
+    }
+
+    case CardLostOnePiece:{
+        CardMoveStar move = data.value<CardMoveStar>();
+        const Card *card = Sanguosha->getCard(move->card_id);
+        if(card->inherits("HeroCard") && move->from_place == Player::Special
+                && card->objectName() == player->getGeneralName())
+        {
+            room->setPlayerMark(player, "hero", 0);
+            room->transfigure(player, "anjiang", false);
+            room->setPlayerProperty(player, "kingdom", "god");
+        }
+
+        break;
+    }
+
+    case GameOverJudge: {
+        player->bury();
+        QString winner = player->getNextAlive()->getNextAlive()->getRole();
+        room->gameOver(winner);
+        return true;
+    }
+
+    default:
+        break;
+    }
+
+    return GameRule::trigger(event, player, data);
+}
+
+bool ThreeKingdomsMode::hasHeroCard(ServerPlayer *player) const{
+    QList<const Card*> cards = player->getHandcards();
+    foreach(const Card *card, cards){
+        if (card->inherits("HeroCard"))
+            return true;
+    }
+    return false;
+}
+
+void ThreeKingdomsMode::addHeroCardsToPile(ServerPlayer *player) const{
+    QList<int> hero_card_ids;
+    foreach(int id, player->handCards()){
+        const Card *card = Sanguosha->getCard(id);
+        if (card->inherits("HeroCard"))
+            hero_card_ids << id;
+    }
+    if(!hero_card_ids.isEmpty())
+        player->addToPile("heros", hero_card_ids);
+}
+
+void ThreeKingdomsMode::addHeroCardsFlag(ServerPlayer *player) const{
+    foreach(int id, player->handCards()){
+        const Card *card = Sanguosha->getCard(id);
+        if (card->inherits("HeroCard"))
+            player->getRoom()->setCardFlag(id, "justdraw");
+    }
+}
+
+void ThreeKingdomsMode::removeHeroCardsFlag(ServerPlayer *player) const{
+    foreach(int id, player->getPile("heros")){
+        const Card *card = Sanguosha->getCard(id);
+        if (card->hasFlag("justdraw"))
+            player->getRoom()->setCardFlag(id, "-justdraw");
+    }
+}
+
 HulaoPassMode::HulaoPassMode(QObject *parent)
     :GameRule(parent)
 {

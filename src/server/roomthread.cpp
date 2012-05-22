@@ -289,7 +289,9 @@ void RoomThread::run(){
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
 
     GameRule *game_rule;
-    if(room->getMode() == "04_1v3")
+    if(room->getMode() == "03_3kingdoms")
+        game_rule = new ThreeKingdomsMode(this);
+    else if(room->getMode() == "04_1v3")
         game_rule = new HulaoPassMode(this);
     else if(Config.EnableScene)	//changjing
         game_rule = new SceneRule(this);	//changjing

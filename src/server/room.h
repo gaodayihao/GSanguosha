@@ -191,8 +191,8 @@ public:
     //        relevant or not.
     bool notifyMoveCards(bool isLostPhase, QList<CardsMoveStruct> move, bool forceVisible);
 
-    void acquireSkill(ServerPlayer *player, const Skill *skill, bool open = true);
-    void acquireSkill(ServerPlayer *player, const QString &skill_name, bool open = true);
+    void acquireSkill(ServerPlayer *player, const Skill *skill, bool open = true, bool doAnimation = true);
+    void acquireSkill(ServerPlayer *player, const QString &skill_name, bool open = true, bool doAnimation = true);
     void adjustSeats();
     void swapPile();
     QList<int> getDiscardPile();

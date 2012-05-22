@@ -82,7 +82,7 @@ protected:
 
 private:
     const Card *m_card, *filtered_card;
-    QPixmap suit_pixmap, icon_pixmap, number_pixmap, cardsuit_pixmap, small_suit_pixmap, *owner_pixmap;
+    QPixmap card_pixmap, suit_pixmap, icon_pixmap, number_pixmap, cardsuit_pixmap, small_suit_pixmap, *owner_pixmap;
     QPointF home_pos;
     QGraphicsPixmapItem *frame, *avatar;
     bool auto_back, frozen;
