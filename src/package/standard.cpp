@@ -76,13 +76,6 @@ void EquipCard::onUse(Room *room, const CardUseStruct &card_use) const{
 void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     const EquipCard *equipped = NULL;
     ServerPlayer *target = targets.value(0, source);
-
-//    int card_id;
-//    if(getSkillName() == "hongyan")
-//        card_id = Sanguosha->getCard(getSubcards().first())->getId();
-//    else
-//        card_id = getEffectiveId();
-
     if (room->getCardOwner(getEffectiveId()) != source) return;
     switch(location()){
     case WeaponLocation: equipped = target->getWeapon(); break;
