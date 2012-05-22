@@ -11,6 +11,10 @@ return {
 	
 	["heros"] = "武将牌",
 	
+	["$AddHeroCardsToPile"] = "%from 将 %card 放置在武将区",
+	["#LoseHeroCard"] = "%from 失去了装备中的武将卡，由 %arg 变回了 %arg2",
+	["#EquipedHeroCard"] = "%from 装备了武将卡 %arg",
+	
 	["#prepare"] = "是否装备武将牌？",
 	[":prepare"] = "起始四张手牌中有武将牌的话可以装备武将牌。",
 	["usehero"] = "装备武将牌",

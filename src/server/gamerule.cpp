@@ -831,6 +831,12 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
         if(card->inherits("HeroCard") && move->from_place == Player::Special
                 && card->objectName() == player->getGeneralName())
         {
+            LogMessage log;
+            log.from = player;
+            log.type = "#LoseHeroCard";
+            log.arg = player->getGeneralName();
+            log.arg2 = "anjiang";
+            room->sendLog(log);
             room->setPlayerMark(player, "hero", 0);
             room->transfigure(player, "anjiang", false);
             room->setPlayerProperty(player, "kingdom", "god");
@@ -864,13 +870,26 @@ bool ThreeKingdomsMode::hasHeroCard(ServerPlayer *player) const{
 
 void ThreeKingdomsMode::addHeroCardsToPile(ServerPlayer *player) const{
     QList<int> hero_card_ids;
+
+    LogMessage log;
+    log.from = player;
+    log.type = "$AddHeroCardsToPile";
+
     foreach(int id, player->handCards()){
         const Card *card = Sanguosha->getCard(id);
-        if (card->inherits("HeroCard"))
+        if (card->inherits("HeroCard")){
             hero_card_ids << id;
+            if(log.card_str.isEmpty())
+                log.card_str = QString::number(id);
+            else
+                log.card_str += "+" + QString::number(id);
+        }
     }
     if(!hero_card_ids.isEmpty())
+    {
+        player->getRoom()->sendLog(log);
         player->addToPile("heros", hero_card_ids);
+    }
 }
 
 void ThreeKingdomsMode::addHeroCardsFlag(ServerPlayer *player) const{

@@ -51,6 +51,12 @@ PrepareCard::PrepareCard(){
 void PrepareCard::onUse(Room *room, const CardUseStruct &card_use) const{
     const Card *card = Sanguosha->getCard(this->getSubcards().first());
 
+    LogMessage log;
+    log.from = card_use.from;
+    log.type = "#EquipedHeroCard";
+    log.arg = card->objectName();
+    room->sendLog(log);
+
     room->setPlayerMark(card_use.from, "hero", card->getEffectiveId());
     room->transfigure(card_use.from, card->objectName(), false);
     room->setPlayerProperty(card_use.from, "kingdom", card_use.from->getGeneral()->getKingdom());
@@ -157,6 +163,12 @@ void UseHeroCard::onUse(Room *room, const CardUseStruct &card_use) const{
         room->setCardFlag(equiped, "-justdraw");
         room->throwCard(equiped, source);
     }
+
+    LogMessage log;
+    log.from = source;
+    log.type = "#EquipedHeroCard";
+    log.arg = herocard->objectName();
+    room->sendLog(log);
 
     room->setPlayerMark(source, "hero", herocard->getEffectiveId());
     room->transfigure(source, herocard->objectName(), false);
