@@ -796,10 +796,12 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 QList<int> heros = player->getPile("heros");
 
                 room->fillAG(heros, player);
-                int hero = room->askForAG(player, heros, false, "throwSelfHero");
+                int hero = room->askForAG(player, heros, true, "throwSelfHero");
                 player->invoke("clearAG");
 
-                room->setCardFlag(hero, "-justdraw");
+                if(hero == -1)
+                    break;
+
                 int heroSelf = hero;
 
                 heros = target->getPile("heros");
@@ -808,8 +810,11 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 hero = room->askForAG(player, heros, true, "throwTargetHero");
                 player->invoke("clearAG");
 
-                room->setCardFlag(hero, "-justdraw");
+                if(hero == -1)
+                    break;
 
+                room->setCardFlag(heroSelf, "-justdraw");
+                room->setCardFlag(hero, "-justdraw");
                 room->throwCard(heroSelf, player);
                 room->throwCard(hero, target);
 
