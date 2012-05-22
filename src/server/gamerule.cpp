@@ -813,7 +813,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 room->throwCard(heroSelf, player);
                 room->throwCard(hero, target);
 
-                return false;
+                return true;
             }
         }
         break;
