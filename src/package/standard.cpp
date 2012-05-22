@@ -76,7 +76,14 @@ void EquipCard::onUse(Room *room, const CardUseStruct &card_use) const{
 void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     const EquipCard *equipped = NULL;
     ServerPlayer *target = targets.value(0, source);
-    if (room->getCardOwner(getId()) != source) return;
+
+//    int card_id;
+//    if(getSkillName() == "hongyan")
+//        card_id = Sanguosha->getCard(getSubcards().first())->getId();
+//    else
+//        card_id = getEffectiveId();
+
+    if (room->getCardOwner(getEffectiveId()) != source) return;
     switch(location()){
     case WeaponLocation: equipped = target->getWeapon(); break;
     case ArmorLocation: equipped = target->getArmor(); break;
@@ -84,7 +91,7 @@ void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
     case OffensiveHorseLocation: equipped = target->getOffensiveHorse(); break;
     }
 
-    if (room->getCardOwner(getEffectiveId()) == source && room->getCardPlace(getEffectiveId()) == Player::Hand)
+    if (room->getCardPlace(getEffectiveId()) == Player::Hand)
     {
         QList<CardsMoveStruct> exchangeMove;
         CardsMoveStruct move1;
