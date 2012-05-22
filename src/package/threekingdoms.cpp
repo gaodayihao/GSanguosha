@@ -83,6 +83,7 @@ RecastHeroCard::RecastHeroCard(){
     target_fixed = true;
     once = true;
     owner_discarded = true;
+    mute = true;
 }
 
 void RecastHeroCard::onUse(Room *room, const CardUseStruct &card_use) const{
@@ -106,6 +107,7 @@ void RecastHeroCard::onUse(Room *room, const CardUseStruct &card_use) const{
             return;
         canRecast.removeOne(card_id);
         room->setCardFlag(card_id, "-justdraw");
+        source->playCardEffect("@recast");
         room->throwCard(card_id,source);
         room->drawCards(source,1);
     }
