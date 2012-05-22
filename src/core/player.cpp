@@ -82,8 +82,6 @@ bool Player::isWounded() const{
 }
 
 General::Gender Player::getGender() const{
-    if(ServerInfo.GameMode == "03_3kingdoms" && general && general->objectName() == "anjiang")
-        return General::Neuter;
     if(general)
         return general->getGender();
     else
