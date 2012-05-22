@@ -1,11 +1,15 @@
 return {
 	["ThreeKingdoms"] = "三国鼎立",
 	["threekingdoms_mode"] = "三国鼎立",
+	["threekingdoms_mode:throw"] = "弃置对方武将牌",
+	["threekingdoms_mode:normal"] = "正常使用",
 
 	["general_card"] = "武将牌",
 	["hero_card"] = "武将",
 	
 	[":hero"] = "武将牌，仅用于[三国鼎立]游戏模式。",
+	
+	["heros"] = "武将牌",
 	
 	["#prepare"] = "是否装备武将牌？",
 	[":prepare"] = "起始四张手牌中有武将牌的话可以装备武将牌。",

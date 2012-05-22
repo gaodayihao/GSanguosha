@@ -1340,18 +1340,26 @@ end
 
 function SmartAI:isFriend(other, another)
 	if not other then self.room:writeToConsole(debug.traceback()) return end
+	if self.player:objectName() == other:objectName() then return true end
+	local mode = string.lower(global_room:getMode())
+	if mode == "03_3kingdoms" then
+		return other:objectName() == self.player:getNextAlive():getNextAlive():objectName()
+	end
 	if another then return self:isFriend(other)==self:isFriend(another) end
 	if sgs.isRolePredictable() and self.lua_ai:relationTo(other) ~= sgs.AI_Neutrality then return self.lua_ai:isFriend(other) end
-	if self.player:objectName() == other:objectName() then return true end
 	if self:objectiveLevel(other) < 0 then return true end
 	return false
 end
 
 function SmartAI:isEnemy(other, another)
 	if not other then self.room:writeToConsole(debug.traceback()) return end
+	if self.player:objectName() == other:objectName() then return false end
+	local mode = string.lower(global_room:getMode())
+	if mode == "03_3kingdoms" then
+		return other:objectName() ~= self.player:getNextAlive():getNextAlive():objectName()
+	end
 	if another then return self:isFriend(other)~=self:isFriend(another) end
 	if sgs.isRolePredictable() and self.lua_ai:relationTo(other) ~= sgs.AI_Neutrality then return self.lua_ai:isEnemy(other) end
-	if self.player:objectName() == other:objectName() then return false end
 	if self:objectiveLevel(other) > 0 then return true end
 	return false
 end

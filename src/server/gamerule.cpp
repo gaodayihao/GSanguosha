@@ -729,6 +729,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 room->acquireSkill(player, "herorecast", true, false);
                 if (hasHeroCard(player))
                     room->askForUseCard(player, "@prepare", "#prepare");
+                room->getThread()->delay();
                 addHeroCardsToPile(player);
             }
             return false;
@@ -768,6 +769,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
         if(player->getPhase() == Player::Draw)
             addHeroCardsFlag(player);
 
+        room->getThread()->delay();
         addHeroCardsToPile(player);
         break;
     }
