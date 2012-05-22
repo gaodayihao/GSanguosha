@@ -776,21 +776,17 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
         break;
     }
 
-    case CardUsed:{
-        CardUseStruct use = data.value<CardUseStruct>();
+    case CardEffect:{
+        CardEffectStruct use = data.value<CardEffectStruct>();
         if (use.card->inherits("Dismantlement"))
         {
-            ServerPlayer *target = use.to.first();
+            ServerPlayer *target = use.to;
             if(player->getPile("heros").isEmpty() || target->getPile("heros").isEmpty())
                 break;
 
             QString choice = room->askForChoice(player, objectName(), "normal+throw");
             if(choice == "normal")
                 break;
-
-            player->playCardEffect(use.card);
-
-            room->throwCard(use.card);
 
             QList<int> heros = player->getPile("heros");
 

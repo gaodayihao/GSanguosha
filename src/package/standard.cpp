@@ -84,7 +84,7 @@ void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
     case OffensiveHorseLocation: equipped = target->getOffensiveHorse(); break;
     }
 
-    if (room->getCardOwner(getId()) == source && room->getCardPlace(getId()) == Player::Hand)
+    if (room->getCardOwner(getEffectiveId()) == source && room->getCardPlace(getEffectiveId()) == Player::Hand)
     {
         QList<CardsMoveStruct> exchangeMove;
         CardsMoveStruct move1;
