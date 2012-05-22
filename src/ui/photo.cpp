@@ -305,7 +305,9 @@ void Photo::updateAvatar(){
             avatar = pixmap;
         }
 
-        if(player->getGameMode() == "06_3v3"){
+        if(player->getGameMode() == "03_3kingdoms")
+            lord_frame->hide();
+        else if(player->getGameMode() == "06_3v3"){
             if(player->getRole() == "renegade" || player->isLord())
                 lord_frame->show();
             else

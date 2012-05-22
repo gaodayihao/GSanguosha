@@ -743,7 +743,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
         case Player::NotActive:{
             removeHeroCardsFlag(player);
             QList<int> heros = player->getPile("heros");
-            heros.removeOne(player->getMark("hero"));
+            //heros.removeOne(player->getMark("hero"));
 
             int willthrow = 2;
 
@@ -780,35 +780,36 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
         CardUseStruct use = data.value<CardUseStruct>();
         if (use.card->inherits("Dismantlement"))
         {
-            QString choice = room->askForChoice(player, objectName(), "throw+normal");
+            ServerPlayer *target = use.to.first();
+            if(player->getPile("heros").isEmpty() || target->getPile("heros").isEmpty())
+                break;
+
+            QString choice = room->askForChoice(player, objectName(), "normal+throw");
             if(choice == "normal")
                 break;
 
+            player->playCardEffect(use.card);
+
             room->throwCard(use.card);
-            ServerPlayer *target = use.to.first();
-            QList<int> heros = target->getPile("heros");
-            if(heros.isEmpty())
-                return false;
+
+            QList<int> heros = player->getPile("heros");
 
             room->fillAG(heros, player);
-            int hero = room->askForAG(player, heros, true, objectName());
+            int hero = room->askForAG(player, heros, false, "throwSelfHero");
             player->invoke("clearAG");
 
-            if (hero == -1)
-                return false;
-
             room->setCardFlag(hero, "-justdraw");
-            room->throwCard(hero, target);
+            int heroSelf = hero;
 
-            heros = player->getPile("heros");
-
-            if(heros.isEmpty())
-                return false;
+            heros = target->getPile("heros");
 
             room->fillAG(heros, player);
-            hero = room->askForAG(player, heros, false, objectName());
+            hero = room->askForAG(player, heros, true, "throwTargetHero");
             player->invoke("clearAG");
+
             room->setCardFlag(hero, "-justdraw");
+
+            room->throwCard(heroSelf, player);
             room->throwCard(hero, target);
 
             return false;
