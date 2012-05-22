@@ -285,6 +285,8 @@ public:
     void startTest(const QString &to_test);
     void networkDelayTestCommand(ServerPlayer *player, const QString &);
 
+    void setGerenalGender(const QString &name, const QString &gender);
+
 protected:
     virtual void run();
 

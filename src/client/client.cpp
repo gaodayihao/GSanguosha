@@ -98,6 +98,7 @@ Client::Client(QObject *parent, const QString &filename)
     callbacks["setPileNumber"] = &Client::setPileNumber;
     callbacks["setStatistics"] = &Client::setStatistics;
     callbacks["setCardFlag"] = &Client::setCardFlag;
+    callbacks["setGerenalGender"] = &Client::setGerenalGender;
 
     // interactive methods
     m_interactions[S_COMMAND_CHOOSE_GENERAL] = &Client::askForGeneral;
@@ -1100,7 +1101,26 @@ void Client::setCardFlag(const QString &pattern_str){
     QString object = texts.at(1);
     QString card_str = texts.at(2);
 
-    Sanguosha->getCard(card_str.toInt())->setFlags(object);
+    Sanguosha->getCard(object.toInt())->setFlags(card_str);
+}
+
+void Client::setGerenalGender(const QString &pattern_str){
+    QRegExp rx("(\\w+):(.+)");
+    if(!rx.exactMatch(pattern_str))
+        return;
+
+    QStringList texts = rx.capturedTexts();
+    QString general_name = texts.at(1);
+    QString gender = texts.at(2);
+
+    General *general = (General *)Sanguosha->getGeneral(general_name);
+
+    if (gender == "M")
+        general->setGender(General::Male);
+    else if (gender == "F")
+        general->setGender(General::Female);
+    else
+        general->setGender(General::Neuter);
 }
 
 void Client::updatePileNum(){

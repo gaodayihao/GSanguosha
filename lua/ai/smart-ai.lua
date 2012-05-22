@@ -148,7 +148,8 @@ function SmartAI:initialize(player)
 	end
 
 	sgs.ais[player:objectName()] = self
-	if self.player:isLord() and not sgs.GetConfig("EnableHegemony", false) then
+	local mode = string.lower(global_room:getMode())
+	if self.player:isLord() and not sgs.GetConfig("EnableHegemony", false) and mode ~= "03_3kingdoms" then
 		if (sgs.ai_chaofeng[self.player:getGeneralName()] or 0) < 3 then
 			sgs.ai_chaofeng[self.player:getGeneralName()] = 3
 		end
@@ -1341,10 +1342,6 @@ end
 function SmartAI:isFriend(other, another)
 	if not other then self.room:writeToConsole(debug.traceback()) return end
 	if self.player:objectName() == other:objectName() then return true end
-	local mode = string.lower(global_room:getMode())
-	if mode == "03_3kingdoms" then
-		return other:objectName() == self.player:getNextAlive():getNextAlive():objectName()
-	end
 	if another then return self:isFriend(other)==self:isFriend(another) end
 	if sgs.isRolePredictable() and self.lua_ai:relationTo(other) ~= sgs.AI_Neutrality then return self.lua_ai:isFriend(other) end
 	if self:objectiveLevel(other) < 0 then return true end
@@ -1354,10 +1351,6 @@ end
 function SmartAI:isEnemy(other, another)
 	if not other then self.room:writeToConsole(debug.traceback()) return end
 	if self.player:objectName() == other:objectName() then return false end
-	local mode = string.lower(global_room:getMode())
-	if mode == "03_3kingdoms" then
-		return other:objectName() ~= self.player:getNextAlive():getNextAlive():objectName()
-	end
 	if another then return self:isFriend(other)~=self:isFriend(another) end
 	if sgs.isRolePredictable() and self.lua_ai:relationTo(other) ~= sgs.AI_Neutrality then return self.lua_ai:isEnemy(other) end
 	if self:objectiveLevel(other) > 0 then return true end
@@ -3935,6 +3928,7 @@ dofile "lua/ai/standard_cards-ai.lua"
 dofile "lua/ai/maneuvering-ai.lua"
 dofile "lua/ai/standard-ai.lua"
 dofile "lua/ai/chat-ai.lua"
+dofile "lua/ai/threekingdoms-ai.lua"
 dofile "lua/ai/basara-ai.lua"
 dofile "lua/ai/hegemony-ai.lua"
 dofile "lua/ai/hulaoguan-ai.lua"

@@ -2352,6 +2352,7 @@ void Room::chooseGenerals(){
 }
 
 void Room::run(){
+    setGerenalGender("anjiang", "M");
     // initialize random seed for later use
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
 
@@ -2394,8 +2395,7 @@ void Room::run(){
         connect(thread_1v1, SIGNAL(finished()), this, SLOT(startGame()));
 
     }else if(mode == "03_3kingdoms"){
-        General *anjiang = (General *)Sanguosha->getGeneral("anjiang");
-        anjiang->setGender(General::Neuter);
+        setGerenalGender("anjiang", ".");
         foreach(ServerPlayer *player, m_players){
             setPlayerProperty(player, "general", "anjiang");
         }
@@ -4412,4 +4412,19 @@ void Room::Ready_timerTrigger()
         }
     }
     ready_timer->stop();
+}
+
+void Room::setGerenalGender(const QString &name, const QString &gender)
+{
+    General *general = (General *)Sanguosha->getGeneral(name);
+    if (gender == "M")
+        general->setGender(General::Male);
+    else if (gender == "F")
+        general->setGender(General::Female);
+    else
+        general->setGender(General::Neuter);
+
+    QString pattern = name + ":" + gender;
+
+    broadcastInvoke("setGerenalGender", pattern);
 }
