@@ -706,7 +706,7 @@ ThreeKingdomsMode::ThreeKingdomsMode(QObject *parent)
     :GameRule(parent)
 {
     setObjectName("threekingdoms_mode");
-    events << CardDrawnDone << CardGotOnePiece << CardLostOnePiece;
+    events << CardEffect << CardDrawnDone << CardGotOnePiece << CardLostOnePiece;
 }
 
 bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
