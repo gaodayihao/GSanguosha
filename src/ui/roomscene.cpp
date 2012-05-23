@@ -2204,7 +2204,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
         return;
 
     // do timeout
-    if(newStatus != Client::NotActive){
+    if(newStatus != Client::NotActive and (newStatus != oldStatus)){
         if(focused) focused->hideProgressBar();
         QApplication::alert(main_window);
         connect(dashboard, SIGNAL(progressBarTimedOut()), this, SLOT(doTimeout()));
@@ -2313,8 +2313,6 @@ void RoomScene::doCancelButton(){
             const ViewAsSkill *skill = dashboard->currentSkill();
             if (skill)
                 cancelViewAsSkill();
-            else
-                dashboard->unselectAll();
             dashboard->stopPending();
             dashboard->enableCards();
             break;
@@ -2368,6 +2366,7 @@ void RoomScene::doCancelButton(){
             break;
         }
     }
+    dashboard->unselectAll();
 }
 
 void RoomScene::doDiscardButton(){
