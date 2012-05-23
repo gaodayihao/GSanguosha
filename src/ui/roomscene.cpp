@@ -62,6 +62,7 @@ struct RoomLayout {
     QPointF log_box_pos;
     QPointF button1_pos, button2_pos, button3_pos;
     QPointF state_item_pos;
+    bool isCircular;
 };
 
 struct NormalRoomLayout : public RoomLayout{
@@ -79,6 +80,7 @@ struct NormalRoomLayout : public RoomLayout{
         button2_pos = QPointF(15, 60);
         button3_pos = QPointF(15, 5);
         state_item_pos = QPointF(-110, -80);
+        isCircular = false;
     }
 };
 
@@ -97,6 +99,7 @@ struct CircularRoomLayout : public RoomLayout{
         button2_pos = QPointF(-605, 220);
         button3_pos = QPointF(-605, 165);
         state_item_pos = QPointF(367, -320);
+        isCircular = true;
     }
 };
 
@@ -3061,7 +3064,11 @@ void RoomScene::doGongxin(const QList<int> &card_ids, bool enable_heart, bool en
 }
 
 void RoomScene::createStateItem(){
-    QPixmap state("image/system/state.png");
+    QPixmap state;
+    if(room_layout->isCircular)
+        state.load("image/system/state_circular.png");
+    else
+        state.load("image/system/state.png");
 
     state_item = addPixmap(state);
     state_item->setPos(room_layout->state_item_pos);
@@ -3073,7 +3080,7 @@ void RoomScene::createStateItem(){
     text_item->setParentItem(state_item);
     text_item->setPos(2, 30);
     text_item->setDocument(ClientInstance->getLinesDoc());
-    text_item->setTextWidth(220);
+    text_item->setTextWidth(state_item->boundingRect().width());
     text_item->setDefaultTextColor(Qt::white);
 
     add_robot = NULL;
@@ -3259,6 +3266,8 @@ void RoomScene::onGameStart(){
 
         chat_widget->show();
         log_box->show();
+        chat_box_widget->show();
+        state_item->show();
 
         if(self_box && enemy_box){
             self_box->show();
@@ -3881,8 +3890,10 @@ void RoomScene::fillGenerals3v3(const QStringList &names){
 }
 
 void RoomScene::fillGenerals(const QStringList &names){
+    chat_box_widget->hide();
     chat_widget->hide();
     log_box->hide();
+    state_item->hide();
 
     if(ServerInfo.GameMode == "06_3v3")
         fillGenerals3v3(names);
@@ -4113,10 +4124,11 @@ void RoomScene::updateStateItem(const QString &roles)
         AddRoleIcon(map, 'N', "renegade");
     }
 
+    int skip = (state_item->boundingRect().width() - roles.length() * 21) / 2;
     foreach(QChar c, roles){
         if(map.contains(c)){
             QGraphicsPixmapItem *item = addPixmap(map.value(c));
-            item->setPos(21*role_items.length(), 6);
+            item->setPos(21*role_items.length() + skip, 6);
             item->setParentItem(state_item);
 
             role_items << item;

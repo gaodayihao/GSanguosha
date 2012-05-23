@@ -85,7 +85,7 @@ private:
     QPixmap card_pixmap, suit_pixmap, icon_pixmap, number_pixmap, cardsuit_pixmap, small_suit_pixmap, *owner_pixmap;
     QPointF home_pos;
     QGraphicsPixmapItem *frame, *avatar;
-    bool auto_back, frozen;
+    bool auto_back, frozen, m_isHeroCard;
 signals:
     void toggle_discards();
     void clicked();

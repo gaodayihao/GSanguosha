@@ -15,6 +15,10 @@
 
 CardItem::CardItem(const Card *card)
 {
+    if(card && card->inherits("HeroCard"))
+        m_isHeroCard = true;
+    else
+        m_isHeroCard = false;
     setCard(card);
     m_isSelected = false;
     auto_back = true;
@@ -41,9 +45,14 @@ void CardItem::setCard(const Card* card)
 {
     if (card != NULL)
     {
-        Pixmap::load("image/system/card-back.png");
-//        Pixmap::load(card->getPixmapPath(), false);
-        card_pixmap.load(card->getPixmapPath());
+        if(!m_isHeroCard)
+            Pixmap::load(card->getPixmapPath(), false);
+
+        else
+        {
+            Pixmap::load("image/system/card-back.png");
+            card_pixmap.load(card->getPixmapPath());
+        }
         icon_pixmap.load(card->getIconPath());
         suit_pixmap.load(QString("image/system/suit/%1.png").arg(card->getSuitString()));
         small_suit_pixmap.load(QString("image/system/log/%1.png").arg(card->getSuitString()));
@@ -53,7 +62,6 @@ void CardItem::setCard(const Card* card)
     }
     else
     {
-        card_pixmap.load("image/system/card-back.png");
         Pixmap::load("image/system/card-back.png");
     }
     m_card = card;
@@ -66,7 +74,7 @@ void CardItem::setEnabled(bool enabled)
 }
 
 CardItem::CardItem(const QString &general_name)
-    :m_card(NULL), filtered_card(NULL), auto_back(true), frozen(false)
+    :m_card(NULL), filtered_card(NULL), auto_back(true), frozen(false), m_isHeroCard(false)
 {
     changeGeneral(general_name);
     m_currentAnimation = NULL;
@@ -316,14 +324,17 @@ void CardItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *)
     emit leave_hover();
 }
 
-void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *){
+void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
     if (!isEnabled())
     {
         painter->fillRect(this->boundingRect(), QColor(100, 100, 100, 255 * opacity()));
         painter->setOpacity(0.7);
     }
 
-    painter->drawPixmap(0, 0, 93, 130, card_pixmap);
+    if(m_isHeroCard)
+        painter->drawPixmap(0, 0, 93, 130, card_pixmap);
+    else
+        Pixmap::paint(painter, option, widget);
 
     if (m_card) {
         painter->drawPixmap(0, 14, cardsuit_pixmap);

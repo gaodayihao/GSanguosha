@@ -596,7 +596,10 @@ void Client::onPlayerUseCard(const Card *card, const QList<const Player *> &targ
 
 void Client::startInXs(const QString &left_seconds){
     int seconds = left_seconds.toInt();
-    lines_doc->setHtml(tr("Game will start in <b>%1</b> seconds").arg(left_seconds));
+    if (seconds > 0)
+        lines_doc->setHtml(tr("<p align = \"center\">Game will start in <b>%1</b> seconds...</p>").arg(left_seconds));
+    else
+        lines_doc->setHtml(QString());
 
     emit start_in_xs();
     if(seconds == 0 && Sanguosha->getScenario(ServerInfo.GameMode) == NULL){
@@ -1128,9 +1131,9 @@ void Client::updatePileNum(){
                        .arg(pile_num).arg(discarded_list.length()).arg(swap_pile);
 
     if(skill_title.isEmpty())
-        lines_doc->setHtml(pile_str);
+        lines_doc->setHtml("<p align = \"center\">" + pile_str + "</p>");
     else
-        lines_doc->setHtml(QString("%1 <br/> <b>%2</b>: %3").arg(pile_str).arg(skill_title).arg(skill_line));
+        lines_doc->setHtml(QString("<p align = \"center\">%1 <br/> <b>%2</b>: %3</p>").arg(pile_str).arg(skill_title).arg(skill_line));
 }
 
 void Client::askForDiscard(const Json::Value &req){

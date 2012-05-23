@@ -56,12 +56,12 @@ Photo::Photo():PlayerCardContainer("image/system/photo-back.png"),
     progress_bar = new QSanCommandProgressBar;
     progress_bar->setAutoHide(true);
     progress_bar->hide();
-    progress_bar->setMaximumHeight(15);
+    progress_bar->setMaximumHeight(13);
     progress_bar->setMaximumWidth(pixmap.width());
 
     QGraphicsProxyWidget *widget = new QGraphicsProxyWidget(this);
     widget->setWidget(progress_bar);
-    widget->setPos( -6 , - 25);
+    widget->setPos( -6 , pixmap.height()+2);
 
     skill_name_item = new QGraphicsSimpleTextItem(this);
     skill_name_item->setBrush(Qt::white);
