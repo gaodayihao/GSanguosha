@@ -274,6 +274,7 @@ void Photo::showCard(int card_id){
     QPointF card_pos(pos() + QPointF(0, 20));
     card_item->setPos(card_pos);
     card_item->setHomePos(card_pos);
+    card_item->setZValue(10001);
 
     QTimer::singleShot(2000, card_item, SLOT(deleteLater()));
 }

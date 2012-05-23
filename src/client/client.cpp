@@ -596,8 +596,9 @@ void Client::onPlayerUseCard(const Card *card, const QList<const Player *> &targ
 
 void Client::startInXs(const QString &left_seconds){
     int seconds = left_seconds.toInt();
+    QString prompt_str = tr("Game will start in <b>%1</b> seconds...").arg(left_seconds);
     if (seconds > 0)
-        lines_doc->setHtml(tr("<p align = \"center\">Game will start in <b>%1</b> seconds...</p>").arg(left_seconds));
+        lines_doc->setHtml("<p align = \"center\">" + prompt_str + "</p>");
     else
         lines_doc->setHtml(QString());
 
