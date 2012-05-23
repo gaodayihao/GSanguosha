@@ -270,12 +270,12 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
             LogMessage log;
             log.type = "#AskForPeaches";
             log.from = player;
-            log.to = dying.savers;
+            log.to = room->getAllPlayers();
             log.arg = QString::number(1 - player->getHp());
             room->sendLog(log);
 
             RoomThread *thread = room->getThread();
-            foreach(ServerPlayer *saver, dying.savers){
+            foreach(ServerPlayer *saver, room->getAllPlayers()){
                 if(player->getHp() > 0)
                     break;
 
@@ -290,6 +290,9 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
 
     case AskForPeaches:{
             DyingStruct dying = data.value<DyingStruct>();
+
+            if(!dying.savers.contains(player))
+                break;
 
             while(dying.who->getHp() <= 0){
                 const Card *peach = room->askForSinglePeach(player, dying.who);

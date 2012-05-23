@@ -633,6 +633,51 @@ public:
     }
 };
 
+class Wansha: public TriggerSkill{
+public:
+    Wansha():TriggerSkill("wansha"){
+        frequency = Skill::Compulsory;
+        events << Dying;
+    }
+
+    virtual int getPriority() const{
+        return 5;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        ServerPlayer *jiaxu = target->getRoom()->getCurrent();
+        return jiaxu->hasSkill(objectName()) && jiaxu->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
+        Room *room = player->getRoom();
+        room->playSkillEffect(objectName());
+        ServerPlayer *jiaxu = room->getCurrent();
+
+        QList<ServerPlayer *> savers;
+        savers << jiaxu;
+
+        LogMessage log;
+        log.from = jiaxu;
+        log.arg = objectName();
+        if(jiaxu != player){
+            savers << player;
+            log.type = "#WanshaTwo";
+            log.to << player;
+        }else{
+            log.type = "#WanshaOne";
+        }
+        room->sendLog(log);
+
+        DyingStruct dying = data.value<DyingStruct>();
+        dying.savers = savers;
+
+        data = QVariant::fromValue(dying);
+
+        return false;
+    }
+};
+
 class Luanwu: public ZeroCardViewAsSkill{
 public:
     Luanwu():ZeroCardViewAsSkill("luanwu"){
@@ -935,7 +980,7 @@ ThicketPackage::ThicketPackage()
     related_skills.insertMulti("haoshi", "#haoshi-give");
 
     jiaxu = new General(this, "jiaxu", "qun", 3);
-    jiaxu->addSkill(new Skill("wansha", Skill::Compulsory));
+    jiaxu->addSkill(new Wansha);
     jiaxu->addSkill(new Weimu);
     jiaxu->addSkill(new MarkAssignSkill("@chaos", 1));
     jiaxu->addSkill(new Luanwu);

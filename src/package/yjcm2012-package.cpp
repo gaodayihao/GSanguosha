@@ -567,8 +567,8 @@ public:
         if(event == AskForPeaches && handang->getPhase() == Player::NotActive){
             DyingStruct dying = data.value<DyingStruct>();
             forever{
-                if(!dying.savers.contains(handang) || dying.who->getHp() > 0 || handang->isNude() ||
-                        room->getCurrent()->isDead() || !room->askForSkillInvoke(handang, objectName(), data))
+                if(dying.who->getHp() > 0 || handang->isNude() || room->getCurrent()->isDead() ||
+                        !room->askForSkillInvoke(handang, objectName(), data))
                     break;
                 room->playSkillEffect(objectName());
 
@@ -594,6 +594,10 @@ public:
                 && id == damage.card->getEffectiveId()){
 
                 DyingStruct dying = room->getTag("JiefanTarget").value<DyingStruct>();
+
+                if (!dying.savers.contains(handang))
+                    return false;
+
                 ServerPlayer *target = dying.who;
                 Peach *peach = new Peach(damage.card->getSuit(), damage.card->getNumber());
                 peach->setSkillName(objectName());

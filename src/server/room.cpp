@@ -183,33 +183,10 @@ void Room::enterDying(ServerPlayer *player, DamageStruct *reason){
     }
     broadcastInvoke("playAudio", sos_filename);
 
-    QList<ServerPlayer *> savers;
-    ServerPlayer *current = getCurrent();
-    if(current->hasSkill("wansha") && current->isAlive()){
-        playSkillEffect("wansha");
-
-        savers << current;
-
-        LogMessage log;
-        log.from = current;
-        log.arg = "wansha";
-        if(current != player){
-            savers << player;
-            log.type = "#WanshaTwo";
-            log.to << player;
-        }else{
-            log.type = "#WanshaOne";
-        }
-
-        sendLog(log);
-
-    }else
-        savers = getAllPlayers();
-
     DyingStruct dying;
     dying.who = player;
     dying.damage = reason;
-    dying.savers = savers;
+    dying.savers = getAllPlayers();
 
     QVariant dying_data = QVariant::fromValue(dying);
     thread->trigger(Dying, player, dying_data);
