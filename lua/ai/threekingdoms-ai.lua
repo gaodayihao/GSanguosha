@@ -72,7 +72,7 @@ if sgs.GetConfig("GameMode", "08p") == "03_3kingdoms" then
 		
 		if not canInvoke then return end
 		
-		if canInvoke and math.random(0,2) == 0 then return end
+		if canInvoke and  not (heros:length() > 2) and math.random(0,1) == 0 then return end
 		
 		return sgs.Card_Parse("@RecastHeroCard=.")
 	end
