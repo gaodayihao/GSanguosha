@@ -484,8 +484,9 @@ void RoomScene::createExtraButtons(){
     m_reverseSelectionButton = dashboard->createButton("reverse-select");
     m_reverseSelectionButton->setEnabled(true);
 
-    dashboard->addWidget(m_reverseSelectionButton, room_layout->m_scenePadding
-                         + room_layout->m_photoRoomPadding * 3 + Photo::S_NORMAL_PHOTO_WIDTH, true);
+    /*dashboard->addWidget(m_reverseSelectionButton, room_layout->m_scenePadding
+                         + room_layout->m_photoRoomPadding * 3 + Photo::S_NORMAL_PHOTO_WIDTH, true);*/
+    dashboard->addWidget(m_reverseSelectionButton, 5, 136, false);
     connect(m_reverseSelectionButton, SIGNAL(clicked()), dashboard, SLOT(reverseSelection()));
 
     m_freeDiscardButton = NULL;
@@ -616,7 +617,7 @@ void RoomScene::adjustItems(){
 
      if (self_box)
          self_box->setPos(infoPlane.left() - padding - self_box->boundingRect().width(),
-            sceneRect().height() - padding * 3 - self_box->boundingRect().height() - dashboard->boundingRect().height() - m_reverseSelectionButton->height());
+            sceneRect().height() - padding * 3 - self_box->boundingRect().height() - dashboard->boundingRect().height() - 15);
      if (enemy_box)
          enemy_box->setPos(padding * 2, padding * 2);
 
@@ -3274,8 +3275,8 @@ void RoomScene::onGameStart(){
     // add free discard button
     if(ServerInfo.FreeChoose && !ClientInstance->getReplayer()){
         m_freeDiscardButton = dashboard->addButton("free-discard",
-                                                   m_reverseSelectionButton->pos().x() + m_reverseSelectionButton->width()
-                                                   + room_layout->m_scenePadding, true);
+                                                   room_layout->m_scenePadding*2 + room_layout->m_photoRoomPadding * 3 + Photo::S_NORMAL_PHOTO_WIDTH,
+                                                   true);
         m_freeDiscardButton->setToolTip(tr("Discard cards freely"));
         FreeDiscardSkill *discard_skill = new FreeDiscardSkill(this);
         button2skill.insert(m_freeDiscardButton, discard_skill);
