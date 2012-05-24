@@ -61,7 +61,7 @@ Photo::Photo():player(NULL),
 
     QGraphicsDropShadowEffect * drp = new QGraphicsDropShadowEffect;
     drp->setBlurRadius(10);
-    drp->setColor(QColor(20, 48, 60));
+    drp->setColor(Qt::yellow);
     drp->setOffset(0);
     skill_name_item->setGraphicsEffect(drp);
 
@@ -93,6 +93,10 @@ Photo::Photo():player(NULL),
     lord_frame->setZValue(1.5);
     lord_frame->hide();
 
+    _m_kingdomIcon = new QGraphicsPixmapItem(this);
+    _m_kingdomIcon->setPos(-2, -2);
+    _m_kingdomIcon->setZValue(2.5);
+
     QStringList names;
     names   << "round_start" << "start" << "judge" << "draw"
             << "play" << "discard" << "finish";
@@ -102,17 +106,18 @@ Photo::Photo():player(NULL),
 
     foreach(Pixmap *phase, phases){
         phase->setParentItem(this);
-        phase->setPos(23, S_NORMAL_PHOTO_HEIGHT - 2);
+        phase->setPos(13, S_NORMAL_PHOTO_HEIGHT - 4);
         phase->setZValue(1.8);
         phase->hide();
     }
 
     mark_item = new QGraphicsTextItem(this);
-    mark_item->setPos(2, 69);
+    mark_item->setPos(-71, 73);
     mark_item->setDefaultTextColor(Qt::white);
 
     role_combobox = NULL;
     pile_button = NULL;
+    game_start = false;
 }
 
 QRectF Photo::boundingRect() const
@@ -123,11 +128,15 @@ QRectF Photo::boundingRect() const
 void Photo::setOrder(int order){
     QPixmap pixmap(QString("image/system/number/%1.png").arg(order));
     if(order_item)
+    {
         order_item->setPixmap(pixmap);
+        order_item->setZValue(3.0);
+    }
     else{
         order_item = new QGraphicsPixmapItem(pixmap, this);
         order_item->setVisible(ServerInfo.EnableSame);
         order_item->moveBy(15, 0);
+        order_item->setZValue(3.0);
     }
 }
 
@@ -246,7 +255,7 @@ void Photo::setPlayer(const ClientPlayer *player)
 
 void Photo::hideAvatar(){
     hide_avatar = true;
-
+    _m_kingdomIcon->hide();
     update();
 }
 
@@ -256,7 +265,7 @@ void Photo::showCard(int card_id){
     CardItem *card_item = new CardItem(card);
     scene()->addItem(card_item);
 
-    QPointF card_pos(pos() + QPointF(0, 20));
+    QPointF card_pos(pos() + QPointF(-40, -56));
     card_item->setPos(card_pos);
     card_item->setHomePos(card_pos);
     card_item->setZValue(10001);
@@ -273,7 +282,10 @@ void Photo::updateAvatar(){
             avatar_area->setToolTip(general->getSkillDescription());
             success = avatar.load(general->getPixmapPath("small"));
         }
-        _m_kingdomIcon.load(player->getKingdomIcon());
+        QPixmap kingdom_icon(player->getKingdomIcon());
+        if (!kingdom_icon.isNull())
+            game_start = true;
+        _m_kingdomIcon->setPixmap(kingdom_icon);
         _m_kindomColorMaskIcon.load(player->getKingdomFrame());
 
         if(!success){
@@ -398,7 +410,7 @@ void Photo::installEquip(CardItem *equip){
 void Photo::installDelayedTrick(CardItem *trick){
     QGraphicsPixmapItem *item = new QGraphicsPixmapItem(this);
     item->setPixmap(QPixmap(player->topDelayedTrick()->getIconPath()));
-    item->setZValue(10002);
+    item->setZValue(2.0);
     QString tooltip;
     if(player->topDelayedTrick()->isVirtualCard())
         tooltip=Sanguosha->getCard((player->topDelayedTrick()->getSubcards()).at(0))->getDescription();
@@ -493,7 +505,7 @@ bool Photo::_addCardItems(QList<CardItem*> &card_items, Player::Place place)
 
 void Photo::drawMagatama(QPainter *painter, int index, const QPixmap &pixmap){
     const int step = pixmap.width();
-    painter->drawPixmap(54 + index * step, 73, pixmap);
+    painter->drawPixmap(54 + index * step, 74, pixmap);
 }
 
 void Photo::drawHp(QPainter *painter){
@@ -516,7 +528,7 @@ void Photo::drawHp(QPainter *painter){
     }
     else
     {
-        const QRectF textArea(72, 73, 40, 20);
+        const QRectF textArea(72, 74, 40, 20);
         drawMagatama(painter, 0, *magatama);
         QFont hpFont("Arial", 12);
         hpFont.setBold(true);
@@ -606,6 +618,8 @@ void Photo::updatePile(const QString &pile_name){
             active++;
             button->setText(QString("%1 (%2)").arg(Sanguosha->translate(pile_name)).arg(pile.length()));
         }
+        else
+            continue;
 
         QMenu *menu = button->menu();
         menu->setProperty("private_pile","true");
@@ -616,6 +630,10 @@ void Photo::updatePile(const QString &pile_name){
             const Card *card = Sanguosha->getCard(card_id);
             if (card != NULL) cards << card;
         }
+        if (cards.isEmpty())
+            menu->addAction(QString("%1 (%2)(%3)").arg(tr("Hide"))
+                            .arg(Sanguosha->translate(pile_name))
+                            .arg(pile.length()));
 
         qSort(cards.begin(), cards.end(), CompareByNumber);
         foreach(const Card *card, cards){
@@ -646,7 +664,7 @@ void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     painter->drawPixmap(QRect(0, 0, S_SHADOW_INCLUSIVE_PHOTO_WIDTH, S_SHADOW_INCLUSIVE_PHOTO_HEIGHT), _m_mainFrame);
     if (!hide_avatar)
     {
-        painter->drawPixmap(QRect(-2, -2, 36, 36), _m_kingdomIcon);
+        _m_kingdomIcon->show();
     }
 
     if (player == NULL) return;
@@ -694,25 +712,28 @@ void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
             painter->drawPixmap(-8, avatarRect.top() + 5, chain_icon);
     }
 
-    int n = player->getHandcardNum();
-    painter->drawPixmap(QRect(0, 72, 18, 19), _m_handCardIcon);
-    QFont hpFont("Arial");
-    hpFont.setBold(true);
-    painter->setFont(hpFont);
-    QPen pen(Qt::black);
-    painter->setPen(pen);
-    painter->drawText(QRect(0, 73, 18, 18), QString::number(n), QTextOption(Qt::AlignCenter));
-    hpFont.setBold(false);
-    painter->setFont(hpFont);
-    pen.setColor(Qt::white);
-    painter->setPen(pen);
+    if(game_start)
+    {
+        int n = player->getHandcardNum();
+        painter->drawPixmap(QRect(0, 72, 18, 19), _m_handCardIcon);
+        QFont hpFont("Arial");
+        hpFont.setBold(true);
+        painter->setFont(hpFont);
+        QPen pen(Qt::black);
+        painter->setPen(pen);
+        painter->drawText(QRect(0, 73, 18, 18), QString::number(n), QTextOption(Qt::AlignCenter));
+        hpFont.setBold(false);
+        painter->setFont(hpFont);
+    }
 
     QString state_str = player->getState();
     if(!state_str.isEmpty() && state_str != "online"){
-        QRectF stateArea(0, avatarRect.top() + 1, 24, 15);
+        QRectF stateArea(0, avatarRect.top() + 1, 30, 15);
         stateArea.moveRight(avatarRect.right());
-        painter->fillRect(stateArea, Qt::gray);
-        painter->drawText(stateArea, Sanguosha->translate(state_str));
+        painter->fillRect(stateArea, QColor(63, 57, 43));
+        QPen pen(QColor(224, 217, 175));
+        painter->setPen(pen);
+        painter->drawText(stateArea, Sanguosha->translate(state_str), QTextOption(Qt::AlignCenter));
     }
 
     drawEquip(painter, weapon, 0);
@@ -739,19 +760,19 @@ void Photo::drawEquip(QPainter *painter, CardItem *equip, int order){
         small_equip.load(path);
         QPixmapCache::insert(path, small_equip);
     }
-    QRect equip_rect(0, 119 + order * 17, small_equip.width(), small_equip.height());
+    QRect equip_rect(1, 93 + order * 14, small_equip.width(), small_equip.height());
 
     if(small_equip.isNull())
-        painter->drawText(20, 115 + 15 + order * 17, card->label());
+        painter->drawText(20, 102 + order * 14, card->label());
     else
         painter->drawPixmap(equip_rect, small_equip);
 
     // draw the number of equip
     // painter->setPen(card->isRed() ? Qt::red : Qt::black);
-    painter->drawText(108, 115 + 15 + order * 17, card->getNumberString());
+    painter->drawText(108, 102 + order * 14, card->getNumberString());
 
     // draw the suit of equip
-    QRect suit_rect(115, 117 + order * 17, 18, 19);
+    QRect suit_rect(115, 88 + order * 14, 18, 19);
     painter->drawPixmap(suit_rect, equip->getSmallSuitPixmap());
 
 }

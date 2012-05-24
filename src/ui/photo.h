@@ -80,7 +80,8 @@ private:
     QGraphicsPixmapItem *ready_item, *lord_frame;
     QPixmap _m_mainFrame;
     QPixmap _m_handCardIcon;
-    QPixmap _m_kingdomIcon;
+    QGraphicsPixmapItem *_m_kingdomIcon;
+//    QPixmap _m_kingdomIcon;
     QPixmap _m_kindomColorMaskIcon;
     Pixmap chain;
     RoleCombobox *role_combobox;
@@ -101,7 +102,7 @@ private:
     QMap<QString, QGraphicsSimpleTextItem *> mark_texts;
 
     QGraphicsPixmapItem *order_item;
-    bool hide_avatar;
+    bool hide_avatar, game_start;
     QPixmap death_pixmap;
     QPixmap back_icon, chain_icon;
     QList<Pixmap *> phases;

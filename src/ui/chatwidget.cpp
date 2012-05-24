@@ -166,7 +166,7 @@ ChatWidget::ChatWidget():base_pixmap("image/system/chatface/base.png")
     easy_text_board=new MyPixmapItem(QPixmap("image/system/chatface/easytextboard.png"),this);
     easy_text_board->setSize(180, 222);
     easy_text_board->setPos(-99, -223);
-    easy_text_board->setZValue(1);
+    easy_text_board->setZValue(4);
     easy_text_board->setVisible(false);
     easy_text_board->itemName="easytextboard";
 
@@ -200,7 +200,8 @@ void ChatWidget::sendText()
 }
 
 QRectF ChatWidget::boundingRect() const{
-    return QRectF(-1, 0, 24 * 3 + 2, 24);
+//    return QRectF(-1, 0, 24 * 3 + 2, 24);
+    return QRectF(-1, 0, 80, 39);
 }
 
 void ChatWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){

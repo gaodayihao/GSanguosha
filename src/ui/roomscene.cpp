@@ -70,7 +70,7 @@ struct CircularRoomLayout : public RoomLayout{
     CircularRoomLayout(){
         m_scenePadding = 0;
         m_roleBoxHeight = 75;
-        m_chatTextBoxHeight = 30;
+        m_chatTextBoxHeight = 40;
         m_logBoxHeightPercentage = 0.6;
         m_chatBoxHeightPercentage = 0.4;
         m_infoPlaneWidthPercentage = 0.22;
@@ -3496,7 +3496,6 @@ void RoomScene::animateHpChange(const QString &, const QStringList &args)
             Pixmap *aniMaga = new Pixmap;
             QPixmap *qpixmap = MagatamaWidget::GetMagatama(index);
             aniMaga->setPixmap(*qpixmap);
-            aniMaga->setZValue(10001);
             addItem(aniMaga);
             aniMaga->show();
             i+=hp-delta;
@@ -3513,6 +3512,7 @@ void RoomScene::animateHpChange(const QString &, const QStringList &args)
             pos.rx() += dashboard->scenePos().x();
             pos.ry() += dashboard->scenePos().y();
             aniMaga->setPos(pos);
+            aniMaga->setZValue(10086);
 
             QPropertyAnimation *fade = new QPropertyAnimation(aniMaga,"opacity");
             fade->setEndValue(0);
