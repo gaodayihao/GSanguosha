@@ -287,7 +287,7 @@ public:
 class TuntianGet: public TriggerSkill{
 public:
     TuntianGet():TriggerSkill("#tuntian-get"){
-        events << CardLostDone << FinishJudge;
+        events << CardLostOneTime << FinishJudge;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -295,11 +295,12 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-        if(event == CardLostDone){
-            CardsMoveStar move = data.value<CardsMoveStar>();
+        if(event == CardLostOneTime){
+            CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
 
-            if((move->from_place == Player::Hand || move->from_place == Player::Equip) &&
-                    player->getRoom()->getCurrent() != player
+            if((move->from_places.contains(Player::Hand) || move->from_places.contains(Player::Equip))
+                    && move->to != move->from
+                    && player->getRoom()->getCurrent() != player
                     && player->askForSkillInvoke("tuntian", data)){
 
                 Room *room = player->getRoom();
@@ -738,7 +739,7 @@ public:
         if(current->getPhase() == Player::Discard){
             QVariantList guzheng = erzhang->tag["Guzheng"].toList();
 
-            CardsMoveStar move = data.value<CardsMoveStar>();
+            CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
             foreach (int card_id, move->card_ids){
                 if(!room->getTag("QiaobianCost").isNull() && card_id == room->getTag("QiaobianCost").toInt())
                     continue;

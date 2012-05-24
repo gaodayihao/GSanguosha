@@ -595,7 +595,7 @@ public:
 
                 DyingStruct dying = room->getTag("JiefanTarget").value<DyingStruct>();
 
-                if (!dying.savers.contains(handang) || dying.who->getHp() > 0)
+                if (!dying.savers.contains(handang) || dying.who->getHp() > 0 || dying.who->isDead())
                     return true;
 
                 ServerPlayer *target = dying.who;

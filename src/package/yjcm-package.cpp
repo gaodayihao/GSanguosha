@@ -327,22 +327,12 @@ public:
         Room *room = player->getRoom();
 
         if(event == CardGotOneTime){
-            MoveNCardsStruct moveNcards = player->tag["MoveNCards"].value<MoveNCardsStruct>();
-            if(moveNcards.from && moveNcards.count >= 2 && !player->hasFlag("moveNcards")
-                    && room->askForSkillInvoke(player,objectName(),data))
-            {
-                room->setPlayerFlag(player, "moveNcards");
-                room->drawCards(moveNcards.from,1);
-                room->playSkillEffect(objectName(), qrand() % 2 + 1);
-                return false;
-            }
-            CardsMoveStar move = data.value<CardsMoveStar>();
-            if (move->from != NULL && move->card_ids.size() >= 2 && !player->hasFlag("moveNcards")
+            CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
+            if (move->from != NULL && move->card_ids.size() >= 2
                     && room->askForSkillInvoke(player,objectName(),data)){
                 room->drawCards((ServerPlayer*)move->from,1);
                 room->playSkillEffect(objectName(), qrand() % 2 + 1);
             }
-            room->setPlayerFlag(player, "-moveNcards");
         }else if(event == Damaged){
             DamageStruct damage = data.value<DamageStruct>();
             ServerPlayer *source = damage.from;
@@ -406,14 +396,30 @@ void XuanhuoCard::onEffect(const CardEffectStruct &effect) const{
         }
         else
         {
-            if (!effect.to->isNude())
-                room->selectSomeCardToMove(effect.to, effect.from, effect.from, qMin(effect.to->getCardCount(true),2), "he", "xuanhuo");
+            if (!effect.to->isNude()){
+                int first_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanhuo");
+                DummyCard *dummy = new DummyCard;
+                dummy->addSubcard(first_id);
+                effect.to->addToPile("#xuanhuo", dummy, true);
+                int second_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanhuo");
+                dummy->addSubcard(second_id);
+                room->moveCardTo(dummy, effect.from, Player::Hand, false);
+                delete dummy;
+            }
         }
     }
     else
     {
-        if (!effect.to->isNude())
-            room->selectSomeCardToMove(effect.to, effect.from, effect.from, qMin(effect.to->getCardCount(true),2), "he", "xuanhuo");
+        if (!effect.to->isNude()){
+            int first_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanhuo");
+            DummyCard *dummy = new DummyCard;
+            dummy->addSubcard(first_id);
+            effect.to->addToPile("#xuanhuo", dummy, true);
+            int second_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanhuo");
+            dummy->addSubcard(second_id);
+            room->moveCardTo(dummy, effect.from, Player::Hand, false);
+            delete dummy;
+        }
     }
 }
 
@@ -514,8 +520,8 @@ public:
         }
         else if(event == CardLostOneTime)
         {
-            CardsMoveStar move = data.value<CardsMoveStar>();
-            if(move->from_place == Player::Equip ||
+            CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
+            if(move->from_places.contains(Player::Equip) ||
                     lingtong->tag.value("InvokeXuanfeng", false).toBool())
             {
                 lingtong->tag.remove("InvokeXuanfeng");

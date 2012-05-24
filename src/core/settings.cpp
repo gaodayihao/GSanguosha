@@ -122,7 +122,7 @@ void Settings::init(){
     BGMVolume = value("BGMVolume", 1.0f).toFloat();
     EffectVolume = value("EffectVolume", 1.0f).toFloat();
 
-    BackgroundBrush = value("BackgroundBrush", "backdrop/new-version.jpg").toString();
+    BackgroundImage = value("BackgroundImage", "backdrop/new-version.jpg").toString();
 
     TextColor = value("TextColor","white").toString();
     TextB = value("TextB","0").toString();

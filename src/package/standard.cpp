@@ -106,7 +106,7 @@ void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
         log.card_str = QString::number(getEffectiveId());
         room->sendLog(log);
 
-        room->moveCards(exchangeMove, true);
+        room->moveCardsAtomic(exchangeMove, true);
     }
 }
 

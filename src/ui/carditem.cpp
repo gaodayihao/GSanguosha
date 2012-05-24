@@ -34,7 +34,6 @@ CardItem::CardItem(const Card *card)
 
     avatar = NULL;
 
-    setCacheMode(QGraphicsItem::ItemCoordinateCache);
     owner_pixmap = NULL;
 
     m_opacityAtHome = 1.0;
@@ -328,7 +327,7 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     if (!isEnabled())
     {
         painter->fillRect(this->boundingRect(), QColor(100, 100, 100, 255 * opacity()));
-        painter->setOpacity(0.7);
+        painter->setOpacity(0.7 * opacity());
     }
 
     if(m_isHeroCard)

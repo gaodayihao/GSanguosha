@@ -148,16 +148,8 @@ public:
             else
                 to_goback = (DummyCard*)room->askForExchange(diaochan, "lihun", target->getHp(), true, "LihunGoBack");
 
-            MoveNCardsStruct moveNcards;
-            moveNcards.from = diaochan;
-            moveNcards.to = target;
-            moveNcards.count = to_goback->getSubcards().length();
-
-            target->tag["MoveNCards"] = QVariant::fromValue(moveNcards);
-            room->moveCardTo(to_goback,target, Player::Hand);
-            target->tag.remove("MoveNCards");
+            room->moveCardTo(to_goback, target, Player::Hand);
             delete to_goback;
-
         }
 
         return false;

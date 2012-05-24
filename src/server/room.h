@@ -244,12 +244,11 @@ public:
 
     void moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place dstPlace,
                     bool forceMoveVisible = false, bool ignoreChanged = true);
+    void moveCardsAtomic(QList<CardsMoveStruct> cards_move, bool forceMoveVisible);
     void moveCards(CardsMoveStruct cards_move, bool forceMoveVisible, bool ignoreChanged = true);
     void moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible, bool ignoreChanged = true);
     void _moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible, bool ignoreChanged);
-
-    void selectSomeCardToMove(ServerPlayer *from,ServerPlayer *to, ServerPlayer *selector, int count, const QString &flags,
-                              const QString &reason);
+    QList<CardsMoveStruct> _breakDownCardMoves(QList<CardsMoveStruct> &cards_moves);
 
     // interactive methods
     void activate(ServerPlayer *player, CardUseStruct &card_use);
@@ -320,8 +319,8 @@ private:
         QString m_from_player_name;
     };
     int _m_lastMovementId;
-    void _fillMoveInfo(CardMoveStruct &move);
-    void _fillMoveInfo(CardsMoveStruct &moves, int card_index);
+    void _fillMoveInfo(CardMoveStruct &move) const;
+    void _fillMoveInfo(CardsMoveStruct &moves, int card_index) const;
     QString _chooseDefaultGeneral(ServerPlayer* player) const;
     bool _setPlayerGeneral(ServerPlayer* player, const QString& generalName, bool isFirst);
     QString mode;

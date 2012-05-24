@@ -37,7 +37,6 @@ public:
         setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
     }
 
-protected:
     virtual void resizeEvent(QResizeEvent *event) {
         QGraphicsView::resizeEvent(event);
         if(Config.FitInView)
@@ -148,11 +147,13 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::gotoScene(QGraphicsScene *scene){
-    view->setScene(scene);
+
     if(this->scene)
         this->scene->deleteLater();
     this->scene = scene;
-
+    view->setScene(scene);
+    QResizeEvent e(view->size(), view->size());
+    view->resizeEvent(&e);
     changeBackground();
 }
 
@@ -507,7 +508,7 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::setBackgroundBrush(){
     if(scene){
-        QPixmap pixmap(Config.BackgroundBrush);
+        QPixmap pixmap(Config.BackgroundImage);
         QBrush brush(pixmap);
 
         if(pixmap.width() > 100 && pixmap.height() > 100){

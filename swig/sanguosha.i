@@ -505,8 +505,6 @@ enum TriggerEvent{
     CardLostOneTime,
     CardGotOnePiece,
     CardGotOneTime,
-    CardLostDone,
-    CardGotDone,
     CardDrawing,
     CardDrawnDone,
 

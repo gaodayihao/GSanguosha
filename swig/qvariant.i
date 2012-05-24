@@ -112,11 +112,11 @@ public:
 		$self->setValue(QVariant::fromValue(*phase));
 	}
 	
-	const CardsMoveStruct *toCardsMove() const{
-		return $self->value<CardsMoveStar>();
+	const CardsMoveOneTimeStruct *toCardsMoveOneTime() const{
+		return $self->value<CardsMoveOneTimeStar>();
 	}
 	
-	void setValue(const CardsMoveStruct *move){
+	void setValue(const CardsMoveOneTimeStruct *move){
 		$self->setValue(move);
 	}
 };

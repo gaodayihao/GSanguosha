@@ -457,6 +457,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     main_window->statusBar()->setObjectName("skill_bar_container");
     //main_window->statusBar()->setLayout(skill_dock_layout);
     addWidgetToSkillDock(sort_combobox, true);
+    main_window->statusBar()->show();
 
     createStateItem();
 
@@ -1233,8 +1234,10 @@ void RoomScene::loseCards(int moveId, QList<CardsMoveStruct> card_moves)
         QList<CardItem*> cards = from_container->removeCardItems(movement.card_ids, movement.from_place);
         foreach (CardItem* card, cards)
         {
-            // card->setPos(card->mapToScene(0, 0));
-            card->setParent(this);
+            card->setHomePos(from_container->mapToScene(card->homePos()));
+            card->setPos(from_container->mapToScene(card->pos()));
+            card->goBack(true);
+            card->setParent(NULL);
         }
         _m_cardsMoveStash[moveId].append(cards);
         if (movement.from != NULL && movement.from_place != Player::Judging && movement.to_place == Player::DiscardPile)
