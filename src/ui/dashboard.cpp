@@ -15,7 +15,7 @@
 
 using namespace QSanProtocol;
 
-const QRect Dashboard::S_EQUIP_CARD_MOVE_REGION(0, -10,
+const QRect Dashboard::S_EQUIP_CARD_MOVE_REGION(0, 0,
     CardItem::S_NORMAL_CARD_WIDTH * 1.5, CardItem::S_NORMAL_CARD_HEIGHT);
 const QRect Dashboard::S_JUDGE_CARD_MOVE_REGION(0, -20,
     CardItem::S_NORMAL_CARD_WIDTH * 1.5, CardItem::S_NORMAL_CARD_HEIGHT);
@@ -45,7 +45,7 @@ Dashboard::Dashboard(QGraphicsItem *button_widget)
 
     QPointF specialCenter = mapFromItem(avatar, avatar->boundingRect().width() / 2, 0);
     m_cardSpecialRegion = QRectF(specialCenter.x() - CardItem::S_NORMAL_CARD_WIDTH * 1.5,
-                                 specialCenter.y() - CardItem::S_NORMAL_CARD_HEIGHT,
+                                 specialCenter.y(),
                                  CardItem::S_NORMAL_CARD_WIDTH * 3,
                                  CardItem::S_NORMAL_CARD_HEIGHT);
     _addProgressBar();
