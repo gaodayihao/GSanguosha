@@ -111,7 +111,7 @@ void Dashboard::createRight(){
 //    back_icon->setPos(43, 47);
     back_icon->setPos(small_avatar->pos());
     back_icon->moveBy(1, 1);
-    back_icon->setZValue(1.0);
+    back_icon->setZValue(10001);
     back_icon->hide();
 
     if(button_widget){
@@ -132,7 +132,7 @@ void Dashboard::createRight(){
     chain_icon->setPos(small_avatar->pos());
     chain_icon->moveBy(-33 ,49);
     chain_icon->hide();
-    chain_icon->setZValue(1.0);
+    chain_icon->setZValue(10086);
 
     QGraphicsPixmapItem *handcard_pixmap = new QGraphicsPixmapItem(right);
     handcard_pixmap->setPixmap(QPixmap("image/system/handcard.png"));
@@ -153,6 +153,7 @@ void Dashboard::createRight(){
     else
         mark_item->setPos(-119 - 5, 6);
     mark_item->setDefaultTextColor(Qt::white);
+    mark_item->setZValue(10086);
 
     action_item = NULL;
 }

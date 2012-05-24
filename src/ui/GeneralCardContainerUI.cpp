@@ -39,8 +39,8 @@ void PlayerCardContainer::_disperseCards(QList<CardItem*> &cards, QRectF fillReg
 {
     int numCards = cards.size();
     if (numCards == 0) return;
-    if (!keepOrder)
-        qSort(cards.begin(), cards.end(), PlayerCardContainer::_horizontalPosLessThan);
+    //if (!keepOrder)
+    //    qSort(cards.begin(), cards.end(), PlayerCardContainer::_horizontalPosLessThan);
     double maxWidth = fillRegion.width();
     double step = qMin(cards.first()->boundingRect().width(), maxWidth / numCards);
     align &= Qt::AlignHorizontal_Mask;

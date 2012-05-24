@@ -48,11 +48,11 @@ Photo::Photo():player(NULL),
     progress_bar->setAutoHide(true);
     progress_bar->hide();
     progress_bar->setMaximumHeight(13);
-    progress_bar->setMaximumWidth(pixmap.width());
+    progress_bar->setMaximumWidth(S_NORMAL_PHOTO_WIDTH);
 
     QGraphicsProxyWidget *widget = new QGraphicsProxyWidget(this);
     widget->setWidget(progress_bar);
-    widget->setPos( -6 , pixmap.height()+2);
+    widget->setPos(0, S_SHADOW_INCLUSIVE_PHOTO_HEIGHT + 3);
 
     skill_name_item = new QGraphicsSimpleTextItem(this);
     skill_name_item->setBrush(Qt::white);
@@ -61,7 +61,7 @@ Photo::Photo():player(NULL),
 
     QGraphicsDropShadowEffect * drp = new QGraphicsDropShadowEffect;
     drp->setBlurRadius(10);
-    drp->setColor(Qt::yellow);
+    drp->setColor(QColor(20, 48, 60));
     drp->setOffset(0);
     skill_name_item->setGraphicsEffect(drp);
 
@@ -398,6 +398,7 @@ void Photo::installEquip(CardItem *equip){
 void Photo::installDelayedTrick(CardItem *trick){
     QGraphicsPixmapItem *item = new QGraphicsPixmapItem(this);
     item->setPixmap(QPixmap(player->topDelayedTrick()->getIconPath()));
+    item->setZValue(10002);
     QString tooltip;
     if(player->topDelayedTrick()->isVirtualCard())
         tooltip=Sanguosha->getCard((player->topDelayedTrick()->getSubcards()).at(0))->getDescription();
@@ -649,37 +650,16 @@ void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
         if(!_m_kindomColorMaskIcon.isNull())
             painter->drawPixmap(avatarRect, _m_kindomColorMaskIcon);
     }
-    if (player != NULL && player->isAlive())
-    {
-        if (!player->faceUp())
-        {
-            qreal oldOpacity = painter->opacity();
-            painter->setOpacity(0.7);
-            painter->drawPixmap(avatarRect, back_icon);
-            painter->setOpacity(oldOpacity);
-        }
-        if (player->isChained())
-            painter->drawPixmap(-8, avatarRect.top() + 5, chain_icon);
-    }
+
     painter->drawPixmap(QRect(0, 0, S_SHADOW_INCLUSIVE_PHOTO_WIDTH, S_SHADOW_INCLUSIVE_PHOTO_HEIGHT), _m_mainFrame);
     if (!hide_avatar)
     {
-        painter->drawPixmap(QRect(10, 3, 22, 22), _m_kingdomIcon);
+        painter->drawPixmap(QRect(-2, -2, 36, 36), _m_kingdomIcon);
     }
 
     if (player == NULL) return;
     painter->drawText(QRect(28, 12, 72, 14), player->screenName(), QTextOption(Qt::AlignHCenter));
     drawHp(painter);
-    int n = player->getHandcardNum();
-    if (n > 0) {
-        painter->drawPixmap(QRect(6, 68, 18, 18), _m_handCardIcon);
-        QFont hpFont("Arial");
-        hpFont.setBold(true);
-        painter->setFont(hpFont);
-        painter->drawText(QRect(6, 68, 18, 18), QString::number(n), QTextOption(Qt::AlignCenter));
-        hpFont.setBold(false);
-        painter->setFont(hpFont);
-    }
 
     if(player->isDead()){
         int death_x = 5;
@@ -697,15 +677,7 @@ void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
         painter->drawPixmap(death_x, 50, death_pixmap);
     }
 
-    QString state_str = player->getState();
-    if(!state_str.isEmpty() && state_str != "online"){
-        QRectF stateArea(0, avatarRect.top(), 24, 15);
-        stateArea.moveRight(avatarRect.right());
-        painter->fillRect(stateArea, Qt::gray);
-        painter->drawText(stateArea, Sanguosha->translate(state_str));
-    }
-
-    if(player->getPhase() != Player::NotActive){
+    if(player != NULL && player->getPhase() != Player::NotActive){
         int index = static_cast<int>(player->getPhase());
         if(index > 0){
             phases.at(index - 1)->hide();
@@ -718,6 +690,37 @@ void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
         foreach(Pixmap *phase, phases){
             phase->hide();
         }
+    }
+
+    if (player != NULL && player->isAlive())
+    {
+        if (!player->faceUp())
+        {
+            painter->drawPixmap(avatarRect, back_icon);
+        }
+        if (player->isChained())
+            painter->drawPixmap(-8, avatarRect.top() + 5, chain_icon);
+    }
+
+    int n = player->getHandcardNum();
+    painter->drawPixmap(QRect(0, 72, 18, 19), _m_handCardIcon);
+    QFont hpFont("Arial");
+    hpFont.setBold(true);
+    painter->setFont(hpFont);
+    QPen pen(Qt::black);
+    painter->setPen(pen);
+    painter->drawText(QRect(0, 73, 18, 18), QString::number(n), QTextOption(Qt::AlignCenter));
+    hpFont.setBold(false);
+    painter->setFont(hpFont);
+    pen.setColor(Qt::white);
+    painter->setPen(pen);
+
+    QString state_str = player->getState();
+    if(!state_str.isEmpty() && state_str != "online"){
+        QRectF stateArea(0, avatarRect.top(), 24, 15);
+        stateArea.moveRight(avatarRect.right());
+        painter->fillRect(stateArea, Qt::gray);
+        painter->drawText(stateArea, Sanguosha->translate(state_str));
     }
 
     drawEquip(painter, weapon, 0);

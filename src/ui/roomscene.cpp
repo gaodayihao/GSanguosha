@@ -69,7 +69,7 @@ struct RoomLayout {
 struct CircularRoomLayout : public RoomLayout{
     CircularRoomLayout(){
         m_scenePadding = 0;
-        m_roleBoxHeight = 60;
+        m_roleBoxHeight = 75;
         m_chatTextBoxHeight = 30;
         m_logBoxHeightPercentage = 0.6;
         m_chatBoxHeightPercentage = 0.4;
@@ -2127,7 +2127,6 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
     case Client::Playing:{
             dashboard->enableCards();
 
-            bringToFront(dashboard);
             ok_button->setEnabled(false);
             cancel_button->setEnabled(false);
             discard_button->setEnabled(true);
@@ -3604,6 +3603,7 @@ void RoomScene::doAppearingAnimation(const QString &name, const QStringList &arg
         return;
     }
     Pixmap *item = new Pixmap(QString("image/system/animation/%1.png").arg(name));
+    item->setZValue(10058);
     addItem(item);
 
     QPointF from = getAnimationObject(args.at(0))->scenePos();
@@ -3626,13 +3626,13 @@ void RoomScene::doLightboxAnimation(const QString &, const QStringList &args){
 
     lightbox->setBrush(QColor(0x20, 0x20, 0x20));
     lightbox->setOpacity(0.8);
-    lightbox->moveBy(-main_window->width()/2, -main_window->height()/2);
+//    lightbox->moveBy(-main_window->width()/2, -main_window->height()/2);
     lightbox->setZValue(10086);
 
     QGraphicsTextItem *line = addText(word, Config.BigFont);
     line->setDefaultTextColor(Qt::white);
     QRectF line_rect = line->boundingRect();
-    line->setPos(-line_rect.width()/2, -line_rect.height());
+    line->setPos(line_rect.width()/2, line_rect.height()*2);
 
     line->setParentItem(lightbox);
     line->setPos(lightbox->mapFromScene(line->x(), line->y()));

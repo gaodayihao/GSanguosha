@@ -612,13 +612,12 @@ void Client::arrangeSeats(const QString &seats_str){
     QStringList player_names = seats_str.split("+");
     players.clear();
 
-    int i;
-    for(i=0; i<player_names.length(); i++){
+    for (int i = 0; i < player_names.length(); i++){
         ClientPlayer *player = findChild<ClientPlayer*>(player_names.at(i));
 
         Q_ASSERT(player != NULL);
 
-        player->setSeat(i+1);
+        player->setSeat(i + 1);
         players << player;
     }
 
@@ -627,12 +626,12 @@ void Client::arrangeSeats(const QString &seats_str){
 
     Q_ASSERT(self_index != -1);
 
-    for(i=self_index+1; i<players.length(); i++)
-        seats.prepend(players.at(i));
-    for(i=0; i<self_index; i++)
-        seats.prepend(players.at(i));
+    for (int i = self_index+1; i < players.length(); i++)
+        seats.append(players.at(i));
+    for(int i = 0; i < self_index; i++)
+        seats.append(players.at(i));
 
-    Q_ASSERT(seats.length() == players.length()-1);
+    Q_ASSERT(seats.length() == players.length() - 1);
 
     emit seats_arranged(seats);
 }
