@@ -1234,10 +1234,8 @@ void RoomScene::loseCards(int moveId, QList<CardsMoveStruct> card_moves)
         QList<CardItem*> cards = from_container->removeCardItems(movement.card_ids, movement.from_place);
         foreach (CardItem* card, cards)
         {
-            card->setHomePos(from_container->mapToScene(card->homePos()));
-            card->setPos(from_container->mapToScene(card->pos()));
-            card->goBack(true);
-            card->setParent(NULL);
+            // card->setPos(card->mapToScene(0, 0));
+            card->setParent(this);
         }
         _m_cardsMoveStash[moveId].append(cards);
         if (movement.from != NULL && movement.from_place != Player::Judging && movement.to_place == Player::DiscardPile)
