@@ -9,7 +9,7 @@
 
 CardContainer::CardContainer()
 {
-    Pixmap::load("image/system/card-container.png", false);
+    Pixmap::load("image/system/card-container.png", true);
     setFlag(ItemIsFocusable);
     setFlag(ItemIsMovable);
     close_button = new CloseButton;
@@ -218,7 +218,7 @@ void CardContainer::view(const ClientPlayer *player){
 }
 
 GuanxingBox::GuanxingBox()
-    :Pixmap("image/system/guanxing-box.png", false)
+    :Pixmap("image/system/guanxing-box.png", true)
 {
     setFlag(ItemIsFocusable);
     setFlag(ItemIsMovable);

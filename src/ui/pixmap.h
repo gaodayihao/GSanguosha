@@ -8,13 +8,12 @@ class Pixmap : public QGraphicsObject{
     Q_OBJECT
 
 public:
-    Pixmap(const QString &filename, bool center_as_origin = true);
-    Pixmap();
+    Pixmap(const QString &filename, bool center_as_origin = false);
+    Pixmap(bool center_as_origin = false);
     virtual QRectF boundingRect() const;
-    void load(const QString &filename, bool center_as_origin = true);
-    bool changePixmap(const QString &name);
+    bool load(const QString &filename, bool center_as_origin = false);
+    bool load(const QString &filename, QSize newSize, bool center_as_origin = false);
     void setPixmap(const QPixmap &pixmap);
-    void shift();
     void makeGray();
     void scaleSmoothly(qreal ratio);
 
@@ -28,10 +27,11 @@ public:
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
+    int _m_width, _m_height;
     QPixmap pixmap;
 
 private:
+    bool _load(const QString &filename, QSize newSize, bool useNewSize, bool center_as_origin);
     bool markable, marked;
 
 signals:

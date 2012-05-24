@@ -49,7 +49,11 @@ public:
     };
 
     void setFrame(FrameType type);
-
+    virtual QRectF boundingRect() const;
+    static const int S_NORMAL_PHOTO_WIDTH = 130;
+    static const int S_NORMAL_PHOTO_HEIGHT = 150;
+    static const int S_SHADOW_INCLUSIVE_PHOTO_WIDTH = 135;
+    static const int S_SHADOW_INCLUSIVE_PHOTO_HEIGHT = 157;
 public slots:
     void updateAvatar();    
     void updateSmallAvatar();
@@ -61,7 +65,6 @@ public slots:
     void hideSkillName();
     void setDrankState();
     void setActionState();
-    void updateRoleComboboxPos();
     void killPlayer();
 
 protected:
@@ -74,9 +77,11 @@ protected:
 private:
     const ClientPlayer *player;
     QPixmap avatar, small_avatar;
-    QGraphicsPixmapItem *kingdom_item, *ready_item, *lord_frame;
-    QPixmap kingdom_frame;
-    QPixmap handcard;
+    QGraphicsPixmapItem *ready_item, *lord_frame;
+    QPixmap _m_mainFrame;
+    QPixmap _m_handCardIcon;
+    QPixmap _m_kingdomIcon;
+    QPixmap _m_kindomColorMaskIcon;
     Pixmap chain;
     RoleCombobox *role_combobox;
     QGraphicsProxyWidget  *pile_button;
@@ -98,7 +103,7 @@ private:
     QGraphicsPixmapItem *order_item;
     bool hide_avatar;
     QPixmap death_pixmap;
-    Pixmap *back_icon;
+    QPixmap back_icon, chain_icon;
     QList<Pixmap *> phases;
     QSanCommandProgressBar *progress_bar;
     QGraphicsPixmapItem *emotion_item, *frame_item;

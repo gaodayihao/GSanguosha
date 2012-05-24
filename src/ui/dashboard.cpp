@@ -21,7 +21,7 @@ const QRect Dashboard::S_JUDGE_CARD_MOVE_REGION(0, -20,
     CardItem::S_NORMAL_CARD_WIDTH * 1.5, CardItem::S_NORMAL_CARD_HEIGHT);
 
 Dashboard::Dashboard(QGraphicsItem *button_widget)
-    :left_pixmap("image/system/dashboard-equip.png"), right_pixmap("image/system/dashboard-avatar.png"),
+    :PlayerCardContainer(false), left_pixmap("image/system/dashboard-equip.png"), right_pixmap("image/system/dashboard-avatar.png"),
     button_widget(button_widget), selected(NULL), avatar(NULL),
     weapon(NULL), armor(NULL), defensive_horse(NULL), offensive_horse(NULL),
     view_as_skill(NULL), filter(NULL)
@@ -56,9 +56,8 @@ void Dashboard::createLeft(){
 
     equips << &weapon << &armor << &defensive_horse << &offensive_horse;
 
-    int i;
-    for(i=0; i<4; i++){
-        QRectF rect(8, 40 + 32 *i, 117, 25);
+    for(int i = 0; i < 4; i++){
+        QRectF rect(8, 40 + 32 * i, 117, 25);
         equip_rects[i] = new QGraphicsRectItem(rect, left);
         equip_rects[i]->setPen(Qt::NoPen);
     }
@@ -142,7 +141,7 @@ void Dashboard::createRight(){
     handcard_num = new QGraphicsSimpleTextItem(handcard_pixmap);
     handcard_num->setPos(6,8);
 
-     QFont serifFont("Times", 10, QFont::Bold);
+    QFont serifFont("Times", 10, QFont::Bold);
     handcard_num->setFont(serifFont);
     handcard_num->setBrush(Qt::white);
 
@@ -191,9 +190,9 @@ void Dashboard::setTrust(bool trust){
 bool Dashboard::_addCardItems(QList<CardItem*> &card_items, Player::Place place)
 {
     if (place == Player::Equip)
-        _disperseCards(card_items, S_EQUIP_CARD_MOVE_REGION, Qt::AlignCenter, true);
+        _disperseCards(card_items, S_EQUIP_CARD_MOVE_REGION, Qt::AlignCenter, true, false);
     else if (place == Player::Judging)
-        _disperseCards(card_items, S_JUDGE_CARD_MOVE_REGION, Qt::AlignCenter, true);
+        _disperseCards(card_items, S_JUDGE_CARD_MOVE_REGION, Qt::AlignCenter, true, false);
     else if (place == Player::PlaceTakeoff)
     {
         m_takenOffCards.append(card_items);
@@ -201,7 +200,7 @@ bool Dashboard::_addCardItems(QList<CardItem*> &card_items, Player::Place place)
         {
             card->setHomeOpacity(1.0);
         }
-        _disperseCards(card_items, m_cardTakeOffRegion, Qt::AlignCenter, true);
+        _disperseCards(card_items, m_cardTakeOffRegion, Qt::AlignCenter, true, false);
         return false;
     }
     else if (place == Player::Special)
@@ -210,7 +209,7 @@ bool Dashboard::_addCardItems(QList<CardItem*> &card_items, Player::Place place)
         {
             card->setHomeOpacity(0.0);
         }
-        _disperseCards(card_items, m_cardSpecialRegion, Qt::AlignCenter, true);
+        _disperseCards(card_items, m_cardSpecialRegion, Qt::AlignCenter, true, false);
         return true;
     }
 
@@ -264,7 +263,7 @@ void Dashboard::setPlayer(const ClientPlayer *player){
 void Dashboard::updateAvatar(){
     const General *general = Self->getAvatarGeneral();
     avatar->setToolTip(general->getSkillDescription());
-    if(!avatar->changePixmap(general->getPixmapPath("big"))){
+    if(!avatar->load(general->getPixmapPath("big"))){
         QPixmap pixmap(General::BigIconSize);
         pixmap.fill(Qt::black);
 
@@ -292,7 +291,7 @@ void Dashboard::updateSmallAvatar(){
     const General *general2 = Self->getGeneral2();
     if(general2){
         small_avatar->setToolTip(general2->getSkillDescription());
-        bool success = small_avatar->changePixmap(general2->getPixmapPath("tiny"));
+        bool success = small_avatar->load(general2->getPixmapPath("tiny"));
 
         if(!success){
             QPixmap pixmap(General::TinyIconSize);
@@ -461,7 +460,6 @@ void Dashboard::setWidth(int width){
     prepareGeometryChange();
     adjustCards();
 
-    setX(-boundingRect().width()/2);
     m_cardTakeOffRegion = middle->boundingRect();
     m_cardTakeOffRegion.setY(middle->pos().y() - CardItem::S_NORMAL_CARD_HEIGHT * 1.5);
     m_cardTakeOffRegion.setHeight(CardItem::S_NORMAL_CARD_HEIGHT);
@@ -875,13 +873,13 @@ QList<CardItem*> Dashboard::removeCardItems(const QList<int> &card_ids, Player::
     if (place == Player::Hand)
         adjustCards();
     else if (place == Player::Equip)
-        _disperseCards(result, S_EQUIP_CARD_MOVE_REGION, Qt::AlignCenter, false);
+        _disperseCards(result, S_EQUIP_CARD_MOVE_REGION, Qt::AlignCenter, false, false);
     else if (place == Player::Judging)
-        _disperseCards(result, S_JUDGE_CARD_MOVE_REGION, Qt::AlignCenter, false);
+        _disperseCards(result, S_JUDGE_CARD_MOVE_REGION, Qt::AlignCenter, false, false);
     else if (place == Player::PlaceTakeoff)
-        _disperseCards(result, m_cardTakeOffRegion, Qt::AlignCenter, false);
+        _disperseCards(result, m_cardTakeOffRegion, Qt::AlignCenter, false, false);
     else if (place == Player::Special)
-        _disperseCards(result, m_cardSpecialRegion, Qt::AlignCenter, false);
+        _disperseCards(result, m_cardSpecialRegion, Qt::AlignCenter, false, false);
     update();
     return result;
 }

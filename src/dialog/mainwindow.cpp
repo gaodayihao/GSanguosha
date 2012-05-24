@@ -28,6 +28,7 @@
 #include <QSystemTrayIcon>
 #include <QInputDialog>
 #include <QLabel>
+#include <QStatusBar>
 
 class FitView : public QGraphicsView
 {
@@ -37,22 +38,22 @@ public:
         setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
     }
 
-protected:
     virtual void resizeEvent(QResizeEvent *event) {
         QGraphicsView::resizeEvent(event);
-        if(Config.FitInView)
-            fitInView(sceneRect(), Qt::KeepAspectRatio);
-
-        if(matrix().m11()>1)setMatrix(QMatrix());
-
+        MainWindow *main_window = qobject_cast<MainWindow *>(parentWidget());
         if(scene()->inherits("RoomScene")){
             RoomScene *room_scene = qobject_cast<RoomScene *>(scene());
-            room_scene->adjustItems(matrix());
+            QRectF newSceneRect(0, 0, event->size().width(), event->size().height());
+            room_scene->setSceneRect(newSceneRect);
+            room_scene->adjustItems();
+            setSceneRect(room_scene->sceneRect());
+            if(Config.FitInView)
+                fitInView(room_scene->sceneRect(), Qt::KeepAspectRatio);
+            main_window->setBackgroundBrush(false);
+            return;
         }
-
-        MainWindow *main_window = qobject_cast<MainWindow *>(parentWidget());
         if(main_window)
-            main_window->setBackgroundBrush();
+            main_window->setBackgroundBrush(true);
     }
 };
 
@@ -103,7 +104,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     foreach(QAction *action, actions)
         start_scene->addButton(action);
-
     view = new FitView(scene);
 
     setCentralWidget(view);
@@ -148,10 +148,13 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::gotoScene(QGraphicsScene *scene){
-    view->setScene(scene);
+
     if(this->scene)
         this->scene->deleteLater();
     this->scene = scene;
+    view->setScene(scene);
+    QResizeEvent e(view->size(), view->size());
+    view->resizeEvent(&e);
     changeBackground();
 }
 
@@ -350,7 +353,6 @@ void MainWindow::enterRoom(){
     connect(ui->actionKick, SIGNAL(triggered()), room_scene, SLOT(kick()));
     connect(ui->actionSurrender, SIGNAL(triggered()), room_scene, SLOT(surrender()));
     connect(ui->actionSaveRecord, SIGNAL(triggered()), room_scene, SLOT(saveReplayRecord()));
-    connect(ui->actionExpand_dashboard, SIGNAL(triggered()), room_scene, SLOT(adjustDashboard()));
 
     if(ServerInfo.FreeChoose){
         ui->menuCheat->setEnabled(true);
@@ -380,7 +382,6 @@ void MainWindow::enterRoom(){
     BackLoader *loader = new BackLoader(this);
     loader->start();
 
-    room_scene->adjustItems();
     gotoScene(room_scene);
 }
 
@@ -504,38 +505,28 @@ void MainWindow::on_actionAbout_triggered()
     window->appear();
 }
 
-void MainWindow::setBackgroundBrush(){
+void MainWindow::setBackgroundBrush(bool centerAsOrigin){
     if(scene){
         QPixmap pixmap(Config.BackgroundImage);
         QBrush brush(pixmap);
 
-        if(pixmap.width() > 100 && pixmap.height() > 100){
-            qreal _width = width()/view->matrix().m11();
-            qreal _height= height()/view->matrix().m22();
+        qreal sx = qMax((qreal)width(), scene->width()) / qreal(pixmap.width());
+        qreal sy = qMax((qreal)height(), scene->height()) / qreal(pixmap.height());
 
-            qreal dx = -_width/2.0;
-            qreal dy = -_height/2.0;
-            qreal sx = _width / qreal(pixmap.width());
-            qreal sy = _height / qreal(pixmap.height());
-
-
-            QTransform transform;
-            transform.translate(dx, dy);
-            transform.scale(sx, sy);
-            brush.setTransform(transform);
-        }
-
+        QTransform transform;
+        if (centerAsOrigin)
+            transform.translate(-qMax((qreal)width(), scene->width()) / 2,
+                                -qMax((qreal)height(), scene->height()) / 2);
+        transform.scale(sx, sy);
+        brush.setTransform(transform);
         scene->setBackgroundBrush(brush);
     }
 }
 
 void MainWindow::changeBackground(){
-    setBackgroundBrush();
+    setBackgroundBrush(false);
 
-    if(scene->inherits("RoomScene")){
-        RoomScene *room_scene = qobject_cast<RoomScene *>(scene);
-        room_scene->changeTextEditBackground();
-    }else if(scene->inherits("StartScene")){
+    if(scene->inherits("StartScene")){
         StartScene *start_scene = qobject_cast<StartScene *>(scene);
         start_scene->setServerLogBackground();
     }
@@ -790,7 +781,7 @@ QGroupBox *MeleeDialog::createGeneralBox(){
 class RoomItem: public Pixmap{
 public:
     RoomItem(Room *room){
-        changePixmap("image/system/frog/playing.png");
+        load("image/system/frog/playing.png");
 
         const qreal radius = 50;
         const qreal pi = 3.1415926;
@@ -882,11 +873,11 @@ void MeleeDialog::onGameOver(const QString &winner){
         if(p->getGeneralName() == to_test){
 
             if(won){
-                if(room_item) room_item->changePixmap("image/system/frog/good.png");
+                if(room_item) room_item->load("image/system/frog/good.png");
                 updateResultBox(p->getRole(),1);
             }
             else{
-                if(room_item) room_item->changePixmap("image/system/frog/bad.png");
+                if(room_item) room_item->load("image/system/frog/bad.png");
                 updateResultBox(p->getRole(),0);
             }
         }
