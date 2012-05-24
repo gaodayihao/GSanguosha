@@ -57,7 +57,7 @@ Photo::Photo():player(NULL),
     skill_name_item = new QGraphicsSimpleTextItem(this);
     skill_name_item->setBrush(Qt::white);
     skill_name_item->setFont(Config.SmallFont);
-    skill_name_item->moveBy(10, 30);
+    skill_name_item->moveBy(10, 37);
 
     QGraphicsDropShadowEffect * drp = new QGraphicsDropShadowEffect;
     drp->setBlurRadius(10);
@@ -85,11 +85,11 @@ Photo::Photo():player(NULL),
     }
 
     ready_item = new QGraphicsPixmapItem(QPixmap("image/system/ready.png"), this);
-    ready_item->setPos(86, 132);
+    ready_item->setPos(88, 99);
     ready_item->hide();
 
     lord_frame = new QGraphicsPixmapItem(QPixmap("image/system/lordframe.png"), this);
-    lord_frame->setPos(-7, -6);
+    lord_frame->setPos(-9, -6);
     lord_frame->setZValue(1.5);
     lord_frame->hide();
 
@@ -575,7 +575,7 @@ void Photo::updatePile(const QString &pile_name){
         button_widget = new QGraphicsProxyWidget(this);
         button_widget->setWidget(button);
         //button_widget->setPos(pos());
-        button_widget->moveBy(46, 68);
+        button_widget->moveBy(44, 57);
         button_widget->resize(80, 16);
         //scene()->addItem(button_widget);
 
@@ -626,14 +626,6 @@ void Photo::updatePile(const QString &pile_name){
         menu->addSeparator();
     }
     if(active>1)button->setText(QString(tr("Multiple")));
-
-    if(who->getMaxHp()>5)
-    {
-        button_widget->setPos(pos());
-        button_widget->moveBy(100, 68);
-        button_widget->resize(16,16);
-        button->setText(QString());
-    }
 }
 
 void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
@@ -717,7 +709,7 @@ void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
 
     QString state_str = player->getState();
     if(!state_str.isEmpty() && state_str != "online"){
-        QRectF stateArea(0, avatarRect.top(), 24, 15);
+        QRectF stateArea(0, avatarRect.top() + 1, 24, 15);
         stateArea.moveRight(avatarRect.right());
         painter->fillRect(stateArea, Qt::gray);
         painter->drawText(stateArea, Sanguosha->translate(state_str));
