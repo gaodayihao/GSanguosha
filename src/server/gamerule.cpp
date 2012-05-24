@@ -291,7 +291,8 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
     case AskForPeaches:{
             DyingStruct dying = data.value<DyingStruct>();
 
-            if(!dying.savers.contains(player))
+            if(!dying.savers.contains(player) &&
+                    room->getCurrent()->hasSkill("wansha") && room->getCurrent()->isAlive())
                 break;
 
             while(dying.who->getHp() <= 0){
@@ -830,7 +831,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
     case CardGotOnePiece:{
         CardMoveStar move = data.value<CardMoveStar>();
         const Card *card = Sanguosha->getCard(move->card_id);
-        if(card->inherits("HeroCard"))
+        if(card->inherits("HeroCard") && move->to_place != Player::Special)
             player->addToPile("heros", card);
 
         break;
