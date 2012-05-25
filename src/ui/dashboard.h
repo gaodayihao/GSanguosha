@@ -119,7 +119,7 @@ private:
     QList<CardItem *> judging_area;
     QList<QGraphicsItem *> delayed_tricks;
     QGraphicsPixmapItem *death_item;
-    Pixmap *chain_icon, *back_icon;
+    QGraphicsPixmapItem *chain_icon, *back_icon;
 
     QGraphicsRectItem *equip_rects[4];
     CardItem *weapon, *armor, *defensive_horse, *offensive_horse;

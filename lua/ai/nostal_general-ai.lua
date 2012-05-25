@@ -32,6 +32,8 @@ sgs.ai_chaofeng.noszhouyu = sgs.ai_chaofeng.zhouyu
 
 sgs.ai_skill_invoke.noslieren = sgs.ai_skill_invoke.lieren
 
+sgs.ai_skill_pindian.noslieren = sgs.ai_skill_pindian.lieren
+
 sgs.ai_skill_cardask["@enyuanheart"] = function(self)
 	local cards = self.player:getHandcards()
 	for _, card in sgs.qlist(cards) do

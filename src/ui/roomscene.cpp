@@ -108,8 +108,6 @@ RoomScene::RoomScene(QMainWindow *main_window)
 
     room_layout = GetRoomLayout();
 
-    bool circular = Config.value("CircularView", true).toBool();
-
     // create photos
     for(int i = 0; i < player_count - 1;i++){
         Photo *photo = new Photo;
@@ -3492,7 +3490,7 @@ void RoomScene::animateHpChange(const QString &, const QStringList &args)
 
         for(int i = 0;i < delta;i++)
         {
-            Pixmap *aniMaga = new Pixmap;
+            Pixmap *aniMaga = new Pixmap(true);
             QPixmap *qpixmap = MagatamaWidget::GetMagatama(index);
             aniMaga->setPixmap(*qpixmap);
             addItem(aniMaga);

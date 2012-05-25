@@ -7,6 +7,8 @@ sgs.ai_skill_invoke.hengmao = sgs.ai_skill_invoke.longpo
 
 sgs.ai_skill_invoke.fengfa = sgs.ai_skill_invoke.longpo
 
+sgs.ai_skill_invoke.weixue = sgs.ai_skill_invoke.longpo
+
 local longhunEx_skill={}
 longhunEx_skill.name="longhunEx"
 table.insert(sgs.ai_skills, longhunEx_skill)

@@ -106,11 +106,9 @@ void Dashboard::createRight(){
     small_avatar->setParentItem(right);
     small_avatar->setOpacity(0.75);
 
-    back_icon = new Pixmap("image/system/big-back.png");
-    back_icon->setParentItem(right);
-//    back_icon->setPos(43, 47);
+    back_icon = new QGraphicsPixmapItem(QPixmap("image/system/big-back.png"), avatar);
     back_icon->setPos(small_avatar->pos());
-    back_icon->moveBy(1, 1);
+    back_icon->moveBy(-5, -5);
     back_icon->setZValue(10001);
     back_icon->hide();
 
@@ -127,12 +125,10 @@ void Dashboard::createRight(){
     ready_item->setPos(2, 43);
     ready_item->hide();
 
-    chain_icon = new Pixmap("image/system/chainself.png");
-    chain_icon->setParentItem(right);
-    chain_icon->setPos(small_avatar->pos());
-    chain_icon->moveBy(-33 ,49);
-    chain_icon->hide();
+    chain_icon = new QGraphicsPixmapItem(QPixmap("image/system/chainself.png"), avatar);
+    chain_icon->setPos(-33 ,49);
     chain_icon->setZValue(10086);
+    chain_icon->hide();
 
     QGraphicsPixmapItem *handcard_pixmap = new QGraphicsPixmapItem(right);
     handcard_pixmap->setPixmap(QPixmap("image/system/handcard.png"));
