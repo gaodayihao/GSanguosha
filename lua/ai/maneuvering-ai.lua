@@ -23,7 +23,7 @@ sgs.ai_use_priority.Fan = 2.655
 sgs.ai_use_priority.Vine = 0.6
 
 sgs.ai_skill_invoke.fan = function(self, data)
-    local target = data:toSlashEffect().to
+    local target = data:toCardUse().to:first()
     if self:isFriend(target) then
       return target:isChained() and self:isGoodChainTarget(target)
     else
