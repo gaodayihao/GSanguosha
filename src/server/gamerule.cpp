@@ -389,17 +389,17 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
     case CardEffected:{
             if(data.canConvert<CardEffectStruct>()){
                 CardEffectStruct effect = data.value<CardEffectStruct>();
-                if(room->isCanceled(effect))
-                    if(effect.from && effect.from->hasSkill("tanhu") && effect.to->hasFlag("TanhuTarget"))
-                    {
-                        LogMessage log;
-                        log.type = "#NullificaiotnNullify";
-                        log.from = effect.from;
-                        log.arg = "tanhu";
-                        log.arg2 = "nullification";
-                    }
-
-                        return true;
+                bool canceled = room->isCanceled(effect);
+                if(canceled && effect.from && effect.from->hasSkill("tanhu") && effect.to->hasFlag("TanhuTarget"))
+                {
+                    LogMessage log;
+                    log.type = "#NullificaiotnNullify";
+                    log.from = effect.from;
+                    log.arg = "tanhu";
+                    log.arg2 = "nullification";
+                }
+                else if(canceled)
+                    return true;
 
                 effect.card->onEffect(effect);
             }
