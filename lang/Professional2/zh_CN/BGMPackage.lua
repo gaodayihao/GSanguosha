@@ -76,8 +76,8 @@ return {
 	["mouduan"] = "谋断",
 	[":mouduan"] = "<b>转化技</b>，通常状态下，你拥有标记“武”并拥有技能“激昂”和“谦逊”。当你的手牌数为2张或以下时，你须将你的标记翻面为“文”，将该两项技能转化为“英姿”和“克己”。任一角色的回合开始前，你可弃一张牌将标记翻回。",
 	["#NullificaiotnNullify"] = "%from 的 %arg 技能被触发，%arg2 被无效",
-	["#SkillConversion"] = "%from 的 %arg 转化为 %arg",
-	["#MarkTurnOver"] = "%from 将 %arg 标记翻面，现在是 %arg2",
+	["#SkillConversion"] = "%from 的 %arg 转化为 %arg2",
+	["#MarkTurnOver"] = "%from 将标记翻面，现在是 %arg",
 	["@wen"] = "文",
 	["@wu"] = "武",
 }

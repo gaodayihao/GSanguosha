@@ -625,8 +625,7 @@ public:
                 LogMessage log;
                 log.type = "#MarkTurnOver";
                 log.from = player;
-                log.arg = "@wu";
-                log.arg2 = "@wen";
+                log.arg = "@wen";
                 room->sendLog(log);
 
                 room->detachSkillFromPlayer(player, "jiang", false);
@@ -655,8 +654,7 @@ public:
                     LogMessage log;
                     log.type = "#MarkTurnOver";
                     log.from = lvmeng;
-                    log.arg = "@wen";
-                    log.arg2 = "@wu";
+                    log.arg = "@wu";
                     room->sendLog(log);
 
                     room->detachSkillFromPlayer(lvmeng, "yingzi", false);
