@@ -236,12 +236,9 @@ RoomScene::RoomScene(QMainWindow *main_window)
         guanxing_box = new GuanxingBox;
         guanxing_box->hide();
         addItem(guanxing_box);
-        guanxing_box->setZValue(10085);
+        guanxing_box->setZValue(9.0);
 
         connect(ClientInstance, SIGNAL(guanxing(QList<int>,bool)), guanxing_box, SLOT(doGuanxing(QList<int>,bool)));
-
-        if(circular)
-            guanxing_box->moveBy(-155, 0);
     }
 
     {
@@ -257,9 +254,6 @@ RoomScene::RoomScene(QMainWindow *main_window)
         connect(ClientInstance, SIGNAL(ag_filled(QList<int>)), this, SLOT(fillCards(QList<int>)));
         connect(ClientInstance, SIGNAL(ag_taken(ClientPlayer*,int)), this, SLOT(takeAmazingGrace(ClientPlayer*,int)));
         connect(ClientInstance, SIGNAL(ag_cleared()), card_container, SLOT(clear()));
-
-        if(circular)
-            card_container->moveBy(-155, 0);
     }
 
     connect(ClientInstance, SIGNAL(skill_attached(QString, bool)), this, SLOT(attachSkill(QString,bool)));
@@ -336,10 +330,8 @@ RoomScene::RoomScene(QMainWindow *main_window)
         prompt_box->setOpacity(0);
         prompt_box->setFlag(QGraphicsItem::ItemIsMovable);
         prompt_box->shift();
+        prompt_box->setZValue(10);
         prompt_box->keepWhenDisappear();
-        prompt_box->setZValue(10086);
-        if (Config.value("CircularView", true).toBool())
-            prompt_box->moveBy(-(log_box->width()+35)/2,0);
 
         prompt_box_widget = new QGraphicsTextItem(prompt_box);
         prompt_box_widget->setParent(prompt_box);
@@ -2065,6 +2057,12 @@ void RoomScene::doTimeout(){
     }
 }
 
+void RoomScene::showPromptBox()
+{
+    bringToFront(prompt_box);
+    prompt_box->appear();
+}
+
 void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus){
     switch(newStatus){
     case Client::NotActive:{
@@ -2104,7 +2102,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
         }
 
     case Client::Responsing: {
-            prompt_box->appear();
+            showPromptBox();
 
             ok_button->setEnabled(false);
             cancel_button->setEnabled(ClientInstance->m_isDiscardActionRefusable);
@@ -2135,7 +2133,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
         }
 
     case Client::Discarding:{
-            prompt_box->appear();
+            showPromptBox();
 
             ok_button->setEnabled(false);
             cancel_button->setEnabled(ClientInstance->m_isDiscardActionRefusable);
@@ -2171,7 +2169,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
                     }
                 }
             }
-            prompt_box->appear();
+            showPromptBox();
             ok_button->setEnabled(true);
             cancel_button->setEnabled(true);
             discard_button->setEnabled(false);
@@ -2179,7 +2177,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
         }
 
     case Client::AskForPlayerChoose:{
-            prompt_box->appear();
+            showPromptBox();
 
             ok_button->setEnabled(false);
             cancel_button->setEnabled(false);
@@ -2224,7 +2222,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
             yiji_skill->setCards(ClientInstance->getPattern());
             dashboard->startPending(yiji_skill);
 
-            prompt_box->appear();
+            showPromptBox();
 
             break;
         }
@@ -3837,7 +3835,7 @@ void RoomScene::fillGenerals3v3(const QStringList &names){
     QString path = QString("image/system/3v3/select-%1.png").arg(temperature);
     selector_box = new Pixmap(path, true);
     addItem(selector_box);
-    selector_box->setZValue(guanxing_box->zValue());
+    selector_box->setZValue(10000);
     selector_box->setPos(m_tableCenterPos);
 
     const static int start_x = 62;

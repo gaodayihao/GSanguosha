@@ -169,6 +169,7 @@ public slots:
     void toggleDiscards();
     void enableTargets(const Card *card);
     void useSelectedCard();
+    void showPromptBox();
     void updateStatus(Client::Status oldStatus, Client::Status newStatus);
     void killPlayer(const QString &who);
     void revivePlayer(const QString &who);
