@@ -513,11 +513,6 @@ bool ServerPlayer::hasNullification() const{
         }
     }
 
-    if(hasSkill("qice")){
-        if(!hasFlag("QiceUsed") && !isKongcheng() && getPhase() == Player::Play)
-            return true;
-    }
-
     foreach(const Skill* skill, getVisibleSkillList()){
         if(skill->inherits("LuaViewAsSkill")){
             const LuaViewAsSkill* luaskill = qobject_cast<const LuaViewAsSkill*>(skill);

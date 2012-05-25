@@ -596,8 +596,9 @@ public:
 
     virtual void onGameStart(ServerPlayer *lvmeng) const{
         Room *room = lvmeng->getRoom();
-        lvmeng->gainMark("@wu");
+        room->setPlayerMark(lvmeng, "@wu", 1);
         room->acquireSkill(lvmeng, "jiang", true);
+        room->getThread()->delay();
         room->acquireSkill(lvmeng, "qianxun", true);
     }
 };
