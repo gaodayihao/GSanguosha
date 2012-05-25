@@ -597,8 +597,8 @@ public:
     virtual void onGameStart(ServerPlayer *lvmeng) const{
         Room *room = lvmeng->getRoom();
         lvmeng->gainMark("@wu");
-        room->acquireSkill(lvmeng, "jiang", true, false);
-        room->acquireSkill(lvmeng, "qianxun", true, false);
+        room->acquireSkill(lvmeng, "jiang", true);
+        room->acquireSkill(lvmeng, "qianxun", true);
     }
 };
 
@@ -614,28 +614,64 @@ public:
 
     virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &) const{
         Room *room = player->getRoom();
-        ServerPlayer *lvmeng = room->findPlayerBySkillName(objectName());
+        QList<ServerPlayer *>lvmengs = room->findPlayersBySkillName(objectName());
 
         if(event == CardLostOneTime){
             if((player->getMark("@wu") > 0) && player->getHandcardNum() <= 2){
-                room->setPlayerMark(lvmeng, "@wu", 0);
-                room->setPlayerMark(lvmeng, "@wen", 1);
+
+                room->setPlayerMark(player, "@wu", 0);
+                room->setPlayerMark(player, "@wen", 1);
+
+                LogMessage log;
+                log.type = "#MarkTurnOver";
+                log.from = player;
+                log.arg = "@wu";
+                log.arg2 = "@wen";
+                room->sendLog(log);
+
                 room->detachSkillFromPlayer(player, "jiang", false);
                 room->detachSkillFromPlayer(player, "qianxun", false);
                 room->acquireSkill(player, "yingzi", true, false);
                 room->acquireSkill(player, "keji", true, false);
+
+                log.type = "#SkillConversion";
+                log.arg = "jiang";
+                log.arg2 = "yingzi";
+                room->sendLog(log);
+                log.arg = "qianxun";
+                log.arg2 = "keji";
+                room->sendLog(log);
             }
         }
         else{
-            if((lvmeng && lvmeng->getMark("@wen") > 0) && !lvmeng->isKongcheng() && lvmeng->askForSkillInvoke(objectName())){
-                room->setPlayerMark(lvmeng, "@wen", 0);
-                room->setPlayerMark(lvmeng, "@wu", 1);
-                room->detachSkillFromPlayer(lvmeng, "yingzi", false);
-                room->detachSkillFromPlayer(lvmeng, "keji", false);
-                room->acquireSkill(lvmeng, "jiang", true, false);
-                room->acquireSkill(lvmeng, "qianxun", true, false);
-                room->askForDiscard(lvmeng, "mouduan", 1, 1);
-            }
+            foreach(ServerPlayer *lvmeng, lvmengs)
+                if((lvmeng && lvmeng->getMark("@wen") > 0) && !lvmeng->isKongcheng()
+                        && lvmeng->askForSkillInvoke(objectName())){
+
+                    room->askForDiscard(lvmeng, "mouduan", 1, 1);
+                    room->setPlayerMark(lvmeng, "@wen", 0);
+                    room->setPlayerMark(lvmeng, "@wu", 1);
+
+                    LogMessage log;
+                    log.type = "#MarkTurnOver";
+                    log.from = lvmeng;
+                    log.arg = "@wen";
+                    log.arg2 = "@wu";
+                    room->sendLog(log);
+
+                    room->detachSkillFromPlayer(lvmeng, "yingzi", false);
+                    room->detachSkillFromPlayer(lvmeng, "keji", false);
+                    room->acquireSkill(lvmeng, "jiang", true, false);
+                    room->acquireSkill(lvmeng, "qianxun", true, false);
+
+                    log.type = "#SkillConversion";
+                    log.arg = "yingzi";
+                    log.arg2 = "jiang";
+                    room->sendLog(log);
+                    log.arg = "keji";
+                    log.arg2 = "qianxun";
+                    room->sendLog(log);
+                }
         }
         return false;
     }
@@ -671,6 +707,7 @@ BGMPackage::BGMPackage():Package("BGM"){
 
     addMetaObject<LihunCard>();
     addMetaObject<DaheCard>();
+    addMetaObject<TanhuCard>();
 }
 
 ADD_PACKAGE(BGM)
