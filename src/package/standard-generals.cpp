@@ -1374,6 +1374,7 @@ void StandardPackage::addGenerals(){
     lvmeng = new General(this, "lvmeng", "wu");
     lvmeng->addSkill(new Keji);
     lvmeng->addSkill(new KejiSkip);
+    sunquan->addSkill(new TransfigureSkill("weixue", "lvmeng", "bgm_lvmeng"));
     related_skills.insertMulti("keji", "#keji-skip");
 
     huanggai = new General(this, "huanggai", "wu");

@@ -697,7 +697,7 @@ BGMPackage::BGMPackage():Package("BGM"){
     bgm_zhangfei->addSkill(new Jie);
     bgm_zhangfei->addSkill(new Dahe);
 
-    General *bgm_lvmeng = new General(this, "bgm_lvmeng", "wu", 3);
+    General *bgm_lvmeng = new General(this, "bgm_lvmeng", "wu", 3, true, true);
     bgm_lvmeng->addSkill(new Tanhu);
     bgm_lvmeng->addSkill(new MouduanStart);
     bgm_lvmeng->addSkill(new Mouduan);
