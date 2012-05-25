@@ -3137,7 +3137,8 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
         for (int j = 0; j < cards_move.card_ids.size(); j++)
         {
             //trigger events
-            if (cards_move.from && (cards_move.from_place == Player::Hand || cards_move.from_place == Player::Equip)){
+            if (cards_move.from &&
+                (cards_move.from_place == Player::Hand || cards_move.from_place == Player::Equip || cards_move.from_place == Player::Special)){
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardLostOnePiece, (ServerPlayer*)cards_move.from, data);
@@ -3163,7 +3164,7 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
         QList<CardMoveStruct> moves = cards_move.flatten();
         for (int j = 0; j < cards_move.card_ids.size(); j++)
         {
-            if (cards_move.to && cards_move.to != cards_move.from &&
+            if (cards_move.to && (cards_move.to != cards_move.from || cards_move.from_place == Player::PlaceTakeoff) &&
                 (cards_move.to_place == Player::Hand || cards_move.to_place == Player::Equip))
             {
                 CardMoveStar move_star = &moves[j];
@@ -3278,7 +3279,8 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
                 break;
             }
             //trigger events
-            if (cards_move.from && (cards_move.from_place == Player::Hand || cards_move.from_place == Player::Equip)){
+            if (cards_move.from &&
+                (cards_move.from_place == Player::Hand || cards_move.from_place == Player::Equip || cards_move.from_place == Player::Special)){
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardLostOnePiece, (ServerPlayer*)cards_move.from, data);
@@ -3354,7 +3356,7 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
             // @todo: conside move this inside ServerPlayer::addCard;
             setCardMapping(card_id, (ServerPlayer*)cards_move.to, cards_move.to_place);
 
-            if (cards_move.to && cards_move.to != cards_move.from &&
+            if (cards_move.to && (cards_move.to != cards_move.from || cards_move.from_place == Player::PlaceTakeoff) &&
                 (cards_move.to_place == Player::Hand || cards_move.to_place == Player::Equip)) {
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
