@@ -56,6 +56,7 @@ void GameRule::onPhaseChange(ServerPlayer *player) const{
             QVariant num = 2;
             if(room->getTag("FirstRound").toBool()){
                 room->setTag("FirstRound", false);
+                room->getThread()->delay(1500);
                 if(room->getMode() == "02_1v1")
                     num = 1;
             }
