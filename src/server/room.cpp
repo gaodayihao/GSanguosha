@@ -515,7 +515,7 @@ void Room::attachSkillToPlayer(ServerPlayer *player, const QString &skill_name){
     player->invoke("attachSkill", skill_name);
 }
 
-void Room::detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name){
+void Room::detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name, bool sendlog){
     if(!player->hasSkill(skill_name))
         return;
 
@@ -528,11 +528,14 @@ void Room::detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name
         foreach(const Skill *skill, Sanguosha->getRelatedSkills(skill_name))
             detachSkillFromPlayer(player, skill->objectName());
 
-        LogMessage log;
-        log.type = "#LoseSkill";
-        log.from = player;
-        log.arg = skill_name;
-        sendLog(log);
+        if(sendlog)
+        {
+            LogMessage log;
+            log.type = "#LoseSkill";
+            log.from = player;
+            log.arg = skill_name;
+            sendLog(log);
+        }
     }
 }
 
@@ -4032,14 +4035,14 @@ void Room::takeAG(ServerPlayer *player, int card_id){
         QVariant data = QVariant::fromValue(move_star);
         thread->trigger(CardGotOnePiece, player, data);
 
-        CardsMoveStruct cards_move;
-        cards_move.from = NULL;
-        cards_move.from_place = Player::DrawPile;
-        cards_move.to = player;
-        cards_move.to_place = Player::Hand;
-        cards_move.card_ids << card_id;
-        CardsMoveStar moves_star = &cards_move;
-        data = QVariant::fromValue(moves_star);
+        CardsMoveOneTimeStruct moveOneTime;
+        moveOneTime.card_ids << card_id;
+        moveOneTime.from = NULL;
+        moveOneTime.from_places << Player::DrawPile;
+        moveOneTime.to = player;
+        moveOneTime.to_place = Player::Hand;
+        CardsMoveOneTimeStar moveOneTime_star = &moveOneTime;
+        data = QVariant::fromValue(moveOneTime_star);
         thread->trigger(CardGotOneTime, player, data);
     }else{
         discard_pile->prepend(card_id);

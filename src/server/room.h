@@ -54,7 +54,7 @@ public:
     void slashEffect(const SlashEffectStruct &effect);
     void slashResult(const SlashEffectStruct &effect, const Card *jink);
     void attachSkillToPlayer(ServerPlayer *player, const QString &skill_name);
-    void detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name);
+    void detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name, bool sendlog = true);
     bool obtainable(const Card *card, ServerPlayer *player);
     void setPlayerFlag(ServerPlayer *player, const QString &flag);
     void clearPlayerFlags(ServerPlayer *player);

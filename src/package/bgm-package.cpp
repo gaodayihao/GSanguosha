@@ -522,6 +522,125 @@ public:
     }
 };
 
+TanhuCard::TanhuCard(){
+    once = true;
+    will_throw = false;
+}
+
+bool TanhuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return targets.isEmpty() && !to_select->isKongcheng() && to_select != Self;
+}
+
+void TanhuCard::use(Room *room, ServerPlayer *lvmeng, const QList<ServerPlayer *> &targets) const{
+    bool success = lvmeng->pindian(targets.first(), "tanhu", this);
+    if(success){
+        room->setPlayerFlag(targets.first(), "TanhuTarget");
+        room->setFixedDistance(lvmeng, targets.first(), 1);
+    }
+}
+
+class TanhuViewAsSkill: public OneCardViewAsSkill{
+public:
+    TanhuViewAsSkill():OneCardViewAsSkill("tanhu"){
+
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("TanhuCard") && !player->isKongcheng();
+    }
+
+    virtual bool viewFilter(const CardItem *to_select) const{
+        return !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(CardItem *card_item) const{
+        Card *card = new TanhuCard;
+        card->addSubcard(card_item->getFilteredCard());
+        return card;
+    }
+};
+
+class Tanhu: public PhaseChangeSkill{
+public:
+    Tanhu():PhaseChangeSkill("tanhu"){
+        view_as_skill = new TanhuViewAsSkill;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if(target->getPhase() == Player::Finish){
+            Room *room = target->getRoom();
+            QList<ServerPlayer *> players = room->getAlivePlayers();
+
+            foreach(ServerPlayer *player, players){
+                if(player->hasFlag("TanhuTarget"))
+                {
+                    room->setPlayerFlag(player, "-TanhuTarget");
+                    room->setFixedDistance(target, player, -1);
+                }
+            }
+        }
+
+        return false;
+    }
+};
+
+class MouduanStart: public GameStartSkill{
+public:
+    MouduanStart():GameStartSkill("#mouduan"){
+
+    }
+
+    virtual int getPriority() const{
+        return -1;
+    }
+
+    virtual void onGameStart(ServerPlayer *lvmeng) const{
+        Room *room = lvmeng->getRoom();
+        lvmeng->gainMark("@wu");
+        room->acquireSkill(lvmeng, "jiang", true, false);
+        room->acquireSkill(lvmeng, "qianxun", true, false);
+    }
+};
+
+class Mouduan: public TriggerSkill{
+public:
+    Mouduan():TriggerSkill("mouduan"){
+        events << TurnStart << CardLostOneTime;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return true;
+    }
+
+    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &) const{
+        Room *room = player->getRoom();
+        ServerPlayer *lvmeng = room->findPlayerBySkillName(objectName());
+
+        if(event == CardLostOneTime){
+            if((player->getMark("@wu") > 0) && player->getHandcardNum() <= 2){
+                room->setPlayerMark(lvmeng, "@wu", 0);
+                room->setPlayerMark(lvmeng, "@wen", 1);
+                room->detachSkillFromPlayer(player, "jiang", false);
+                room->detachSkillFromPlayer(player, "qianxun", false);
+                room->acquireSkill(player, "yingzi", true, false);
+                room->acquireSkill(player, "keji", true, false);
+            }
+        }
+        else{
+            if((lvmeng && lvmeng->getMark("@wen") > 0) && !lvmeng->isKongcheng() && lvmeng->askForSkillInvoke(objectName())){
+                room->setPlayerMark(lvmeng, "@wen", 0);
+                room->setPlayerMark(lvmeng, "@wu", 1);
+                room->detachSkillFromPlayer(lvmeng, "yingzi", false);
+                room->detachSkillFromPlayer(lvmeng, "keji", false);
+                room->acquireSkill(lvmeng, "jiang", true, false);
+                room->acquireSkill(lvmeng, "qianxun", true, false);
+                room->askForDiscard(lvmeng, "mouduan", 1, 1);
+            }
+        }
+        return false;
+    }
+};
+
 BGMPackage::BGMPackage():Package("BGM"){
     General *bgm_zhaoyun = new General(this, "bgm_zhaoyun", "qun", 3, true, true);
     bgm_zhaoyun->addSkill("longdan");
@@ -543,6 +662,12 @@ BGMPackage::BGMPackage():Package("BGM"){
     General *bgm_zhangfei = new General(this, "bgm_zhangfei", "shu", 4, true, true);
     bgm_zhangfei->addSkill(new Jie);
     bgm_zhangfei->addSkill(new Dahe);
+
+    General *bgm_lvmeng = new General(this, "bgm_lvmeng", "wu", 3);
+    bgm_lvmeng->addSkill(new Tanhu);
+    bgm_lvmeng->addSkill(new MouduanStart);
+    bgm_lvmeng->addSkill(new Mouduan);
+    related_skills.insertMulti("mouduan", "#mouduan");
 
     addMetaObject<LihunCard>();
     addMetaObject<DaheCard>();

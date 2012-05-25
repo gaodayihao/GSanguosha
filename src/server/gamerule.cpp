@@ -35,6 +35,9 @@ void GameRule::onPhaseChange(ServerPlayer *player) const{
     Room *room = player->getRoom();
     switch(player->getPhase()){
     case Player::RoundStart:{
+        if(room->getTag("FirstRound").toBool())
+            room->getThread()->delay();
+
             break;
         }
     case Player::Start: {
@@ -56,7 +59,6 @@ void GameRule::onPhaseChange(ServerPlayer *player) const{
             QVariant num = 2;
             if(room->getTag("FirstRound").toBool()){
                 room->setTag("FirstRound", false);
-                room->getThread()->delay(1500);
                 if(room->getMode() == "02_1v1")
                     num = 1;
             }
@@ -387,7 +389,8 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
     case CardEffected:{
             if(data.canConvert<CardEffectStruct>()){
                 CardEffectStruct effect = data.value<CardEffectStruct>();
-                if(room->isCanceled(effect))
+                if(room->isCanceled(effect) &&
+                        !(effect.from && effect.from->hasSkill("tanhu") && effect.to->hasFlag("TanhuTarget")))
                     return true;
 
                 effect.card->onEffect(effect);

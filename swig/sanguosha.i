@@ -808,7 +808,7 @@ public:
 	void slashEffect(const SlashEffectStruct &effect);
 	void slashResult(const SlashEffectStruct &effect, const Card *jink);
 	void attachSkillToPlayer(ServerPlayer *player, const char *skill_name);
-	void detachSkillFromPlayer(ServerPlayer *player, const char *skill_name);
+	void detachSkillFromPlayer(ServerPlayer *player, const char *skill_name, bool sendlog = true);
 	bool obtainable(const Card *card, ServerPlayer *player);
 	void setPlayerFlag(ServerPlayer *player, const char *flag);
 	void setPlayerProperty(ServerPlayer *player, const char *property_name, const QVariant &value);
@@ -844,8 +844,8 @@ public:
 	void sendLog(const LogMessage &log);
 	void showCard(ServerPlayer *player, int card_id, ServerPlayer *only_viewer = NULL);
 	void showAllCards(ServerPlayer *player, ServerPlayer *to = NULL);
-	void acquireSkill(ServerPlayer *player, const Skill *skill, bool open = true);
-	void acquireSkill(ServerPlayer *player, const char *skill_name, bool open = true);
+	void acquireSkill(ServerPlayer *player, const Skill *skill, bool open = true, bool doAnimation = true);
+	void acquireSkill(ServerPlayer *player, const char *skill_name, bool open = true, bool doAnimation = true);
 	void adjustSeats();
 	void swapPile();
 	QList<int> getDiscardPile();
