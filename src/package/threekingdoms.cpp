@@ -4,6 +4,7 @@
 #include "server.h"
 #include "carditem.h"
 #include "engine.h"
+#include "settings.h"
 
 #include <QFile>
 
@@ -203,32 +204,41 @@ ThreeKingdomsPackage::ThreeKingdomsPackage():Package("ThreeKingdoms")
 {
     type = Package::CardPack;
 
-    Package *stdpack = PackageAdder::packages()["Standard"];
-    Package *windpack = PackageAdder::packages()["Wind"];
-    Package *firepack = PackageAdder::packages()["Fire"];
-    Package *thicketpack = PackageAdder::packages()["Thicket"];
-
-    QList<const General *> generals = stdpack->findChildren<const General *>();
-    generals << windpack->findChildren<const General *>();
-    generals << firepack->findChildren<const General *>();
-    generals << thicketpack->findChildren<const General *>();
-
-    QStringList names;
-    foreach(const General *general, generals){
-        names << general->objectName();
+    QStringList PackageNames;
+    PackageNames << "Standard"
+                 << "Wind"
+                 << "Fire"
+                 << "Thicket"
+                 << "Mountain"
+                 << "YJCM"
+                 << "YJCM2012"
+                 << "BGM";
+    QList<const General*> generals;
+    foreach(QString package, PackageNames)
+    {
+        Package *apackage = PackageAdder::packages()[package];
+        generals << apackage->findChildren<const General *>();
     }
 
-    names << "yuanshu" << "yangxiu" << "gongsunzan";
+    QSet<QString> all;
 
-    names.removeOne("yuji");
-    names.removeOne("ganning");
+    foreach(const General *general, generals){
+        all << general->objectName();
+    }
+    all << "yuanshu" << "yangxiu" << "gongsunzan";
 
-    QList<Card *> cards;
+    all.subtract(Config.value("Banlist/ThreeKingdoms", "").toStringList().toSet());
 
-    foreach(const QString name, names)
+    QList<Card*> cards;
+    foreach(const QString name, all.toList())
     {
         cards << new HeroCard(name,  Card::NoSuit, 0);
     }
+
+    cards << new Dismantlement(Card::Spade, 1)
+          << new Dismantlement(Card::Club, 13)
+          << new Dismantlement(Card::Club, 1)
+          << new Dismantlement(Card::Diamond, 13);
 
     foreach(Card *card, cards)
         card->setParent(this);

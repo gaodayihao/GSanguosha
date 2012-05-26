@@ -1370,6 +1370,8 @@ void Room::swapPile(){
         if(times == limit)
             gameOver(".");
     }
+    if(mode == "03_3kingdoms" && times == 2)
+        gameOver(".");
 
     qSwap(draw_pile, discard_pile);
 

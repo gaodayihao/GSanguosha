@@ -139,7 +139,7 @@ void Settings::init(){
 
     GodSelectLimited = value("GodSelectLimited", 98).toUInt();
 
-    QStringList roles_ban, kof_ban, basara_ban, hegemony_ban, pairs_ban;
+    QStringList roles_ban, kof_ban, basara_ban, hegemony_ban, pairs_ban, threekingdoms_ban;
 
     roles_ban << "zhugejin";
 
@@ -179,6 +179,8 @@ void Settings::init(){
               << "bgm_caoren+caoren" << "bgm_caoren+caozhi" << "bgm_caoren+shenlvbu" << "bgm_caoren+bgm_diaochan"
               << "bgm_caoren+dengshizai" << "bgm_caoren+caizhaoji";
 
+    threekingdoms_ban << "yuji" << "ganning" << "zuoci" << "zuocif" << "bgm_pangtong";
+
     QStringList banlist = value("Banlist/Roles").toStringList();
     if(banlist.isEmpty()){
         foreach(QString ban_general, roles_ban)
@@ -216,6 +218,14 @@ void Settings::init(){
             banlist << ban_general;
 
         setValue("Banlist/Pairs", banlist);
+    }
+
+    banlist = value("Banlist/ThreeKingdoms").toStringList();
+    if(banlist.isEmpty()){
+        foreach(QString ban_general, threekingdoms_ban)
+            banlist << ban_general;
+
+        setValue("Banlist/ThreeKingdoms", banlist);
     }
 
     QStringList forbid_packages;
