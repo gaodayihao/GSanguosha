@@ -220,14 +220,17 @@ ThreeKingdomsPackage::ThreeKingdomsPackage():Package("ThreeKingdoms")
         generals << apackage->findChildren<const General *>();
     }
 
-    QSet<QString> all;
+    QSet<QString> all, ban_set;
 
     foreach(const General *general, generals){
         all << general->objectName();
     }
     all << "yuanshu" << "yangxiu" << "gongsunzan";
 
-    all.subtract(Config.value("Banlist/ThreeKingdoms", "").toStringList().toSet());
+    ban_set = Config.value("Banlist/ThreeKingdoms").toStringList().toSet();
+    if(ban_set.isEmpty())
+        ban_set << "yuji" << "ganning" << "zuoci" << "zuocif" << "bgm_pangtong";
+    all.subtract(ban_set);
 
     QList<Card*> cards;
     foreach(const QString name, all.toList())

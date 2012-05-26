@@ -154,6 +154,8 @@ void Settings::init(){
             hegemony_ban << general;
     }
 
+    threekingdoms_ban << "yuji" << "ganning" << "zuoci" << "zuocif" << "bgm_pangtong";
+
     pairs_ban << "shencaocao" << "dongzhuo" << "zuoci" << "zhoutai" << "+luboyan" << "liaohua" << "bgm_pangtong"
               << "caocao+caochong" << "xushu+zhugeliang" << "simayi+caizhaoji" << "wisjiangwei+zhanggongqi"
               << "zhenji+zhangjiao" << "zhenji+simayi" << "huanggai+yuanshao"
@@ -178,8 +180,6 @@ void Settings::init(){
               << "guanxingzhangbao+luxun" << "guanxingzhangbao+huanggai" << "guanxingzhangbao+sunce"
               << "bgm_caoren+caoren" << "bgm_caoren+caozhi" << "bgm_caoren+shenlvbu" << "bgm_caoren+bgm_diaochan"
               << "bgm_caoren+dengshizai" << "bgm_caoren+caizhaoji";
-
-    threekingdoms_ban << "yuji" << "ganning" << "zuoci" << "zuocif" << "bgm_pangtong";
 
     QStringList banlist = value("Banlist/Roles").toStringList();
     if(banlist.isEmpty()){
@@ -212,20 +212,20 @@ void Settings::init(){
         setValue("Banlist/Hegemony", banlist);
     }
 
-    banlist = value("Banlist/Pairs").toStringList();
-    if(banlist.isEmpty()){
-        foreach(QString ban_general, pairs_ban)
-            banlist << ban_general;
-
-        setValue("Banlist/Pairs", banlist);
-    }
-
     banlist = value("Banlist/ThreeKingdoms").toStringList();
     if(banlist.isEmpty()){
         foreach(QString ban_general, threekingdoms_ban)
             banlist << ban_general;
 
         setValue("Banlist/ThreeKingdoms", banlist);
+    }
+
+    banlist = value("Banlist/Pairs").toStringList();
+    if(banlist.isEmpty()){
+        foreach(QString ban_general, pairs_ban)
+            banlist << ban_general;
+
+        setValue("Banlist/Pairs", banlist);
     }
 
     QStringList forbid_packages;
