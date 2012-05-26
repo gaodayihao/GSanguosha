@@ -645,7 +645,7 @@ public:
         }
         else{
             foreach(ServerPlayer *lvmeng, lvmengs)
-                if((lvmeng && lvmeng->getMark("@wen") > 0) && !lvmeng->isKongcheng()
+                if((lvmeng && lvmeng->getMark("@wen") > 0) && !lvmeng->isNude()
                         && lvmeng->askForSkillInvoke(objectName())){
 
                     room->askForDiscard(lvmeng, "mouduan", 1, 1, false, true);

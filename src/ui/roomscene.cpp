@@ -234,7 +234,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
         guanxing_box = new GuanxingBox;
         guanxing_box->hide();
         addItem(guanxing_box);
-        guanxing_box->setZValue(9);
+        guanxing_box->setZValue(10085);
 
         connect(ClientInstance, SIGNAL(guanxing(QList<int>,bool)), guanxing_box, SLOT(doGuanxing(QList<int>,bool)));
     }
@@ -328,7 +328,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
         prompt_box->setOpacity(0);
         prompt_box->setFlag(QGraphicsItem::ItemIsMovable);
         prompt_box->shift();
-        prompt_box->setZValue(10);
+        prompt_box->setZValue(10086);
         prompt_box->keepWhenDisappear();
 
         prompt_box_widget = new QGraphicsTextItem(prompt_box);
@@ -2059,7 +2059,6 @@ void RoomScene::doTimeout(){
 
 void RoomScene::showPromptBox()
 {
-    bringToFront(prompt_box);
     prompt_box->appear();
 }
 
