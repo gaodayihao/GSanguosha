@@ -469,7 +469,7 @@ public:
     }
 
     virtual bool trigger(TriggerEvent , ServerPlayer *zhoutai, QVariant &) const{
-        if(zhoutai->hasFlag("dying"))
+        if(zhoutai->getHp() < 1)
             Remove(zhoutai);
 
         return false;
@@ -517,6 +517,7 @@ public:
 
                 if(duplicate_numbers.isEmpty()){
                     room->setTag("Buqu", QVariant());
+                    zhoutai->setFlags("-dying");
                     return true;
                 }
             }
@@ -543,6 +544,7 @@ public:
 
             if(duplicate_numbers.isEmpty()){
                 room->playSkillEffect(objectName());
+                zhoutai->setFlags("-dying");
                 return true;
             }else{
                 LogMessage log;

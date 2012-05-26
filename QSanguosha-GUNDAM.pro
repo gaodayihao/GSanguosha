@@ -275,7 +275,7 @@ HEADERS += \
         src/jsoncpp/include/json/autolink.h \
         src/jsoncpp/include/json/assertions.h \
 	src/ui/GeneralCardContainerUI.h \
-	src/ui/DiscardPile.h \
+        src/ui/DiscardPile.h \
         src/core/structs.h
 	
 FORMS += \

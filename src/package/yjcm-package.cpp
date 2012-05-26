@@ -1153,6 +1153,29 @@ public:
     }
 };
 
+class Jueqing: public TriggerSkill{
+public:
+    Jueqing():TriggerSkill("jueqing")
+    {
+        frequency = Compulsory;
+        events << Predamage;
+    }
+
+    virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const
+    {
+        Room *room = player->getRoom();
+        LogMessage log;
+        DamageStruct damage = data.value<DamageStruct>();
+        log.type = "#TriggerSkill";
+        log.from = player;
+        log.arg = objectName();
+        room->sendLog(log);
+        room->playSkillEffect(objectName());
+        room->loseHp(damage.to, damage.damage);
+        return true;
+    }
+};
+
 YJCMPackage::YJCMPackage():Package("YJCM"){
     General *caozhi = new General(this, "caozhi", "wei", 3);
     caozhi->addSkill(new Luoying);
@@ -1211,7 +1234,7 @@ YJCMPackage::YJCMPackage():Package("YJCM"){
     addMetaObject<XinzhanCard>();
     addMetaObject<PaiyiCard>();
 
-    skills << new Paiyi;
+    skills << new Paiyi << new Jueqing;
 }
 
 ADD_PACKAGE(YJCM)
