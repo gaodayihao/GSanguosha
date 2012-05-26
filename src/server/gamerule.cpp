@@ -837,6 +837,50 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
 
                 return true;
             }
+
+            if (effect.card->inherits("Snatch"))
+            {
+                ServerPlayer *target = effect.to;
+                if(player->getPile("heros").isEmpty() || target->getPile("heros").isEmpty())
+                    break;
+
+                QString choice = room->askForChoice(player, "SnatchTargetHero", "normal+snatch");
+                if(choice == "normal")
+                    break;
+
+                if(room->isCanceled(effect))
+                    return true;
+
+                QList<int> heros = target->getPile("heros");
+
+                room->fillAG(heros, player);
+                int hero = room->askForAG(player, heros, true, "throwTargetHero");
+                player->invoke("clearAG");
+
+                if(hero == -1)
+                    break;
+
+                foreach(int m_hero, player->getPile("heros")){
+                    if (m_hero == player->getMark("hero")){
+                        room->throwCard(m_hero, player);
+                    }
+                }
+
+                const Card *heroCard = Sanguosha->getCard(hero);
+                player->addToPile("heros", heroCard);
+                sendHeroCardsToPileLog(hero, player);
+                LogMessage log;
+                log.from = player;
+                log.type = "#EquipedHeroCard";
+                log.arg = heroCard->objectName();
+                room->sendLog(log);
+
+                room->setPlayerMark(player, "hero", heroCard->getEffectiveId());
+                room->transfigure(player, heroCard->objectName(), false);
+                room->setPlayerProperty(player, "kingdom", player->getGeneral()->getKingdom());
+
+                return true;
+            }
         }
         break;
     }
@@ -845,7 +889,10 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
         CardMoveStar move = data.value<CardMoveStar>();
         const Card *card = Sanguosha->getCard(move->card_id);
         if(card->inherits("HeroCard"))
+        {
+            sendHeroCardsToPileLog(move->card_id, player);
             player->addToPile("heros", card);
+        }
 
         break;
     }
@@ -893,6 +940,24 @@ bool ThreeKingdomsMode::hasHeroCard(ServerPlayer *player) const{
     return false;
 }
 
+void ThreeKingdomsMode::sendHeroCardsToPileLog(int card, ServerPlayer* player) const{
+    QList<int> cards;
+    cards << card;
+    sendHeroCardsToPileLog(cards, player);
+}
+
+void ThreeKingdomsMode::sendHeroCardsToPileLog(const QList<int> &cards, ServerPlayer *player) const{
+    LogMessage log;
+    log.from = player;
+    log.type = "$AddHeroCardsToPile";
+    foreach(int card, cards)
+        if(log.card_str.isEmpty())
+            log.card_str = QString::number(card);
+        else
+            log.card_str += "+" + QString::number(card);
+    player->getRoom()->sendLog(log);
+}
+
 void ThreeKingdomsMode::addHeroCardsToPile(ServerPlayer *player) const{
     QList<int> hero_card_ids;
 
@@ -902,17 +967,12 @@ void ThreeKingdomsMode::addHeroCardsToPile(ServerPlayer *player) const{
 
     foreach(int id, player->handCards()){
         const Card *card = Sanguosha->getCard(id);
-        if (card->inherits("HeroCard")){
+        if (card->inherits("HeroCard"))
             hero_card_ids << id;
-            if(log.card_str.isEmpty())
-                log.card_str = QString::number(id);
-            else
-                log.card_str += "+" + QString::number(id);
-        }
     }
     if(!hero_card_ids.isEmpty())
     {
-        player->getRoom()->sendLog(log);
+        sendHeroCardsToPileLog(hero_card_ids, player);
         player->addToPile("heros", hero_card_ids);
     }
 }

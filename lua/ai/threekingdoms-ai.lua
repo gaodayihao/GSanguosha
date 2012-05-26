@@ -116,4 +116,7 @@ if sgs.GetConfig("GameMode", "08p") == "03_3kingdoms" then
 		return "normal"
 	end
 	
+	sgs.ai_skill_choice.SnatchTargetHero = function(self, choice)
+		return "snatch"
+	end
 end

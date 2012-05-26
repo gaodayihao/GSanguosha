@@ -30,6 +30,8 @@ public:
 
 private:
     bool hasHeroCard(ServerPlayer *player) const;
+    void sendHeroCardsToPileLog(int card, ServerPlayer *player) const;
+    void sendHeroCardsToPileLog(const QList<int> &cards, ServerPlayer* player) const;
     void addHeroCardsToPile(ServerPlayer *player) const;
     void addHeroCardsFlag(ServerPlayer *player) const;
     void removeHeroCardsFlag(ServerPlayer *player) const;

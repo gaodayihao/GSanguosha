@@ -84,7 +84,6 @@ public:
 
 RecastHeroCard::RecastHeroCard(){
     target_fixed = true;
-    once = true;
     owner_discarded = true;
     mute = true;
 }

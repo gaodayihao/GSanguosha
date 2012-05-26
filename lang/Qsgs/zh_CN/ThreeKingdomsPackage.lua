@@ -3,6 +3,9 @@ return {
 	["threekingdoms_mode"] = "三国鼎立",
 	["threekingdoms_mode:throw"] = "弃置对方武将牌",
 	["threekingdoms_mode:normal"] = "正常使用",
+	["SnatchTargetHero"] = "抢夺武将牌",
+	["SnatchTargetHero:normal"] = "正常使用",
+	["SnatchTargetHero:snatch"] = "抢夺武将牌",
 
 	["general_card"] = "武将牌",
 	["hero_card"] = "武将",
@@ -22,4 +25,5 @@ return {
 	["herorecast"] = "重铸武将牌",
 	[":herorecast"] = "摸牌阶段内摸起的武将牌每回合内能重铸一次。\
 	例如：到你的摸牌阶段，摸起两张武将牌，你的本回合内可以将这两张武将牌弃掉重新摸取两张牌，若此时再摸起武将牌，则不能再置换。下回合亦不可将这两张武将牌重铸。",
+	
 }
