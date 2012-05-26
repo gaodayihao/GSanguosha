@@ -268,8 +268,6 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
                 break;
             }
 
-            DyingStruct dying = data.value<DyingStruct>();
-
             LogMessage log;
             log.type = "#AskForPeaches";
             log.from = player;
@@ -901,7 +899,8 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
         CardMoveStar move = data.value<CardMoveStar>();
         const Card *card = Sanguosha->getCard(move->card_id);
         if(card->inherits("HeroCard") && move->from_place == Player::Special
-                && card->objectName() == player->getGeneralName())
+                && (card->objectName() == player->getGeneralName() || player->getPile("heros").isEmpty())
+                && player->getGeneralName() != "anjiang")
         {
             LogMessage log;
             log.from = player;
@@ -912,6 +911,10 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
             room->setPlayerMark(player, "hero", 0);
             room->transfigure(player, "anjiang", false);
             room->setPlayerProperty(player, "kingdom", "god");
+            player->throwAllMarks();
+            player->clearPrivatePilesExcept("heros");
+            if(player->getHp() <= 0 and player->isAlive())
+                room->enterDying(player, NULL);
         }
 
         break;

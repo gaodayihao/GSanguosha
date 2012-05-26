@@ -260,7 +260,7 @@ public:
             }
             damage->from->clearPrivatePiles();
             if(damage->from->getHp() <= 0 )
-                room->loseHp(damage->from,0);
+                room->enterDying(damage->from, NULL);
             room->setPlayerMark(damage->from, "@duanchang", 1);
 
             //room->resetAI(damage->from);
@@ -1046,7 +1046,7 @@ public:
             room->detachSkillFromPlayer(zuoci, huashen_skill);
             zuoci->clearPrivatePiles();
             if(zuoci->getHp() <= 0 )
-                room->loseHp(zuoci,0);
+                room->enterDying(zuoci, NULL);
         }
 
         QVariantList huashens = zuoci->tag["Huashens"].toList();

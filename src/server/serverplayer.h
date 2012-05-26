@@ -41,6 +41,7 @@ public:
     void bury();
     void throwAllMarks();
     void clearPrivatePiles();
+    void clearPrivatePilesExcept(const QString &except);
     void drawCards(int n, bool set_emotion = true, const QString &reason = QString());
     bool askForSkillInvoke(const QString &skill_name, const QVariant &data = QVariant());
     QList<int> forceToDiscard(int discard_num, bool include_equip);
