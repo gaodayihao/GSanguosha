@@ -75,7 +75,7 @@ struct CircularRoomLayout : public RoomLayout{
         m_chatBoxHeightPercentage = 0.4;
         m_infoPlaneWidthPercentage = 0.22;
         m_photoRoomPadding = 10;
-        m_photoPhotoPadding = 5;
+        m_photoPhotoPadding = 30;
         m_discardPileMinWidth = CardItem::S_NORMAL_CARD_WIDTH * 5;
         m_discardPilePadding = 50;
         m_minimumSceneSize = QSize(900, 650);
@@ -234,7 +234,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
         guanxing_box = new GuanxingBox;
         guanxing_box->hide();
         addItem(guanxing_box);
-        guanxing_box->setZValue(9.0);
+        guanxing_box->setZValue(9);
 
         connect(ClientInstance, SIGNAL(guanxing(QList<int>,bool)), guanxing_box, SLOT(doGuanxing(QList<int>,bool)));
     }
@@ -621,9 +621,10 @@ void RoomScene::_dispersePhotos(QList<Photo*> &photos, QRectF fillRegion, int mi
     if (numPhotos == 0) return;
     if (align == Qt::AlignHCenter)
     {
-        double maxWidth = fillRegion.width();
+//        double maxWidth = fillRegion.width();
         double photoWidth = Photo::S_NORMAL_PHOTO_WIDTH;
-        double step = qMax(photoWidth  + minDistanceBetweenPhotos, maxWidth / numPhotos);
+//        double step = qMax(photoWidth  + minDistanceBetweenPhotos, maxWidth / numPhotos);
+        double step = photoWidth  + minDistanceBetweenPhotos;
         for (int i = 0; i < numPhotos; i++)
         {
             Photo* photo = photos[i];
@@ -634,9 +635,10 @@ void RoomScene::_dispersePhotos(QList<Photo*> &photos, QRectF fillRegion, int mi
     }
     else if (align == Qt::AlignVCenter)
     {
-        double maxHeight = fillRegion.height();
+//        double maxHeight = fillRegion.height();
         double photoHeight = Photo::S_NORMAL_PHOTO_HEIGHT;
-        double step = qMax(photoHeight + minDistanceBetweenPhotos, maxHeight / numPhotos);
+//        double step = qMax(photoHeight + minDistanceBetweenPhotos, maxHeight / numPhotos);
+        double step = photoHeight + minDistanceBetweenPhotos;
         for (int i = 0; i < numPhotos; i++)
         {
             Photo* photo = photos[i];
@@ -718,8 +720,8 @@ void RoomScene::updateTable()
         QRectF(col2, 0, col1, row2),
         QRectF(0, 0, col1, row2),
         QRectF(0, 0, col1 + col2, row1),
-        QRectF(col2, row1 - Photo::S_NORMAL_PHOTO_HEIGHT * 0.2, col1, row2 - row1 + Photo::S_NORMAL_PHOTO_HEIGHT * 0.2),
-        QRectF(0, row1 - Photo::S_NORMAL_PHOTO_HEIGHT * 0.2, col1, row2 - row1 + Photo::S_NORMAL_PHOTO_HEIGHT * 0.2)
+        QRectF(col2, row1 - Photo::S_NORMAL_PHOTO_HEIGHT * 0.5, col1, row2 - row1 + Photo::S_NORMAL_PHOTO_HEIGHT * 0.5),
+        QRectF(0, row1 - Photo::S_NORMAL_PHOTO_HEIGHT * 0.5, col1, row2 - row1 + Photo::S_NORMAL_PHOTO_HEIGHT * 0.5)
     };
 
     QRectF tableRect(col1, row1, col2 - col1, row2 - row1);
@@ -3482,50 +3484,16 @@ void RoomScene::animateHpChange(const QString &, const QStringList &args)
 
     if(player == Self)
     {
-        int max_hp = Self->getMaxHp();
+        int y = -110;
 
-        qreal width = 26;
-        qreal skip = 6;
-        qreal start_x = dashboard->getRightPosition() + 115;
-
-        for(int i = 0;i < delta;i++)
+        if(Self->getMaxHp() > 5)
+            y += 32;
+        else
         {
-            Pixmap *aniMaga = new Pixmap(true);
-            QPixmap *qpixmap = MagatamaWidget::GetMagatama(index);
-            aniMaga->setPixmap(*qpixmap);
-            addItem(aniMaga);
-            aniMaga->show();
-            i+=hp-delta;
-
-            QPoint pos;
-            if(max_hp < 6){
-                if(max_hp < 4)
-                    pos = QPoint(start_x, skip * (i+2) + (i+1) * width - 2);
-                else
-                    pos = QPoint(start_x, skip * (i+1) + i * width - 2);
-            }
-            else
-                pos = QPoint(start_x, 35);
-            pos.rx() += dashboard->scenePos().x();
-            pos.ry() += dashboard->scenePos().y();
-            aniMaga->setPos(pos);
-            aniMaga->setZValue(10086);
-
-            QPropertyAnimation *fade = new QPropertyAnimation(aniMaga,"opacity");
-            fade->setEndValue(0);
-            QPropertyAnimation *grow = new QPropertyAnimation(aniMaga,"scale");
-            grow->setEndValue(4);
-
-            connect(fade,SIGNAL(finished()),aniMaga,SLOT(deleteLater()));
-
-            QParallelAnimationGroup *group = new QParallelAnimationGroup;
-            group->addAnimation(fade);
-            group->addAnimation(grow);
-
-            group->start(QAbstractAnimation::DeleteWhenStopped);
-
-            i-=hp-delta;
+            y += (qMax(0, player->getHp()))  * 32;
         }
+
+        PixmapAnimation::GetPixmapAnimation(avatar, "bloodlost", 80, y);
 
         return;
     }
@@ -3877,7 +3845,7 @@ void RoomScene::bringToFront(QGraphicsItem* front_item)
         _m_last_front_item->setZValue(_m_last_front_ZValue);
     _m_last_front_item = front_item;
     _m_last_front_ZValue = front_item->zValue();
-    front_item->setZValue(10000);
+    front_item->setZValue(10080);
     m_zValueMutex.unlock();
 }
 

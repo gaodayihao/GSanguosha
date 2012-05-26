@@ -292,6 +292,7 @@ void BackLoader::run()
              << "slash_black"
              << "slash_red"
              << "success"
+             << "bloodlost"
              << "armor/renwang_shield"
              << "armor/eight_diagram"
              << "armor/silver_lion"

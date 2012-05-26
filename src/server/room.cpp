@@ -2951,15 +2951,16 @@ void Room::throwCard(const Card *card, ServerPlayer *who){
     if(card == NULL)
         return;
 
+    QList<int> to_discard;
+    if(card->isVirtualCard())
+            to_discard.append(card->getSubcards());
+        else
+            to_discard << card->getEffectiveId();
+
     if (who) {
         LogMessage log;
         log.type = "$DiscardCard";
         log.from = who;
-        QList<int> to_discard;
-        if(card->isVirtualCard())
-            to_discard.append(card->getSubcards());
-        else
-            to_discard << card->getEffectiveId();
 
         foreach(int card_id, to_discard){
             setCardFlag(card_id, "-visible");
@@ -2971,9 +2972,12 @@ void Room::throwCard(const Card *card, ServerPlayer *who){
         sendLog(log);
     }
 
-    moveCardTo(card, NULL, Player::DiscardPile, true);
+    CardsMoveStruct move(to_discard, NULL, Player::DiscardPile);
+    QList<CardsMoveStruct> moves;
+    moves.append(move);
+    moveCardsAtomic(moves, true);
 
-    if(who){
+    if (who) {
         CardStar card_ptr = card;
         QVariant data = QVariant::fromValue(card_ptr);
         thread->trigger(CardDiscarded, who, data);

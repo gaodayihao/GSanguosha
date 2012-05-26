@@ -527,7 +527,7 @@ public:
             if(!player->askForSkillInvoke(objectName(), data))
                 return false;
 
-            room->setEmotion(player, QString("weapon/%1").arg(objectName()));
+            room->setEmotion(damage.to, QString("weapon/%1").arg(objectName()));
 
             QString horse_type;
             if(horses.length() == 2)

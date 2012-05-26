@@ -59,7 +59,7 @@ void PixmapAnimation::start(bool permanent,int interval)
     if(!permanent)connect(this,SIGNAL(finished()),this,SLOT(deleteLater()));
 }
 
-PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, const QString &emotion)
+PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, const QString &emotion, int x,int y)
 {
     PixmapAnimation *pma = new PixmapAnimation();
     pma->setPath(QString("image/system/emotion/%1/").arg(emotion));
@@ -91,8 +91,8 @@ PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, co
             pma->setScale(1.3);
         }
 
-        pma->moveBy((parent->boundingRect().width() - pma->boundingRect().width())/2,
-                (parent->boundingRect().height() - pma->boundingRect().height())/2);
+        pma->moveBy((parent->boundingRect().width() - pma->boundingRect().width())/2 + x,
+                (parent->boundingRect().height() - pma->boundingRect().height())/2 + y);
 
         pma->setParentItem(parent);
         pma->setZValue(2.5);
