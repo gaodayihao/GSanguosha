@@ -108,6 +108,8 @@ public:
 
     void emitDisconnect();
 
+    void fillHero();
+
     void startNetworkDelayTest();
     qint64 endNetworkDelayTest();
 

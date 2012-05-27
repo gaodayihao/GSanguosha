@@ -112,8 +112,7 @@ if sgs.GetConfig("GameMode", "08p") == "03_3kingdoms" then
 	end
 	
 	sgs.ai_skill_choice.threekingdoms_mode = function(self, choice)
-		if self.player:getPile("heros"):length() > 1 then return "throw" end
-		return "normal"
+		return "throw"
 	end
 	
 	sgs.ai_skill_choice.SnatchTargetHero = function(self, choice)

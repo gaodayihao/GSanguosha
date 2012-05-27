@@ -154,7 +154,7 @@ void Settings::init(){
             hegemony_ban << general;
     }
 
-    threekingdoms_ban << "yuji" << "ganning" << "zuoci" << "zuocif" << "bgm_pangtong";
+    threekingdoms_ban << "yuji" << "zuoci" << "zuocif" << "bgm_pangtong";
 
     pairs_ban << "shencaocao" << "dongzhuo" << "zuoci" << "zhoutai" << "+luboyan" << "liaohua" << "bgm_pangtong"
               << "caocao+caochong" << "xushu+zhugeliang" << "simayi+caizhaoji" << "wisjiangwei+zhanggongqi"

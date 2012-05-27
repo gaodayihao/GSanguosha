@@ -15,6 +15,7 @@ class Window;
 class Button;
 class CardContainer;
 class GuanxingBox;
+class HeroCardContainer;
 class IrregularButton;
 class TrustButton;
 class QGroupBox;
@@ -226,6 +227,8 @@ private:
 
     CardContainer *card_container;
 
+    HeroCardContainer *hero_box;
+
     QList<QAbstractButton *> skill_buttons;
     QMap<QAbstractButton *, const ViewAsSkill *> button2skill;
 
@@ -312,6 +315,7 @@ private:
 
 private slots:
     void fillCards(const QList<int>& card_ids);
+    void fillHero(const QList<int>& card_ids);
     void updateSkillButtons();
     void acquireSkill(const ClientPlayer *player, const QString &skill_name, bool animation);
     void updateRoleComboBox(const QString &new_role);

@@ -228,7 +228,7 @@ ThreeKingdomsPackage::ThreeKingdomsPackage():Package("ThreeKingdoms")
 
     ban_set = Config.value("Banlist/ThreeKingdoms").toStringList().toSet();
     if(ban_set.isEmpty())
-        ban_set << "yuji" << "ganning" << "zuoci" << "zuocif" << "bgm_pangtong";
+        ban_set << "yuji" << "zuoci" << "zuocif" << "bgm_pangtong";
     all.subtract(ban_set);
 
     QList<Card*> cards;

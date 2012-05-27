@@ -140,6 +140,9 @@ public:
     void takeAG(const QString &take_str);
     void clearAG(const QString &);
 
+    void fillHero(const QString &cards_str);
+    void clearHero(const QString &);
+
     //interactive server callbacks
     void askForCard(const Json::Value&);
     void askForUseCard(const Json::Value&);
@@ -323,6 +326,9 @@ signals:
     void ag_filled(const QList<int> &card_ids);
     void ag_taken(ClientPlayer *taker, int card_id);
     void ag_cleared();
+
+    void hero_filled(const QList<int> &card_ids);
+    void hero_cleared();
 
     void generals_filled(const QStringList &general_names);
     void general_taken(const QString &who, const QString &name);

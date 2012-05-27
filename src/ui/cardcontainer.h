@@ -66,6 +66,21 @@ signals:
     void item_gongxined(int card_id);
 };
 
+class HeroCardContainer : public CardContainer
+{
+    Q_OBJECT
+
+public:
+    HeroCardContainer();
+
+public slots:
+    void fillCards(const QList<int> &card_ids = QList<int>());
+    void clear();
+
+private:
+    QList<CardItem *> items;
+};
+
 class GuanxingBox: public Pixmap{
     Q_OBJECT
 

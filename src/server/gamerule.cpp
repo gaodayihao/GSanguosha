@@ -758,7 +758,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
         case Player::NotActive:{
             removeHeroCardsFlag(player);
             QList<int> heros = player->getPile("heros");
-            //heros.removeOne(player->getMark("hero"));
+            heros.removeOne(player->getMark("hero"));
 
             int willthrow = 2;
 
@@ -798,7 +798,9 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
             if (effect.card->inherits("Dismantlement"))
             {
                 ServerPlayer *target = effect.to;
-                if(player->getPile("heros").isEmpty() || target->getPile("heros").isEmpty())
+                QList<int> heros = player->getPile("heros");
+                heros.removeOne(player->getMark("hero"));
+                if(heros.isEmpty() || target->getPile("heros").isEmpty())
                     break;
 
                 QString choice = room->askForChoice(player, objectName(), "normal+throw");
@@ -808,30 +810,31 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 if(room->isCanceled(effect))
                     return true;
 
-                QList<int> heros = player->getPile("heros");
-
-                room->fillAG(heros, player);
-                int hero = room->askForAG(player, heros, true, "throwSelfHero");
-                player->invoke("clearAG");
-
-                if(hero == -1)
-                    break;
-
-                int heroSelf = hero;
-
                 heros = target->getPile("heros");
 
                 room->fillAG(heros, player);
-                hero = room->askForAG(player, heros, true, "throwTargetHero");
+                int hero = room->askForAG(player, heros, true, "throwTargetHero");
                 player->invoke("clearAG");
 
                 if(hero == -1)
                     break;
 
-                room->setCardFlag(heroSelf, "-justdraw");
+                int heroTarget = hero;
+
+                heros = player->getPile("heros");
+                heros.removeOne(player->getMark("hero"));
+
+                room->fillAG(heros, player);
+                hero = room->askForAG(player, heros, true, "throwSelfHero");
+                player->invoke("clearAG");
+
+                if(hero == -1)
+                    break;
+
                 room->setCardFlag(hero, "-justdraw");
-                room->throwCard(heroSelf, player);
-                room->throwCard(hero, target);
+                room->setCardFlag(heroTarget, "-justdraw");
+                room->throwCard(hero, player);
+                room->throwCard(heroTarget, target);
 
                 return true;
             }
@@ -839,7 +842,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
             if (effect.card->inherits("Snatch"))
             {
                 ServerPlayer *target = effect.to;
-                if(player->getPile("heros").isEmpty() || target->getPile("heros").isEmpty())
+                if(player->getMark("hero") == 0 || target->getPile("heros").isEmpty())
                     break;
 
                 QString choice = room->askForChoice(player, "SnatchTargetHero", "normal+snatch");
@@ -890,6 +893,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
         {
             sendHeroCardsToPileLog(move->card_id, player);
             player->addToPile("heros", card);
+            player->fillHero();
         }
 
         break;
@@ -915,9 +919,37 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
             player->clearPrivatePilesExcept("heros");
             if(player->getHp() <= 0 and player->isAlive())
                 room->enterDying(player, NULL);
+            player->fillHero();
         }
 
         break;
+    }
+
+    case StartJudge:{
+        JudgeStar judge = data.value<JudgeStar>();
+
+        int delay = Config.AIDelay;
+        if(judge->time_consuming)
+            delay /= 4;
+
+        do
+        {
+            int card_id = room->drawCard();
+            const Card *judgeCard = Sanguosha->getCard(card_id);
+            judge->card = judgeCard;
+            room->moveCardTo(judgeCard, NULL, Player::DiscardPile);
+            room->getThread()->delay(delay);
+        }while(judge->card->inherits("HeroCard"));
+
+        LogMessage log;
+        log.type = "$InitialJudge";
+        log.from = player;
+        log.card_str = judge->card->getEffectIdString();
+        room->sendLog(log);
+
+        room->sendJudgeResult(judge);
+
+        return false;
     }
 
     case GameOverJudge: {
@@ -978,6 +1010,7 @@ void ThreeKingdomsMode::addHeroCardsToPile(ServerPlayer *player) const{
         sendHeroCardsToPileLog(hero_card_ids, player);
         player->addToPile("heros", hero_card_ids);
     }
+    player->fillHero();
 }
 
 void ThreeKingdomsMode::addHeroCardsFlag(ServerPlayer *player) const{

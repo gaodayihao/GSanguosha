@@ -254,6 +254,16 @@ RoomScene::RoomScene(QMainWindow *main_window)
         connect(ClientInstance, SIGNAL(ag_cleared()), card_container, SLOT(clear()));
     }
 
+    {
+        hero_box = new HeroCardContainer();
+        hero_box->hide();
+        addItem(hero_box);
+        hero_box->setZValue(-2.0);
+
+        connect(ClientInstance, SIGNAL(hero_filled(QList<int>)), this, SLOT(fillHero(QList<int>)));
+        connect(ClientInstance, SIGNAL(hero_cleared()), hero_box, SLOT(clear()));
+    }
+
     connect(ClientInstance, SIGNAL(skill_attached(QString, bool)), this, SLOT(attachSkill(QString,bool)));
     connect(ClientInstance, SIGNAL(skill_detached(QString)), this, SLOT(detachSkill(QString)));
 
@@ -290,6 +300,9 @@ RoomScene::RoomScene(QMainWindow *main_window)
         chat_box_widget->setObjectName("chat_box_widget");
         chat_box->setReadOnly(true);
         chat_box->setTextColor(Config.TextEditColor);
+
+        hero_box->setParentItem(chat_box_widget);
+
         connect(ClientInstance, SIGNAL(line_spoken(QString)), this, SLOT(appendChatBox(QString)));
 
         // chat edit
@@ -604,6 +617,7 @@ void RoomScene::adjustItems(){
     chat_edit->resize(infoPlane.width() - chat_widget->boundingRect().width(), room_layout->m_chatTextBoxHeight);
     chat_widget->setPos(infoPlane.right() - chat_widget->boundingRect().width(),
         chat_edit_widget->y() + (room_layout->m_chatTextBoxHeight - chat_widget->boundingRect().height()) / 2);
+    hero_box->setPos(-2*93, chat_box_widget->boundingRect().height()+82);
 
      if (self_box)
          self_box->setPos(infoPlane.left() - padding - self_box->boundingRect().width(),
@@ -3102,6 +3116,12 @@ void RoomScene::fillCards(const QList<int> &card_ids)
     bringToFront(card_container);
     card_container->fillCards(card_ids);
     card_container->show();
+}
+
+void RoomScene::fillHero(const QList<int> &card_ids)
+{
+    hero_box->fillCards(card_ids);
+    hero_box->show();
 }
 
 void RoomScene::doGongxin(const QList<int> &card_ids, bool enable_heart, bool enable_Spade){

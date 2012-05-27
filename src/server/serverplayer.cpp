@@ -957,7 +957,17 @@ void ServerPlayer::copyFrom(ServerPlayer* sp)
     c->copyFrom(a);
 }
 
-
 void ServerPlayer::emitDisconnect(){
     emit disconnected();
+}
+
+void ServerPlayer::fillHero(){
+    QStringList card_str;
+    foreach(int card_id, getPile("heros"))
+        card_str << QString::number(card_id);
+
+    if(card_str.isEmpty())
+        invoke("clearHero");
+    else
+        invoke("fillHero", card_str.join("+"));
 }

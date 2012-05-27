@@ -313,3 +313,55 @@ void GuanxingBox::reply(){
     clear();
 }
 
+
+HeroCardContainer::HeroCardContainer()
+{
+    Pixmap::load("image/system/hero-box.png");
+}
+
+void HeroCardContainer::fillCards(const QList<int> &card_ids){
+    if(card_ids.isEmpty())
+    {
+        clear();
+        return;
+    }
+    else if(!items.isEmpty()){
+        clear();
+    }
+    QList<CardItem*> card_items = _createCards(card_ids);
+
+    static const QPointF pos1(0, 0);
+    static const int card_width = 93;
+    static const int skip = 93;
+    static const qreal whole_width = skip * 4 + card_width;
+    items.append(card_items);
+    int n = items.length();
+
+    for (int i = 0; i < n; i++) {
+        QPointF pos;
+        if(n <= 5){
+            pos = pos1;
+            pos.setX(pos.x() + (4 - i) * skip);
+        }else{
+            int half = n / 1 + 2;
+            qreal real_skip = whole_width / half;
+
+            pos = pos1;
+            pos.setX(pos.x() + (n - i) * real_skip);
+        }
+        CardItem* item = items[i];
+        item->setPos(pos);
+        item->setHomePos(pos);
+        item->setOpacity(1.0);
+        item->setHomeOpacity(1.0);
+        item->setFlag(QGraphicsItem::ItemIsFocusable);
+    }
+}
+
+void HeroCardContainer::clear(){
+    foreach(CardItem *item, items){
+        item->deleteLater();
+    }
+    items.clear();
+    hide();
+}

@@ -153,6 +153,9 @@ Client::Client(QObject *parent, const QString &filename)
     callbacks["takeAG"] = &Client::takeAG;
     callbacks["clearAG"] = &Client::clearAG;
 
+    callbacks["fillHero"] = &Client::fillHero;
+    callbacks["clearHero"] = &Client::clearHero;
+
     // 3v3 mode & 1v1 mode
     callbacks["fillGenerals"] = &Client::fillGenerals;
     callbacks["askForGeneral3v3"] = &Client::askForGeneral3v3;
@@ -1416,6 +1419,20 @@ void Client::takeAG(const QString &take_str){
 
 void Client::clearAG(const QString &){
     emit ag_cleared();
+}
+
+void Client::fillHero(const QString &cards_str){
+    QStringList cards = cards_str.split("+");
+    QList<int> card_ids;
+    foreach(QString card, cards){
+        card_ids << card.toInt();
+    }
+
+    emit hero_filled(card_ids);
+}
+
+void Client::clearHero(const QString &){
+    emit hero_cleared();
 }
 
 void Client::askForSinglePeach(const Json::Value &arg){
