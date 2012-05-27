@@ -255,13 +255,18 @@ RoomScene::RoomScene(QMainWindow *main_window)
     }
 
     {
-        hero_box = new HeroCardContainer();
-        hero_box->hide();
-        addItem(hero_box);
-        hero_box->setZValue(-2.0);
+        hero_box = NULL;
 
-        connect(ClientInstance, SIGNAL(hero_filled(QList<int>)), this, SLOT(fillHero(QList<int>)));
-        connect(ClientInstance, SIGNAL(hero_cleared()), hero_box, SLOT(clear()));
+        if(ServerInfo.GameMode == "03_3kingdoms")
+        {
+            hero_box = new HeroCardContainer();
+            hero_box->hide();
+            addItem(hero_box);
+            hero_box->setZValue(-2.0);
+
+            connect(ClientInstance, SIGNAL(hero_filled(QList<int>)), this, SLOT(fillHero(QList<int>)));
+            connect(ClientInstance, SIGNAL(hero_cleared()), hero_box, SLOT(clear()));
+        }
     }
 
     connect(ClientInstance, SIGNAL(skill_attached(QString, bool)), this, SLOT(attachSkill(QString,bool)));
@@ -301,7 +306,8 @@ RoomScene::RoomScene(QMainWindow *main_window)
         chat_box->setReadOnly(true);
         chat_box->setTextColor(Config.TextEditColor);
 
-        hero_box->setParentItem(chat_box_widget);
+        if(hero_box)
+            hero_box->setParentItem(chat_box_widget);
 
         connect(ClientInstance, SIGNAL(line_spoken(QString)), this, SLOT(appendChatBox(QString)));
 
@@ -617,7 +623,8 @@ void RoomScene::adjustItems(){
     chat_edit->resize(infoPlane.width() - chat_widget->boundingRect().width(), room_layout->m_chatTextBoxHeight);
     chat_widget->setPos(infoPlane.right() - chat_widget->boundingRect().width(),
         chat_edit_widget->y() + (room_layout->m_chatTextBoxHeight - chat_widget->boundingRect().height()) / 2);
-    hero_box->setPos(-2*93, chat_box_widget->boundingRect().height()+82);
+    if(hero_box)
+        hero_box->setPos(-2*93, chat_box_widget->boundingRect().height()+82);
 
      if (self_box)
          self_box->setPos(infoPlane.left() - padding - self_box->boundingRect().width(),
