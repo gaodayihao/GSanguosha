@@ -573,7 +573,7 @@ QGroupBox *ServerDialog::create3v3Box(){
 
 QGroupBox *ServerDialog::create3kingdomsBox(){
     QGroupBox *box = new QGroupBox(tr("3kingdoms options"));
-    box->setVisible(Config.GameMode == "03_3kingdoms");
+    box->setEnabled(Config.GameMode == "03_3kingdoms");
 
     enable_snatch_hero = new QCheckBox(tr("Enable Snatch Hero"));
     bool snatch_hero = Config.value("3KingDoms/EnableSnatchHero", false).toBool();
@@ -611,7 +611,7 @@ QGroupBox *ServerDialog::createGameModeBox(){
                 QGroupBox *box = create3kingdomsBox();
 
                 connect(button, SIGNAL(toggled(bool)), enable_snatch_hero, SLOT(setEnabled(bool)));
-                connect(button, SIGNAL(toggled(bool)), box, SLOT(setVisible(bool)));
+                connect(button, SIGNAL(toggled(bool)), box, SLOT(setEnabled(bool)));
 
                 item_list << button << box;
             }
