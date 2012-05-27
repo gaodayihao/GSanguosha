@@ -571,6 +571,24 @@ QGroupBox *ServerDialog::create3v3Box(){
     return box;
 }
 
+QGroupBox *ServerDialog::create3kingdomsBox(){
+    QGroupBox *box = new QGroupBox(tr("3kingdoms options"));
+    box->setVisible(Config.GameMode == "03_3kingdoms");
+
+    enable_snatch_hero = new QCheckBox(tr("Enable Snatch Hero"));
+    bool snatch_hero = Config.value("3KingDoms/EnableSnatchHero", false).toBool();
+    enable_snatch_hero->setChecked(snatch_hero);
+    enable_snatch_hero->setEnabled(Config.GameMode == "03_3kingdoms");
+
+    QVBoxLayout *vlayout = new QVBoxLayout;
+
+    vlayout->addWidget(enable_snatch_hero);
+
+    box->setLayout(vlayout);
+
+    return box;
+}
+
 QGroupBox *ServerDialog::createGameModeBox(){
     QGroupBox *mode_box = new QGroupBox(tr("Game mode"));
     mode_group = new QButtonGroup;
@@ -588,7 +606,16 @@ QGroupBox *ServerDialog::createGameModeBox(){
             button->setObjectName(itor.key());
             mode_group->addButton(button);
 
-            if(itor.key() == "06_3v3"){
+            if(itor.key() == "03_3kingdoms")
+            {
+                QGroupBox *box = create3kingdomsBox();
+
+                connect(button, SIGNAL(toggled(bool)), enable_snatch_hero, SLOT(setEnabled(bool)));
+                connect(button, SIGNAL(toggled(bool)), box, SLOT(setVisible(bool)));
+
+                item_list << button << box;
+            }
+            else if(itor.key() == "06_3v3"){
                 // add 3v3 options
                 QGroupBox *box = create3v3Box();
                 connect(button, SIGNAL(toggled(bool)), box, SLOT(setEnabled(bool)));
@@ -676,7 +703,7 @@ QGroupBox *ServerDialog::createGameModeBox(){
     for(int i=0; i<item_list.length(); i++){
         QObject *item = item_list.at(i);
 
-        QVBoxLayout *side = i < item_list.length()/2 - 2 ? left : right;
+        QVBoxLayout *side = i < item_list.length()/2 - 1 ? left : right;
 
         if(item->isWidgetType()){
             QWidget *widget = qobject_cast<QWidget *>(item);
@@ -895,7 +922,8 @@ bool ServerDialog::config(){
     Config.DisableChat = disable_chat_checkbox->isChecked();
     Config.Enable2ndGeneral = second_general_checkbox->isChecked();
     Config.EnableScene = scene_checkbox->isChecked();		//changjing
-    Config.EnableSame = same_checkbox->isChecked();
+    Config.EnableSame = same_checkbox->isChecked();	//changjing
+    Config.EnableSnatchHero = enable_snatch_hero->isChecked() && enable_snatch_hero->isEnabled();
     Config.EnableBasara= basara_checkbox->isChecked() && basara_checkbox->isEnabled();
     Config.EnableHegemony = hegemony_checkbox->isChecked() && hegemony_checkbox->isEnabled();
     Config.MaxHpScheme = max_hp_scheme_combobox->currentIndex();
@@ -960,6 +988,10 @@ bool ServerDialog::config(){
     Config.setValue("RoleChoose", role_choose_combobox->itemData(role_choose_combobox->currentIndex()).toString());
     Config.setValue("ExcludeDisaster", exclude_disaster_checkbox->isChecked());
     Config.setValue("UsingNewMode", new_3v3_radiobutton->isChecked());
+    Config.endGroup();
+
+    Config.beginGroup("3KingDoms");
+    Config.setValue("EnableSnatchHero", Config.EnableSnatchHero);
     Config.endGroup();
 
     QSet<QString> ban_packages;

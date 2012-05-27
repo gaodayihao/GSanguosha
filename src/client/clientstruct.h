@@ -26,6 +26,7 @@ struct ServerInfoStruct{
     bool EnableHegemony;
     bool EnableAI;
     bool DisableChat;
+    bool EnableSnatchHero;
     int MaxHPScheme;
 };
 
@@ -49,6 +50,7 @@ private:
     QLabel *port_label;
     QLabel *game_mode_label;
     QLabel *player_count_label;
+    QLabel *enable_snatch_hero_label;
     QLabel *two_general_label;
     QLabel *scene_label;
     QLabel *same_label;

@@ -29,6 +29,7 @@ public:
     int CountDownSeconds;
     QString GameMode;
     QStringList BanPackages;
+    bool EnableSnatchHero;
     bool ContestMode;
     bool FreeChoose;
     bool ForbidSIMC;

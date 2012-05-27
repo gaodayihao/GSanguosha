@@ -32,7 +32,7 @@ time_t ServerInfoStruct::getCommandTimeout(QSanProtocol::CommandType command, QS
 }
 
 bool ServerInfoStruct::parse(const QString &str){
-    QRegExp rx("(.*):(@?\\w+):(\\d+):([+\\w]*):([FSCTBHAM12]*)");
+    QRegExp rx("(.*):(@?\\w+):(\\d+):([+\\w]*):([FSCTBHAMQ12]*)");
     if(!rx.exactMatch(str)){
         // older version, just take the player count
         int count = str.split(":").at(1).toInt();
@@ -72,6 +72,7 @@ bool ServerInfoStruct::parse(const QString &str){
     EnableHegemony = flags.contains("H");
     EnableAI = flags.contains("A");
     DisableChat = flags.contains("M");
+    EnableSnatchHero = flags.contains("Q");
 
     if(flags.contains("1"))
         MaxHPScheme = 1;
@@ -90,6 +91,7 @@ ServerInfoWidget::ServerInfoWidget(bool show_lack)
     port_label = new QLabel;
     game_mode_label = new QLabel;
     player_count_label = new QLabel;
+    enable_snatch_hero_label = new QLabel;
     two_general_label = new QLabel;
     scene_label = new QLabel;
     same_label = new QLabel;
@@ -111,6 +113,7 @@ ServerInfoWidget::ServerInfoWidget(bool show_lack)
     layout->addRow(tr("Game mode"), game_mode_label);
     layout->addRow(tr("Player count"), player_count_label);
     layout->addRow(tr("2nd general mode"), two_general_label);
+    layout->addRow(tr("Enable Snatch Hero"), enable_snatch_hero_label);
     layout->addRow(tr("Scene Mode"), scene_label);
     layout->addRow(tr("Same Mode"), same_label);
     layout->addRow(tr("Basara Mode"), basara_label);
@@ -138,6 +141,7 @@ void ServerInfoWidget::fill(const ServerInfoStruct &info, const QString &address
     player_count_label->setText(QString::number(player_count));
     port_label->setText(QString::number(Config.ServerPort));
     two_general_label->setText(info.Enable2ndGeneral ? tr("Enabled") : tr("Disabled"));
+    enable_snatch_hero_label->setText(info.EnableSnatchHero ? tr("Enabled") : tr("Disabled"));
     scene_label->setText(info.EnableScene ? tr("Enabled") : tr("Disabled"));
     same_label->setText(info.EnableSame ? tr("Enabled") : tr("Disabled"));
     basara_label->setText(info.EnableBasara ? tr("Enabled") : tr("Disabled"));

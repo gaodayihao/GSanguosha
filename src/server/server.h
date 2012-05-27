@@ -84,10 +84,12 @@ private:
 
     QGroupBox *createGameModeBox();
     QGroupBox *create3v3Box();
+    QGroupBox *create3kingdomsBox();
 
     QLineEdit *server_name_edit;
     QSpinBox *timeout_spinbox, *god_selectlimited_spinbox;
     QCheckBox *nolimit_checkbox;
+    QCheckBox *enable_snatch_hero;
     QCheckBox *contest_mode_checkbox;
     QCheckBox *free_choose_checkbox;
     QCheckBox *free_assign_checkbox;

@@ -73,8 +73,8 @@ Engine::Engine()
     modes["04_1v3"] = tr("4 players (Hulao Pass)");
     modes["05p"] = tr("5 players");
     modes["06p"] = tr("6 players");
-    modes["06pd"] = tr("6 players (2 renegades)");
     modes["06_3v3"] = tr("6 players (3v3)");
+    modes["06pd"] = tr("6 players (2 renegades)");
     modes["07p"] = tr("7 players");
     modes["08p"] = tr("8 players");
     modes["08pd"] = tr("8 players (2 renegades)");
@@ -385,6 +385,8 @@ QString Engine::getSetupString() const{
         flags.append("A");
     if(Config.DisableChat)
         flags.append("M");
+    if(Config.EnableSnatchHero)
+        flags.append("Q");
 
     if(Config.MaxHpScheme == 1)
         flags.append("1");

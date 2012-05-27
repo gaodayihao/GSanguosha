@@ -4,6 +4,7 @@
 #include "standard.h"
 #include "engine.h"
 #include "settings.h"
+#include "clientstruct.h"
 
 #include <QTime>
 
@@ -835,11 +836,10 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 room->setCardFlag(heroTarget, "-justdraw");
                 room->throwCard(hero, player);
                 room->throwCard(heroTarget, target);
-
                 return true;
             }
 
-            if (effect.card->inherits("Snatch"))
+            if (ServerInfo.EnableSnatchHero && effect.card->inherits("Snatch"))
             {
                 ServerPlayer *target = effect.to;
                 if(player->getMark("hero") == 0 || target->getPile("heros").isEmpty())
@@ -869,6 +869,8 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
 
                 const Card *heroCard = Sanguosha->getCard(hero);
                 player->addToPile("heros", heroCard);
+                player->fillHero();
+
                 sendHeroCardsToPileLog(hero, player);
                 LogMessage log;
                 log.from = player;
@@ -879,6 +881,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 room->setPlayerMark(player, "hero", heroCard->getEffectiveId());
                 room->transfigure(player, heroCard->objectName(), false);
                 room->setPlayerProperty(player, "kingdom", player->getGeneral()->getKingdom());
+
 
                 return true;
             }
@@ -902,24 +905,26 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
     case CardLostOnePiece:{
         CardMoveStar move = data.value<CardMoveStar>();
         const Card *card = Sanguosha->getCard(move->card_id);
-        if(card->inherits("HeroCard") && move->from_place == Player::Special
-                && (card->objectName() == player->getGeneralName() || player->getPile("heros").isEmpty())
-                && player->getGeneralName() != "anjiang")
+        if(card->inherits("HeroCard") && move->from_place == Player::Special)
         {
-            LogMessage log;
-            log.from = player;
-            log.type = "#LoseHeroCard";
-            log.arg = player->getGeneralName();
-            log.arg2 = "anjiang";
-            room->sendLog(log);
-            room->setPlayerMark(player, "hero", 0);
-            room->transfigure(player, "anjiang", false);
-            room->setPlayerProperty(player, "kingdom", "god");
-            player->throwAllMarks();
-            player->clearPrivatePilesExcept("heros");
-            if(player->getHp() <= 0 and player->isAlive())
-                room->enterDying(player, NULL);
             player->fillHero();
+            if((card->objectName() == player->getGeneralName() || player->getPile("heros").isEmpty())
+                    && player->getGeneralName() != "anjiang")
+            {
+                LogMessage log;
+                log.from = player;
+                log.type = "#LoseHeroCard";
+                log.arg = player->getGeneralName();
+                log.arg2 = "anjiang";
+                room->sendLog(log);
+                room->setPlayerMark(player, "hero", 0);
+                room->transfigure(player, "anjiang", false);
+                room->setPlayerProperty(player, "kingdom", "god");
+                player->throwAllMarks();
+                player->clearPrivatePilesExcept("heros");
+                if(player->getHp() <= 0 and player->isAlive())
+                    room->enterDying(player, NULL);
+            }
         }
 
         break;
