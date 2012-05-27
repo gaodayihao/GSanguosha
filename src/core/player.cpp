@@ -313,6 +313,22 @@ bool Player::hasLordSkill(const QString &skill_name) const{
     return false;
 }
 
+void Player::addSkill(const QString &skill_name){
+    additional_skills.insert(skill_name);
+}
+
+void Player::deleteSkill(const QString &skill_name){
+    additional_skills.remove(skill_name);
+}
+
+void Player::removeAdditionalSkills(){
+    additional_skills.clear();
+}
+
+QSet<QString> Player::getAdditionalSkills() const{
+    return additional_skills;
+}
+
 void Player::acquireSkill(const QString &skill_name){
     acquired_skills.insert(skill_name);
 }

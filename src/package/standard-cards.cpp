@@ -941,7 +941,7 @@ bool Snatch::targetFilter(const QList<const Player *> &targets, const Player *to
     if(!targets.isEmpty())
         return false;
 
-    if(to_select->isAllNude())
+    if(to_select->isAllNude() && (to_select->getPile("heros").isEmpty() || Self->getMark("hero") == 0))
         return false;
 
     if(to_select == Self)
@@ -978,7 +978,9 @@ bool Dismantlement::targetFilter(const QList<const Player *> &targets, const Pla
     if(!targets.isEmpty())
         return false;
 
-    if(to_select->isAllNude())
+    QList<int> heros = Self->getPile("heros");
+    heros.removeOne(Self->getMark("hero"));
+    if(to_select->isAllNude() && (to_select->getPile("heros").isEmpty() || heros.isEmpty()))
         return false;
 
     if(to_select == Self)

@@ -126,6 +126,11 @@ public:
 
     bool isLord() const;
 
+    void addSkill(const QString &skill_name);
+    void deleteSkill(const QString &skill_name);
+    void removeAdditionalSkills();
+    QSet<QString> getAdditionalSkills() const;
+
     void acquireSkill(const QString &skill_name);
     void loseSkill(const QString &skill_name);
     void loseAllSkills();
@@ -214,6 +219,7 @@ protected:
     QMap<QString, int> marks;
     QMap<QString, QList<int> > piles;
     QSet<QString> acquired_skills;
+    QSet<QString> additional_skills;
     QSet<QString> flags;
     QHash<QString, int> history;
 

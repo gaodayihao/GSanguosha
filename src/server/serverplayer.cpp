@@ -969,5 +969,13 @@ void ServerPlayer::fillHero(){
     if(card_str.isEmpty())
         invoke("clearHero");
     else
+    {
+        QString hero = QString::number(getMark("hero"));
+        if(card_str.contains(hero))
+        {
+            card_str.removeOne(hero);
+            card_str.prepend(hero);
+        }
         invoke("fillHero", card_str.join("+"));
+    }
 }

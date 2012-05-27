@@ -804,7 +804,12 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 if(heros.isEmpty() || target->getPile("heros").isEmpty())
                     break;
 
-                QString choice = room->askForChoice(player, objectName(), "normal+throw");
+                QString choice ;
+                if(target->isNude())
+                    choice = "throw";
+                else
+                    choice = room->askForChoice(player, objectName(), "normal+throw");
+
                 if(choice == "normal")
                     break;
 
@@ -845,7 +850,12 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 if(player->getMark("hero") == 0 || target->getPile("heros").isEmpty())
                     break;
 
-                QString choice = room->askForChoice(player, "SnatchTargetHero", "normal+snatch");
+                QString choice ;
+                if(target->isNude())
+                    choice = "snatch";
+                else
+                    choice = room->askForChoice(player, "SnatchTargetHero", "normal+snatch");
+
                 if(choice == "normal")
                     break;
 
@@ -908,7 +918,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
         if(card->inherits("HeroCard") && move->from_place == Player::Special)
         {
             player->fillHero();
-            if((card->objectName() == player->getGeneralName() || player->getPile("heros").isEmpty())
+            if((move->card_id == player->getMark("hero") || player->getPile("heros").isEmpty())
                     && player->getGeneralName() != "anjiang")
             {
                 LogMessage log;
@@ -922,6 +932,22 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 room->setPlayerProperty(player, "kingdom", "god");
                 player->throwAllMarks();
                 player->clearPrivatePilesExcept("heros");
+
+                QSet<QString>skills = player->getAdditionalSkills();
+                static QSet<QString>except;
+                if(except.isEmpty())
+                {
+                    except << "usehero" << "herorecast";
+                }
+                skills.subtract(except);
+                if(!skills.isEmpty())
+                {
+                    foreach(QString askill, skills.toList())
+                    {
+                        room->detachSkillFromPlayer(player, askill);
+                    }
+                }
+
                 if(player->getHp() <= 0 and player->isAlive())
                     room->enterDying(player, NULL);
             }

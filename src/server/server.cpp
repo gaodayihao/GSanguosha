@@ -991,7 +991,7 @@ bool ServerDialog::config(){
     Config.endGroup();
 
     Config.beginGroup("3KingDoms");
-    Config.setValue("EnableSnatchHero", Config.EnableSnatchHero);
+    Config.setValue("EnableSnatchHero", enable_snatch_hero->isChecked());
     Config.endGroup();
 
     QSet<QString> ban_packages;

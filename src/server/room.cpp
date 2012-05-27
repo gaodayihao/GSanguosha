@@ -520,6 +520,7 @@ void Room::detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name
         return;
 
     player->loseSkill(skill_name);
+    player->deleteSkill(skill_name);
     broadcastInvoke("detachSkill",
                     QString("%1:%2").arg(player->objectName()).arg(skill_name));
 
@@ -3439,6 +3440,7 @@ void Room::acquireSkill(ServerPlayer *player, const Skill *skill, bool open, boo
         return;
 
     player->acquireSkill(skill_name);
+    player->addSkill(skill_name);
 
     if(skill->inherits("TriggerSkill")){
         const TriggerSkill *trigger_skill = qobject_cast<const TriggerSkill *>(skill);

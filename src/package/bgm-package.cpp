@@ -641,6 +641,7 @@ public:
                 log.arg = "qianxun";
                 log.arg2 = "keji";
                 room->sendLog(log);
+                room->playSkillEffect(objectName());
             }
         }
         else{
@@ -670,6 +671,7 @@ public:
                     log.arg = "keji";
                     log.arg2 = "qianxun";
                     room->sendLog(log);
+                    room->playSkillEffect(objectName());
                 }
         }
         return false;

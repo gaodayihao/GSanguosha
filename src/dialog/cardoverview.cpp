@@ -3,6 +3,7 @@
 #include "engine.h"
 #include "clientstruct.h"
 #include "client.h"
+#include "settings.h"
 
 static CardOverview *Overview;
 
@@ -34,7 +35,8 @@ CardOverview::CardOverview(QWidget *parent) :
 }
 
 void CardOverview::loadFromAll(){
-    int i, n = Sanguosha->getCardCountWithoutSpecial();
+    int i, n = Config.value("ThreeKingdomsTest", false).toBool() ? Sanguosha->getCardCount()
+                                                                 :Sanguosha->getCardCountWithoutSpecial();
     ui->tableWidget->setRowCount(n);
     for(i=0; i<n ;i++){
         const Card *card = Sanguosha->getCard(i);

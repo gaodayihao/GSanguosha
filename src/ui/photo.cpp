@@ -612,6 +612,8 @@ void Photo::updatePile(const QString &pile_name){
     int active = 0;
     foreach(QString pile_name,names)
     {
+        if(pile_name.startsWith("#"))
+            continue;
         const QList<int> &pile = who->getPile(pile_name);
         if(!pile.isEmpty()){
             button_widget->show();
