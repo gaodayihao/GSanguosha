@@ -599,9 +599,14 @@ void GameRule::changeGeneral1v1(ServerPlayer *player) const{
     Room *room = player->getRoom();
     QString new_general = player->tag["1v1ChangeGeneral"].toString();
     player->tag.remove("1v1ChangeGeneral");
+
+    QSet<QString> skills = player->getAcquiredSkills();
+    if(!skills.isEmpty())
+        foreach(QString skill, skills.toList())
+            room->detachSkillFromPlayer(player, skill);
+
     room->transfigure(player, new_general, true, true);
     room->revivePlayer(player);
-
     if(player->getKingdom() != player->getGeneral()->getKingdom())
         room->setPlayerProperty(player, "kingdom", player->getGeneral()->getKingdom());
 
@@ -609,7 +614,6 @@ void GameRule::changeGeneral1v1(ServerPlayer *player) const{
                           QString("%1:%2").arg(player->objectName()).arg(new_general),
                           player);
 
-    player->loseAllSkills();
 
     if(!player->faceUp())
         player->turnOver();
