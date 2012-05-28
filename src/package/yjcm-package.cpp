@@ -394,32 +394,12 @@ void XuanhuoCard::onEffect(const CardEffectStruct &effect) const{
             use.to << victim;
             room->useCard(use);
         }
-        else
-        {
-            if (!effect.to->isNude()){
-                int first_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanhuo");
-                DummyCard *dummy = new DummyCard;
-                dummy->addSubcard(first_id);
-                effect.to->addToPile("#xuanhuo", dummy, true);
-                int second_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanhuo");
-                dummy->addSubcard(second_id);
-                room->moveCardTo(dummy, effect.from, Player::Hand, false);
-                delete dummy;
-            }
+        else if (!effect.to->isNude()){
+            room->obtainCards(effect.to, effect.from, effect.from, 2, "he", "xuanhuo");
         }
     }
-    else
-    {
-        if (!effect.to->isNude()){
-            int first_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanhuo");
-            DummyCard *dummy = new DummyCard;
-            dummy->addSubcard(first_id);
-            effect.to->addToPile("#xuanhuo", dummy, true);
-            int second_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanhuo");
-            dummy->addSubcard(second_id);
-            room->moveCardTo(dummy, effect.from, Player::Hand, false);
-            delete dummy;
-        }
+    else if (!effect.to->isNude()){
+        room->obtainCards(effect.to, effect.from, effect.from, 2, "he", "xuanhuo");
     }
 }
 

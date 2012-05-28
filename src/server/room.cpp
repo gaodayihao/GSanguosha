@@ -3145,7 +3145,8 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
         {
             //trigger events
             if (cards_move.from &&
-                (cards_move.from_place == Player::Hand || cards_move.from_place == Player::Equip || cards_move.from_place == Player::Special)){
+                (cards_move.from_place == Player::Hand || cards_move.from_place == Player::Equip || cards_move.from_place == Player::Special)
+                    && !cards_move.from->hasFlag("CardMoving")){
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardLostOnePiece, (ServerPlayer*)cards_move.from, data);
@@ -3156,7 +3157,7 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
             for (int i = 0; i < cards_move.card_ids.size(); i++)
                 moveOneTimeStruct.from_places.append(cards_move.from_place);
         }
-        if (cards_move.countAsOneTime && cards_move.from && moveOneTimeStruct.card_ids.size() > 0){
+        if (cards_move.countAsOneTime && cards_move.from && moveOneTimeStruct.card_ids.size() > 0 && !cards_move.from->hasFlag("CardMoving")){
             moveOneTimeStruct.from = cards_move.from; moveOneTimeStruct.to = cards_move.to;
             moveOneTimeStruct.to_place = cards_move.to_place;
             CardsMoveOneTimeStar lose_star = &moveOneTimeStruct;
@@ -3172,7 +3173,8 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
         for (int j = 0; j < cards_move.card_ids.size(); j++)
         {
             if (cards_move.to && (cards_move.to != cards_move.from || cards_move.from_place == Player::PlaceTakeoff) &&
-                (cards_move.to_place == Player::Hand || cards_move.to_place == Player::Equip))
+                (cards_move.to_place == Player::Hand || cards_move.to_place == Player::Equip)
+                    && !cards_move.to->hasFlag("CardMoving"))
             {
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
@@ -3184,7 +3186,7 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
             for (int i = 0; i < cards_move.card_ids.size(); i++)
                 moveOneTimeStruct.from_places.append(cards_move.from_place);
         }
-        if(cards_move.countAsOneTime && cards_move.to && moveOneTimeStruct.card_ids.size() > 0){
+        if(cards_move.countAsOneTime && cards_move.to && moveOneTimeStruct.card_ids.size() > 0 && !cards_move.to->hasFlag("CardMoving")){
             moveOneTimeStruct.from = cards_move.from; moveOneTimeStruct.to = cards_move.to;
             moveOneTimeStruct.to_place = cards_move.to_place;
             CardsMoveOneTimeStar move_star = &moveOneTimeStruct;
@@ -3287,7 +3289,8 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
             }
             //trigger events
             if (cards_move.from &&
-                (cards_move.from_place == Player::Hand || cards_move.from_place == Player::Equip || cards_move.from_place == Player::Special)){
+                (cards_move.from_place == Player::Hand || cards_move.from_place == Player::Equip || cards_move.from_place == Player::Special)
+                    && !cards_move.from->hasFlag("CardMoving")){
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardLostOnePiece, (ServerPlayer*)cards_move.from, data);
@@ -3298,7 +3301,7 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
             for (int i = 0; i < cards_move.card_ids.size(); i++)
                 moveOneTimeStruct.from_places.append(cards_move.from_place);
         }
-        if (cards_move.countAsOneTime && cards_move.from && moveOneTimeStruct.card_ids.size() > 0){
+        if (cards_move.countAsOneTime && cards_move.from && moveOneTimeStruct.card_ids.size() > 0 && !cards_move.from->hasFlag("CardMoving")){
             moveOneTimeStruct.from = cards_move.from; moveOneTimeStruct.to = cards_move.to;
             moveOneTimeStruct.to_place = cards_move.to_place;
             CardsMoveOneTimeStar lose_star = &moveOneTimeStruct;
@@ -3364,7 +3367,8 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
             setCardMapping(card_id, (ServerPlayer*)cards_move.to, cards_move.to_place);
 
             if (cards_move.to && (cards_move.to != cards_move.from || cards_move.from_place == Player::PlaceTakeoff) &&
-                (cards_move.to_place == Player::Hand || cards_move.to_place == Player::Equip)) {
+                (cards_move.to_place == Player::Hand || cards_move.to_place == Player::Equip)
+                    && !cards_move.to->hasFlag("CardMoving")) {
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardGotOnePiece, (ServerPlayer*)cards_move.to, data);
@@ -3376,7 +3380,7 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
             for (int i = 0; i < cards_move.card_ids.size(); i++)
                 moveOneTimeStruct.from_places.append(cards_move.from_place);
         }
-        if(cards_move.countAsOneTime && cards_move.to && moveOneTimeStruct.card_ids.size() > 0){
+        if(cards_move.countAsOneTime && cards_move.to && moveOneTimeStruct.card_ids.size() > 0 && !cards_move.to->hasFlag("CardMoving")){
             moveOneTimeStruct.from = cards_move.from; moveOneTimeStruct.to = cards_move.to;
             moveOneTimeStruct.to_place = cards_move.to_place;
             CardsMoveOneTimeStar move_star = &moveOneTimeStruct;
@@ -3423,6 +3427,68 @@ bool Room::notifyMoveCards(bool isLostPhase, QList<CardsMoveStruct> cards_moves,
             doNotify(player, S_COMMAND_GET_CARD, arg);
     }
     return true;
+}
+
+void Room::obtainCards(ServerPlayer *from,ServerPlayer *to, ServerPlayer *selector, int count, const QString &flags,
+                                const QString &reason)
+{
+    CardMoveStruct move;
+    move.from = from;
+    move.to = to;
+    move.to_place = Player::Hand;
+
+    CardsMoveOneTimeStruct cards_move;
+    cards_move.from = from;
+    cards_move.to = to;
+    cards_move.to_place = Player::Hand;
+
+    for(int i = 0;i < count;i++)
+    {
+        if((flags == "he" && from->isNude())
+                || (flags == "h" && from->isKongcheng())
+                || (flags == "hej" && from->isAllNude()))
+            break;
+        int card_id = askForCardChosen(selector, from, flags, reason);
+        Player::Place place = getCardPlace(card_id);
+        cards_move.card_ids << card_id;
+        cards_move.from_places << place;
+
+        setPlayerFlag(from,"CardMoving");
+        setPlayerFlag(to,"CardMoving");
+        obtainCard(to, Sanguosha->getCard(card_id), place != Player::Hand);
+        setPlayerFlag(to,"-CardMoving");
+        setPlayerFlag(from,"-CardMoving");
+    }
+
+    if (cards_move.card_ids.isEmpty())
+        return;
+
+    for(int i = 0; i <cards_move.card_ids.count(); i++)
+    {
+        move.from_place = cards_move.from_places(i);
+        move.card_id = cards_move.card_ids.at(i);
+
+        CardMoveStar move_star = &move;
+        QVariant data = QVariant::fromValue(move_star);
+        if(move.from_place != Player::Judging)
+            thread->trigger(CardLostOnePiece, from, data);
+    }
+    CardsMoveOneTimeStar move_star = &cards_move;
+    QVariant data = QVariant::fromValue(move_star);
+    thread->trigger(CardLostOneTime, from, data);
+
+    for(int i = 0; i <cards_move.card_ids.count(); i++)
+    {
+        move.from_place = cards_move.from_places(i);
+        move.card_id = cards_move.card_ids.at(i);
+
+        CardMoveStar move_star = &move;
+        QVariant data = QVariant::fromValue(move_star);
+        thread->trigger(CardGotOnePiece, to, data);
+    }
+    move_star = &cards_move;
+    data = QVariant::fromValue(move_star);
+    thread->trigger(CardGotOneTime, to, data);
 }
 
 void Room::playSkillEffect(const QString &skill_name, int index){
