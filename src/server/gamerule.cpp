@@ -891,6 +891,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 room->setPlayerMark(player, "hero", heroCard->getEffectiveId());
                 room->transfigure(player, heroCard->objectName(), false);
                 room->setPlayerProperty(player, "kingdom", player->getGeneral()->getKingdom());
+                player->fillHero();
 
 
                 return true;

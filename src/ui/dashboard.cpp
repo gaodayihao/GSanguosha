@@ -514,7 +514,7 @@ void Dashboard::_addProgressBar()
     QGraphicsProxyWidget *widget = new QGraphicsProxyWidget(right);
     widget->setWidget(&m_progressBar);
     widget->setParentItem(middle);
-    widget->setPos(250, - 25);
+    widget->setPos(150, - 25);
 
     connect(&m_progressBar, SIGNAL(timedOut()), this, SIGNAL(progressBarTimedOut()));
     m_progressBar.hide();

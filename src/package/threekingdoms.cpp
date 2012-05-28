@@ -63,6 +63,7 @@ void PrepareCard::onUse(Room *room, const CardUseStruct &card_use) const{
     room->setPlayerMark(card_use.from, "hero", card->getEffectiveId());
     room->transfigure(card_use.from, card->objectName(), false);
     room->setPlayerProperty(card_use.from, "kingdom", card_use.from->getGeneral()->getKingdom());
+    card_use.from->fillHero();
 }
 
 class Prepare:public OneCardViewAsSkill{
@@ -177,6 +178,7 @@ void UseHeroCard::onUse(Room *room, const CardUseStruct &card_use) const{
     room->setPlayerMark(source, "hero", herocard->getEffectiveId());
     room->transfigure(source, herocard->objectName(), false);
     room->setPlayerProperty(source, "kingdom", source->getGeneral()->getKingdom());
+    source->fillHero();
 }
 
 class UseHero:public ZeroCardViewAsSkill{
