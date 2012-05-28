@@ -3515,7 +3515,7 @@ void RoomScene::animateHpChange(const QString &, const QStringList &args)
 
         if(Self->getMaxHp() <= 5)
         {
-            int from = Self->getHp() + delta;
+            int from = qMax(Self->getHp() + delta, 1);
             int to = qMax(0, player->getHp());
             for(int i = from;i > to;i--)
             {
