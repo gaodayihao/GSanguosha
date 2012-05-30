@@ -175,7 +175,7 @@ public:
     }
 
     virtual bool viewFilter(const CardItem *to_select) const{
-        const Card *card = to_select->getCard();
+        const Card *card = to_select->getFilteredCard();
         return card->objectName() == "jink" || card->objectName() == "lightning";
     }
 
