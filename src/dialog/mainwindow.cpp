@@ -148,7 +148,6 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::gotoScene(QGraphicsScene *scene){
-
     if(this->scene)
         this->scene->deleteLater();
     this->scene = scene;

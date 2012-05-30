@@ -568,7 +568,7 @@ public:
             DyingStruct dying = data.value<DyingStruct>();
             forever{
                 if(dying.who->getHp() > 0 || handang->isNude() || room->getCurrent()->isDead() ||
-                        !room->askForSkillInvoke(handang, objectName(), data))
+                        !handang->canSlash(room->getCurrent(),true) || !room->askForSkillInvoke(handang, objectName(), data))
                     break;
                 room->playSkillEffect(objectName());
 

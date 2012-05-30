@@ -3465,7 +3465,7 @@ void Room::obtainCards(ServerPlayer *from,ServerPlayer *to, ServerPlayer *select
 
     for(int i = 0; i <cards_move.card_ids.count(); i++)
     {
-        move.from_place = cards_move.from_places(i);
+        move.from_place = cards_move.from_places.at(i);
         move.card_id = cards_move.card_ids.at(i);
 
         CardMoveStar move_star = &move;
@@ -3479,7 +3479,7 @@ void Room::obtainCards(ServerPlayer *from,ServerPlayer *to, ServerPlayer *select
 
     for(int i = 0; i <cards_move.card_ids.count(); i++)
     {
-        move.from_place = cards_move.from_places(i);
+        move.from_place = cards_move.from_places.at(i);
         move.card_id = cards_move.card_ids.at(i);
 
         CardMoveStar move_star = &move;

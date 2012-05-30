@@ -1337,6 +1337,10 @@ void RoomScene::getCards(int moveId, QList<CardsMoveStruct> card_moves)
             }
             else card->setEnabled(true);
         }
+        if(movement.from_place == Player::DrawPile && movement.to_place == Player::DiscardPile)
+            special_card = cards.first();
+        else
+            special_card = NULL;
         if(movement.from_place == Player::DiscardPile || movement.to_place == Player::Hand)
             foreach(CardItem* card,cards)
                 card->deleteCardDescription();
@@ -3156,7 +3160,7 @@ void RoomScene::showJudgeResult(const QString &who, const QString &result){
         QString desc = QString(tr("%1's judge")).arg(Sanguosha->translate(player->getGeneralName()));
         special_card->writeCardDesc(desc);
 
-        special_card->setFrame(result);
+        //special_card->setFrame(result);
     }
 }
 
@@ -3625,16 +3629,15 @@ void RoomScene::doLightboxAnimation(const QString &, const QStringList &args){
 
     lightbox->setBrush(QColor(0x20, 0x20, 0x20));
     lightbox->setOpacity(0.8);
-//    lightbox->moveBy(-main_window->width()/2, -main_window->height()/2);
     lightbox->setZValue(10086);
 
     QGraphicsTextItem *line = addText(word, Config.BigFont);
     line->setDefaultTextColor(Qt::white);
     QRectF line_rect = line->boundingRect();
-    line->setPos(line_rect.width()/2, line_rect.height()*2);
 
     line->setParentItem(lightbox);
-    line->setPos(lightbox->mapFromScene(line->x(), line->y()));
+    line->setPos(main_window->width()/2, main_window->height()/2);
+    line->moveBy(-line_rect.width()/2, -line_rect.height());
     line->setZValue(lightbox->zValue()+1);
 
     QPropertyAnimation *appear = new QPropertyAnimation(line, "opacity");
