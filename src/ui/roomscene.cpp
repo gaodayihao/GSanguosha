@@ -3523,9 +3523,10 @@ void RoomScene::animateHpChange(const QString &, const QStringList &args)
         {
             int from = Self->getHp() + delta;
             int to = qMax(0, player->getHp());
+            int skip = Self->getMaxHp() <= 3 ? 32 : 0;
             for(int i = from;i > to;i--)
             {
-                int _y = y + (i - 1)  * 32;
+                int _y = y + skip + (i - 1)  * 32;
                 PixmapAnimation::GetPixmapAnimation(avatar, "bloodlost", 80, _y);
             }
             return;
