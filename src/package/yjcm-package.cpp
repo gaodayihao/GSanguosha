@@ -1156,6 +1156,57 @@ public:
     }
 };
 
+class Shangshi: public TriggerSkill{
+public:
+    Shangshi():TriggerSkill("shangshi")
+    {
+        frequency = Compulsory;
+        events << HpChanged << CardLostOneTime << CardGotOneTime
+               << CardDrawnDone << PhaseChange;
+    }
+
+    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const
+    {
+        if(event == HpChanged && player->getHp() < 1)
+            return false;
+        if(event == CardLostOneTime && player->getPhase() == Player::Discard)
+            return false;
+        if(event == PhaseChange && player->getPhase() != Player::NotActive)
+            return false;
+
+        Room *room = player->getRoom();
+        const int lostHp = qMin(qMin(player->getLostHp(), player->getMaxHp()), 2);
+        const int HandcardNum = player->getHandcardNum();
+
+        if(lostHp <= HandcardNum)
+            return false;
+
+        if(event == CardLostOneTime)
+        {
+            CardsMoveOneTimeStar cards_move = data.value<CardsMoveOneTimeStar>();
+            if(!cards_move->from_places.contains(Player::Hand))
+                return false;
+        }
+
+        if(event == CardGotOneTime)
+        {
+            CardsMoveOneTimeStar cards_move = data.value<CardsMoveOneTimeStar>();
+            if(cards_move->to_place != Player::Hand)
+                return false;
+        }
+
+        LogMessage log;
+        log.type = "#TriggerSkill";
+        log.from = player;
+        log.arg = objectName();
+        room->sendLog(log);
+        room->playSkillEffect(objectName());
+        player->drawCards(lostHp - HandcardNum);
+
+        return false;
+    }
+};
+
 YJCMPackage::YJCMPackage():Package("YJCM"){
     General *caozhi = new General(this, "caozhi", "wei", 3);
     caozhi->addSkill(new Luoying);
@@ -1214,7 +1265,7 @@ YJCMPackage::YJCMPackage():Package("YJCM"){
     addMetaObject<XinzhanCard>();
     addMetaObject<PaiyiCard>();
 
-    skills << new Paiyi << new Jueqing;
+    skills << new Paiyi << new Jueqing << new Shangshi << new Skill("#testgeneral");
 }
 
 ADD_PACKAGE(YJCM)

@@ -317,6 +317,10 @@ public:
         return target->hasFlag("luoyi") && target->isAlive();
     }
 
+    virtual int getPriority() const{
+        return 3;
+    }
+
     virtual bool trigger(TriggerEvent , ServerPlayer *xuchu, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
 

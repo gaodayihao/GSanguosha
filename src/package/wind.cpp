@@ -445,7 +445,7 @@ public:
 
     static void Remove(ServerPlayer *zhoutai){
         Room *room = zhoutai->getRoom();
-        const QList<int> buqu(zhoutai->getPile("buqu"));
+        QList<int> buqu(zhoutai->getPile("buqu"));
 
         int need = 1 - zhoutai->getHp();
         if(need <= 0){
@@ -456,20 +456,18 @@ public:
         }else{
             int to_remove = buqu.length() - need;
 
-            room->fillAG(buqu);
-
-            int i;
-            for(i=0; i<to_remove; i++){
+            for(int i=0; i<to_remove; i++){
+                room->fillAG(buqu);
                 int card_id = room->askForAG(zhoutai, buqu, false, "buqu");
+                buqu.removeOne(card_id);
                 room->throwCard(card_id);
+                room->broadcastInvoke("clearAG");
             }
-
-            room->broadcastInvoke("clearAG");
         }
     }
 
     virtual bool trigger(TriggerEvent , ServerPlayer *zhoutai, QVariant &) const{
-        if(zhoutai->getHp() < 1)
+        if(zhoutai->getPile("buqu").length() > 0)
             Remove(zhoutai);
 
         return false;

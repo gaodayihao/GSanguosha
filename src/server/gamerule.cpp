@@ -192,6 +192,9 @@ bool GameRule::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data)
                     log.arg = new_kingdom;
                     room->sendLog(log);
                 }
+
+                if((player->hasSkill("jueqing") || player->hasSkill("shangshi")) && !player->hasSkill("#testgeneral"))
+                    room->killPlayer(player);
             }
             setGameProcess(room);
             room->setTag("FirstRound", true);
