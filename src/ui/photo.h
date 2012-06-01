@@ -77,13 +77,13 @@ protected:
 private:
     const ClientPlayer *player;
     QPixmap avatar, small_avatar;
-    QGraphicsPixmapItem *ready_item, *lord_frame;
+    QGraphicsPixmapItem *ready_item, *lord_frame, *_m_phase;
     QPixmap _m_mainFrame;
     QPixmap _m_handCardIcon;
-    QGraphicsPixmapItem *_m_kingdomIcon;
+    QGraphicsPixmapItem *_m_kingdomIcon/*, *_m_phase*/;
 //    QPixmap _m_kingdomIcon;
     QPixmap _m_kindomColorMaskIcon;
-    Pixmap chain;
+    QStringList phase_names;
     RoleCombobox *role_combobox;
     QGraphicsProxyWidget  *pile_button;
     QGraphicsPixmapItem *action_item, *save_me_item;
@@ -105,7 +105,6 @@ private:
     bool hide_avatar, game_start;
     QPixmap death_pixmap;
     QPixmap back_icon, chain_icon;
-    QList<Pixmap *> phases;
     QSanCommandProgressBar *progress_bar;
     QGraphicsPixmapItem *emotion_item, *frame_item;
     QGraphicsSimpleTextItem *skill_name_item;

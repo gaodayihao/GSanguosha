@@ -98,18 +98,17 @@ Photo::Photo():player(NULL),
     _m_kingdomIcon->setZValue(2.5);
 
     QStringList names;
-    names   << "round_start" << "start" << "judge" << "draw"
-            << "play" << "discard" << "finish";
-
-    foreach(QString name, names)
-        phases << new Pixmap(QString("image/system/phase/%1.png").arg(name));
-
-    foreach(Pixmap *phase, phases){
-        phase->setParentItem(this);
-        phase->setPos(13, S_NORMAL_PHOTO_HEIGHT - 4);
-        phase->setZValue(1.8);
-        phase->hide();
+    names << "round_start" << "start" << "judge" << "draw"
+          << "play" << "discard" << "finish";
+    foreach(QString name, names){
+        phase_names << QString("image/system/phase/%1.png").arg(name);
+        PixmapAnimation::GetFrameFromCache(QString("image/system/phase/%1.png").arg(name));
     }
+
+    _m_phase = new QGraphicsPixmapItem(this);
+    _m_phase->setPos(13, S_NORMAL_PHOTO_HEIGHT - 4);
+    _m_phase->setZValue(1.8);
+    _m_phase->hide();
 
     mark_item = new QGraphicsTextItem(this);
     mark_item->setPos(-71, 73);
@@ -648,7 +647,7 @@ void Photo::updatePile(const QString &pile_name){
     if(active>1)button->setText(QString(tr("Multiple")));
 }
 
-void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
+void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *){
     painter->setPen(Qt::white);
     QRect avatarRect = avatar_area->boundingRect().toRect();
     static QPixmap wait_frame("image/system/wait-frame.png");
@@ -691,18 +690,11 @@ void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
 
     if(player != NULL && player->getPhase() != Player::NotActive){
         int index = static_cast<int>(player->getPhase());
-        if(index > 0){
-            phases.at(index - 1)->hide();
-            phases.at(index)->show();
-        }
-        else
-            phases.at(index)->show();
+        _m_phase->setPixmap(PixmapAnimation::GetFrameFromCache(phase_names.at(index)));
+        _m_phase->show();
     }
-    else{
-        foreach(Pixmap *phase, phases){
-            phase->hide();
-        }
-    }
+    else
+        _m_phase->hide();
 
     if (player != NULL && player->isAlive())
     {
