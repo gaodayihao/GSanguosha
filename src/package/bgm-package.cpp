@@ -649,7 +649,6 @@ public:
                 if((lvmeng && lvmeng->getMark("@wen") > 0) && !lvmeng->isNude()
                         && lvmeng->askForSkillInvoke(objectName())){
 
-                    room->askForDiscard(lvmeng, "mouduan", 1, 1, false, true);
                     room->setPlayerMark(lvmeng, "@wen", 0);
                     room->setPlayerMark(lvmeng, "@wu", 1);
 
@@ -672,6 +671,7 @@ public:
                     log.arg2 = "qianxun";
                     room->sendLog(log);
                     room->playSkillEffect(objectName());
+                    room->askForDiscard(lvmeng, "mouduan", 1, 1, false, true);
                 }
         }
         return false;
