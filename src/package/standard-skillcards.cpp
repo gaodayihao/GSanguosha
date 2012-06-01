@@ -103,9 +103,6 @@ void TuxiCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.from->getRoom();
     int card_id = room->askForCardChosen(effect.from, effect.to, "h", "tuxi");
     room->obtainCard(effect.from, card_id, false);
-
-    room->setEmotion(effect.to, "bad");
-    room->setEmotion(effect.from, "good");
 }
 
 FanjianCard::FanjianCard(){

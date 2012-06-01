@@ -118,6 +118,7 @@ Photo::Photo():player(NULL),
     role_combobox = NULL;
     pile_button = NULL;
     game_start = false;
+    this->last_phase = NULL;
 }
 
 QRectF Photo::boundingRect() const
@@ -565,10 +566,23 @@ void Photo::setFrame(FrameType type){
 
 void Photo::updatePhase(){
     progress_bar->hide();
-    if(player->getPhase() != Player::NotActive)
+
+    if(player->getPhase() != Player::NotActive){
+        int index = static_cast<int>(player->getPhase());
+        if(this->last_phase)
+            this->last_phase->hide();
+        phases.at(index)->show();
+        this->last_phase = phases.at(index);
         setFrame(Playing);
+    }
     else
+    {
+        if(this->last_phase){
+            this->last_phase->hide();
+            this->last_phase = NULL;
+        }
         setFrame(NoFrame);
+    }
 }
 
 static bool CompareByNumber(const Card *card1, const Card *card2){
@@ -687,21 +701,6 @@ void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
         }
 
         painter->drawPixmap(death_x, 50, death_pixmap);
-    }
-
-    if(player != NULL && player->getPhase() != Player::NotActive){
-        int index = static_cast<int>(player->getPhase());
-        if(index > 0){
-            phases.at(index - 1)->hide();
-            phases.at(index)->show();
-        }
-        else
-            phases.at(index)->show();
-    }
-    else{
-        foreach(Pixmap *phase, phases){
-            phase->hide();
-        }
     }
 
     if (player != NULL && player->isAlive())
