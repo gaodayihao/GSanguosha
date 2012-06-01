@@ -241,6 +241,7 @@ public:
 
     virtual QString getSubtype() const;
 
+    virtual QString getEffectPath(bool) const;
     virtual Location location() const;
     virtual QString label() const;
 
@@ -259,6 +260,7 @@ public:
     Armor(Suit suit, int number):EquipCard(suit, number){}
     virtual QString getSubtype() const;
 
+    virtual QString getEffectPath(bool) const;
     virtual Location location() const;
     virtual QString label() const;
 };

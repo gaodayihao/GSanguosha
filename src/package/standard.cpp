@@ -286,6 +286,10 @@ QString Weapon::getSubtype() const{
     return "weapon";
 }
 
+QString Weapon::getEffectPath(bool) const{
+    return QString("audio/%1/card/common/weapon.ogg").arg(Config.SoundEffectMode);
+}
+
 EquipCard::Location Weapon::location() const{
     return WeaponLocation;
 }
@@ -312,6 +316,10 @@ void Weapon::onUninstall(ServerPlayer *player) const{
 
 QString Armor::getSubtype() const{
     return "armor";
+}
+
+QString Armor::getEffectPath(bool) const{
+    return QString("audio/%1/card/common/armor.ogg").arg(Config.SoundEffectMode);
 }
 
 EquipCard::Location Armor::location() const{

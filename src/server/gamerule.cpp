@@ -894,6 +894,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, ServerPlayer *player, QVaria
                 log.type = "#EquipedHeroCard";
                 log.arg = heroCard->objectName();
                 room->sendLog(log);
+                room->broadcastInvoke("playAudio", "equiphero");
 
                 room->setPlayerMark(player, "hero", heroCard->getEffectiveId());
                 room->transfigure(player, heroCard->objectName(), false);

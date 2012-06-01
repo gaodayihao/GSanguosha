@@ -59,7 +59,9 @@ void PrepareCard::onUse(Room *room, const CardUseStruct &card_use) const{
     log.type = "#EquipedHeroCard";
     log.arg = card->objectName();
     room->sendLog(log);
+    room->broadcastInvoke("playAudio", "equiphero");
 
+    card_use.from->addToPile("heros", card->getEffectiveId());
     room->setPlayerMark(card_use.from, "hero", card->getEffectiveId());
     room->transfigure(card_use.from, card->objectName(), false);
     room->setPlayerProperty(card_use.from, "kingdom", card_use.from->getGeneral()->getKingdom());
@@ -160,8 +162,8 @@ void UseHeroCard::onUse(Room *room, const CardUseStruct &card_use) const{
     room->fillAG(heros, source);
     int hero = room->askForAG(source, heros, false, "usehero");
     room->setCardFlag(hero, "-justdraw");
-
     source->invoke("clearAG");
+
     const Card *herocard = Sanguosha->getCard(hero);
 
     if(equiped >0){
@@ -174,6 +176,7 @@ void UseHeroCard::onUse(Room *room, const CardUseStruct &card_use) const{
     log.type = "#EquipedHeroCard";
     log.arg = herocard->objectName();
     room->sendLog(log);
+    room->broadcastInvoke("playAudio", "equiphero");
 
     room->setPlayerMark(source, "hero", herocard->getEffectiveId());
     room->transfigure(source, herocard->objectName(), false);
