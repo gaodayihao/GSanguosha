@@ -12,7 +12,7 @@ public:
         events << CardFinished << CardResponsed;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         if(player->getPhase() != Player::NotActive)
             return false;
 
@@ -31,8 +31,6 @@ public:
 
         if(card == NULL || !card->isBlack())
             return false;
-
-        Room *room = player->getRoom();
 
         room->setEmotion(player, QString("weapon/%1").arg("sp_moonspear"));
 
@@ -118,12 +116,11 @@ public:
         events << Damage;
     }
 
-    virtual bool trigger(TriggerEvent , ServerPlayer *zhurong, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *zhurong, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         ServerPlayer *target = damage.to;
         if(damage.card && damage.card->inherits("Slash") && !zhurong->isKongcheng()
             && !target->isKongcheng() && target != zhurong){
-            Room *room = zhurong->getRoom();
             if(room->askForSkillInvoke(zhurong, objectName(), data)){
                 room->playSkillEffect("lieren", 1);
 
@@ -162,14 +159,13 @@ public:
         return true;
     }
 
-    virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *, QVariant &data) const{
         CardEffectStruct effect = data.value<CardEffectStruct>();
 
         if(effect.to == effect.from)
             return false;
 
         if(effect.card->getTypeId() == Card::Trick){
-            Room *room = player->getRoom();
 
             if((effect.from && effect.from->hasSkill(objectName()))){
                 LogMessage log;
@@ -287,8 +283,7 @@ public:
         frequency = Compulsory;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-        Room *room = player->getRoom();
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
 
         if(event == HpRecover){
             RecoverStruct recover = data.value<RecoverStruct>();
@@ -381,12 +376,11 @@ public:
         return "nothing";
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *lingtong, QVariant &data) const{
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *lingtong, QVariant &data) const{
         if(event == CardLostOneTime){
             CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
             if (move->from_places.contains(Player::Equip))
             {
-                Room *room = lingtong->getRoom();
 
                 QString choice = room->askForChoice(lingtong, objectName(), "slash+damage+nothing");
 

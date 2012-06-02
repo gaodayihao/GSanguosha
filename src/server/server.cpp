@@ -1077,11 +1077,8 @@ void Server::daemonize(){
 }
 
 Room *Server::createNewRoom(){
-    // 20111218 add RoomID
-    static int RoomID = 0;
-    RoomID ++;
     Room *new_room = new Room(this, Config.GameMode);
-    new_room->setTag("RoomID",RoomID); // set room id
+    new_room->setTag("RoomID",new_room->getId()); // set room id
     new_room->setTag("RoomOwnerScreenName"," "); // set blank tag
     new_room->setTag("DrawPileCount",QString::number(new_room->getDrawPileCount())); // set draw pile count
 

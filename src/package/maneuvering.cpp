@@ -122,7 +122,7 @@ public:
         events << CardonUse;
     }
 
-    virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
         if(use.card->objectName() != "slash"
                 || (!use.card->getSkillName().isEmpty() && use.card->getSubcards().length() > 0))
@@ -134,7 +134,7 @@ public:
             card->setSkillName(objectName());
             use.card = card;
 
-            player->getRoom()->setEmotion(player, QString("weapon/%1").arg(objectName()));
+            room->setEmotion(player, QString("weapon/%1").arg(objectName()));
 
             data = QVariant::fromValue(use);
         }
@@ -155,13 +155,11 @@ public:
         events << DamageProceed;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if(damage.card && damage.card->inherits("Slash") &&
             damage.to->isKongcheng() && !damage.chain)
         {
-            Room *room = damage.to->getRoom();
-
             room->getThread()->delay(1200);
             room->setEmotion(damage.to, QString("weapon/%1").arg(objectName()));
             room->getThread()->delay(400);
@@ -193,7 +191,7 @@ public:
         events << Predamaged << SlashEffected << CardEffected;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         if(event == SlashEffected){
             SlashEffectStruct effect = data.value<SlashEffectStruct>();
             if(effect.nature == DamageStruct::Normal){
@@ -202,10 +200,10 @@ public:
                 log.type = "#ArmorNullify";
                 log.arg = objectName();
                 log.arg2 = effect.slash->objectName();
-                player->getRoom()->sendLog(log);
+                room->sendLog(log);
 
-                player->getRoom()->setEmotion(player, QString("armor/%1").arg(objectName()));
-                player->getRoom()->getThread()->delay(1200);
+                room->setEmotion(player, QString("armor/%1").arg(objectName()));
+                room->getThread()->delay(1200);
 
                 return true;
             }
@@ -257,7 +255,7 @@ public:
         events << Predamaged;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if(damage.damage > 1){
             LogMessage log;
@@ -265,12 +263,12 @@ public:
             log.from = player;
             log.arg = QString::number(damage.damage);
             log.arg2 = objectName();
-            player->getRoom()->sendLog(log);
+            room->sendLog(log);
 
             damage.damage = 1;
             data = QVariant::fromValue(damage);
 
-            player->getRoom()->setEmotion(player, QString("armor/%1").arg(objectName()));
+            room->setEmotion(player, QString("armor/%1").arg(objectName()));
         }
 
         return false;

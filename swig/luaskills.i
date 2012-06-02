@@ -6,7 +6,7 @@ public:
 	void setViewAsSkill(ViewAsSkill *view_as_skill);
 	
 	virtual bool triggerable(const ServerPlayer *target) const;
-	virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const;
+	virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const;
 
 	LuaFunction on_trigger;
 	LuaFunction can_trigger;
@@ -17,7 +17,7 @@ class GameStartSkill: public TriggerSkill{
 public:
 	GameStartSkill(const QString &name);
 
-	virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const;
+	virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const;
 	virtual void onGameStart(ServerPlayer *player) const = 0;
 };
 
@@ -157,11 +157,10 @@ bool LuaTriggerSkill::triggerable(const ServerPlayer *target) const{
 	}
 }
 
-bool LuaTriggerSkill::trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+bool LuaTriggerSkill::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
 	if(on_trigger == 0)
 		return false;
 		
-	Room *room = player->getRoom();
 	lua_State *L = room->getLuaState();
 	
 	int e = static_cast<int>(event);
@@ -175,13 +174,16 @@ bool LuaTriggerSkill::trigger(TriggerEvent event, ServerPlayer *player, QVariant
 	// the first argument: event
 	lua_pushinteger(L, e);	
 	
-	// the second argument: player
+	// the second argument: room
+	SWIG_NewPointerObj(L, room, SWIGTYPE_p_Room, 0);
+	
+	// the third argument: player
 	SWIG_NewPointerObj(L, player, SWIGTYPE_p_ServerPlayer, 0);
 
 	// the last event: data
 	SWIG_NewPointerObj(L, &data, SWIGTYPE_p_QVariant, 0);
 	
-	int error = lua_pcall(L, 4, 1, 0);
+	int error = lua_pcall(L, 5, 1, 0);
 	if(error){
 		const char *error_msg = lua_tostring(L, -1);
 		lua_pop(L, 1);

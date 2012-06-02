@@ -115,8 +115,7 @@ public:
 
         if(target->isKongcheng()){
             bool has_black = false;
-            int i;
-            for(i=0; i<4; i++){
+            for(int i = 0; i < 4; i++){
                 const EquipCard *equip = target->getEquip(i);
                 if(equip && equip->isBlack()){
                     has_black = true;
@@ -129,8 +128,8 @@ public:
             return true;
     }
 
-    virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
-        Room *room = player->getRoom();
+    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
+        if (player == NULL) return false;
         JudgeStar judge = data.value<JudgeStar>();
 
         QStringList prompt_list;
@@ -143,12 +142,17 @@ public:
             // the only difference for Guicai & Guidao
             const Card* oldJudge = judge->card;
             judge->card = Sanguosha->getCard(card->getEffectiveId());
-            CardsMoveStruct move(QList<int>(), NULL, Player::DiscardPile);
-            move.card_ids.append(card->getEffectiveId());
+
+            CardsMoveStruct move1(QList<int>(), NULL, Player::DiscardPile);
+            move1.card_ids.append(card->getEffectiveId());
+
+            CardsMoveStruct move2(QList<int>(), player, Player::Hand);
+            move2.card_ids.append(oldJudge->getEffectiveId());
+
             QList<CardsMoveStruct> moves;
-            moves.append(move);
+            moves.append(move1);
+            moves.append(move2);
             room->moveCardsAtomic(moves, true);
-            player->obtainCard(oldJudge);
 
             LogMessage log;
             log.type = "$ChangedJudge";
@@ -232,12 +236,11 @@ public:
         return 3;
     }
 
-    virtual bool trigger(TriggerEvent , ServerPlayer *zhangjiao, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *zhangjiao, QVariant &data) const{
+        if (zhangjiao == NULL) return false;
         CardStar card_star = data.value<CardStar>();
         if(!card_star->inherits("Jink"))
             return false;
-
-        Room *room = zhangjiao->getRoom();
         room->askForUseCard(zhangjiao, "@@leiji", "@leiji");
 
         return false;
@@ -403,7 +406,7 @@ public:
         return true;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
 
         if(event == DamageDone && damage.from && damage.from->hasSkill("kuanggu") && damage.from->isAlive()){
@@ -412,7 +415,6 @@ public:
         }else if(event == Damage && player->hasSkill("kuanggu") && player->isAlive()){
             bool invoke = player->tag.value("InvokeKuanggu", false).toBool();
             if(invoke){
-                Room *room = player->getRoom();
 
                 room->playSkillEffect(objectName());
 
@@ -466,7 +468,7 @@ public:
         }
     }
 
-    virtual bool trigger(TriggerEvent , ServerPlayer *zhoutai, QVariant &) const{
+    virtual bool trigger(TriggerEvent , Room*, ServerPlayer *zhoutai, QVariant &) const{
         if(zhoutai->getPile("buqu").length() > 0)
             Remove(zhoutai);
 
@@ -481,9 +483,7 @@ public:
         default_choice = "alive";
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *zhoutai, QVariant &) const{
-        Room *room = zhoutai->getRoom();
-
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *zhoutai, QVariant &) const{
         if(event == Dying){
             QString choice = room->askForChoice(zhoutai, objectName(), "alive+dead");
             if(choice == "alive"){
@@ -613,7 +613,7 @@ public:
         events << FinishJudge;
     }
 
-    virtual bool trigger(TriggerEvent , ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
         JudgeStar judge = data.value<JudgeStar>();
         if(judge->card->getSuit() == Card::Spade){
             LogMessage log;
@@ -625,8 +625,8 @@ public:
             new_card->setSkillName("hongyan");
             judge->card = new_card;
 
-            player->getRoom()->sendLog(log);
-            player->getRoom()->playSkillEffect("hongyan");
+            room->sendLog(log);
+            room->playSkillEffect("hongyan");
         }
 
         return false;
@@ -694,8 +694,7 @@ public:
         return target->hasFlag("TianxiangTarget") || TriggerSkill::triggerable(target);
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *xiaoqiao, QVariant &data) const{
-        Room *room = xiaoqiao->getRoom();
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *xiaoqiao, QVariant &data) const{
         if(event == DamageComplete && xiaoqiao->isAlive() && xiaoqiao->hasFlag("TianxiangTarget")){
             xiaoqiao->drawCards(xiaoqiao->getLostHp());
             room->setPlayerFlag(xiaoqiao, "-TianxiangTarget");

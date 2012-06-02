@@ -14,7 +14,7 @@ public:
         events << CardFinished << CardResponsed;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         if(player->getPhase() != Player::NotActive)
             return false;
 
@@ -34,7 +34,6 @@ public:
         if(card == NULL || !card->isBlack())
             return false;
 
-        Room *room = player->getRoom();
         if(!room->askForSkillInvoke(player, objectName(), data))
             return false;
 
@@ -104,13 +103,12 @@ public:
         events << Predamaged;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *yangxiu, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *yangxiu, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
 
         if(damage.from == NULL)
            return false;
 
-        Room *room = yangxiu->getRoom();
         if(room->askForSkillInvoke(yangxiu, objectName(), data)){
             QString choice = room->askForChoice(yangxiu, objectName(), "basic+equip+trick");
             room->playSkillEffect(objectName());
@@ -137,8 +135,7 @@ public:
         events << CardUsed << CardEffected;
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-        Room *room = player->getRoom();
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         if(event == CardUsed){
             CardUseStruct use = data.value<CardUseStruct>();
 
@@ -204,12 +201,11 @@ public:
         return kingdom_set.size();
     }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *yuanshu, QVariant &data) const{
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *yuanshu, QVariant &data) const{
         if(event == DrawNCards){
             int x = getKingdoms(yuanshu);
             data = data.toInt() + x;
 
-            Room *room = yuanshu->getRoom();
             LogMessage log;
             log.type = "#YongsiGood";
             log.from = yuanshu;
@@ -368,8 +364,7 @@ public:
        return TriggerSkill::triggerable(target);
    }
 
-    virtual bool trigger(TriggerEvent event, ServerPlayer *player, QVariant &data) const{
-        Room *room = player->getRoom();
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         if(event == GameStart){
             if(player->getHp()>2)
                 player->addMark("ycg");
