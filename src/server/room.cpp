@@ -982,7 +982,6 @@ int Room::askForCardChosen(ServerPlayer *player, ServerPlayer *who, const QStrin
 const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const QString &prompt,
                              const QVariant &data, TriggerEvent trigger_event)
 {
-    notifyMoveFocus(player, S_COMMAND_RESPONSE_CARD);
     const Card *card = NULL;
 
     QVariant asked = pattern;
@@ -992,6 +991,7 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
         provided = NULL;
         has_provided = false;
     }else if(pattern.startsWith("@") || !player->isNude()){
+        notifyMoveFocus(player, S_COMMAND_RESPONSE_CARD);
         AI *ai = player->getAI();
         if(ai){
             card = ai->askForCard(pattern, prompt, data);
