@@ -1025,13 +1025,13 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return true;
+        return target != NULL;
     }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
 
-        if (player == NULL || damage.from == NULL || !damage.from->hasSkill(objectName()) || damage.to->isChained()
+        if (damage.from == NULL || !damage.from->hasSkill(objectName()) || damage.to->isChained()
                 || damage.nature != DamageStruct::Fire)
             return false;
 
