@@ -43,9 +43,12 @@ public:
 
         switch(event){
         case GameStart:{
+            foreach (ServerPlayer* player, room->getPlayers())
+            {
                 room->acquireSkill(player, "peaching");
                 break;
             }
+        }
 
         case GameOverJudge:{
                 return true;

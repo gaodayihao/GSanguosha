@@ -343,7 +343,7 @@ function SmartAI:getUsePriority(card)
 		if v then return v else return sgs.ai_use_priority[class_name] end
 	end
 	if self.player:hasSkill("rende") then
-		if card:inherits("ExNihio") then v = 5.9 end
+		if card:inherits("ExNihio") then v = 8.9 end
 		return v or sgs.ai_use_priority[class_name]
 	end
 
@@ -427,8 +427,8 @@ function SmartAI:getDynamicUsePriority(card)
 				dynamic_value = 6.55
 			elseif use_card:inherits("RendeCard") and self.player:usedTimes("RendeCard") < 2 then
 				if not self.player:isWounded() then dynamic_value = 6.57
-				elseif self:isWeak() then dynamic_value = 15
-				else dynamic_value = 12
+				elseif self:isWeak() then dynamic_value = 9
+				else dynamic_value = 8
 				end
 			elseif use_card:inherits("JujianCard") or use_card:inherits("NosJujianCard") then
 				if not self.player:isWounded() then dynamic_value = 0
@@ -683,13 +683,13 @@ function SmartAI:getPriorTarget()
 		return prior_targets[1]
 	end
 
-	for _, enemy in ipairs(self.enemies) do
-		if enemy:isLord() and not inOneGroup(enemy) and sgs.isLordInDanger() then return enemy end
-	end
-
 	self:sort(self.enemies, "defense")
 	for _, enemy in ipairs(self.enemies) do
 		if enemy:getHp() < 2 and not inOneGroup(enemy) then return enemy end
+	end
+
+	for _, enemy in ipairs(self.enemies) do
+		if enemy:isLord() and not inOneGroup(enemy) and sgs.isLordInDanger() then return enemy end
 	end
 
 	for _, enemy in ipairs(self.enemies) do	
@@ -703,14 +703,14 @@ function SmartAI:getPriorTarget()
 		return prior_targets[1]
 	end
 	
-	self:sort(self.enemies,"threat")
-	for _, enemy in ipairs(self.enemies) do
-		if not self:hasSkills(sgs.exclusive_skill, enemy) and not inOneGroup(enemy) then return enemy end
-	end
-	
 	self:sort(self.enemies, "defense")
 	for _, enemy in ipairs(self.enemies) do
 		if self:isWeak(enemy) and not inOneGroup(enemy) then return enemy end
+	end
+	
+	self:sort(self.enemies,"threat")
+	for _, enemy in ipairs(self.enemies) do
+		if not self:hasSkills(sgs.exclusive_skill, enemy) and not inOneGroup(enemy) then return enemy end
 	end
 	
 	self:sort(self.enemies, "hp")

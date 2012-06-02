@@ -423,6 +423,7 @@ Card *Card::Clone(const Card *card){
     QObject *card_obj = meta->newInstance(Q_ARG(Card::Suit, suit), Q_ARG(int, number));
     if(card_obj){
         Card *new_card = qobject_cast<Card *>(card_obj);
+        new_card->setId(card->getId());
         new_card->setObjectName(card->objectName());
         new_card->addSubcard(card->getId());
         return new_card;
@@ -473,7 +474,9 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
 
 void Card::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     if(will_throw){
-        room->throwCard(this, owner_discarded ? source : NULL);
+        CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName(), QString(), this->getSkillName(), QString());
+        if (targets.size() == 1) reason.m_targetId = targets.first()->objectName();
+        room->moveCardTo(this, NULL, Player::DiscardPile, reason);
     }
 
     if(targets.length() == 1){

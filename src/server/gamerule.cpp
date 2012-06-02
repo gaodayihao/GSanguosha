@@ -528,7 +528,8 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
             JudgeStar judge = data.value<JudgeStar>();
             judge->card = Sanguosha->getCard(card_id);
-            room->moveCardTo(judge->card, NULL, Player::DiscardPile);
+            room->moveCardTo(judge->card, NULL, Player::DiscardPile,
+                             CardMoveReason(CardMoveReason::S_REASON_JUDGE, judge->who->objectName(), QString(), QString(), judge->reason));
 
             LogMessage log;
             log.type = "$InitialJudge";
@@ -548,7 +549,8 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
     case FinishJudge:{
             JudgeStar judge = data.value<JudgeStar>();
-            room->throwCard(judge->card);
+            CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, QString());
+            room->throwCard(judge->card, reason, NULL);
 
             LogMessage log;
             log.type = "$JudgeResult";
@@ -568,14 +570,17 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
             LogMessage log;
 
-            room->throwCard(pindian->from_card);
+            CardMoveReason reason(CardMoveReason::S_REASON_PINDIAN, pindian->from->objectName(), pindian->to->objectName(),
+                                  pindian->reason, QString());
+            room->moveCardTo(pindian->from_card, NULL, Player::DiscardPile, reason);
             log.type = "$PindianResult";
             log.from = pindian->from;
             log.card_str = pindian->from_card->getEffectIdString();
             room->sendLog(log);
             room->getThread()->delay();
 
-            room->throwCard(pindian->to_card);
+            CardMoveReason reason2(CardMoveReason::S_REASON_PINDIAN, pindian->to->objectName());
+            room->moveCardTo(pindian->to_card, NULL, Player::DiscardPile, reason2);
             log.type = "$PindianResult";
             log.from = pindian->to;
             log.card_str = pindian->to_card->getEffectIdString();
@@ -834,8 +839,9 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
 
                 room->setCardFlag(hero, "-justdraw");
                 room->setCardFlag(heroTarget, "-justdraw");
+                CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLED, effect.to->objectName());
                 room->throwCard(hero, player);
-                room->throwCard(heroTarget, target);
+                room->throwCard(Sanguosha->getCard(heroTarget), reason, target);
                 return true;
             }
 
@@ -1074,13 +1080,17 @@ bool HulaoPassMode::trigger(TriggerEvent event, Room* room, ServerPlayer *player
 
         QList<const Card *> tricks = lord->getJudgingArea();
         foreach(const Card *trick, tricks)
-            room->throwCard(trick);
+        {
+            CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, QString());
+            room->throwCard(trick, reason, NULL);
+        }
 
         if(room->alivePlayerCount() == room->getPlayers().count() && lord->getWeapon()
                 && lord->askForSkillInvoke("weapon_recast"))
         {
             lord->playCardEffect("@recast");
-            room->throwCard(lord->getWeapon());
+            CardMoveReason reason(CardMoveReason::S_REASON_RECAST, player->objectName());
+            room->throwCard(lord->getWeapon(), reason, NULL);
             lord->drawCards(1, false);
         }
 
@@ -1110,7 +1120,8 @@ bool HulaoPassMode::trigger(TriggerEvent event, Room* room, ServerPlayer *player
         CardUseStruct use = data.value<CardUseStruct>();
         if(use.card->inherits("Weapon") && player->askForSkillInvoke("weapon_recast", data)){
             player->playCardEffect("@recast");
-            room->throwCard(use.card);
+            CardMoveReason reason(CardMoveReason::S_REASON_RECAST, player->objectName());
+            room->throwCard(use.card, reason, NULL);
             player->drawCards(1, false);
             return false;
         }

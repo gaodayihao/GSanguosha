@@ -70,7 +70,10 @@ public:
             ServerPlayer *xuyou = room->findPlayerBySkillName(objectName());
             foreach(int card_id, player->getPile("hautain")){
                 if(!xuyou)
-                    room->throwCard(card_id);
+                {
+                    CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, xuyou->objectName(), "hautain", QString());
+                    room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
+                }
                 else
                     room->obtainCard(player, card_id);
             }
@@ -172,7 +175,8 @@ public:
         if(card->inherits("TrickCard") && !card->inherits("DelayedTrick")){
             if(!room->askForSkillInvoke(jiangwei, objectName(), data))
                 return false;
-            room->throwCard(card);
+            // TODO: fix this!
+            room->throwCard(card, NULL);
             room->askForUseCard(jiangwei, "slash", "@askforslash");
         }
         return false;
@@ -267,7 +271,8 @@ public:
 
                 const Card *card = Sanguosha->getCard(card_id);
                 if(!card->inherits("BasicCard")){
-                    room->throwCard(card_id);
+                    // @todo: fix this!
+                    room->throwCard(card_id, NULL);
                     room->setEmotion(player, "bad");
                 }
                 else{

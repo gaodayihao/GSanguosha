@@ -165,92 +165,92 @@ public:
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         switch(event){
         case GameStart:{
-                if(player->isLord()){
-                    room->installEquip(player, "renwang_shield");
-                    room->installEquip(player, "hualiu");
+            player = room->getLord();
+            room->installEquip(player, "renwang_shield");
+            room->installEquip(player, "hualiu");
 
-                    ServerPlayer *caocao = room->findPlayer("caocao");
-                    room->installEquip(caocao, "qinggang_sword");
-                    room->installEquip(caocao, "zhuahuangfeidian");
+            ServerPlayer *caocao = room->findPlayer("caocao");
+            room->installEquip(caocao, "qinggang_sword");
+            room->installEquip(caocao, "zhuahuangfeidian");
 
-                    ServerPlayer *liubei = room->findPlayer("liubei");
-                    room->installEquip(liubei, "double_sword");
+            ServerPlayer *liubei = room->findPlayer("liubei");
+            room->installEquip(liubei, "double_sword");
 
-                    ServerPlayer *guanyu = room->findPlayer("guanyu");
-                    room->installEquip(guanyu, "blade");
-                    room->installEquip(guanyu, "chitu");
-                    room->acquireSkill(guanyu, "zhanshuangxiong");
+            ServerPlayer *guanyu = room->findPlayer("guanyu");
+            room->installEquip(guanyu, "blade");
+            room->installEquip(guanyu, "chitu");
+            room->acquireSkill(guanyu, "zhanshuangxiong");
 
 
-                    ServerPlayer *zhangliao = room->findPlayer("zhangliao");
-                    room->detachSkillFromPlayer(zhangliao, "tuxi");
-                    room->acquireSkill(zhangliao, "smalltuxi");
-                }
+            ServerPlayer *zhangliao = room->findPlayer("zhangliao");
+            room->detachSkillFromPlayer(zhangliao, "tuxi");
+            room->acquireSkill(zhangliao, "smalltuxi");
 
-                break;
-            }
+
+            break;
+        }
 
         case PhaseChange:{
-                if(player->getPhase() == Player::Draw){
-                    bool burned = room->getTag("BurnWuchao").toBool();
-                    if(!burned){
-                        QString name = player->getGeneralName();
-                        if(name == "caocao" || name == "guojia" || name == "guanyu"){
-                            player->drawCards(1, false);
-                            return true;
-                        }
+            if(player->getPhase() == Player::Draw){
+                bool burned = room->getTag("BurnWuchao").toBool();
+                if(!burned){
+                    QString name = player->getGeneralName();
+                    if(name == "caocao" || name == "guojia" || name == "guanyu"){
+                        player->drawCards(1, false);
+                        return true;
                     }
                 }
-
-                break;
             }
+
+            break;
+        }
 
         case Damaged:{
-                bool burned = room->getTag("BurnWuchao").toBool();
-                if(burned)
-                    return false;
+            bool burned = room->getTag("BurnWuchao").toBool();
+            if(burned)
+                return false;
 
-                DamageStruct damage = data.value<DamageStruct>();
-                if(player->getGeneralName() == "yuanshao" && damage.nature == DamageStruct::Fire
-                   && damage.from->getRoleEnum() == Player::Rebel){
-                    room->setTag("BurnWuchao", true);
+            DamageStruct damage = data.value<DamageStruct>();
+            if(player->getGeneralName() == "yuanshao" && damage.nature == DamageStruct::Fire
+                    && damage.from->getRoleEnum() == Player::Rebel){
+                room->setTag("BurnWuchao", true);
 
-                    QStringList tos;
-                    tos << "yuanshao" << "yanliangwenchou" << "zhenji" << "liubei";
+                QStringList tos;
+                tos << "yuanshao" << "yanliangwenchou" << "zhenji" << "liubei";
 
-                    foreach(QString name, tos){
-                        ServerPlayer *to = room->findPlayer(name);
-                        if(to == NULL || to->containsTrick("supply_shortage"))
-                            continue;
+                foreach(QString name, tos){
+                    ServerPlayer *to = room->findPlayer(name);
+                    if(to == NULL || to->containsTrick("supply_shortage"))
+                        continue;
 
-                        int card_id = room->getCardFromPile("@duanliang");
-                        if(card_id == -1){
-                            break;
-                        }
-
-                        room->moveCardTo(Sanguosha->getCard(card_id), to, Player::Judging, true);
+                    int card_id = room->getCardFromPile("@duanliang");
+                    if(card_id == -1){
+                        break;
                     }
-                }
 
-                break;
+                    room->moveCardTo(Sanguosha->getCard(card_id), to, Player::Judging, true);
+                }
             }
+
+            break;
+        }
 
         case GameOverJudge:{
-                if(player->isLord()){
-                    QStringList roles = room->aliveRoles(player);
-                    if(roles.length() == 2){
-                        QString first = roles.at(0);
-                        QString second = roles.at(1);
-                        if(first == "renegade" && second == "renegade"){
-                            player->bury();
-                            room->gameOver("renegade");
-                            return true;
-                        }
+            if(player->isLord()){
+                QStringList roles = room->aliveRoles(player);
+                if(roles.length() == 2){
+                    QString first = roles.at(0);
+                    QString second = roles.at(1);
+                    if(first == "renegade" && second == "renegade"){
+                        player->bury();
+                        room->gameOver("renegade");
+                        return true;
                     }
                 }
-
-                break;
             }
+
+            break;
+        }
 
         default:
             break;

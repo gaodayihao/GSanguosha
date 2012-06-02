@@ -283,7 +283,8 @@ public:
 
                 for(i = 0; i < x; i++){
                     int card_id = room->drawCard();
-                    room->moveCardTo(Sanguosha->getCard(card_id), menghuo, Player::PlaceTakeoff, true);
+                    room->moveCardTo(Sanguosha->getCard(card_id), menghuo, Player::PlaceTakeoff,
+                                     CardMoveReason(CardMoveReason::S_REASON_SHOW, menghuo->objectName(), QString(), "zaiqi", QString()), true);
                     card_ids << card_id;
                     room->getThread()->delay();
                 }
@@ -295,7 +296,8 @@ public:
                         recover.card = card;
                         recover.who = menghuo;
                         room->recover(menghuo, recover);
-                        room->throwCard(card_id);
+                        CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, menghuo->objectName(), "zaiqi", QString());
+                        room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
                         has_heart = true;
                     }else
                         room->obtainCard(menghuo, card_id);

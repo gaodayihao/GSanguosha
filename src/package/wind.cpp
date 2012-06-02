@@ -143,10 +143,12 @@ public:
             const Card* oldJudge = judge->card;
             judge->card = Sanguosha->getCard(card->getEffectiveId());
 
-            CardsMoveStruct move1(QList<int>(), NULL, Player::DiscardPile);
+            CardsMoveStruct move1(QList<int>(), NULL, Player::DiscardPile,
+                                  CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->objectName(), this->objectName(), QString()));
             move1.card_ids.append(card->getEffectiveId());
 
-            CardsMoveStruct move2(QList<int>(), player, Player::Hand);
+            CardsMoveStruct move2(QList<int>(), player, Player::Hand,
+                                  CardMoveReason(CardMoveReason::S_REASON_OVERRIDE, player->objectName(), this->objectName(), QString()));
             move2.card_ids.append(oldJudge->getEffectiveId());
 
             QList<CardsMoveStruct> moves;
@@ -449,11 +451,12 @@ public:
         Room *room = zhoutai->getRoom();
         QList<int> buqu(zhoutai->getPile("buqu"));
 
+        CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, zhoutai->objectName(), "buqu", QString());
         int need = 1 - zhoutai->getHp();
         if(need <= 0){
             // clear all the buqu cards
             foreach(int card_id, buqu){
-                room->throwCard(card_id);
+                room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
             }
         }else{
             int to_remove = buqu.length() - need;
@@ -462,7 +465,7 @@ public:
                 room->fillAG(buqu);
                 int card_id = room->askForAG(zhoutai, buqu, false, "buqu");
                 buqu.removeOne(card_id);
-                room->throwCard(card_id);
+                room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
                 room->broadcastInvoke("clearAG");
             }
         }
@@ -715,21 +718,23 @@ GuhuoCard::GuhuoCard(){
     mute = true;
 }
 
-bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString guhuo_to, const QString guhuocard) const{
+bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString guhuo_to, const QString to_guhuo) const{
     Room *room = yuji->getRoom();
     room->setTag("Guhuoing", true);
     room->setTag("GuhuoType", this->user_string);
 
     //yuji->addToPile("#guhuo_pile", this->getEffectiveId(), false);
-    room->moveCardTo(this, yuji, Player::PlaceTakeoff, false);
+
+    room->moveCardTo(this, yuji, Player::PlaceTakeoff,
+                     CardMoveReason(CardMoveReason::S_REASON_SHOW, yuji->objectName(), "guhuo", user_string), false);
+
+    room->setEmotion(yuji, "guhuo/" + to_guhuo);
 
     QList<ServerPlayer *> players = room->getOtherPlayers(yuji);
     QSet<ServerPlayer *> questioned;
 
     foreach(ServerPlayer *player, players)
         room->setEmotion(player, ".");
-
-    room->setEmotion(yuji, "guhuo/"+guhuocard);
 
     foreach(ServerPlayer *player, players){
         if(player->getHp() <= 0){
@@ -762,8 +767,8 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString guhuo_to, const QString 
         room->sendLog(log);
     }
 
-    room->moveCardTo(this, NULL, Player::DiscardPile, true, false);
-
+    room->moveCardTo(this, NULL, Player::DiscardPile,
+                     CardMoveReason(CardMoveReason::S_REASON_SHOW, yuji->objectName(), "guhuo", user_string), true, false);
     LogMessage log;
     log.type = "$GuhuoResult";
     log.from = yuji;
@@ -954,7 +959,9 @@ const Card *GuhuoCard::validate(const CardUseStruct *card_use) const{
         Card *use_card = Sanguosha->cloneCard(user_string, card->getSuit(), card->getNumber());
         use_card->setSkillName("guhuo");
         use_card->addSubcard(this);
-        room->throwCard(this);
+        // TODO: verify this...
+        CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, card_use->from->objectName());
+        room->throwCard(this, reason, NULL);
 
         return use_card;
     }else

@@ -7,6 +7,7 @@
 #include "client.h"
 #include "playercarddialog.h"
 #include "rolecombobox.h"
+#include "SkinBank.h"
 
 #include <QPainter>
 #include <QDrag>
@@ -25,34 +26,36 @@
 
 using namespace QSanProtocol;
 
-const QRect Photo::S_CARD_MOVE_REGION(-50, Photo::S_NORMAL_PHOTO_HEIGHT / 2,
-                                      200, CardItem::S_NORMAL_CARD_HEIGHT);
-
-Photo::Photo():player(NULL),
-               _m_mainFrame("image/system/photo-back.png"),
-               _m_handCardIcon("image/system/handcard.png"),
-               action_item(NULL), save_me_item(NULL), permanent(false),
-               weapon(NULL), armor(NULL), defensive_horse(NULL), offensive_horse(NULL),
-               order_item(NULL), hide_avatar(false)
+Photo::Photo(): player(NULL),
+    action_item(NULL), save_me_item(NULL), permanent(false),
+    weapon(NULL), armor(NULL), defensive_horse(NULL), offensive_horse(NULL),
+    order_item(NULL), hide_avatar(false)
 {
     setAcceptHoverEvents(true);
-    translate(-S_NORMAL_PHOTO_WIDTH / 2, -S_NORMAL_PHOTO_HEIGHT / 2);
 
     frame_item = new QGraphicsPixmapItem(this);
     frame_item->setPos(-14, -14);
     frame_item->setZValue(-1.0);
 
-    chain_icon = QPixmap("image/system/chain.png");
+    _m_roomSkin = &QSanSkinFactory::getInstance().getCurrentSkinScheme().getRoomSkin();
+    _m_photoLayout = &_m_roomSkin->getPhotoLayout();
+    _m_commonLayout = &_m_roomSkin->getCommonLayout();
+    _m_mainFrame = _m_roomSkin->getPixmap(QSanRoomSkin::S_SKIN_KEY_PHOTO_MAINFRAME);
+    _m_handCardIcon = _m_roomSkin->getPixmap(QSanRoomSkin::S_SKIN_KEY_PHOTO_HANDCARDNUM);
+
+    translate(-_m_photoLayout->m_normalWidth / 2, -_m_photoLayout->m_normalHeight / 2);
+    chain_icon = QPixmap(_m_roomSkin->getPixmap(QSanRoomSkin::S_SKIN_KEY_PHOTO_CHAIN));
 
     progress_bar = new QSanCommandProgressBar;
     progress_bar->setAutoHide(true);
     progress_bar->hide();
-    progress_bar->setMaximumHeight(13);
-    progress_bar->setMaximumWidth(S_NORMAL_PHOTO_WIDTH);
+    progress_bar->setOrientation(_m_photoLayout->m_isProgressBarHorizontal ? Qt::Horizontal : Qt::Vertical);
+    progress_bar->setMaximumHeight(_m_photoLayout->m_progressBarArea.height());
+    progress_bar->setMaximumWidth(_m_photoLayout->m_progressBarArea.width());
 
     QGraphicsProxyWidget *widget = new QGraphicsProxyWidget(this);
     widget->setWidget(progress_bar);
-    widget->setPos(0, S_SHADOW_INCLUSIVE_PHOTO_HEIGHT + 3);
+    widget->setPos(_m_photoLayout->m_progressBarArea.left(), _m_photoLayout->m_progressBarArea.top());
 
     skill_name_item = new QGraphicsSimpleTextItem(this);
     skill_name_item->setBrush(Qt::white);
@@ -72,7 +75,7 @@ Photo::Photo():player(NULL),
     avatar_area = new QGraphicsRectItem(6, 26, 120, 50, this);
     avatar_area->setPen(Qt::NoPen);
 
-    back_icon = QPixmap("image/generals/small/faceturned.png");
+    back_icon = QPixmap(_m_roomSkin->getPixmap(QSanRoomSkin::S_SKIN_KEY_PHOTO_FACETURNEDMASK));
 
     small_avatar_area = new QGraphicsRectItem(124 - 42, 72 - 36, 42, 36, this);
     small_avatar_area->setPen(Qt::NoPen);
@@ -97,19 +100,10 @@ Photo::Photo():player(NULL),
     _m_kingdomIcon->setPos(-2, -2);
     _m_kingdomIcon->setZValue(2.5);
 
-    QStringList names;
-    names   << "round_start" << "start" << "judge" << "draw"
-            << "play" << "discard" << "finish";
-
-    foreach(QString name, names)
-        phases << new Pixmap(QString("image/system/phase/%1.png").arg(name));
-
-    foreach(Pixmap *phase, phases){
-        phase->setParentItem(this);
-        phase->setPos(13, S_NORMAL_PHOTO_HEIGHT - 4);
-        phase->setZValue(1.8);
-        phase->hide();
-    }
+    phase = new QGraphicsPixmapItem(this);
+    phase->setZValue(1.8);
+    phase->setPos(_m_photoLayout->m_phaseArea.left(), _m_photoLayout->m_phaseArea.top());
+    phase->hide();
 
     mark_item = new QGraphicsTextItem(this);
     mark_item->setPos(-71, 73);
@@ -123,7 +117,7 @@ Photo::Photo():player(NULL),
 
 QRectF Photo::boundingRect() const
 {
-    return QRectF(0, 0, S_SHADOW_INCLUSIVE_PHOTO_WIDTH, S_SHADOW_INCLUSIVE_PHOTO_HEIGHT);
+    return QRectF(0, 0, _m_photoLayout->m_widthIncludeMarkAndControl, _m_photoLayout->m_heightIncludeMarkAndControl);
 }
 
 void Photo::setOrder(int order){
@@ -149,7 +143,7 @@ void Photo::revivePlayer(){
 
 void Photo::createRoleCombobox(){
     role_combobox = new RoleCombobox(this);
-    role_combobox->setPos(S_NORMAL_PHOTO_WIDTH - RoleCombobox::S_ROLE_COMBO_BOX_WIDTH, 0);
+    role_combobox->setPos(_m_photoLayout->m_normalWidth - RoleCombobox::S_ROLE_COMBO_BOX_WIDTH, 0);
     QString role = player->getRole();
     if(!ServerInfo.EnableHegemony && !role.isEmpty())
             role_combobox->fix(role);
@@ -471,14 +465,14 @@ QList<CardItem*> Photo::removeCardItems(const QList<int> &card_ids, Player::Plac
             result.append(card_item);
         }
     }
-    _disperseCards(result, S_CARD_MOVE_REGION, Qt::AlignCenter, true, false);
+    _disperseCards(result, _m_photoLayout->m_cardMoveRegion, Qt::AlignCenter, true, false);
     update();
     return result;
 }
 
 bool Photo::_addCardItems(QList<CardItem*> &card_items, Player::Place place)
 {
-    _disperseCards(card_items, S_CARD_MOVE_REGION, Qt::AlignCenter, true, false);
+    _disperseCards(card_items, _m_photoLayout->m_cardMoveRegion, Qt::AlignCenter, true, false);
     double homeOpacity = 0.0;
     bool destroy = true;
     if (place == Player::PlaceTakeoff)
@@ -571,8 +565,9 @@ void Photo::updatePhase(){
         int index = static_cast<int>(player->getPhase());
         if(this->last_phase)
             this->last_phase->hide();
-        phases.at(index)->show();
-        this->last_phase = phases.at(index);
+        phase->setPixmap(_m_roomSkin->getPixmap(QString(QSanRoomSkin::S_SKIN_KEY_PHOTO_PHASE).arg(index)));
+        phase->show();
+        this->last_phase = phase;
         setFrame(Playing);
     }
     else
@@ -677,7 +672,7 @@ void Photo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
             painter->drawPixmap(avatarRect, _m_kindomColorMaskIcon);
     }
 
-    painter->drawPixmap(QRect(0, 0, S_SHADOW_INCLUSIVE_PHOTO_WIDTH, S_SHADOW_INCLUSIVE_PHOTO_HEIGHT), _m_mainFrame);
+    painter->drawPixmap(_m_photoLayout->m_mainFrameArea, _m_mainFrame);
     if (!hide_avatar)
     {
         _m_kingdomIcon->show();

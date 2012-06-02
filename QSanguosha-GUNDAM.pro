@@ -145,7 +145,8 @@ SOURCES += \
         swig/sanguosha_wrap.cxx \
         src/ui/GeneralCardContainerUI.cpp \
         src/ui/DiscardPile.cpp \
-        src/core/structs.cpp
+        src/core/structs.cpp \
+    src/ui/SkinBank.cpp
 
 HEADERS += \
         src/client/aux-skills.h \
@@ -276,7 +277,8 @@ HEADERS += \
         src/jsoncpp/include/json/assertions.h \
 	src/ui/GeneralCardContainerUI.h \
         src/ui/DiscardPile.h \
-        src/core/structs.h
+        src/core/structs.h \
+    src/ui/SkinBank.h
 	
 FORMS += \
         src/dialog/cardoverview.ui \

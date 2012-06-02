@@ -826,11 +826,11 @@ void Room::obtainCard(ServerPlayer *target, const Card *card, bool unhide){
     if(card == NULL)
         return;
 
-    moveCardTo(card, target, Player::Hand, unhide);
+    moveCardTo(card, target, Player::Hand, CardMoveReason(CardMoveReason::S_REASON_UNKNOWN, QString()), unhide);
 }
 
 void Room::obtainCard(ServerPlayer *target, int card_id, bool unhide){
-    moveCardTo(Sanguosha->getCard(card_id), target, Player::Hand, unhide);
+    moveCardTo(Sanguosha->getCard(card_id), target, Player::Hand, CardMoveReason(CardMoveReason::S_REASON_UNKNOWN, QString()), unhide);
 }
 
 bool Room::isCanceled(const CardEffectStruct &effect){
@@ -924,10 +924,6 @@ bool Room::_askForNullification(const TrickCard *trick, ServerPlayer *from, Serv
         if (continuable) return _askForNullification(trick, from, to, positive, aiHelper);
         else return false;
     }
-    CardUseStruct use;
-    use.card = card;
-    use.from = repliedPlayer;
-    useCard(use);
 
     LogMessage log;
     log.type = "#NullificationDetails";
@@ -938,6 +934,11 @@ bool Room::_askForNullification(const TrickCard *trick, ServerPlayer *from, Serv
 
     broadcastInvoke("animate", QString("nullification:%1:%2")
         .arg(repliedPlayer->objectName()).arg(to->objectName()));
+
+    CardUseStruct use;
+    use.card = card;
+    use.from = repliedPlayer;
+    useCard(use);
 
     QVariant decisionData = QVariant::fromValue("Nullification:"+QString(trick->metaObject()->className())+":"+to->objectName()+":"+(positive?"true":"false"));
     thread->trigger(ChoiceMade, this, repliedPlayer, decisionData);
@@ -1023,12 +1024,17 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
     card = card->validateInResposing(player, &continuable);
 
     if(card){
+        CardMoveReason reason(CardMoveReason::S_REASON_RESPONSE, player->objectName());
         if(card->getTypeId() != Card::Skill){
             const CardPattern *card_pattern = Sanguosha->getPattern(pattern);
             if((card_pattern == NULL || card_pattern->willThrow()) && trigger_event != NonTrigger)
-                throwCard(card);
-        }else if(card->willThrow())
-            throwCard(card);
+                moveCardTo(card, NULL, Player::DiscardPile, reason);
+        }
+        else if(card->willThrow())
+        {
+            reason.m_skillName = card->getSkillName();
+            moveCardTo(card, NULL, Player::DiscardPile, reason);
+        }
 
         QVariant decisionData = QVariant::fromValue("cardResponsed:"+pattern+":"+prompt+":_"+card->toString()+"_");
         thread->trigger(ChoiceMade, this, player, decisionData);
@@ -2954,6 +2960,12 @@ void Room::drawCards(QList<ServerPlayer*> players, int n, const QString &reason)
 
 
 void Room::throwCard(const Card *card, ServerPlayer *who){
+    CardMoveReason reason(CardMoveReason::S_REASON_DISCARD, who ? who->objectName() : QString());
+    reason.m_skillName = card->getSkillName();
+    throwCard(card, reason, who);
+}
+
+void Room::throwCard(const Card *card, const CardMoveReason &reason, ServerPlayer *who){
     if(card == NULL)
         return;
 
@@ -2978,7 +2990,7 @@ void Room::throwCard(const Card *card, ServerPlayer *who){
         sendLog(log);
     }
 
-    CardsMoveStruct move(to_discard, NULL, Player::DiscardPile);
+    CardsMoveStruct move(to_discard, NULL, Player::DiscardPile, reason);
     QList<CardsMoveStruct> moves;
     moves.append(move);
     moveCardsAtomic(moves, true);
@@ -3001,6 +3013,12 @@ RoomThread *Room::getThread() const{
 void Room::moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place dstPlace,
     bool forceMoveVisible, bool ignoreChanged)
 {
+    moveCardTo(card, dstPlayer, dstPlace, CardMoveReason(CardMoveReason::S_REASON_UNKNOWN, QString()), forceMoveVisible, ignoreChanged);
+}
+
+void Room::moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place dstPlace, const CardMoveReason &reason,
+                      bool forceMoveVisible, bool ignoreChanged)
+{
     CardsMoveStruct move;
     if(card->isVirtualCard())
     {
@@ -3011,6 +3029,7 @@ void Room::moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place d
         move.card_ids.append(card->getId());
     move.to = dstPlayer;
     move.to_place = dstPlace;
+    move.reason = reason;
     QList<CardsMoveStruct> moves;
     moves.append(move);
     moveCards(moves, forceMoveVisible, ignoreChanged);
@@ -3158,7 +3177,7 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
         moveOneTimeStruct.card_ids.append(cards_move.card_ids);
         for (int i = 0; i < cards_move.card_ids.size(); i++)
             moveOneTimeStruct.from_places.append(cards_move.from_place);
-        if (cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 && !cards_move.from->hasFlag("CardMoving")){
+        if (cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 && cards_move.from && !cards_move.from->hasFlag("CardMoving")){
             moveOneTimeStruct.from = cards_move.from; moveOneTimeStruct.to = cards_move.to;
             moveOneTimeStruct.to_place = cards_move.to_place;
             CardsMoveOneTimeStar lose_star = &moveOneTimeStruct;
@@ -3185,7 +3204,7 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
         moveOneTimeStruct.card_ids.append(cards_move.card_ids);
         for (int i = 0; i < cards_move.card_ids.size(); i++)
             moveOneTimeStruct.from_places.append(cards_move.from_place);
-        if(cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 && !cards_move.to->hasFlag("CardMoving")){
+        if(cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 && cards_move.to && !cards_move.to->hasFlag("CardMoving")){
             moveOneTimeStruct.from = cards_move.from; moveOneTimeStruct.to = cards_move.to;
             moveOneTimeStruct.to_place = cards_move.to_place;
             CardsMoveOneTimeStar move_star = &moveOneTimeStruct;
@@ -3288,7 +3307,7 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
             }
             //trigger events
             if ((cards_move.from_place == Player::Hand || cards_move.from_place == Player::Equip || cards_move.from_place == Player::Special)
-                    && !cards_move.from->hasFlag("CardMoving")){
+                    && cards_move.from && !cards_move.from->hasFlag("CardMoving")){
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardLostOnePiece, this, (ServerPlayer*)cards_move.from, data);
@@ -3297,7 +3316,7 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
         moveOneTimeStruct.card_ids.append(cards_move.card_ids);
         for (int i = 0; i < cards_move.card_ids.size(); i++)
             moveOneTimeStruct.from_places.append(cards_move.from_place);
-        if (cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 && !cards_move.from->hasFlag("CardMoving")){
+        if (cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 && cards_move.from && !cards_move.from->hasFlag("CardMoving")){
             moveOneTimeStruct.from = cards_move.from; moveOneTimeStruct.to = cards_move.to;
             moveOneTimeStruct.to_place = cards_move.to_place;
             CardsMoveOneTimeStar lose_star = &moveOneTimeStruct;
@@ -3374,7 +3393,7 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
         moveOneTimeStruct.card_ids.append(cards_move.card_ids);
         for (int i = 0; i < cards_move.card_ids.size(); i++)
             moveOneTimeStruct.from_places.append(cards_move.from_place);
-        if(cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 && !cards_move.to->hasFlag("CardMoving")){
+        if(cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 && cards_move.to && !cards_move.to->hasFlag("CardMoving")){
             moveOneTimeStruct.from = cards_move.from; moveOneTimeStruct.to = cards_move.to;
             moveOneTimeStruct.to_place = cards_move.to_place;
             CardsMoveOneTimeStar move_star = &moveOneTimeStruct;

@@ -1085,8 +1085,10 @@ void PaiyiCard::onUse(Room *room, const CardUseStruct &card_use) const{
             return;
     }
 
-    room->throwCard(card_id);
+    CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, zhonghui->objectName(),
+                          target->objectName(), "paiyi", QString());
 
+    room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
     LogMessage log;
     log.from = card_use.from;
     log.to = card_use.to;

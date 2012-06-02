@@ -91,6 +91,7 @@ void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
         move1.card_ids << getEffectiveId();
         move1.to = source;
         move1.to_place = Player::Equip;
+        move1.reason = CardMoveReason(CardMoveReason::S_REASON_USE, source->objectName());
         exchangeMove.push_back(move1);
         if(equipped)
         {
@@ -98,6 +99,7 @@ void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
             move2.card_ids << equipped->getEffectiveId();
             move2.to = NULL;
             move2.to_place = Player::DiscardPile;
+            move2.reason = CardMoveReason(CardMoveReason::S_REASON_CHANGE_EQUIP, source->objectName());
             exchangeMove.push_back(move2);
         }
         LogMessage log;
@@ -214,8 +216,11 @@ QString DelayedTrick::getSubtype() const{
 void DelayedTrick::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.to->getRoom();
 
-    if(!movable)
-        room->throwCard(this);
+    CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, effect.to->objectName());
+    if (!movable)
+    {
+        room->throwCard(this, reason, NULL);
+    }
 
     LogMessage log;
     log.from = effect.to;
@@ -228,7 +233,7 @@ void DelayedTrick::onEffect(const CardEffectStruct &effect) const{
     room->judge(judge_struct);
 
     if(judge_struct.isBad()){
-        room->throwCard(this);
+        room->throwCard(this, reason, NULL);
         takeEffect(effect.to);
     }else if(movable){
         onNullified(effect.to);
@@ -251,8 +256,12 @@ void DelayedTrick::onNullified(ServerPlayer *target) const{
             room->moveCardTo(this, player, Player::Judging, true);
             break;
         }
-    }else
-        room->throwCard(this);
+    }
+    else
+    {
+        CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, target->objectName());
+        room->throwCard(this, reason, NULL);
+    }
 }
 
 const DelayedTrick *DelayedTrick::CastFrom(const Card *card){

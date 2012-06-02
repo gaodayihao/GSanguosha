@@ -13,6 +13,7 @@
 #include "indicatoritem.h"
 #include "pixmapanimation.h"
 #include "audio.h"
+#include "SkinBank.h"
 
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
@@ -52,41 +53,6 @@
 
 using namespace QSanProtocol;
 
-struct RoomLayout {
-    int m_scenePadding;
-    int m_roleBoxHeight;
-    int m_chatTextBoxHeight;
-    int m_discardPileMinWidth;
-    int m_discardPilePadding;
-    double m_logBoxHeightPercentage;
-    double m_chatBoxHeightPercentage;
-    double m_infoPlaneWidthPercentage;
-    double m_photoRoomPadding;
-    double m_photoPhotoPadding;
-    QSize m_minimumSceneSize;
-};
-
-struct CircularRoomLayout : public RoomLayout{
-    CircularRoomLayout(){
-        m_scenePadding = 0;
-        m_roleBoxHeight = 75;
-        m_chatTextBoxHeight = 40;
-        m_logBoxHeightPercentage = 0.6;
-        m_chatBoxHeightPercentage = 0.4;
-        m_infoPlaneWidthPercentage = 0.22;
-        m_photoRoomPadding = 10;
-        m_photoPhotoPadding = 30;
-        m_discardPileMinWidth = CardItem::S_NORMAL_CARD_WIDTH * 5;
-        m_discardPilePadding = 50;
-        m_minimumSceneSize = QSize(900, 650);
-    }
-};
-
-static RoomLayout *GetRoomLayout(){
-    static CircularRoomLayout circular;
-    return &circular;
-}
-
 RoomScene *RoomSceneInstance;
 
 void RoomScene::resetPiles()
@@ -96,9 +62,12 @@ void RoomScene::resetPiles()
 
 #include "irregularbutton.h"
 
-RoomScene::RoomScene(QMainWindow *main_window)
-    :focused(NULL), special_card(NULL),
-      main_window(main_window),game_started(false)
+RoomScene::RoomScene(QMainWindow *main_window):
+    _m_roomLayout(&(QSanSkinFactory::getInstance().getCurrentSkinScheme().getRoomSkin().getRoomLayout())),
+    _m_photoLayout(&(QSanSkinFactory::getInstance().getCurrentSkinScheme().getRoomSkin().getPhotoLayout())),
+    _m_commonLayout(&(QSanSkinFactory::getInstance().getCurrentSkinScheme().getRoomSkin().getCommonLayout())),
+    focused(NULL), special_card(NULL),
+    main_window(main_window),game_started(false)
 {
     m_choiceDialog = NULL;
     RoomSceneInstance = this;
@@ -106,7 +75,8 @@ RoomScene::RoomScene(QMainWindow *main_window)
     _m_last_front_ZValue = 0;
     int player_count = Sanguosha->getPlayerCount(ServerInfo.GameMode);
 
-    room_layout = GetRoomLayout();
+    // TODO: for now, just load the default skin. We'll have to build some UI to allow user to change skin
+    QSanSkinFactory::getInstance().switchSkin("default");
 
     // create photos
     for(int i = 0; i < player_count - 1;i++){
@@ -583,18 +553,18 @@ void RoomScene::createReplayControlBar(){
 void RoomScene::adjustItems(){
     QRectF displayRegion = sceneRect();
     if (displayRegion.left() != 0 || displayRegion.top() != 0 ||
-        displayRegion.bottom() < room_layout->m_minimumSceneSize.height() ||
-        displayRegion.right() < room_layout->m_minimumSceneSize.width())
+        displayRegion.bottom() < _m_roomLayout->m_minimumSceneSize.height() ||
+        displayRegion.right() < _m_roomLayout->m_minimumSceneSize.width())
     {
         displayRegion.setLeft(0); displayRegion.setTop(0);
-        double sy = room_layout->m_minimumSceneSize.height() / displayRegion.height();
-        double sx = room_layout->m_minimumSceneSize.width() / displayRegion.width();
+        double sy = _m_roomLayout->m_minimumSceneSize.height() / displayRegion.height();
+        double sx = _m_roomLayout->m_minimumSceneSize.width() / displayRegion.width();
         double scale = qMax(sx, sy);
         displayRegion.setBottom(scale * displayRegion.height());
         displayRegion.setRight(scale * displayRegion.width());
         setSceneRect(displayRegion);
     }
-    int padding = room_layout->m_scenePadding;
+    int padding = _m_roomLayout->m_scenePadding;
     displayRegion.moveLeft(displayRegion.x() + padding);
     displayRegion.moveTop(displayRegion.y() + padding);
     displayRegion.setWidth(displayRegion.width() - padding * 2);
@@ -607,30 +577,31 @@ void RoomScene::adjustItems(){
 
     // set infoplane
     QRectF infoPlane;
-    infoPlane.setWidth(displayRegion.width() * room_layout->m_infoPlaneWidthPercentage);
+    infoPlane.setWidth(displayRegion.width() * _m_roomLayout->m_infoPlaneWidthPercentage);
     infoPlane.moveRight(displayRegion.right());
-    infoPlane.setTop(displayRegion.top() + room_layout->m_roleBoxHeight);
-    infoPlane.setBottom(dashboard->y() - room_layout->m_chatTextBoxHeight);
-    m_rolesBoxBackground = m_rolesBoxBackground.scaled(infoPlane.width(), room_layout->m_roleBoxHeight);
+    infoPlane.setTop(displayRegion.top() + _m_roomLayout->m_roleBoxHeight);
+    infoPlane.setBottom(dashboard->y() - _m_roomLayout->m_chatTextBoxHeight);
+    m_rolesBoxBackground = m_rolesBoxBackground.scaled(infoPlane.width(), _m_roomLayout->m_roleBoxHeight);
     m_rolesBox->setPixmap(m_rolesBoxBackground);
     m_rolesBox->setPos(infoPlane.left(), displayRegion.top());
 
     log_box_widget->setPos(infoPlane.topLeft());
-    log_box->resize(infoPlane.width(), infoPlane.height() * room_layout->m_logBoxHeightPercentage);
-    chat_box_widget->setPos(infoPlane.left(), infoPlane.bottom() - infoPlane.height() * room_layout->m_chatBoxHeightPercentage);
+    log_box->resize(infoPlane.width(), infoPlane.height() * _m_roomLayout->m_logBoxHeightPercentage);
+    chat_box_widget->setPos(infoPlane.left(), infoPlane.bottom() - infoPlane.height() * _m_roomLayout->m_chatBoxHeightPercentage);
     chat_box->resize(infoPlane.width(), infoPlane.bottom() - chat_box_widget->y());
     chat_edit_widget->setPos(infoPlane.left(), infoPlane.bottom());
-    chat_edit->resize(infoPlane.width() - chat_widget->boundingRect().width(), room_layout->m_chatTextBoxHeight);
+    chat_edit->resize(infoPlane.width() - chat_widget->boundingRect().width(), _m_roomLayout->m_chatTextBoxHeight);
     chat_widget->setPos(infoPlane.right() - chat_widget->boundingRect().width(),
-        chat_edit_widget->y() + (room_layout->m_chatTextBoxHeight - chat_widget->boundingRect().height()) / 2);
+        chat_edit_widget->y() + (_m_roomLayout->m_chatTextBoxHeight - chat_widget->boundingRect().height()) / 2);
+
     if(hero_box)
         hero_box->setPos(-2*93 - 8, chat_box_widget->boundingRect().height()+82 - 5);
 
-     if (self_box)
-         self_box->setPos(infoPlane.left() - padding - self_box->boundingRect().width(),
-            sceneRect().height() - padding * 3 - self_box->boundingRect().height() - dashboard->boundingRect().height() - 15);
-     if (enemy_box)
-         enemy_box->setPos(padding * 2, padding * 2);
+    if (self_box)
+        self_box->setPos(infoPlane.left() - padding - self_box->boundingRect().width(),
+                         sceneRect().height() - padding * 3 - self_box->boundingRect().height() - dashboard->boundingRect().height() - 15);
+    if (enemy_box)
+        enemy_box->setPos(padding * 2, padding * 2);
 
     updateTable();
     updateRolesBox();
@@ -638,12 +609,13 @@ void RoomScene::adjustItems(){
 
 void RoomScene::_dispersePhotos(QList<Photo*> &photos, QRectF fillRegion, int minDistanceBetweenPhotos, Qt::Alignment align)
 {
+    double photoWidth = _m_photoLayout->m_normalWidth;
+    double photoHeight = _m_photoLayout->m_normalHeight;
     int numPhotos = photos.size();
     if (numPhotos == 0) return;
     if (align == Qt::AlignHCenter)
     {
 //        double maxWidth = fillRegion.width();
-        double photoWidth = Photo::S_NORMAL_PHOTO_WIDTH;
 //        double step = qMax(photoWidth  + minDistanceBetweenPhotos, maxWidth / numPhotos);
         double step = photoWidth  + minDistanceBetweenPhotos;
         for (int i = 0; i < numPhotos; i++)
@@ -657,7 +629,6 @@ void RoomScene::_dispersePhotos(QList<Photo*> &photos, QRectF fillRegion, int mi
     else if (align == Qt::AlignVCenter)
     {
 //        double maxHeight = fillRegion.height();
-        double photoHeight = Photo::S_NORMAL_PHOTO_HEIGHT;
 //        double step = qMax(photoHeight + minDistanceBetweenPhotos, maxHeight / numPhotos);
         double step = photoHeight + minDistanceBetweenPhotos;
         for (int i = 0; i < numPhotos; i++)
@@ -670,7 +641,6 @@ void RoomScene::_dispersePhotos(QList<Photo*> &photos, QRectF fillRegion, int mi
     }
     else if (align == Qt::AlignBottom)
     {
-        double photoHeight = Photo::S_NORMAL_PHOTO_HEIGHT;
         double step = minDistanceBetweenPhotos + photoHeight;
         for (int i = 0; i < numPhotos; i++)
         {
@@ -684,9 +654,11 @@ void RoomScene::_dispersePhotos(QList<Photo*> &photos, QRectF fillRegion, int mi
 
 void RoomScene::updateTable()
 {
-    int &pad = room_layout->m_scenePadding;
+    int pad = _m_roomLayout->m_scenePadding;
     int tablew = log_box_widget->x() - pad;
-    int tableh = sceneRect().height() - pad * 2 - dashboard->boundingRect().height() - room_layout->m_photoRoomPadding;
+    int tableh = sceneRect().height() - pad * 2 - dashboard->boundingRect().height() - _m_roomLayout->m_photoRoomPadding;
+    int photow = _m_photoLayout->m_normalWidth;
+    int photoh = _m_photoLayout->m_normalHeight;
 
     // Layout:
     //    col1           col2
@@ -725,9 +697,9 @@ void RoomScene::updateTable()
         {3, 3, 1, 1, 1} // loyalist (right), same with rebel (right)
     };
 
-    double col1 = Photo::S_NORMAL_PHOTO_WIDTH + 2 * room_layout->m_photoRoomPadding;
+    double col1 = photow + 2 * _m_roomLayout->m_photoRoomPadding;
     double col2 = tablew - col1;
-    double row1 = Photo::S_NORMAL_PHOTO_HEIGHT + 2 * room_layout->m_photoRoomPadding;
+    double row1 = photoh + 2 * _m_roomLayout->m_photoRoomPadding;
     double row2 = tableh;
 
     const int C_NUM_REGIONS = 10;
@@ -741,8 +713,8 @@ void RoomScene::updateTable()
         QRectF(col2, 0, col1, row2),
         QRectF(0, 0, col1, row2),
         QRectF(0, 0, col1 + col2, row1),
-        QRectF(col2, row1 - Photo::S_NORMAL_PHOTO_HEIGHT * 0.5, col1, row2 - row1 + Photo::S_NORMAL_PHOTO_HEIGHT * 0.5),
-        QRectF(0, row1 - Photo::S_NORMAL_PHOTO_HEIGHT * 0.5, col1, row2 - row1 + Photo::S_NORMAL_PHOTO_HEIGHT * 0.5)
+        QRectF(col2, row1 - photoh * 0.5, col1, row2 - row1 + photoh * 0.5),
+        QRectF(0, row1 - photoh * 0.5, col1, row2 - row1 + photoh * 0.5)
     };
 
     QRectF tableRect(col1, row1, col2 - col1, row2 - row1);
@@ -750,7 +722,7 @@ void RoomScene::updateTable()
     control_panel->setPos(m_tableCenterPos);
     m_drawPile->setPos(m_tableCenterPos);
     m_discardPile->setPos(m_tableCenterPos);
-    m_discardPile->setSize(qMax((int)tableRect.width() - room_layout->m_discardPilePadding * 2, room_layout->m_discardPileMinWidth),
+    m_discardPile->setSize(qMax((int)tableRect.width() - _m_roomLayout->m_discardPilePadding * 2, _m_roomLayout->m_discardPileMinWidth),
         CardItem::S_NORMAL_CARD_HEIGHT);
     card_container->setPos(m_tableCenterPos);
     guanxing_box->setPos(m_tableCenterPos);
@@ -789,7 +761,7 @@ void RoomScene::updateTable()
         if (i < 3 || i == 7) align = Qt::AlignHCenter;
         // else if (pkMode) align = Qt::AlignBottom;
         else align = Qt::AlignVCenter;
-        _dispersePhotos(photosInRegion[i], seatRegions[i], room_layout->m_photoPhotoPadding, align);
+        _dispersePhotos(photosInRegion[i], seatRegions[i], _m_roomLayout->m_photoPhotoPadding, align);
     }
 
 }
@@ -1306,17 +1278,54 @@ void RoomScene::loseCards(int moveId, QList<CardsMoveStruct> card_moves)
             card->setParentItem(NULL);
         }
         _m_cardsMoveStash[moveId].append(cards);
-        if (movement.from != NULL && movement.from_place != Player::Judging && movement.to_place == Player::DiscardPile)
-        {
-            QString from_general;
-            from_general= movement.from->getGeneralName();
-            from_general = Sanguosha->translate(from_general);
-            foreach(CardItem* card,cards)
-                card->writeCardDesc(from_general);
-        }
         keepLoseCardLog(movement);
     }
 }
+
+QString RoomScene::_translateMovementReason(const CardMoveReason &reason)
+{
+    if (reason.m_reason == CardMoveReason::S_REASON_UNKNOWN) return QString();
+    Photo* srcPhoto = name2photo[reason.m_playerId];
+    Photo* dstPhoto = name2photo[reason.m_targetId];
+    QString playerName, targetName;
+
+    if (srcPhoto != NULL)
+        playerName = Sanguosha->translate(srcPhoto->getPlayer()->getGeneralName());
+    else if (reason.m_playerId == Self->objectName())
+        playerName = QString("%1(%2)").arg(Sanguosha->translate(Self->getGeneralName()))
+                        .arg(Sanguosha->translate("yourself"));
+
+    if (dstPhoto != NULL)
+        targetName = Sanguosha->translate("use upon")
+            .append(Sanguosha->translate(dstPhoto->getPlayer()->getGeneralName()));
+    else if (reason.m_targetId == Self->objectName())
+        targetName = QString("%1%2(%3)").arg(Sanguosha->translate("use upon"))
+        .arg(Sanguosha->translate(Self->getGeneralName())).arg(Sanguosha->translate("yourself"));
+
+    QString result(playerName + targetName);
+    result.append(Sanguosha->translate(reason.m_skillName));
+    result.append(Sanguosha->translate(reason.m_eventName));
+    if (reason.m_reason == CardMoveReason::S_REASON_DISMANTLED)
+        result.append(Sanguosha->translate("dismantled"));
+    else if (reason.m_reason == CardMoveReason::S_REASON_CHANGE_EQUIP)
+        result.append(Sanguosha->translate("change equip"));
+    else if ((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD)
+        result.append(Sanguosha->translate("discard"));
+    else if (reason.m_reason == CardMoveReason::S_REASON_JUDGE)
+        result.append(Sanguosha->translate("judge"));
+    else if (reason.m_reason == CardMoveReason::S_REASON_USE && reason.m_skillName.isEmpty())
+        result.append(Sanguosha->translate("use"));
+    else if (reason.m_reason == CardMoveReason::S_REASON_RESPONSE && reason.m_skillName.isEmpty())
+        result.append(Sanguosha->translate("response"));
+    else if (reason.m_reason == CardMoveReason::S_REASON_RECAST)
+        result.append(Sanguosha->translate("recast"));
+    else if (reason.m_reason == CardMoveReason::S_REASON_PINDIAN)
+        result.append(Sanguosha->translate("pindian"));
+    return result;
+    //QString("%1:%2:%3:%4").arg(movement.reason.m_reason)
+    //            .arg(movement.reason.m_skillName).arg(movement.reason.m_eventName
+}
+
 void RoomScene::getCards(int moveId, QList<CardsMoveStruct> card_moves)
 {
     bool doAdjust = false;
@@ -1336,14 +1345,8 @@ void RoomScene::getCards(int moveId, QList<CardsMoveStruct> card_moves)
                 j--;
             }
             else card->setEnabled(true);
+            card->setFootnote(_translateMovementReason(movement.reason));
         }
-        if(movement.from_place == Player::DrawPile && movement.to_place == Player::DiscardPile)
-            special_card = cards.first();
-        else
-            special_card = NULL;
-        if(movement.from_place == Player::DiscardPile || movement.to_place == Player::Hand)
-            foreach(CardItem* card,cards)
-                card->deleteCardDescription();
         bringToFront(to_container);
         to_container->addCardItems(cards, movement.to_place);
         keepGetCardLog(movement);
@@ -3158,7 +3161,7 @@ void RoomScene::showJudgeResult(const QString &who, const QString &result){
         const ClientPlayer *player = ClientInstance->getPlayer(who);
 
         QString desc = QString(tr("%1's judge")).arg(Sanguosha->translate(player->getGeneralName()));
-        special_card->writeCardDesc(desc);
+        special_card->setFootnote(desc);
 
         //special_card->setFrame(result);
     }
@@ -3303,7 +3306,7 @@ void RoomScene::onGameStart(){
     // add free discard button
     if(ServerInfo.FreeChoose && !ClientInstance->getReplayer()){
         m_freeDiscardButton = dashboard->addButton("free-discard",
-                                                   room_layout->m_scenePadding*2 + room_layout->m_photoRoomPadding * 3 + Photo::S_NORMAL_PHOTO_WIDTH,
+                                                   _m_roomLayout->m_scenePadding*2 + _m_roomLayout->m_photoRoomPadding * 3 + _m_photoLayout->m_normalWidth,
                                                    true);
         m_freeDiscardButton->setToolTip(tr("Discard cards freely"));
         FreeDiscardSkill *discard_skill = new FreeDiscardSkill(this);

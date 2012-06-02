@@ -57,12 +57,9 @@ bool Analeptic::isAvailable(const Player *player) const{
 }
 
 void Analeptic::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    room->throwCard(this);
     if(targets.isEmpty())
         room->cardEffect(this, source, source);
-    else
-        foreach(ServerPlayer *tmp, targets)
-            room->cardEffect(this, source, tmp);
+    BasicCard::use(room, source, targets);
 }
 
 void Analeptic::onEffect(const CardEffectStruct &effect) const{
@@ -364,7 +361,9 @@ bool IronChain::targetsFeasible(const QList<const Player *> &targets, const Play
 
 void IronChain::onUse(Room *room, const CardUseStruct &card_use) const{
     if(card_use.to.isEmpty()){
-        room->throwCard(this);
+        CardMoveReason reason(CardMoveReason::S_REASON_RECAST, card_use.from->objectName());
+        reason.m_skillName = this->getSkillName();
+        room->moveCardTo(this, NULL, Player::DiscardPile, reason);
         card_use.from->playCardEffect("@recast");
         card_use.from->drawCards(1);
     }else
@@ -372,7 +371,6 @@ void IronChain::onUse(Room *room, const CardUseStruct &card_use) const{
 }
 
 void IronChain::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    room->throwCard(this);
     if(getSkillName() != "lianhuan")
         source->playCardEffect("@tiesuo");
     TrickCard::use(room, source, targets);

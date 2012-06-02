@@ -285,10 +285,12 @@ public:
 
         if(card){
             // the only difference for Guicai & Guidao
-            room->throwCard(judge->card);
+            CardMoveReason reason(CardMoveReason::S_REASON_JUDGE, player->objectName(), "guicai", QString());
+            room->throwCard(judge->card, reason, judge->who);
 
             judge->card = Sanguosha->getCard(card->getEffectiveId());
-            room->moveCardTo(judge->card, NULL, Player::DiscardPile);
+            room->moveCardTo(judge->card, NULL, Player::DiscardPile,
+                             CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->objectName(), "guicai", QString()));
 
             LogMessage log;
             log.type = "$ChangedJudge";

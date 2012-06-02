@@ -7,6 +7,7 @@
 #include "protocol.h"
 #include "TimedProgressBar.h"
 #include "GeneralCardContainerUI.h"
+#include "SkinBank.h"
 
 #include <QGraphicsObject>
 #include <QPixmap>
@@ -50,10 +51,6 @@ public:
 
     void setFrame(FrameType type);
     virtual QRectF boundingRect() const;
-    static const int S_NORMAL_PHOTO_WIDTH = 130;
-    static const int S_NORMAL_PHOTO_HEIGHT = 150;
-    static const int S_SHADOW_INCLUSIVE_PHOTO_WIDTH = 135;
-    static const int S_SHADOW_INCLUSIVE_PHOTO_HEIGHT = 157;
 public slots:
     void updateAvatar();    
     void updateSmallAvatar();
@@ -72,9 +69,11 @@ protected:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
-    static const QRect S_CARD_MOVE_REGION;
     QList<CardItem*> m_takenOffCards;
 private:
+    const QSanRoomSkin* _m_roomSkin;
+    const QSanRoomSkin::CommonLayout* _m_commonLayout;
+    const QSanRoomSkin::PhotoLayout* _m_photoLayout;
     const ClientPlayer *player;
     QPixmap avatar, small_avatar;
     QGraphicsPixmapItem *ready_item, *lord_frame;
@@ -103,8 +102,7 @@ private:
     bool hide_avatar, game_start;
     QPixmap death_pixmap;
     QPixmap back_icon, chain_icon;
-    QList<Pixmap *> phases;
-    Pixmap *last_phase;
+    QGraphicsPixmapItem *phase, *last_phase;
     QSanCommandProgressBar *progress_bar;
     QGraphicsPixmapItem *emotion_item, *frame_item;
     QGraphicsSimpleTextItem *skill_name_item;

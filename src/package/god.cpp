@@ -670,15 +670,15 @@ public:
         delete exchange_card;
     }
 
-    static void DiscardStar(ServerPlayer *shenzhuge, int n){
+    static void DiscardStar(ServerPlayer *shenzhuge, int n, QString skillName){
         Room *room = shenzhuge->getRoom();
         QList<int> stars = shenzhuge->getPile("stars");
 
-        int i;
-        for(i=0; i<n; i++){
+        for(int i = 0; i < n; i++){
             room->fillAG(stars, shenzhuge);
             int card_id = room->askForAG(shenzhuge, stars, false, "qixing-discard");
-            room->throwCard(card_id);
+            CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, shenzhuge->objectName(), skillName, QString());
+            room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
             stars.removeOne(card_id);
             shenzhuge->invoke("clearAG");
         }
@@ -724,7 +724,7 @@ bool KuangfengCard::targetFilter(const QList<const Player *> &targets, const Pla
 }
 
 void KuangfengCard::onEffect(const CardEffectStruct &effect) const{
-    Qixing::DiscardStar(effect.from, 1);
+    Qixing::DiscardStar(effect.from, 1, "kuangfeng");
 
     effect.from->loseMark("@star");
     effect.to->gainMark("@gale");
@@ -838,9 +838,9 @@ bool DawuCard::targetFilter(const QList<const Player *> &targets, const Player *
     return targets.length() < Self->getMark("@star");
 }
 
-void DawuCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
+void DawuCard::use(Room *, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     int n = targets.length();
-    Qixing::DiscardStar(source, n);
+    Qixing::DiscardStar(source, n, "dawu");
 
     source->loseMark("@star", n);
     foreach(ServerPlayer *target, targets){

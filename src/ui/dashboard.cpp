@@ -509,12 +509,12 @@ QPushButton *Dashboard::addButton(const QString &name, int x, bool from_left){
 
 void Dashboard::_addProgressBar()
     {
-    m_progressBar.setFixedSize(250, 15);
+    m_progressBar.setFixedSize(280, 13);
     m_progressBar.setTextVisible(false);
     QGraphicsProxyWidget *widget = new QGraphicsProxyWidget(right);
     widget->setWidget(&m_progressBar);
     widget->setParentItem(middle);
-    widget->setPos(150, - 25);
+    widget->setPos(120, - 27);
 
     connect(&m_progressBar, SIGNAL(timedOut()), this, SIGNAL(progressBarTimedOut()));
     m_progressBar.hide();

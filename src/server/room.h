@@ -243,10 +243,13 @@ public:
     void obtainCard(ServerPlayer *target, const Card *card, bool unhide = true);
     void obtainCard(ServerPlayer *target, int card_id, bool unhide = true);
 
-    void throwCard(const Card *card, ServerPlayer *who = NULL);
-    void throwCard(int card_id, ServerPlayer *who = NULL);
+    void throwCard(int card_id, ServerPlayer *who);
+    void throwCard(const Card *card, ServerPlayer *who);
+    void throwCard(const Card *card, const CardMoveReason &reason, ServerPlayer *who);
 
     void moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place dstPlace,
+                    bool forceMoveVisible = false, bool ignoreChanged = true);
+    void moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place dstPlace, const CardMoveReason &reason,
                     bool forceMoveVisible = false, bool ignoreChanged = true);
     void moveCardsAtomic(QList<CardsMoveStruct> cards_move, bool forceMoveVisible);
     void moveCards(CardsMoveStruct cards_move, bool forceMoveVisible, bool ignoreChanged = true);

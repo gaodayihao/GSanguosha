@@ -78,8 +78,13 @@ void LihunCard::onEffect(const CardEffectStruct &effect) const{
     effect.to->setFlags("LihunTarget");
     DummyCard *cd = effect.to->wholeHandCards();
     if(cd)
-        room->obtainCard(effect.from, cd, false);
+    {
+        CardMoveReason reason(CardMoveReason::S_REASON_TRANSFER, effect.from->objectName(),
+                              effect.to->objectName(), "lihun", QString());
+        room->moveCardTo(cd, effect.from, Player::Hand, reason, false);
+    }
     cd->deleteLater();
+    effect.to->setFlags("LihunTarget");
 }
 
 class LihunSelect: public OneCardViewAsSkill{
@@ -147,7 +152,10 @@ public:
             else
                 to_goback = (DummyCard*)room->askForExchange(diaochan, "lihun", target->getHp(), true, "LihunGoBack");
 
-            room->moveCardTo(to_goback, target, Player::Hand);
+            CardMoveReason reason(CardMoveReason::S_REASON_TRANSFER, diaochan->objectName(),
+                                  target->objectName(), "lihun", QString());
+            room->moveCardTo(to_goback, target, Player::Hand, reason, false);
+            target->setFlags("-LihunTarget");
             delete to_goback;
         }
 
@@ -281,11 +289,13 @@ public:
         }
 
         int card_id = -1;
+        CardMoveReason reason(CardMoveReason::S_REASON_PUT, sp_pangtong->objectName(), "manjuan", QString());
         if(event == CardGotOnePiece){
             CardMoveStar move = data.value<CardMoveStar>();
             card_id = move->card_id;
             if(move->to_place == Player::Hand){
-                room->throwCard(move->card_id);
+                const Card* card = Sanguosha->getCard(card_id);
+                room->moveCardTo(card, NULL, Player::DiscardPile, reason);
                 LogMessage log;
                 log.type = "$ManjuanGot";
                 log.from = sp_pangtong;
@@ -299,7 +309,8 @@ public:
                 return false;
 
             card_id = data.toInt();
-            room->throwCard(card_id);
+            const Card* card = Sanguosha->getCard(card_id);
+            room->moveCardTo(card, NULL, Player::DiscardPile, reason);
         }
 
         if(sp_pangtong->getPhase() == Player::NotActive || !sp_pangtong->askForSkillInvoke(objectName(), data))
@@ -351,7 +362,8 @@ public:
         {
             player->addMark("zuixiangHasTrigger");
             room->setPlayerCardLock(player, ".");
-            CardsMoveStruct move(zuixiang, player, Player::Hand);
+            CardMoveReason reason(CardMoveReason::S_REASON_PUT, player->objectName(), QString(), "zuixiang", "");
+            CardsMoveStruct move(zuixiang, player, Player::Hand, reason);
             room->moveCards(move, true);
         }
     }
@@ -602,7 +614,7 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return true;
+        return target != NULL;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{

@@ -24,10 +24,12 @@ public:
             room->playSkillEffect(objectName());
 
             int card_id = room->drawCard();
-            room->throwCard(judge->card);
+            CardMoveReason reason(CardMoveReason::S_REASON_JUDGE, player->objectName(), "zhenlie", QString());
+            room->throwCard(judge->card, reason, judge->who);
 
             judge->card = Sanguosha->getCard(card_id);
-            room->moveCardTo(judge->card, NULL, Player::DiscardPile);
+            room->moveCardTo(judge->card, NULL, Player::DiscardPile,
+                             CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->getGeneralName(), this->objectName(), QString()));
 
             LogMessage log;
             log.type = "$ChangedJudge";
@@ -414,10 +416,11 @@ public:
         Room *room = player->getRoom();
         int card_id = room->drawCard();
         const Card *card = Sanguosha->getCard(card_id);
-        room->moveCardTo(card, player, Player::PlaceTakeoff, true);
+        room->moveCardTo(card, player, Player::PlaceTakeoff,
+                         CardMoveReason(CardMoveReason::S_REASON_SHOW, player->getGeneralName(), "fuhun", QString()), true);
         room->getThread()->delay();
 
-        player->obtainCard(card);
+        player->obtainCard(card, true);
 
         return card;
     }
@@ -814,7 +817,8 @@ public:
                 room->broadcastInvoke("clearAG");
                 if(card_id != -1){
                     room->playSkillEffect(objectName());
-                    room->throwCard(card_id);
+                    CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, chengpu->objectName(), "chunlao", QString());
+                    room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
                     Analeptic *analeptic = new Analeptic(Card::NoSuit, 0);
                     analeptic->setSkillName(objectName());
                     CardUseStruct use;

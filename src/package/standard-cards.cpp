@@ -140,13 +140,9 @@ QString Peach::getSubtype() const{
 //}
 
 void Peach::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    room->throwCard(this);
-
     if(targets.isEmpty())
         room->cardEffect(this, source, source);
-    else
-        foreach(ServerPlayer *tmp, targets)
-            room->cardEffect(this, source, tmp);
+    BasicCard::use(room, source, targets);
 }
 
 void Peach::onEffect(const CardEffectStruct &effect) const{
@@ -607,7 +603,8 @@ AmazingGrace::AmazingGrace(Suit suit, int number)
 }
 
 void AmazingGrace::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    room->throwCard(this);
+    CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
+    room->moveCardTo(this, NULL, Player::DiscardPile, reason);
 
     QList<ServerPlayer *> players = targets.isEmpty() ? room->getAllPlayers() : targets;
     QList<int> card_ids = room->getNCards(players.length());
@@ -722,7 +719,10 @@ void ArcheryAttack::onEffect(const CardEffectStruct &effect) const{
 }
 
 void SingleTargetTrick::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    room->throwCard(this);
+    CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
+    reason.m_skillName = this->getSkillName();
+    if (targets.size() == 1) reason.m_targetId = targets.first()->objectName();
+    room->moveCardTo(this, NULL, Player::DiscardPile, reason);
 
     CardEffectStruct effect;
     effect.card = this;
@@ -774,9 +774,10 @@ bool Collateral::targetFilter(const QList<const Player *> &targets, const Player
 }
 
 void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    room->throwCard(this);
+    CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName(), targets[0]->objectName(), QString(), QString());
+    room->throwCard(this, reason, NULL);
 
-    ServerPlayer *killer = targets.at(0);
+    ServerPlayer *killer = targets[0];
     QList<ServerPlayer *> victims = targets;
     if(victims.length() > 1)
         victims.removeAt(0);
@@ -848,9 +849,10 @@ Nullification::Nullification(Suit suit, int number)
     setObjectName("nullification");
 }
 
-void Nullification::use(Room *room, ServerPlayer *, const QList<ServerPlayer *> &) const{
+void Nullification::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const{
     // does nothing, just throw it
-    room->throwCard(this);
+    CardMoveReason reason(CardMoveReason::S_REASON_RESPONSE, source->objectName());
+    room->moveCardTo(this, NULL, Player::DiscardPile, reason);
 }
 
 bool Nullification::isAvailable(const Player *) const{
@@ -991,7 +993,9 @@ void Dismantlement::onEffect(const CardEffectStruct &effect) const{
 
     Room *room = effect.to->getRoom();
     int card_id = room->askForCardChosen(effect.from, effect.to, "hej", objectName());
-    room->throwCard(card_id, room->getCardPlace(card_id) == Player::Judging ? NULL : effect.to);
+    CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLED, effect.to->objectName());
+    room->throwCard(Sanguosha->getCard(card_id), reason, effect.to);
+    // room->throwCard(card_id, room->getCardPlace(card_id) == Player::Judging ? NULL : effect.to);
 
     LogMessage log;
     log.type = "$Dismantlement";

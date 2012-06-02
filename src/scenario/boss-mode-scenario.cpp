@@ -356,59 +356,63 @@ public:
 
         switch(event){
         case GameStart:{
-                if(player->isLord()){
-                    if(boss_banlist.contains(player->getGeneralName()))
-                        getRandomSkill(player, true);
+            player = room->getLord();
+            if (boss_banlist.contains(player->getGeneralName()))
+                getRandomSkill(player, true);
 
-                    removeLordSkill(player);
+            removeLordSkill(player);
 
-                    room->installEquip(player, "silver_lion");
-                    qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
-                    if((qrand() % 2) == 1){
-                        room->acquireSkill(player, "silue");
-                        room->acquireSkill(player, "kedi");
-                    }
-                    else{
-                        room->acquireSkill(player, "jishi");
-                        room->acquireSkill(player, "daji");
-                    }
-
-                    int maxhp = 8-((player->getMaxHp()%3)%2);
-                    room->setPlayerProperty(player, "maxhp", maxhp);
-                    room->setPlayerProperty(player, "hp", maxhp);
-                }
-
-                getRandomSkill(player);
-                room->setTag("FirstRound", true);
-                break;
+            room->installEquip(player, "silver_lion");
+            qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+            if((qrand() % 2) == 1){
+                room->acquireSkill(player, "silue");
+                room->acquireSkill(player, "kedi");
             }
+            else{
+                room->acquireSkill(player, "jishi");
+                room->acquireSkill(player, "daji");
+            }
+
+            int maxhp = 8-((player->getMaxHp()%3)%2);
+            room->setPlayerProperty(player, "maxhp", maxhp);
+            room->setPlayerProperty(player, "hp", maxhp);
+
+            foreach (ServerPlayer* serverPlayer, room->getPlayers())
+            {
+                getRandomSkill(serverPlayer);
+            }
+
+            room->setTag("FirstRound", true);
+            break;
+        }
+
 
         case TurnStart:{
-                if(player->isLord() && player->faceUp()){
-                    bool hasLoseMark = false;
-                    if(player->getMark("@frantic") > 0){
-                        player->loseMark("@frantic");
-                        hasLoseMark = true;
-                    }
-
-                    if(hasLoseMark && player->getMark("@frantic") == 0){
-                        startDeadJudge(player);
-                        player->addMark("frantic_over");
-                    }
+            if(player->isLord() && player->faceUp()){
+                bool hasLoseMark = false;
+                if(player->getMark("@frantic") > 0){
+                    player->loseMark("@frantic");
+                    hasLoseMark = true;
                 }
-                break;
+
+                if(hasLoseMark && player->getMark("@frantic") == 0){
+                    startDeadJudge(player);
+                    player->addMark("frantic_over");
+                }
             }
+            break;
+        }
 
         case PhaseChange:{
-                if(player->isLord() && player->getMark("frantic_over") > 0 && player->getPhase() == Player::Finish)
-                   player->getRoom()->killPlayer(player);
-                break;
-            }
+            if(player->isLord() && player->getMark("frantic_over") > 0 && player->getPhase() == Player::Finish)
+                player->getRoom()->killPlayer(player);
+            break;
+        }
 
         case GameOverJudge:{
-                return true;
-                break;
-            }
+            return true;
+            break;
+        }
 
         case Death:{
             QList<ServerPlayer *> players = room->getAlivePlayers();
@@ -470,7 +474,7 @@ public:
 
                     QList<const Card *> judges = player->getCards("j");
                     foreach(const Card *card, judges)
-                        room->throwCard(card->getEffectiveId());
+                        room->throwCard(card->getEffectiveId(), NULL);
                 }
             }
             break;

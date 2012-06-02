@@ -10,6 +10,7 @@
 #include "clientlogbox.h"
 #include "sprite.h"
 #include "chatwidget.h"
+#include "SkinBank.h"
 
 class Window;
 class Button;
@@ -194,6 +195,9 @@ protected:
     QMutex m_zValueMutex;
 
 private:
+    const QSanRoomSkin::RoomLayout* _m_roomLayout;
+    const QSanRoomSkin::PhotoLayout* _m_photoLayout;
+    const QSanRoomSkin::CommonLayout* _m_commonLayout;
     QGraphicsItem* _m_last_front_item;
     double _m_last_front_ZValue;
     PlayerCardContainer* _getPlayerCardContainer(Player::Place place, Player* player);
@@ -270,6 +274,10 @@ private:
     Button *arrange_button;
     KOFOrderBox *enemy_box, *self_box;
     QPointF m_tableCenterPos;
+
+    // TODO: this function shouldn't be here. But it's here anyway, before someone find a better
+    // home for it.
+    QString _translateMovementReason(const CardMoveReason& reason);
 
     void useCard(const Card *card);
     void fillTable(QTableWidget *table, const QList<const ClientPlayer *> &players);

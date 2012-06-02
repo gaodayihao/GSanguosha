@@ -13,8 +13,15 @@
 #include <QPropertyAnimation>
 #include <QGraphicsDropShadowEffect>
 
+void CardItem::_initialize()
+{
+    this->_m_roomSkin = &(QSanSkinFactory::getInstance().getCurrentSkinScheme().getRoomSkin());
+    this->_m_layout = &(_m_roomSkin->getCommonLayout());
+}
+
 CardItem::CardItem(const Card *card)
 {
+    _initialize();
     if(card && card->inherits("HeroCard"))
         m_isHeroCard = true;
     else
@@ -23,6 +30,7 @@ CardItem::CardItem(const Card *card)
     m_isSelected = false;
     auto_back = true;
     frozen = false;
+     m_isDescriptionVisible = true;
 
     setTransformOriginPoint(pixmap.width()/2, pixmap.height()/2);
     setAcceptHoverEvents(true);
@@ -34,10 +42,17 @@ CardItem::CardItem(const Card *card)
 
     avatar = NULL;
 
-    owner_pixmap = NULL;
-
     m_opacityAtHome = 1.0;
     m_currentAnimation = NULL;
+}
+
+CardItem::CardItem(const QString &general_name)
+    :m_card(NULL), filtered_card(NULL), auto_back(true), frozen(false), m_isHeroCard(false)
+{
+    _initialize();
+    changeGeneral(general_name);
+    m_currentAnimation = NULL;
+    m_opacityAtHome = 1.0;
 }
 
 void CardItem::setCard(const Card* card)
@@ -70,14 +85,6 @@ void CardItem::setCard(const Card* card)
 void CardItem::setEnabled(bool enabled)
 {
     Pixmap::setEnabled(enabled);
-}
-
-CardItem::CardItem(const QString &general_name)
-    :m_card(NULL), filtered_card(NULL), auto_back(true), frozen(false), m_isHeroCard(false)
-{
-    changeGeneral(general_name);
-    m_currentAnimation = NULL;
-    m_opacityAtHome = 1.0;
 }
 
 CardItem::~CardItem()
@@ -337,41 +344,20 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         Pixmap::paint(painter, option, widget);
 
     if (m_card) {
-        painter->drawPixmap(0, 14, cardsuit_pixmap);
-        painter->drawPixmap(0, 2, number_pixmap);
-        if(owner_pixmap)painter->drawPixmap(0,0,*owner_pixmap);
+        painter->drawPixmap(_m_layout->m_cardSuitArea, cardsuit_pixmap);
+        painter->drawPixmap(_m_layout->m_cardNumberArea, number_pixmap);
+        if (this->m_isDescriptionVisible)
+        {
+            // first, draw shadow
+            const QSanRoomSkin::QSanTextFont& font = _m_layout->m_cardFootnoteFont;
+            font.paintText(painter, _m_layout->m_cardFootnoteArea,
+                           (Qt::AlignmentFlag)((int)Qt::AlignHCenter | Qt::AlignBottom | Qt::TextWrapAnywhere), owner_text);
+        }
     }
 }
 
 
-void CardItem::writeCardDesc(QString card_owner)
+void CardItem::setFootnote(QString desc)
 {
-     if(m_card){
-         int x, y;
-         x=(93-card_owner.toLocal8Bit().length()*6)/2;
-         y=120;
-         owner_pixmap = new QPixmap(pixmap.size());
-         owner_pixmap->fill(QColor(0,0,0,0));
-         QPainter painter(owner_pixmap);
-
-#ifdef Q_OS_WIN32
-         static QFont card_desc_font("SimSun", 9, QFont::Normal);
-         painter.setFont(card_desc_font);
-         painter.setPen(Qt::black);
-#endif
-
-         painter.drawText(x, y-1, card_owner);
-         painter.drawText(x, y+1, card_owner);
-         painter.drawText(x-1, y, card_owner);
-         painter.drawText(x+1, y, card_owner);
-
-         painter.setPen(QColor(228,213,160));
-         painter.drawText(x, y, card_owner);
-         update();
-     }
-}
-
-void CardItem::deleteCardDescription(){
-    delete owner_pixmap;
-    owner_pixmap = NULL;
+    owner_text = desc;
 }

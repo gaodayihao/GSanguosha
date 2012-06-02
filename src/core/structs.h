@@ -66,10 +66,74 @@ struct CardUseStruct{
     QList<ServerPlayer *> to;
 };
 
+class CardMoveReason
+{
+public:
+    int m_reason;
+    QString m_playerId; // the cause (not the source) of the movement, such as "lusu" when "dimeng", or "zhanghe" when "qiaobian"
+    QString m_targetId; // To keep this structure lightweight, currently this is only used for UI purpose.
+                        // It will be set to empty if multiple targets are involved. NEVER use it for trigger condition
+                        // judgement!!! It will not accurately reflect the real reason.
+    QString m_skillName; // skill that triggers movement of the cards, such as "longdang", "dimeng"
+    QString m_eventName; // additional arg such as "lebusishu" on top of "S_REASON_JUDGE"
+    inline CardMoveReason(){ m_reason = S_REASON_UNKNOWN; }
+    inline CardMoveReason(int moveReason, QString playerId)
+    {
+        m_reason = moveReason;
+        m_playerId = playerId;
+    }
+
+    inline CardMoveReason(int moveReason, QString playerId, QString skillName, QString eventName)
+    {
+        m_reason = moveReason;
+        m_playerId = playerId;
+        m_skillName = skillName;
+        m_eventName = eventName;
+    }
+
+    inline CardMoveReason(int moveReason, QString playerId, QString targetId, QString skillName, QString eventName)
+    {
+        m_reason = moveReason;
+        m_playerId = playerId;
+        m_targetId = targetId;
+        m_skillName = skillName;
+        m_eventName = eventName;
+    }
+
+    bool tryParse(const Json::Value&);
+    Json::Value toJsonValue() const;
+    static const int S_REASON_UNKNOWN = 0x00;
+    static const int S_REASON_USE = 0x01;
+    static const int S_REASON_RESPONSE = 0x02;
+    static const int S_REASON_DISCARD = 0x03;
+    static const int S_REASON_JUDGE = 0x04;
+    static const int S_REASON_PINDIAN = 0x05;
+    static const int S_REASON_TRANSFER = 0x06;
+    static const int S_REASON_DRAW = 0x08;
+    static const int S_REASON_PUT = 0x09; // Theoretically, this should not be here because "put" will not
+                                          // trigger event such as "manjuan". But let's do a dirty fix for
+                                          // now.
+    static const int S_REASON_SHOW = 0x0A; // For "fire attack" and "fuhun"
+    static const int S_REASON_RECAST = 0x0B; // Tiesuolianhuan
+    static const int S_REASON_NATURAL_ENTER = 0x0C;
+    static const int S_REASON_REMOVE_FROM_PILE = 0x0D;
+
+    //subcategory of transfer
+    static const int S_REASON_SWAP = 0x16; // for "dimeng", "ganlu"
+    static const int S_REASON_OVERRIDE = 0x26; // for "guidao"
+    //subcategory of discard
+    static const int S_REASON_DISMANTLED = 0x13; // for "guohechaiqiao"
+    static const int S_REASON_CHANGE_EQUIP = 0x23; // for replacing existing equips
+
+    static const int S_MASK_BASIC_REASON = 0x0F;
+};
+
+
 struct CardsMoveOneTimeStruct{
     QList<int> card_ids;
     QList<Player::Place> from_places;
     Player::Place to_place;
+    CardMoveReason reason;
     Player *from, *to;
 };
 
@@ -86,6 +150,7 @@ struct CardMoveStruct{
     QString from_player_name, to_player_name;
     QString from_pile_name, to_pile_name;
     Player *from, *to;
+    CardMoveReason reason;
     bool open;
     bool tryParse(const Json::Value&);
     Json::Value toJsonValue() const;
@@ -114,29 +179,35 @@ struct CardsMoveStruct{
         to = NULL;
         countAsOneTime = false;
     }
-    inline CardsMoveStruct(const QList<int> &ids, Player* to, Player::Place to_place)
+
+    inline CardsMoveStruct(const QList<int> &ids, Player* to, Player::Place to_place, CardMoveReason reason)
     {
         this->card_ids = ids;
         this->from_place = Player::PlaceUnknown;
         this->to_place = to_place;
         this->from = NULL;
         this->to = to;
+        this->reason = reason;
     }
+
     inline bool hasSameSourceAs(const CardsMoveStruct &move)
     {
         return (from == move.from) && (from_place == move.from_place) &&
                (from_player_name == move.from_player_name) && (from_pile_name == move.from_pile_name);
     }
+
     inline bool hasSameDestinationAs(const CardsMoveStruct &move)
     {
         return (to == move.to) && (to_place == move.to_place) &&
                (to_player_name == move.to_player_name) && (to_pile_name == move.to_pile_name);
     }
+
     QList<int> card_ids;
     Player::Place from_place, to_place;
     QString from_player_name, to_player_name;
     QString from_pile_name, to_pile_name;
     Player *from, *to;
+    CardMoveReason reason;
     bool open; // helper to prevent sending card_id to unrelevant clients
     bool countAsOneTime; // helper to identify distinct move counted as one time
     bool tryParse(const Json::Value&);
