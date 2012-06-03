@@ -72,7 +72,7 @@ Photo::Photo(): player(NULL),
     emotion_item->moveBy(10, 0);
     emotion_item->setZValue(10086);
 
-    avatar_area = new QGraphicsRectItem(6, 26, 120, 50, this);
+    avatar_area = new QGraphicsRectItem(_m_photoLayout->m_avatarArea, this);
     avatar_area->setPen(Qt::NoPen);
 
     back_icon = QPixmap(_m_roomSkin->getPixmap(QSanRoomSkin::S_SKIN_KEY_PHOTO_FACETURNEDMASK));

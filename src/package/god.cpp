@@ -534,7 +534,7 @@ public:
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
-        return player->getMark("@wrath") >= 2 && !player->hasUsed("WuqianCard");
+        return player->getMark("@wrath") >= 2;
     }
 
     virtual const Card *viewAs() const{

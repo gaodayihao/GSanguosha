@@ -851,7 +851,7 @@ Nullification::Nullification(Suit suit, int number)
 
 void Nullification::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const{
     // does nothing, just throw it
-    CardMoveReason reason(CardMoveReason::S_REASON_RESPONSE, source->objectName());
+    CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
     room->moveCardTo(this, NULL, Player::DiscardPile, reason);
 }
 

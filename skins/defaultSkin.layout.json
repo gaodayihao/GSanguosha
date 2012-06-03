@@ -12,7 +12,7 @@
 {
 	"scenePadding": 0,
 	"roleBoxHeight": 80,
-	"chatTextBoxHeight": 30,
+	"chatTextBoxHeight": 38,
 	"logBoxHeightPercentage": 0.6,
 	"chatBoxHeightPercentage": 0.4,
 	"infoPlaneWidthPercentage": 0.22,
@@ -30,7 +30,7 @@
 	"heightIncludeShadow": 155,
 	"widthIncludeMarkAndControl": 139,
 	"heightIncludeMarkAndControl": 155,
-	"avatarArea": [6, 26, 120, 50],
+	"avatarArea": [4, 25, 126, 50],
 	"smallAvatarArea": [82, 36, 42, 36],
 	"cardMoveArea": [-50, 65, 200, 130],
 	"phaseArea": [13, 144, 16, 63],

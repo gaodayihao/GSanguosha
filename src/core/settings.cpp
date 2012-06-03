@@ -157,7 +157,7 @@ void Settings::init(){
 
     pairs_ban << "shencaocao" << "dongzhuo" << "zuoci" << "zhoutai" << "+luboyan" << "liaohua" << "bgm_pangtong"
               << "caocao+caochong" << "xushu+zhugeliang" << "simayi+caizhaoji" << "wisjiangwei+zhanggongqi"
-              << "zhenji+zhangjiao" << "zhenji+simayi" << "huanggai+yuanshao"
+              << "zhenji+zhangjiao" << "zhenji+simayi" << "zhenji+wangyi" << "huanggai+yuanshao"
               << "huanggai+wuguotai" << "dengshizai+caoren" << "dengshizai+shenlvbu" << "dengshizai+bgm_diaochan"
               << "luxun+liubei" << "luxun+wolong" << "luxun+yuji" << "luxun+daqiao"
               << "zhangchuhua+liubei" << "zhangchuhua+wolong" << "zhangchuhua+yuji" << "zhangchuhua+daqiao"
