@@ -6,7 +6,7 @@
 	"cardSuitArea": [0, 14, 27, 28],
 	"cardNumberArea": [0, 2, 27, 28],
 	"cardFootnoteArea": [0, 70, 93, 50],
-	"cardFootnoteFont": ["SimSun", 9, 50, [255, 255, 255, 255], [20, 20, 20, 255]]
+	"cardFootnoteFont": ["SimSun", 9, 50, [228, 213, 160, 255], [0, 0, 0, 255]]
 },
 "room":
 {
