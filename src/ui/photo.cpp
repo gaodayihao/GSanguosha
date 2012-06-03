@@ -555,7 +555,7 @@ void Photo::setFrame(FrameType type){
         frame_item->hide();
     }
 
-    update();
+    //update();
 }
 
 void Photo::updatePhase(){

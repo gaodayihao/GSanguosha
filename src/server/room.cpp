@@ -1025,10 +1025,11 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
 
     if(card){
         CardMoveReason reason(CardMoveReason::S_REASON_RESPONSE, player->objectName());
+        CardMoveReason reason2(CardMoveReason::S_REASON_DISCARD, player->objectName());
         if(card->getTypeId() != Card::Skill){
             const CardPattern *card_pattern = Sanguosha->getPattern(pattern);
             if((card_pattern == NULL || card_pattern->willThrow()) && trigger_event != NonTrigger)
-                moveCardTo(card, NULL, Player::DiscardPile, reason);
+                moveCardTo(card, NULL, Player::DiscardPile, reason2);
         }
         else if(card->willThrow())
         {
