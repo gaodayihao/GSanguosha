@@ -3201,6 +3201,7 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardGotOnePiece, this, (ServerPlayer*)cards_move.to, data);
             }
+            Sanguosha->getCard(cards_move.card_ids[j])->onMove(moves[j]);
         }
         moveOneTimeStruct.card_ids.append(cards_move.card_ids);
         for (int i = 0; i < cards_move.card_ids.size(); i++)
