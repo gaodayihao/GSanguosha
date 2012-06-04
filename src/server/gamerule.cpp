@@ -36,9 +36,6 @@ void GameRule::onPhaseChange(ServerPlayer *player) const{
     Room *room = player->getRoom();
     switch(player->getPhase()){
     case Player::RoundStart:{
-        if(room->getTag("FirstRound").toBool())
-            room->getThread()->delay();
-
             break;
         }
     case Player::Start: {

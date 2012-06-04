@@ -474,9 +474,14 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
 
 void Card::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     if(will_throw){
-        CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName(), QString(), this->getSkillName(), QString());
-        if (targets.size() == 1) reason.m_targetId = targets.first()->objectName();
-        room->moveCardTo(this, NULL, Player::DiscardPile, reason);
+        if(owner_discarded)
+            room->throwCard(this, source);
+        else
+        {
+            CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName(), QString(), this->getSkillName(), QString());
+            if (targets.size() == 1) reason.m_targetId = targets.first()->objectName();
+            room->moveCardTo(this, NULL, Player::DiscardPile, reason);
+        }
     }
 
     if(targets.length() == 1){

@@ -365,7 +365,7 @@ void RoomThread::run(){
         }else{
             if(room->getMode() == "02_1v1")
                 room->setCurrent(room->getPlayers().at(1));
-
+            delay();
             forever {
                 trigger(TurnStart, room, room->getCurrent());
                 if (room->isFinished()) break;
