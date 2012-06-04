@@ -30,7 +30,7 @@ return {
 	["dismantled"] = "被拆",
 	["recast"] = "重铸",
 	["pindian"] = "拼点",
-	["change equip"] = "更换武器",
+	["change equip"] = "更换装备",
 	["finish"] = "结束",
 	["online"] = "在线",
 	["offline"] = "离线",
