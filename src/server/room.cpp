@@ -1027,17 +1027,18 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
         CardMoveReason reason(CardMoveReason::S_REASON_RESPONSE, player->objectName());
         if(trigger_event == JinkUsed){
             reason.m_reason = CardMoveReason::S_REASON_USE;
+            reason.m_skillName = card->getSkillName();
             moveCardTo(card, NULL, Player::DiscardPile, reason);
         }
-        else if(card->getTypeId() != Card::Skill){
+        else if(card->getTypeId() != Card::Skill && trigger_event == CardDiscarded){
             const CardPattern *card_pattern = Sanguosha->getPattern(pattern);
-            if((card_pattern == NULL || card_pattern->willThrow()) && trigger_event != NonTrigger)
+            if((card_pattern == NULL || card_pattern->willThrow()))
             {
                 reason.m_reason = CardMoveReason::S_REASON_DISCARD;
                 moveCardTo(card, NULL, Player::DiscardPile, reason);
             }
         }
-        else if(card->willThrow())
+        else if(card->willThrow() && trigger_event != NonTrigger)
         {
             reason.m_skillName = card->getSkillName();
             moveCardTo(card, NULL, Player::DiscardPile, reason);
