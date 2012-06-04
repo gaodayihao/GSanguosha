@@ -508,11 +508,14 @@ ZhibaCard::ZhibaCard(){
 }
 
 bool ZhibaCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    return targets.isEmpty() && to_select->hasLordSkill("sunce_zhiba") && to_select != Self && !to_select->isKongcheng();
+    return targets.isEmpty() && to_select->hasLordSkill("sunce_zhiba")
+            && !to_select->hasFlag("zhiba_pindian")
+            && to_select != Self && !to_select->isKongcheng();
 }
 
 void ZhibaCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     ServerPlayer *sunce = targets.first();
+    room->setPlayerFlag(sunce, "zhiba_pindian");
     if(sunce->getMark("hunzi") > 0 &&
        room->askForChoice(sunce, "zhiba_pindian", "accept+reject") == "reject")
     {
@@ -531,7 +534,8 @@ public:
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
-        return ! player->hasUsed("ZhibaCard") && player->getKingdom() == "wu" && !player->isKongcheng();
+        return player->usedTimes("ZhibaCard") < player->getMark("zhibaTimes")
+                && player->getKingdom() == "wu" && !player->isKongcheng();
     }
 
     virtual bool viewFilter(const CardItem *to_select) const{
@@ -543,6 +547,45 @@ public:
         card->addSubcard(card_item->getFilteredCard());
 
         return card;
+    }
+};
+
+class ZhibaOthers: public PhaseChangeSkill{
+public:
+    ZhibaOthers():PhaseChangeSkill("zhiba_pindian"){
+        view_as_skill = new ZhibaPindian;
+    }
+
+    virtual int getPriority() const{
+        return 2;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        Player::Phase phase = target->getPhase();
+        if(phase != Player::RoundStart && phase != Player::NotActive)
+            return false;
+
+        Room *room = target->getRoom();
+        if(phase == Player::RoundStart)
+        {
+            int zhibaTimes = 0;
+            foreach(ServerPlayer *other, room->getOtherPlayers(target))
+            {
+                if(other->hasLordSkill("sunce_zhiba"))
+                    zhibaTimes++;
+            }
+            room->setPlayerMark(target, "zhibaTimes", zhibaTimes);
+        }
+        else
+        {
+            room->setPlayerMark(target, "zhibaTimes", 0);
+            foreach(ServerPlayer *other, room->getOtherPlayers(target))
+            {
+                if(other->hasFlag("zhiba_pindian"))
+                    room->setPlayerFlag(other, "-zhiba_pindian");
+            }
+        }
+        return false;
     }
 };
 
@@ -565,7 +608,7 @@ public:
             if(!player->hasLordSkill(objectName()))
                 return false;
 
-            foreach(ServerPlayer *p, room->getOtherPlayers(player)){
+            foreach(ServerPlayer *p, room->getAlivePlayers()){
                 if(!p->hasSkill("zhiba_pindian"))
                     room->attachSkillToPlayer(p, "zhiba_pindian");
             }
@@ -1289,7 +1332,7 @@ MountainPackage::MountainPackage()
     addMetaObject<ZhibaCard>();
     addMetaObject<JixiCard>();
 
-    skills << new ZhibaPindian << new Jixi;
+    skills << new ZhibaOthers << new Jixi;
 }
 
 ADD_PACKAGE(Mountain)

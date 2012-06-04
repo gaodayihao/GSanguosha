@@ -67,11 +67,12 @@ void HuangtianCard::use(Room *room, ServerPlayer *, const QList<ServerPlayer *> 
         foreach(int card_id, subcards)
             room->setCardFlag(card_id,"visible");
         room->setEmotion(zhangjiao, "good");
+        room->setPlayerFlag(zhangjiao, "huangtian_got");
     }
 }
 
 bool HuangtianCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    return targets.isEmpty() && to_select->hasLordSkill("huangtian") && to_select != Self;
+    return targets.isEmpty() && !to_select->hasFlag("huangtian_got") && to_select->hasLordSkill("huangtian") && to_select != Self;
 }
 
 class GuidaoViewAsSkill:public OneCardViewAsSkill{
@@ -177,7 +178,8 @@ public:
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
-        return !player->hasUsed("HuangtianCard") && player->getKingdom() == "qun";
+        return player->usedTimes("HuangtianCard") < player->getMark("huangtianTimes")
+                && player->getKingdom() == "qun";
     }
 
     virtual bool viewFilter(const CardItem *to_select) const{
@@ -190,6 +192,45 @@ public:
         card->addSubcard(card_item->getFilteredCard());
 
         return card;
+    }
+};
+
+class HuangtianOthers: public PhaseChangeSkill{
+public:
+    HuangtianOthers():PhaseChangeSkill("huangtianv"){
+        view_as_skill = new HuangtianViewAsSkill;
+    }
+
+    virtual int getPriority() const{
+        return 2;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        Player::Phase phase = target->getPhase();
+        if(phase != Player::RoundStart && phase != Player::NotActive)
+            return false;
+
+        Room *room = target->getRoom();
+        if(phase == Player::RoundStart)
+        {
+            int huangtianTimes = 0;
+            foreach(ServerPlayer *other, room->getOtherPlayers(target))
+            {
+                if(other->hasLordSkill("huangtian"))
+                    huangtianTimes++;
+            }
+            room->setPlayerMark(target, "huangtianTimes", huangtianTimes);
+        }
+        else
+        {
+            room->setPlayerMark(target, "huangtianTimes", 0);
+            foreach(ServerPlayer *other, room->getOtherPlayers(target))
+            {
+                if(other->hasFlag("huangtian_got"))
+                    room->setPlayerFlag(other, "-huangtian_got");
+            }
+        }
+        return false;
     }
 };
 
@@ -1074,7 +1115,7 @@ WindPackage::WindPackage()
     addMetaObject<LeijiCard>();
     addMetaObject<ShensuCard>();
 
-    skills << new HuangtianViewAsSkill;
+    skills << new HuangtianOthers;
 
     General *xiaoqiao = new General(this, "xiaoqiao", "wu", 3, false);
     xiaoqiao->addSkill(new Hongyan);
