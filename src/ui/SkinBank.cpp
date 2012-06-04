@@ -36,15 +36,15 @@ void QSanRoomSkin::QSanTextFont::paintText(QPainter* painter, QRect pos, Qt::Ali
     if (m_drawShadow)
     {
         painter->setPen(m_backgroundPen);
+        pos.translate(0, -1);
+        painter->drawText(pos, align, text);
+        pos.translate(0, 2);
+        painter->drawText(pos, align, text);
         pos.translate(-1, -1);
         painter->drawText(pos, align, text);
-        pos.translate(2, 2);
+        pos.translate(2, 0);
         painter->drawText(pos, align, text);
-        pos.translate(-2, 0);
-        painter->drawText(pos, align, text);
-        pos.translate(2, -2);
-        painter->drawText(pos, align, text);
-        pos.translate(-1, 1);
+        pos.translate(-1, 0);
     }
     painter->setPen(m_foregroundPen);
     painter->drawText(pos, align, text);
