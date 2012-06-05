@@ -595,7 +595,7 @@ void RoomScene::adjustItems(){
         chat_edit_widget->y() + (_m_roomLayout->m_chatTextBoxHeight - chat_widget->boundingRect().height()) / 2);
 
     if(hero_box)
-        hero_box->setPos(-2*93 - 8, chat_box_widget->boundingRect().height()+82 - 5);
+        hero_box->setPos(-2*93 - 15, chat_box_widget->boundingRect().height()+82 - 9);
 
     if (self_box)
         self_box->setPos(infoPlane.left() - padding - self_box->boundingRect().width(),

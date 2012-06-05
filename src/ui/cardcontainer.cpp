@@ -357,7 +357,7 @@ void HeroCardContainer::fillCards(const QList<int> &card_ids){
         item->setZValue(20-i);
         if(Self->getMark("hero") == item->getCard()->getId())
         {
-            item->setFrame("good");
+            item->setFrame("equiphero");
             item->moveBy(8, 0);
         }
         item->setFlag(QGraphicsItem::ItemIsFocusable);

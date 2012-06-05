@@ -38,7 +38,11 @@ QString HeroCard::getPixmapPath() const{
 QString HeroCard::getDescription() const{
     const General *general = Sanguosha->getGeneral(objectName());
     if(general)
-        return general->getSkillDescription();
+    {
+        QString des = QString("<b>%1:</b><br/>%2").arg(Sanguosha->translate(objectName()))
+                .arg(general->getSkillDescription());
+        return des;
+    }
 
     return tr("<b>[%1]</b> %2").arg(getName()).arg(":hero");
 }
