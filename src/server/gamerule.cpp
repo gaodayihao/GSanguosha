@@ -130,6 +130,13 @@ void GameRule::onPhaseChange(ServerPlayer *player) const{
                 room->setPlayerFlag(player, "-drank");
             }
 
+            if(player->hasFlag("willclearCardLock"))
+                room->clearPlayerCardLock(player);
+
+            if(player->hasFlag("willclearFixDistance"))
+                foreach(ServerPlayer *other, room->getOtherPlayers(player))
+                    room->setFixedDistance(player, other, -1);
+
             room->clearPlayerFlags(player);
             player->clearHistory();
 
@@ -755,8 +762,8 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
 
     case PhaseChange: {
         switch(player->getPhase()){
-        case Player::NotActive:{
-            removeHeroCardsFlag(player);
+        case Player::Discard:{
+            GameRule::trigger(event, room, player, data);
             QList<int> heros = player->getPile("heros");
             heros.removeOne(player->getMark("hero"));
 
@@ -768,8 +775,13 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
                 int card_id = room->askForAG(player, heros, false, "throwhero");
                 heros.removeOne(card_id);
                 player->invoke("clearAG");
+                room->setCardFlag(card_id, "-justdraw");
                 room->throwCard(card_id, player);
             }
+            return false;
+        }
+        case Player::NotActive:{
+            removeHeroCardsFlag(player);
             break;
         }
         default:
@@ -818,7 +830,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
                 int hero = getPlayerHero(room, player, target, "throwTargetHero", false);
 
                 if(hero == -1)
-                    break;
+                    return true;
 
                 int heroTarget = hero;
 
@@ -828,9 +840,8 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
                 room->fillAG(heros, player);
                 hero = room->askForAG(player, heros, true, "throwSelfHero");
                 player->invoke("clearAG");
-
                 if(hero == -1)
-                    break;
+                    hero = heros.at(qrand() % heros.length());
 
                 room->setCardFlag(hero, "-justdraw");
                 room->setCardFlag(heroTarget, "-justdraw");
@@ -861,7 +872,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
                 int hero = getPlayerHero(room, player, target, "throwTargetHero", false);
 
                 if(hero == -1)
-                    break;
+                    return true;
 
                 if(player->getPile("heros").contains(player->getMark("hero")))
                     room->throwCard(player->getMark("hero"), player);
@@ -904,6 +915,9 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
     }
 
     case CardLostOnePiece:{
+        if(!data.canConvert<CardMoveStar>())
+            break;
+
         CardMoveStar move = data.value<CardMoveStar>();
         const Card *card = Sanguosha->getCard(move->card_id);
         if(card->inherits("HeroCard") && move->from_place == Player::Special)
@@ -939,6 +953,8 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
                     }
                 }
 
+                room->setPlayerFlag(player, "willclearCardLock");
+                room->setPlayerFlag(player, "willclearFixDistance");
                 if(player->getHp() <= 0 and player->isAlive())
                     room->enterDying(player, NULL);
             }

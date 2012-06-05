@@ -259,9 +259,11 @@ public:
                     room->detachSkillFromPlayer(damage->from, skill->objectName());
             }
             damage->from->clearPrivatePiles();
-            if(damage->from->getHp() <= 0 )
+            if(damage->from->getHp() <= 0 && damage->from->isAlive())
                 room->enterDying(damage->from, NULL);
             room->setPlayerMark(damage->from, "@duanchang", 1);
+            room->setPlayerFlag(damage->from, "willclearCardLock");
+            room->setPlayerFlag(damage->from, "willclearFixDistance");
 
             //room->resetAI(damage->from);
         }
@@ -1086,7 +1088,7 @@ public:
         if(!huashen_skill.isEmpty()){
             room->detachSkillFromPlayer(zuoci, huashen_skill);
             zuoci->clearPrivatePiles();
-            if(zuoci->getHp() <= 0 )
+            if(zuoci->getHp() <= 0)
                 room->enterDying(zuoci, NULL);
         }
 
