@@ -970,7 +970,12 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
             int card_id = room->drawCard();
             const Card *judgeCard = Sanguosha->getCard(card_id);
             judge->card = judgeCard;
-            room->moveCardTo(judgeCard, NULL, Player::DiscardPile);
+            if(judgeCard->inherits("HeroCard"))
+                room->moveCardTo(judgeCard, NULL, Player::DiscardPile);
+            else
+                room->moveCardTo(judge->card, NULL, Player::DiscardPile,
+                                 CardMoveReason(CardMoveReason::S_REASON_JUDGE,
+                                                judge->who->objectName(), QString(), QString(), judge->reason));
             room->getThread()->delay(delay);
         }while(judge->card->inherits("HeroCard"));
 

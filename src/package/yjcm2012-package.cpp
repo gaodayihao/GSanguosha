@@ -568,11 +568,11 @@ public:
                 if(dying.who->getHp() > 0 || handang->isNude() || room->getCurrent()->isDead() ||
                         !handang->canSlash(room->getCurrent(),true) || !room->askForSkillInvoke(handang, objectName(), data))
                     break;
-                room->playSkillEffect(objectName());
 
                 const Card *slash = room->askForCard(handang, "slash", "jiefan-slash-Use:" + dying.who->objectName(), data, NonTrigger);
 
                 if(slash){
+                    room->playSkillEffect(objectName());
                     room->setTag("JiefanTarget", data);
                     room->setTag("JiefanSlash", slash->getEffectiveId());
                     room->setCardFlag(slash, "jiefan-slash");

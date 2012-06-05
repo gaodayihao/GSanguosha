@@ -925,13 +925,6 @@ bool Room::_askForNullification(const TrickCard *trick, ServerPlayer *from, Serv
         else return false;
     }
 
-    LogMessage log;
-    log.type = "#NullificationDetails";
-    log.from = from;
-    log.to << to;
-    log.arg = trick_name;
-    sendLog(log);
-
     broadcastInvoke("animate", QString("nullification:%1:%2")
         .arg(repliedPlayer->objectName()).arg(to->objectName()));
 
@@ -939,6 +932,13 @@ bool Room::_askForNullification(const TrickCard *trick, ServerPlayer *from, Serv
     use.card = card;
     use.from = repliedPlayer;
     useCard(use);
+
+    LogMessage log;
+    log.type = "#NullificationDetails";
+    log.from = from;
+    log.to << to;
+    log.arg = trick_name;
+    sendLog(log);
 
     QVariant decisionData = QVariant::fromValue("Nullification:"+QString(trick->metaObject()->className())+":"+to->objectName()+":"+(positive?"true":"false"));
     thread->trigger(ChoiceMade, this, repliedPlayer, decisionData);
