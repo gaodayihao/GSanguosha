@@ -35,6 +35,7 @@ private:
     void addHeroCardsToPile(ServerPlayer *player) const;
     void addHeroCardsFlag(ServerPlayer *player) const;
     void removeHeroCardsFlag(ServerPlayer *player) const;
+    int getPlayerHero(Room *room, ServerPlayer *player, ServerPlayer *who, const QString &reason, bool open) const;
 };
 
 class HulaoPassMode: public GameRule{

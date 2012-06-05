@@ -671,6 +671,9 @@ QList<int> Engine::getRandomCards() const{
             list << card->getId();
     }
 
+    if(list.last() == cards.length() - 1)
+        list.removeLast();
+
     qShuffle(list);
 
     return list;

@@ -815,11 +815,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
                 if(room->isCanceled(effect))
                     return true;
 
-                heros = target->getPile("heros");
-
-                room->fillAG(heros, player);
-                int hero = room->askForAG(player, heros, true, "throwTargetHero");
-                player->invoke("clearAG");
+                int hero = getPlayerHero(room, player, target, "throwTargetHero", false);
 
                 if(hero == -1)
                     break;
@@ -862,23 +858,16 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
                 if(room->isCanceled(effect))
                     return true;
 
-                QList<int> heros = target->getPile("heros");
-
-                room->fillAG(heros, player);
-                int hero = room->askForAG(player, heros, true, "throwTargetHero");
-                player->invoke("clearAG");
+                int hero = getPlayerHero(room, player, target, "throwTargetHero", false);
 
                 if(hero == -1)
                     break;
 
-                foreach(int m_hero, player->getPile("heros")){
-                    if (m_hero == player->getMark("hero")){
-                        room->throwCard(m_hero, player);
-                    }
-                }
+                if(player->getPile("heros").contains(player->getMark("hero")))
+                    room->throwCard(player->getMark("hero"), player);
 
                 const Card *heroCard = Sanguosha->getCard(hero);
-                player->addToPile("heros", heroCard);
+                player->addToPile("heros", heroCard, false);
                 player->fillHero();
 
                 sendHeroCardsToPileLog(hero, player);
@@ -907,7 +896,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
         if(card->inherits("HeroCard"))
         {
             sendHeroCardsToPileLog(move->card_id, player);
-            player->addToPile("heros", card);
+            player->addToPile("heros", card, false);
             player->fillHero();
         }
 
@@ -1046,7 +1035,7 @@ void ThreeKingdomsMode::addHeroCardsToPile(ServerPlayer *player) const{
     if(!hero_card_ids.isEmpty())
     {
         sendHeroCardsToPileLog(hero_card_ids, player);
-        player->addToPile("heros", hero_card_ids);
+        player->addToPile("heros", hero_card_ids, false);
     }
     player->fillHero();
 }
@@ -1065,6 +1054,54 @@ void ThreeKingdomsMode::removeHeroCardsFlag(ServerPlayer *player) const{
         if (card->hasFlag("justdraw"))
             player->getRoom()->setCardFlag(id, "-justdraw");
     }
+}
+
+int ThreeKingdomsMode::getPlayerHero(Room *room, ServerPlayer *player, ServerPlayer *who, const QString &reason, bool open) const{
+    QList<int> heros = who->getPile("heros");
+    if(heros.isEmpty())
+        return -1;
+    if (open)
+    {
+        room->fillAG(heros, player);
+        int hero = room->askForAG(player, heros, false, reason);
+        player->invoke("clearAG");
+        return hero;
+    }
+    else
+    {
+        int hero = who->getMark("hero");
+        bool equiped = hero > 0;
+        int unkown = Sanguosha->getCardCount() - 1;
+        QList<int> newlist;
+        if(equiped)
+        {
+            newlist << hero;
+            for(int i = 0; i < heros.length() - 1; i++)
+                newlist << unkown;
+            room->fillAG(newlist, player);
+            int ahero = room->askForAG(player, newlist, true, reason);
+            player->invoke("clearAG");
+            if(ahero == -1)
+                ahero = heros.at(qrand() % heros.length());
+            if (ahero == unkown)
+            {
+                heros.removeOne(hero);
+                return heros.at(qrand() % heros.length());
+            }
+            else
+                return ahero;
+        }
+        else
+        {
+            for(int i = 0; i < heros.length(); i++)
+                newlist << unkown;
+            room->fillAG(newlist, player);
+            room->askForAG(player, newlist, true, reason);
+            player->invoke("clearAG");
+            return heros.at(qrand() % heros.length());
+        }
+    }
+    return -1;
 }
 
 HulaoPassMode::HulaoPassMode(QObject *parent)

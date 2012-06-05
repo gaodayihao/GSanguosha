@@ -44,7 +44,7 @@ QString HeroCard::getDescription() const{
         return des;
     }
 
-    return tr("<b>[%1]</b> %2").arg(getName()).arg(":hero");
+    return tr("<b>[%1]</b> %2").arg(Sanguosha->translate("general_card")).arg(Sanguosha->translate(":hero"));
 }
 
 //-----------Skills Part
@@ -65,7 +65,7 @@ void PrepareCard::onUse(Room *room, const CardUseStruct &card_use) const{
     room->sendLog(log);
     room->broadcastInvoke("playAudio", "equiphero");
 
-    card_use.from->addToPile("heros", card->getEffectiveId());
+    card_use.from->addToPile("heros", card->getEffectiveId(), false);
     room->setPlayerMark(card_use.from, "hero", card->getEffectiveId());
     room->transfigure(card_use.from, card->objectName(), false);
     room->setPlayerProperty(card_use.from, "kingdom", card_use.from->getGeneral()->getKingdom());
@@ -243,13 +243,14 @@ ThreeKingdomsPackage::ThreeKingdomsPackage():Package("ThreeKingdoms")
     QList<Card*> cards;
     foreach(const QString name, all.toList())
     {
-        cards << new HeroCard(name,  Card::NoSuit, 0);
+        cards << new HeroCard(name, Card::NoSuit, 0);
     }
 
-    cards << new Dismantlement(Card::Spade, 1)
+    cards << new Dismantlement(Card::Club, 1)
           << new Dismantlement(Card::Club, 13)
-          << new Dismantlement(Card::Club, 1)
-          << new Dismantlement(Card::Diamond, 13);
+          << new Dismantlement(Card::Diamond, 1)
+          << new Dismantlement(Card::Diamond, 13)
+          << new HeroCard("unknownhero", Card::NoSuit, 0);
 
     foreach(Card *card, cards)
         card->setParent(this);

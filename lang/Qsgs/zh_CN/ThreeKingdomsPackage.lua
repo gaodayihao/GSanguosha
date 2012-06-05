@@ -9,6 +9,7 @@ return {
 
 	["general_card"] = "武将牌",
 	["hero_card"] = "武将",
+	["unknownhero"] = "未知武将",
 	
 	[":hero"] = "武将牌，仅用于[三国鼎立]游戏模式。",
 	
