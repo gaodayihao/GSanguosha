@@ -236,7 +236,8 @@ public:
             target->getRoom()->playSkillEffect(objectName());
 
             target->drawCards(1);
-
+            if(target->isKongcheng())
+                return;
             Room *room = target->getRoom();
             room->showAllCards(target);
 
