@@ -88,6 +88,7 @@ void RoleCombobox::expand(){
 
 void RoleCombobox::fix(const QString &role){
     m_currentRole->setRole(role);
+    m_currentRole->setEnabled(false);
     disconnect(m_currentRole);
     // delete all
     foreach(RoleComboboxItem *item, items)
