@@ -100,9 +100,7 @@ Photo::Photo(): player(NULL),
     _m_kingdomIcon->setPos(-2, -2);
     _m_kingdomIcon->setZValue(2.5);
 
-    phase = new QGraphicsPixmapItem(this);
-    phase->setZValue(1.8);
-    phase->setPos(_m_photoLayout->m_phaseArea.left(), _m_photoLayout->m_phaseArea.top());
+    phase = new PhasePixmap(this, _m_photoLayout->m_phaseArea, _m_roomSkin);
     phase->hide();
 
     mark_item = new QGraphicsTextItem(this);
@@ -112,7 +110,6 @@ Photo::Photo(): player(NULL),
     role_combobox = NULL;
     pile_button = NULL;
     game_start = false;
-    this->last_phase = NULL;
 }
 
 QRectF Photo::boundingRect() const
@@ -554,28 +551,20 @@ void Photo::setFrame(FrameType type){
     }else{
         frame_item->hide();
     }
-
-    //update();
 }
 
 void Photo::updatePhase(){
     progress_bar->hide();
-
     if(player->getPhase() != Player::NotActive){
         int index = static_cast<int>(player->getPhase());
-        if(this->last_phase)
-            this->last_phase->hide();
-        phase->setPixmap(_m_roomSkin->getPixmap(QString(QSanRoomSkin::S_SKIN_KEY_PHOTO_PHASE).arg(index)));
-        phase->show();
-        this->last_phase = phase;
+        if(!phase->isVisible())
+            phase->show();
+        phase->setPhase(index);
         setFrame(Playing);
     }
     else
     {
-        if(this->last_phase){
-            this->last_phase->hide();
-            this->last_phase = NULL;
-        }
+        phase->hide();
         setFrame(NoFrame);
     }
 }
@@ -795,4 +784,22 @@ void Photo::killPlayer(){
 
     if(save_me_item)
         save_me_item->hide();
+}
+
+PhasePixmap::PhasePixmap(QGraphicsItem *parent, const QRect &Area, const QSanRoomSkin* roomSkin)
+    :_m_index(0), _m_Area(Area), _m_roomSkin(roomSkin)
+{
+    setParentItem(parent);
+    setPos(_m_Area.left(), _m_Area.top());
+    setZValue(1.8);
+}
+
+void PhasePixmap::setPhase(int index){
+    _m_index = index;
+    update();
+}
+
+void PhasePixmap::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *){
+    QPixmap phase_pixmap = _m_roomSkin->getPixmap(QString(QSanRoomSkin::S_SKIN_KEY_PHOTO_PHASE).arg(_m_index));
+    painter->drawPixmap(0, 0, _m_Area.width(), _m_Area.height(), phase_pixmap);
 }
