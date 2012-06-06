@@ -17,7 +17,22 @@
 class ClientPlayer;
 class RoleCombobox;
 class QPushButton;
-class PhasePixmap;
+
+class PhasePixmap : public Pixmap
+{
+    Q_OBJECT
+public:
+    explicit PhasePixmap(QGraphicsItem *parent, const QRect &Area, const QSanRoomSkin* roomSkin);
+    void setPhase(int index);
+
+protected:
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+private:
+    int _m_index;
+    QRect _m_Area;
+    const QSanRoomSkin* _m_roomSkin;
+};
 
 class Photo : public PlayerCardContainer
 {
@@ -112,20 +127,6 @@ private:
     void drawEquip(QPainter *painter, CardItem *equip, int order);
     void drawHp(QPainter *painter);
     void drawMagatama(QPainter *painter, int index, const QPixmap &pixmap);
-};
-
-class PhasePixmap : public Pixmap
-{
-    Q_OBJECT
-public:
-    explicit PhasePixmap(QGraphicsItem *parent, const QRect &Area, const QSanRoomSkin* roomSkin);
-    void setPhase(int index);
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-private:
-    int _m_index;
-    QRect _m_Area;
-    const QSanRoomSkin* _m_roomSkin;
 };
 
 #endif // PHOTOBACK_H
