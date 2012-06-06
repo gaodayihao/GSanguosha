@@ -26,6 +26,7 @@ class IQSanComponentSkin // interface class
 public:
     bool load(const QString &layoutConfigFileName, const QString &imageConfigFileName);
     QPixmap getPixmap(const QString &key) const;
+    QString getPath(const QString &key) const;
 protected:
     virtual bool _loadLayoutConfig() = 0;
     Json::Value _m_layoutConfig;

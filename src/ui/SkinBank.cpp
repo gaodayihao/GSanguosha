@@ -87,6 +87,11 @@ QPixmap IQSanComponentSkin::getPixmap(const QString &key) const
     return QSanPixmapCache::getPixmap(key, _m_imageConfig[key.toAscii().constData()].asCString());
 }
 
+QString IQSanComponentSkin::getPath(const QString &key) const
+{
+    return _m_imageConfig[key.toAscii().constData()].asCString();
+}
+
 const QSanRoomSkin::RoomLayout& QSanRoomSkin::getRoomLayout() const
 {
     return this->_m_roomLayout;

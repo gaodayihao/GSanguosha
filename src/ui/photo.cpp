@@ -555,6 +555,7 @@ void Photo::setFrame(FrameType type){
 
 void Photo::updatePhase(){
     progress_bar->hide();
+
     if(player->getPhase() != Player::NotActive){
         int index = static_cast<int>(player->getPhase());
         if(!phase->isVisible())
@@ -562,8 +563,7 @@ void Photo::updatePhase(){
         phase->setPhase(index);
         setFrame(Playing);
     }
-    else
-    {
+    else{
         if(phase->isVisible())
             phase->hide();
         setFrame(NoFrame);
@@ -788,7 +788,7 @@ void Photo::killPlayer(){
 }
 
 PhasePixmap::PhasePixmap(QGraphicsItem *parent, const QRect &Area, const QSanRoomSkin* roomSkin)
-    :_m_index(0), _m_Area(Area), _m_roomSkin(roomSkin)
+    : _m_Area(Area), _m_roomSkin(roomSkin)
 {
     setParentItem(parent);
     setPos(_m_Area.left(), _m_Area.top());
@@ -796,11 +796,5 @@ PhasePixmap::PhasePixmap(QGraphicsItem *parent, const QRect &Area, const QSanRoo
 }
 
 void PhasePixmap::setPhase(int index){
-    _m_index = index;
-    update();
-}
-
-void PhasePixmap::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *){
-    QPixmap phase_pixmap = _m_roomSkin->getPixmap(QString(QSanRoomSkin::S_SKIN_KEY_PHOTO_PHASE).arg(_m_index));
-    painter->drawPixmap(0, 0, _m_Area.width(), _m_Area.height(), phase_pixmap);
+    load(_m_roomSkin->getPath(QString(QSanRoomSkin::S_SKIN_KEY_PHOTO_PHASE).arg(index)));
 }

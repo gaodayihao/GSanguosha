@@ -25,11 +25,7 @@ public:
     explicit PhasePixmap(QGraphicsItem *parent, const QRect &Area, const QSanRoomSkin* roomSkin);
     void setPhase(int index);
 
-protected:
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
 private:
-    int _m_index;
     QRect _m_Area;
     const QSanRoomSkin* _m_roomSkin;
 };
