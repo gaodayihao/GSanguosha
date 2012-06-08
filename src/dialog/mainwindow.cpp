@@ -50,6 +50,14 @@ public:
             fitInView(room_scene->sceneRect(), Qt::KeepAspectRatio);
             main_window->setBackgroundBrush(false);
             return;
+        }else if(scene()->inherits("StartScene"))
+        {
+            StartScene *start_scene = qobject_cast<StartScene *>(scene());
+            QRectF newSceneRect(-event->size().width() / 2, -event->size().height() / 2,
+                                event->size().width(), event->size().height());
+            start_scene->setSceneRect(newSceneRect);
+            setSceneRect(start_scene->sceneRect());
+            fitInView(start_scene->sceneRect(), Qt::KeepAspectRatio);
         }
         if(main_window)
             main_window->setBackgroundBrush(true);
@@ -523,7 +531,11 @@ void MainWindow::setBackgroundBrush(bool centerAsOrigin){
 }
 
 void MainWindow::changeBackground(){
-    setBackgroundBrush(false);
+    bool centerAsOrigin = true;
+    if(scene->inherits("RoomScene"))
+        centerAsOrigin = false;
+
+    setBackgroundBrush(centerAsOrigin);
 
     if(scene->inherits("StartScene")){
         StartScene *start_scene = qobject_cast<StartScene *>(scene);

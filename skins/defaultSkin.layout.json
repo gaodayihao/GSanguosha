@@ -30,11 +30,11 @@
 	"heightIncludeShadow": 155,
 	"widthIncludeMarkAndControl": 139,
 	"heightIncludeMarkAndControl": 155,
-	"avatarArea": [4, 25, 126, 50],
-	"smallAvatarArea": [86, 36, 42, 36],
+	"avatarArea": [5, 26, 122, 50],
+	"smallAvatarArea": [83, 36, 42, 36],
 	"cardMoveArea": [-50, 65, 200, 130],
-	"phaseArea": [13, 144, 120, 12],
-	"mainFrameArea": [0, 0, 139, 155],
+	"phaseArea": [13, 145, 120, 12],
+	"mainFrameArea": [0, 0, 136, 157],
 	"progressBarArea": [0, 158, 130, 11],
 	"progressBarHorizontal": true
 }

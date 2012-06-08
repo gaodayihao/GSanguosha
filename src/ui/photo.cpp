@@ -755,10 +755,10 @@ void Photo::drawEquip(QPainter *painter, CardItem *equip, int order){
 
     // draw the number of equip
     // painter->setPen(card->isRed() ? Qt::red : Qt::black);
-    painter->drawText(108, 102 + order * 14, card->getNumberString());
+    painter->drawText(108, 103 + order * 14, card->getNumberString());
 
     // draw the suit of equip
-    QRect suit_rect(115, 88 + order * 14, 18, 19);
+    QRect suit_rect(115, 89 + order * 14, 18, 19);
     painter->drawPixmap(suit_rect, equip->getSmallSuitPixmap());
 
 }
