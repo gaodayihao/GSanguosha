@@ -3188,7 +3188,8 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
         moveOneTimeStruct.card_ids.append(cards_move.card_ids);
         for (int i = 0; i < cards_move.card_ids.size(); i++)
             moveOneTimeStruct.from_places.append(cards_move.from_place);
-        if (cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 && cards_move.from && !cards_move.from->hasFlag("CardMoving")){
+        if (cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 &&
+                cards_move.from && !cards_move.from->hasFlag("CardMoving")){
             moveOneTimeStruct.from = cards_move.from; moveOneTimeStruct.to = cards_move.to;
             moveOneTimeStruct.to_place = cards_move.to_place;
             CardsMoveOneTimeStar lose_star = &moveOneTimeStruct;
@@ -3210,6 +3211,11 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardGotOnePiece, this, (ServerPlayer*)cards_move.to, data);
+            }
+            else if(cards_move.to_place == Player::DiscardPile && cards_move.from){
+                CardMoveStar move_star = &moves[j];
+                QVariant data = QVariant::fromValue(move_star);
+                thread->trigger(CardGotOnePiece, this, (ServerPlayer*)cards_move.from, data);
             }
             Sanguosha->getCard(cards_move.card_ids[j])->onMove(moves[j]);
         }
@@ -3328,7 +3334,8 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
         moveOneTimeStruct.card_ids.append(cards_move.card_ids);
         for (int i = 0; i < cards_move.card_ids.size(); i++)
             moveOneTimeStruct.from_places.append(cards_move.from_place);
-        if (cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 && cards_move.from && !cards_move.from->hasFlag("CardMoving")){
+        if (cards_move.countAsOneTime && moveOneTimeStruct.card_ids.size() > 0 &&
+                cards_move.from && !cards_move.from->hasFlag("CardMoving")){
             moveOneTimeStruct.from = cards_move.from; moveOneTimeStruct.to = cards_move.to;
             moveOneTimeStruct.to_place = cards_move.to_place;
             CardsMoveOneTimeStar lose_star = &moveOneTimeStruct;
@@ -3399,6 +3406,11 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardGotOnePiece, this, (ServerPlayer*)cards_move.to, data);
+            }
+            else if(cards_move.to_place == Player::DiscardPile && cards_move.from){
+                CardMoveStar move_star = &moves[j];
+                QVariant data = QVariant::fromValue(move_star);
+                thread->trigger(CardGotOnePiece, this, (ServerPlayer*)cards_move.from, data);
             }
             Sanguosha->getCard(card_id)->onMove(moves[j]);
         }
