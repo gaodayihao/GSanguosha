@@ -907,53 +907,55 @@ public:
     }
 
     virtual bool onPhaseChange(ServerPlayer *liushan) const{
+        Room *room = liushan->getRoom();
+
         switch(liushan->getPhase()){
         case Player::Play: {
-                bool invoked = liushan->askForSkillInvoke(objectName());
-                if(invoked)
-                    liushan->setFlags("fangquan");
-                return invoked;
-            }
+            bool invoked = liushan->askForSkillInvoke(objectName());
+            if(invoked)
+                liushan->setFlags("fangquan");
+
+            return invoked;
+        }
 
         case Player::Finish: {
-                if(liushan->hasFlag("fangquan")){
-                    Room *room = liushan->getRoom();
+            if(liushan->hasFlag("fangquan")){
+                if(liushan->isKongcheng())
+                    return false;
 
-                    if(liushan->isKongcheng())
-                        return false;
+                if(!room->askForDiscard(liushan, "fangquan", 1, 1, true))
+                    return false;
 
-                    if(!room->askForDiscard(liushan, "fangquan", 1, 1, true))
-                        return false;
+                ServerPlayer *player = room->askForPlayerChosen(liushan, room->getOtherPlayers(liushan), objectName());
 
-                    ServerPlayer *player = room->askForPlayerChosen(liushan, room->getOtherPlayers(liushan), objectName());
+                QString name = player->getGeneralName();
+                if(name == "zhugeliang" || name == "shenzhugeliang" || name == "wolong")
+                    room->playSkillEffect("fangquan", 1);
+                else
+                    room->playSkillEffect("fangquan", 2);
 
-                    QString name = player->getGeneralName();
-                    if(name == "zhugeliang" || name == "shenzhugeliang" || name == "wolong")
-                        room->playSkillEffect("fangquan", 1);
-                    else
-                        room->playSkillEffect("fangquan", 2);
+                LogMessage log;
+                log.type = "#Fangquan";
+                log.from = liushan;
+                log.to << player;
+                room->sendLog(log);
 
-                    LogMessage log;
-                    log.type = "#Fangquan";
-                    log.from = liushan;
-                    log.to << player;
-                    room->sendLog(log);
-
-                    room->setPlayerFlag(liushan, "Fangquan_invoke");
-                    room->setPlayerFlag(player, "Fangquan_target");
-                }
-
-                break;
+                PlayerStar p = player;
+                room->setTag("Fangquan", QVariant::fromValue(p));
             }
+
+            break;
+        }
 
         case Player::NotActive: {
-                if(liushan->hasFlag("Fangquan_invoke"))
-                    foreach(ServerPlayer *sp, liushan->getRoom()->getOtherPlayers(liushan))
-                        if(sp->hasFlag("Fangquan_target"))
-                            sp->gainAnExtraTurn(liushan);
-
-                break;
+            PlayerStar p = room->getTag("Fangquan").value<PlayerStar>();
+            if(p){
+                room->setTag("Fangquan", QVariant());
+                p->gainAnExtraTurn(liushan);
             }
+
+            break;
+        }
 
         default:
             break;

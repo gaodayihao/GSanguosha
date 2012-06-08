@@ -117,6 +117,7 @@ bool QSanRoomSkin::_loadLayoutConfig()
     _m_photoLayout.m_widthIncludeMarkAndControl = config["widthIncludeMarkAndControl"].asInt();
     _m_photoLayout.m_widthIncludeShadow = config["widthIncludeShadow"].asInt();
     QSanProtocol::Utils::tryParse(config["avatarArea"], _m_photoLayout.m_avatarArea);
+    QSanProtocol::Utils::tryParse(config["smallAvatarArea"], _m_photoLayout.m_smallAvatarArea);
     QSanProtocol::Utils::tryParse(config["cardMoveArea"], _m_photoLayout.m_cardMoveRegion);
     QSanProtocol::Utils::tryParse(config["phaseArea"], _m_photoLayout.m_phaseArea);
     QSanProtocol::Utils::tryParse(config["mainFrameArea"], _m_photoLayout.m_mainFrameArea);

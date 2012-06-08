@@ -175,7 +175,7 @@ void Settings::init(){
               << "huatuo+xunyu" << "huatuo+xiahoujuan" << "huatuo+zhanggongqi"
               << "lukang+liubei" << "lukang+wolong" << "lukang+yuji" << "jiangboyue+lukang"
               << "lukang+zhanggongqi" << "bgm_diaochan+caoren" << "bgm_diaochan+shenlvbu"
-              << "bgm_diaochan+caizhaoji" << "caozhi+shenlvbu" << "caoren+caozhi"
+              << "bgm_diaochan+caizhaoji" <<"bgm_diaochan+caozhi" << "caozhi+shenlvbu" << "caoren+caozhi"
               << "guanxingzhangbao+luxun" << "guanxingzhangbao+huanggai" << "guanxingzhangbao+sunce"
               << "bgm_caoren+caoren" << "bgm_caoren+caozhi" << "bgm_caoren+shenlvbu" << "bgm_caoren+bgm_diaochan"
               << "bgm_caoren+dengshizai" << "bgm_caoren+caizhaoji";

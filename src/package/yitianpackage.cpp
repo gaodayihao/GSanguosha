@@ -1475,7 +1475,10 @@ public:
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &) const{
         ServerPlayer *dengshizai = room->findPlayerBySkillName(objectName());
 
-        if(dengshizai && dengshizai->faceUp() && dengshizai->askForSkillInvoke(objectName())){
+        if(dengshizai == NULL)
+            return false;
+
+        if(dengshizai->faceUp() && dengshizai->askForSkillInvoke(objectName())){
             room->playSkillEffect(objectName());
 
             dengshizai->turnOver();
@@ -1494,7 +1497,7 @@ public:
 
         }else{
             PlayerStar p = room->getTag("Zhenggong").value<PlayerStar>();
-            if(p){
+            if(p && !player->hasFlag("isExtraTurn")){
                 p->loseMark("@zhenggong");
                 room->setCurrent(p);
                 room->setTag("Zhenggong", QVariant());

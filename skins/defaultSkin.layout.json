@@ -31,7 +31,7 @@
 	"widthIncludeMarkAndControl": 139,
 	"heightIncludeMarkAndControl": 155,
 	"avatarArea": [4, 25, 126, 50],
-	"smallAvatarArea": [82, 36, 42, 36],
+	"smallAvatarArea": [86, 36, 42, 36],
 	"cardMoveArea": [-50, 65, 200, 130],
 	"phaseArea": [13, 144, 120, 12],
 	"mainFrameArea": [0, 0, 139, 155],

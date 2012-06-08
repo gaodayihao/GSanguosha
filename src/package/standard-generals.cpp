@@ -1205,9 +1205,9 @@ public:
 
     virtual bool triggerable(const ServerPlayer *target) const{
         if (target == NULL) return false;
+        if(Sanguosha->getBanPackages().contains("BGM") && Sanguosha->getBanPackages().contains("sp")) return false;
         bool canInvoke = ServerInfo.GameMode.endsWith("p") || ServerInfo.GameMode.endsWith("pd") ||
                 ServerInfo.GameMode.endsWith("pz");
-        if(Sanguosha->getBanPackages().contains("BGM") || Sanguosha->getBanPackages().contains("sp")) return false;
         return GameStartSkill::triggerable(target) && target->getGeneralName() == "diaochan" && canInvoke;
     }
 
@@ -1215,10 +1215,26 @@ public:
         if(player->askForSkillInvoke(objectName())){
             Room *room = player->getRoom();
             QString choice;
-            if(Sanguosha->getBanPackages().contains("sp")) choice = "BGM-Diaochan";
-            else if(Sanguosha->getBanPackages().contains("BGM")) choice = "SP-Diaochan";
+            QStringList ConvertList;
+            ConvertList << "SP-Diaochan" << "BGM-Diaochan";
+            if(ServerInfo.Enable2ndGeneral)
+            {
+                QStringList ban_list = Config.value("Banlist/Pairs").toStringList();
+                QString ban1(QString("%1+%2").arg("bgm_diaochan").arg(player->getGeneral2Name()));
+                QString ban2(QString("%1+%2").arg(player->getGeneral2Name()).arg("bgm_diaochan"));
+                if(ban_list.contains(ban1) || ban_list.contains(ban2))
+                    ConvertList.removeOne("BGM-Diaochan");
+            }
+            if(Sanguosha->getBanPackages().contains("sp")) ConvertList.removeOne("SP-Diaochan");
+            else if(Sanguosha->getBanPackages().contains("BGM")) ConvertList.removeOne("BGM-Diaochan");
+
+            if(ConvertList.length() == 1)
+                choice = ConvertList.first();
+            else if(ConvertList.isEmpty())
+                return;
             else
-                choice = room->askForChoice(player, objectName(), "SP-Diaochan+BGM-Diaochan");
+                choice = room->askForChoice(player, objectName(), ConvertList.join("+"));
+
             if(choice == "SP-Diaochan") choice = "sp_diaochan"; else choice = "bgm_diaochan";
             room->transfigure(player, choice, true, false, "diaochan");
         }

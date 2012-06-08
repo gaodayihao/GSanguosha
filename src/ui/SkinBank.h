@@ -66,6 +66,7 @@ public:
         int m_widthIncludeMarkAndControl;
         int m_heightIncludeMarkAndControl;
         QRect m_avatarArea;
+        QRect m_smallAvatarArea;
         QRect m_cardMoveRegion;
         QRect m_phaseArea;
         QRect m_mainFrameArea;

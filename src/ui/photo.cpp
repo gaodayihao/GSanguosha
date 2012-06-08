@@ -77,7 +77,7 @@ Photo::Photo(): player(NULL),
 
     back_icon = QPixmap(_m_roomSkin->getPixmap(QSanRoomSkin::S_SKIN_KEY_PHOTO_FACETURNEDMASK));
 
-    small_avatar_area = new QGraphicsRectItem(124 - 42, 72 - 36, 42, 36, this);
+    small_avatar_area = new QGraphicsRectItem(_m_photoLayout->m_smallAvatarArea, this);
     small_avatar_area->setPen(Qt::NoPen);
 
     equips << &weapon << &armor << &defensive_horse << &offensive_horse;

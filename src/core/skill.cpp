@@ -335,6 +335,14 @@ TransfigureSkill::TransfigureSkill(const QString &name, const QString &from, con
 
 bool TransfigureSkill::triggerable(const ServerPlayer *target) const{
     if (target == NULL) return false;
+    if(ServerInfo.Enable2ndGeneral)
+    {
+        QStringList ban_list = Config.value("Banlist/Pairs").toStringList();
+        QString ban1(QString("%1+%2").arg(to).arg(target->getGeneral2Name()));
+        QString ban2(QString("%1+%2").arg(target->getGeneral2Name()).arg(to));
+        if(ban_list.contains(ban1) || ban_list.contains(ban2) || ban_list.contains(to))
+            return false;
+    }
     bool canInvoke = ServerInfo.GameMode.endsWith("p") || ServerInfo.GameMode.endsWith("pd") ||
             ServerInfo.GameMode.endsWith("pz");
     QString package = Sanguosha->getGeneral(to)->getPackage();
