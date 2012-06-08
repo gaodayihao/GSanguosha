@@ -1293,8 +1293,20 @@ public:
     void dojuejingEx(ServerPlayer *shenzhao, Room *room) const{
         int HandcardNum = shenzhao->getHandcardNum();
         if(HandcardNum < 4){
+            LogMessage log;
+            log.type = "#TriggerSkill";
+            log.from = shenzhao;
+            log.arg = "juejingEx";
+            room->sendLog(log);
+
             shenzhao->drawCards(4 - HandcardNum);
         }else if(HandcardNum > 4){
+            LogMessage log;
+            log.type = "#TriggerSkill";
+            log.from = shenzhao;
+            log.arg = "juejingEx";
+            room->sendLog(log);
+
             room->askForDiscard(shenzhao,"juejingEx",HandcardNum - 4, HandcardNum - 4);
         }
     }

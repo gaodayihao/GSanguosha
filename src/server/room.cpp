@@ -2216,8 +2216,11 @@ void Room::chooseGenerals(){
         if(Config.EnableSame)
             lord_list = Sanguosha->getRandomGenerals(Config.value("MaxChoice", 5).toInt());
         else if(the_lord->getState() == "robot")
-            if(qrand()%100 < nonlord_prob)
-                lord_list = Sanguosha->getRandomGenerals(1);
+            if(qrand()%100 < nonlord_prob){
+                QSet<QString> banset;
+                banset << "noszhonghui";
+                lord_list = Sanguosha->getRandomGenerals(1, banset);
+            }
             else
                 lord_list = Sanguosha->getLords();
         else

@@ -425,6 +425,384 @@ public:
     }
 };
 
+class NosZhenggong: public MasochismSkill{
+public:
+    NosZhenggong():MasochismSkill("noszhenggong"){
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return TriggerSkill::triggerable(target) && target->getMark("nosbaijiang") == 0;
+    }
+
+    virtual void onDamaged(ServerPlayer *zhonghui, const DamageStruct &damage) const{
+        if(damage.from && damage.from->hasEquip())
+        {
+            QStringList equip_map;
+            equip_map << "weapon" << "armor" << "dhorse" << "ohorse";
+            QStringList equips;
+
+            for(int i = 0; i < equip_map.length(); i++)
+            {
+                if(damage.from->getEquip(i) && !zhonghui->getEquip(i))
+                    equips << equip_map.at(i);
+            }
+
+            if(equips.isEmpty())
+                return;
+
+            QVariant data = QVariant::fromValue((PlayerStar)damage.from);
+            if(!zhonghui->askForSkillInvoke(objectName(), data))
+                return;
+
+            Room *room = zhonghui->getRoom();
+
+            QString equip_type;
+            if(equips.length() == 1)
+                equip_type = equips.first();
+            else
+                equip_type = room->askForChoice(zhonghui, objectName(), equips.join("+"));
+
+            room->moveCardTo(damage.from->getEquip(equip_map.indexOf(equip_type)), zhonghui, Player::Equip);
+        }
+    }
+};
+
+NosQuanjiCard::NosQuanjiCard(){
+    target_fixed = true;
+    will_throw = false;
+}
+
+void NosQuanjiCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const{
+    ServerPlayer *target = room->getTag("QuanjiTarget").value<PlayerStar>();
+    room->cardEffect(this, source, target);
+}
+
+void NosQuanjiCard::onEffect(const CardEffectStruct &effect) const{
+    if(effect.from->pindian(effect.to, "nosquanji",
+                            Sanguosha->getCard(this->getSubcards().first())))
+        effect.from->getRoom()->setPlayerFlag(effect.from, "quanji_win");
+}
+
+
+class NosQuanjiViewAsSkill:public OneCardViewAsSkill{
+public:
+    NosQuanjiViewAsSkill():OneCardViewAsSkill("nosquanji"){
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return false;
+    }
+
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
+        return pattern == "@@nosquanji";
+    }
+
+    virtual bool viewFilter(const CardItem *to_select) const{
+        return !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(CardItem *card_item) const{
+        Card *card = new NosQuanjiCard;
+        card->addSubcard(card_item->getFilteredCard());
+
+        return card;
+    }
+};
+
+class NosQuanji: public TriggerSkill{
+public:
+    NosQuanji():TriggerSkill("nosquanji"){
+        events << PhaseChange;
+        view_as_skill = new NosQuanjiViewAsSkill;
+    }
+
+    virtual int getPriority() const{
+        return 3;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target && !target->hasSkill(objectName());
+    }
+
+    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &) const{
+        if(player->getPhase() != Player::RoundStart || player->isKongcheng())
+            return false;
+
+        bool skip = false;
+        room->setTag("QuanjiTarget", QVariant::fromValue((PlayerStar)player));
+        foreach(ServerPlayer *zhonghui, room->findPlayersBySkillName(objectName()))
+        {
+            if(zhonghui->isKongcheng() || zhonghui->getMark("nosbaijiang") > 0)
+                continue;
+
+            QString prompt = "@quanji-pindian:" + player->objectName() + ":" + objectName();
+            bool used = room->askForUseCard(zhonghui, "@@nosquanji", prompt);
+
+            if(!used)
+                continue;
+            else if(zhonghui->hasFlag("quanji_win"))
+            {
+                room->setPlayerFlag(zhonghui, "-quanji_win");
+                if(!skip)
+                {
+                    player->skip(Player::Start);
+                    player->skip(Player::Judge);
+                    skip = true;
+                }
+            }
+        }
+        room->removeTag("QuanjiTarget");
+        return skip;
+    }
+};
+
+class NosBaijiang: public PhaseChangeSkill{
+public:
+    NosBaijiang():PhaseChangeSkill("nosbaijiang"){
+        frequency = Wake;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return PhaseChangeSkill::triggerable(target)
+                && target->getMark("nosbaijiang") == 0
+                && target->getPhase() == Player::Start
+                && target->getEquips().length() >= 3;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *zhonghui) const{
+        Room *room = zhonghui->getRoom();
+
+        /*LogMessage log;
+        log.type = "#ZhijiWake";
+        log.from = jiangwei;
+        log.arg = objectName();
+        room->sendLog(log);
+
+        room->playSkillEffect("zhiji");
+        room->broadcastInvoke("animate", "lightbox:$Zhiji:5000");
+        room->getThread()->delay(5000);*/
+
+        room->setPlayerMark(zhonghui, "nosbaijiang", 1);
+        zhonghui->gainMark("@wake");
+        room->setPlayerProperty(zhonghui, "maxhp", zhonghui->getMaxHp() + 1);
+
+        RecoverStruct recover;
+        recover.who = zhonghui;
+        room->recover(zhonghui, recover);
+
+        room->acquireSkill(zhonghui, "nosyexin");
+        room->detachSkillFromPlayer(zhonghui, "noszhenggong");
+        room->detachSkillFromPlayer(zhonghui, "nosquanji");
+
+        return false;
+    }
+};
+
+NosYexinCard::NosYexinCard(){
+    target_fixed = true;
+    once = true;
+}
+
+void NosYexinCard::onUse(Room *room, const CardUseStruct &card_use) const{
+    ServerPlayer *zhonghui = card_use.from;
+
+    QList<int> powers = zhonghui->getPile("nospower");
+    QList<int> willput;
+    if(powers.isEmpty())
+        return;
+
+    int ai_delay = Config.AIDelay;
+    Config.AIDelay = 0;
+
+    int n = 0;
+    while(!powers.isEmpty())
+    {
+        room->fillAG(powers, zhonghui);
+
+        int card_id = room->askForAG(zhonghui, powers, true, "nosyexin");
+        if(card_id == -1)
+        {
+            zhonghui->invoke("clearAG");
+            break;
+        }
+        powers.removeOne(card_id);
+        ++n;
+
+        room->obtainCard(zhonghui, card_id);
+        zhonghui->invoke("clearAG");
+    }
+
+    Config.AIDelay = ai_delay;
+
+    if(n == 0)
+        return;
+
+    const Card *exchange_card = room->askForExchange(zhonghui, "nosyexin", n);
+
+    foreach(int card_id, exchange_card->getSubcards())
+        willput.push_back(card_id);
+
+    zhonghui->addToPile("nospower", willput);
+
+    LogMessage log;
+    log.type = "#QixingExchange";
+    log.from = zhonghui;
+    log.arg = QString::number(n);
+    log.arg2 = "nosyexin";
+    room->sendLog(log);
+
+    delete exchange_card;
+}
+
+class NosYexinViewAsSkill: public ZeroCardViewAsSkill{
+public:
+    NosYexinViewAsSkill():ZeroCardViewAsSkill("nosyexin"){
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->getPile("nospower").isEmpty() && !player->hasUsed("NosYexinCard");
+    }
+
+    virtual const Card *viewAs() const{
+        return new NosYexinCard;
+    }
+
+    virtual Location getLocation() const{
+        return Right;
+    }
+};
+
+class NosYexin: public TriggerSkill{
+public:
+    NosYexin():TriggerSkill("nosyexin"){
+        events << Damage << Damaged;
+        view_as_skill = new NosYexinViewAsSkill;
+    }
+
+    virtual int getPriority() const{
+        return -1;
+    }
+
+    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *zhonghui, QVariant &) const{
+        if(!zhonghui->askForSkillInvoke(objectName()))
+            return false;
+
+        int card_id = room->drawCard();
+        zhonghui->addToPile("nospower", card_id);
+
+        return false;
+    }
+};
+
+class NosPaiyi: public PhaseChangeSkill{
+public:
+    NosPaiyi():PhaseChangeSkill("nospaiyi"){
+        _m_place["Judging"] = Player::Judging;
+        _m_place["Equip"] = Player::Equip;
+        _m_place["Hand"] = Player::Hand;
+    }
+
+    QString getPlace(Room *room, ServerPlayer *player, QStringList places) const{
+        if(places.length() == 1)
+        {
+            return places.first();
+        }
+        else
+        {
+            QString place = room->askForChoice(player, "nospaiyi", places.join("+"));
+            return place;
+        }
+
+        return QString();
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *zhonghui) const{
+        if(zhonghui->getPhase() != Player::Finish || zhonghui->getPile("nospower").isEmpty())
+            return false;
+
+        Room *room = zhonghui->getRoom();
+
+        QList<int> powers = zhonghui->getPile("nospower");
+        QStringList places;
+
+        places << "Hand";
+
+        room->fillAG(powers, zhonghui);
+        int power = room->askForAG(zhonghui, powers, true, "nospaiyi");
+        zhonghui->invoke("clearAG");
+
+        if(power == -1)
+            power = powers.first();
+
+        const Card *card = Sanguosha->getCard(power);
+
+        ServerPlayer *target = room->askForPlayerChosen(zhonghui, room->getAlivePlayers(), "nospaiyi");
+        CardMoveReason reason(CardMoveReason::S_REASON_TRANSFER, zhonghui->objectName(), "nospaiyi", QString());
+
+        if(card->inherits("DelayedTrick"))
+        {
+            if(!zhonghui->isProhibited(target, card) && !target->containsTrick(card->objectName()))
+                places << "Judging";
+
+            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason);
+        }
+        else if(card->inherits("EquipCard"))
+        {
+            const EquipCard *equip = qobject_cast<const EquipCard *>(card);
+            if(!target->getEquip(equip->location()))
+                places << "Equip";
+
+            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason);
+        }
+        else
+            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason);
+
+        if(target != zhonghui)
+            room->drawCards(zhonghui, 1);
+
+        return false;
+    }
+
+private:
+    QMap<QString, Player::Place> _m_place;
+};
+
+class NosZili: public PhaseChangeSkill{
+public:
+    NosZili():PhaseChangeSkill("noszili"){
+        frequency = Wake;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return PhaseChangeSkill::triggerable(target)
+                && target->getMark("noszili") == 0
+                && target->getPhase() == Player::Start
+                && target->getPile("nospower").length() >= 4;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *zhonghui) const{
+        Room *room = zhonghui->getRoom();
+
+        /*LogMessage log;
+        log.type = "#ZhijiWake";
+        log.from = jiangwei;
+        log.arg = objectName();
+        room->sendLog(log);
+
+        room->playSkillEffect("zhiji");
+        room->broadcastInvoke("animate", "lightbox:$Zhiji:5000");
+        room->getThread()->delay(5000);*/
+
+        room->setPlayerMark(zhonghui, "noszili", 1);
+        zhonghui->gainMark("@wake");
+        room->loseMaxHp(zhonghui);
+
+        room->acquireSkill(zhonghui, "nospaiyi");
+
+        return false;
+    }
+};
+
 NostalGeneralPackage::NostalGeneralPackage()
     :Package("nostal_general")
 {
@@ -450,9 +828,22 @@ NostalGeneralPackage::NostalGeneralPackage()
     General *noslingtong = new General(this, "noslingtong", "wu");
     noslingtong->addSkill(new NosXuanfeng);
 
+    General *noszhonghui = new General(this, "noszhonghui", "wei", 3);
+    noszhonghui->addSkill(new NosZhenggong);
+    noszhonghui->addSkill(new NosQuanji);
+    noszhonghui->addSkill(new NosBaijiang);
+    noszhonghui->addSkill(new NosZili);
+
+    noszhonghui->addRelateSkill("nosyexin");
+    noszhonghui->addRelateSkill("nospaiyi");
+
     addMetaObject<NosFanjianCard>();
     addMetaObject<NosXuanhuoCard>();
     addMetaObject<NosJujianCard>();
+    addMetaObject<NosQuanjiCard>();
+    addMetaObject<NosYexinCard>();
+
+    skills << new NosYexin << new NosPaiyi;
 }
 
 ADD_PACKAGE(NostalGeneral)

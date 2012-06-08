@@ -169,8 +169,7 @@ void GeneralSelector::loadFirstGeneralTable(const QString &role){
                 QString name;
                 stream >> name;
 
-                int i;
-                for(i=0; i<7; i++){
+                for(int i = 0; i< 7; i++){
                     qreal value;
                     stream >> value;
 
@@ -180,6 +179,11 @@ void GeneralSelector::loadFirstGeneralTable(const QString &role){
             }
 
             file.close();
+        }
+
+        for(int i = 0; i< 7; i++){
+            QString key = QString("%1:%2:%3:%4").arg("noszhonghui").arg(role).arg(i+2).arg(lord);
+            first_general_table.insert(key, 0);
         }
     }
 }

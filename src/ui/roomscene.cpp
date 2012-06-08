@@ -1378,7 +1378,8 @@ void RoomScene::keepGetCardLog(const CardsMoveStruct &move)
         foreach(int card_id, move.card_ids)
             log_box->appendLog("$RecycleCard", to_general, QStringList(), QString::number(card_id));
     }
-    if(move.from && move.from_place != Player::Hand && move.to && move.from != move.to)
+    if(move.from && move.from_place != Player::Hand && move.to && move.from != move.to
+            && move.to_place != Player::Judging)
     {
         QString from_general = move.from->getGeneralName();
         QStringList tos;
@@ -1395,7 +1396,7 @@ void RoomScene::keepGetCardLog(const CardsMoveStruct &move)
             log_box->appendLog("#MoveNCards", from_general, tos, QString(),
                                QString::number(hide));
     }
-    if(move.from_place == Player::Hand && move.to_place == Player::Hand)
+    if(move.from && move.from_place == Player::Hand && move.to && move.to_place == Player::Hand)
     {
         QString from_general = move.from->getGeneralName();
         QStringList tos;
@@ -2196,7 +2197,8 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
                     }
                 }
             }
-            showPromptBox();
+            if(!inReplay)
+                showPromptBox();
             ok_button->setEnabled(true);
             cancel_button->setEnabled(true);
             discard_button->setEnabled(false);

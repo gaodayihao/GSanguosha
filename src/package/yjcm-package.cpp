@@ -1061,7 +1061,7 @@ PaiyiCard::PaiyiCard(){
     mute = true;
 }
 
-bool PaiyiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool PaiyiCard::targetFilter(const QList<const Player *> &targets, const Player *, const Player *) const{
     if(!targets.isEmpty())
         return false;
 

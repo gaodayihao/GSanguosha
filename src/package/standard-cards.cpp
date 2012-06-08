@@ -518,13 +518,13 @@ public:
             if(!player->askForSkillInvoke(objectName(), data))
                 return false;
 
-            room->setEmotion(damage.to, QString("weapon/%1").arg(objectName()));
-
             QString horse_type;
             if(horses.length() == 2)
                 horse_type = room->askForChoice(player, objectName(), horses.join("+"));
             else
                 horse_type = horses.first();
+
+            room->setEmotion(damage.to, QString("weapon/%1").arg(objectName()));
 
             if(horse_type == "dhorse")
                 room->throwCard(damage.to->getDefensiveHorse(), damage.to);
