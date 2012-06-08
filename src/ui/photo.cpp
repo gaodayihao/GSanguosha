@@ -83,7 +83,7 @@ Photo::Photo(): player(NULL),
     equips << &weapon << &armor << &defensive_horse << &offensive_horse;
 
     for(int i = 0; i < 4; i++){
-        equip_rects[i] = new QGraphicsRectItem(QRect(1, 93 + 14 * i, 130, 18), this);
+        equip_rects[i] = new QGraphicsRectItem(QRect(1, 118 + 17 * i, 129, 16), this);
         equip_rects[i]->setPen(Qt::NoPen);
     }
 
