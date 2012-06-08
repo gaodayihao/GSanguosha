@@ -37,6 +37,7 @@ public:
     void startGongxinwithHongyan();
     void addCloseButton(bool dispose = false);
     void view(const ClientPlayer *player);
+    bool hasCloseButton();
 
     ClientPlayer* m_currentPlayer;
 public slots:

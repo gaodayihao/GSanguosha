@@ -204,6 +204,10 @@ void CloseButton::mouseReleaseEvent(QGraphicsSceneMouseEvent *){
     emit clicked();
 }
 
+bool CardContainer::hasCloseButton(){
+    return close_button->isVisible();
+}
+
 void CardContainer::view(const ClientPlayer *player){
     QList<int> card_ids;
     QList<const Card *> cards = player->getCards();

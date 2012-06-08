@@ -2105,7 +2105,8 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
                      oldStatus == Client::AskForGongxin)
             {
                 guanxing_box->clear();
-                card_container->clear();
+                if(!card_container->hasCloseButton())
+                    card_container->clear();
             }
             prompt_box->disappear();
             ClientInstance->getPromptDoc()->clear();
