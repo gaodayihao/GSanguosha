@@ -443,7 +443,7 @@ public:
 
             for(int i = 0; i < equip_map.length(); i++)
             {
-                if(damage.from->getEquip(i) && !zhonghui->getEquip(i))
+                if(damage.from->getEquip(i))
                     equips << equip_map.at(i);
             }
 
@@ -462,7 +462,13 @@ public:
             else
                 equip_type = room->askForChoice(zhonghui, objectName(), equips.join("+"));
 
-            room->moveCardTo(damage.from->getEquip(equip_map.indexOf(equip_type)), zhonghui, Player::Equip);
+            const Card *card = damage.from->getEquip(equip_map.indexOf(equip_type));
+            room->moveCardTo(card, zhonghui, Player::Hand);
+
+            CardUseStruct card_use;
+            card_use.from = zhonghui;
+            card_use.card = card;
+            room->useCard(card_use);
         }
     }
 };
