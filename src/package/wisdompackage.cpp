@@ -186,13 +186,13 @@ public:
 class Beifa: public TriggerSkill{
 public:
     Beifa():TriggerSkill("beifa"){
-        events << CardLostOnePiece;
+        events << CardLostOneTime;
         frequency = Compulsory;
     }
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *jiangwei, QVariant &data) const{
         if(jiangwei->isKongcheng()){
-            CardMoveStar move = data.value<CardMoveStar>();
-            if(move->from_place != Player::Hand)
+            CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
+            if(!move->from_places.contains(Player::Hand))
                 return false;
 
             QList<ServerPlayer *> players;
