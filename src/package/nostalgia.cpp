@@ -506,7 +506,7 @@ public:
     }
 
     virtual int getPriority() const{
-        return 3;
+        return 5;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -636,7 +636,7 @@ void NosYexinCard::onUse(Room *room, const CardUseStruct &card_use) const{
     LogMessage log;
     log.type = "#QixingExchange";
     log.from = zhonghui;
-    log.arg = QString::number(n);
+    log.arg = QString::number(qMin(n, zhonghui->getHandcardNum()));
     log.arg2 = "nosyexin";
     room->sendLog(log);
 

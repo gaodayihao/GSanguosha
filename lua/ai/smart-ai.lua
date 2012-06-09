@@ -102,11 +102,11 @@ function SmartAI:initialize(player)
 	self.lua_ai.callback = function(full_method_name, ...)
 		--The __FUNCTION__ macro is defined as CLASS_NAME::SUBCLASS_NAME::FUNCTION_NAME 
 		--in MSVC, while in gcc only FUNCTION_NAME is in place.
-		local method_name_start = 1;
+		local method_name_start = 1
 		while true do		    
-			local found = string.find(full_method_name, "::", method_name_start);			
+			local found = string.find(full_method_name, "::", method_name_start)			
 			if found ~= nil then			    
-				method_name_start = found + 2;
+				method_name_start = found + 2
 			else			    
 				break
 			end			     
@@ -1715,7 +1715,7 @@ function SmartAI:askForChoice(skill_name, choices)
 		if skill and choices:match(skill:getDefaultChoice(self.player)) then
 			return skill:getDefaultChoice(self.player)
 		else
-			local choice_table = choices:split("+");
+			local choice_table = choices:split("+")
 			for index, achoice in ipairs(choice_table) do
 				if achoice == "benghuai" then table.remove(choice_table, index) break end
 			end
@@ -3348,7 +3348,7 @@ function SmartAI:evaluatePlayerCardsNum(class_name, player)
 	end
 	
 	local percentage = (#(self:getCardsFromGame(class_name)) - #(self:getCardsFromDiscardPile(class_name)))/length
-	local modified = 1;
+	local modified = 1
 	if class_name == "Jink" then modified = 1.23
 	elseif class_name == "Analeptic" then modified = 1.17
 	elseif class_name == "Peach" then modified = 1.19
