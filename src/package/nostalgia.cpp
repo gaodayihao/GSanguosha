@@ -469,7 +469,7 @@ void NosQuanjiCard::use(Room *room, ServerPlayer *source, const QList<ServerPlay
 void NosQuanjiCard::onEffect(const CardEffectStruct &effect) const{
     if(effect.from->pindian(effect.to, "nosquanji",
                             Sanguosha->getCard(this->getSubcards().first())))
-        effect.from->getRoom()->setPlayerFlag(effect.from, "quanji_win");
+        effect.from->setFlags("quanji_win");
 }
 
 
@@ -521,7 +521,7 @@ public:
         room->setTag("QuanjiTarget", QVariant::fromValue((PlayerStar)player));
         foreach(ServerPlayer *zhonghui, room->findPlayersBySkillName(objectName()))
         {
-            if(zhonghui->isKongcheng() || zhonghui->getMark("nosbaijiang") > 0)
+            if(zhonghui->isKongcheng() || zhonghui->getMark("nosbaijiang") > 0 || player->isKongcheng())
                 continue;
 
             QString prompt = "@quanji-pindian:" + player->objectName() + ":" + objectName();
@@ -531,7 +531,7 @@ public:
                 continue;
             else if(zhonghui->hasFlag("quanji_win"))
             {
-                room->setPlayerFlag(zhonghui, "-quanji_win");
+                zhonghui->setFlags("-quanji_win");
                 if(!skip)
                 {
                     player->skip(Player::Start);
