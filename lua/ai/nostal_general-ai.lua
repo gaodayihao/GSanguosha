@@ -237,17 +237,21 @@ sgs.ai_skill_invoke.noszhenggong = function(self,data)
 	return true
 end
 
+sgs.ai_skill_cardchosen.noszhenggong = function(self, who, flags)
+	for i = 0, 3 do
+		if not self.player:getEquip(i) and who:getEquip(i) then
+			return who:getEquip(i)
+		end
+	end
+	
+	return sgs.Sanguosha:getCard(self:askForCardChosenDefault(who, flags))
+end
+
 sgs.ai_skill_use["@@nosquanji"] = function(self, prompt)
 	local current = self.room:getCurrent()
 	if self:isFriend(current) then
 		if current:hasSkill("zhiji") and not current:hasSkill("guanxing") and current:getHandcardNum() == 1 then
 			return "@NosQuanjiCard=" .. self:getMinCard(self.player):getId() .. "->."
-		end
-		
-		if current:hasSkill("kongcheng") and current:getHandcardNum() == 1 then
-			local cards = sgs.QList2Table(self.player:getHandcards())
-			self:sortByKeepValue(cards)
-			return "@NosQuanjiCard=" .. cards[1]:getId() .. "->."
 		end
 	elseif self:isEnemy(current) then
 		if self.player:getHandcardNum() <= 1 and not self:needKongcheng(self.player) then return "." end
@@ -295,3 +299,5 @@ sgs.ai_skill_askforag.nosyexin = function(self, card_ids)
 	self:sortByCardNeed(cards)
 	return cards[#cards]:getEffectiveId()
 end
+
+

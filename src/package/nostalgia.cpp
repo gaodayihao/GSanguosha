@@ -716,6 +716,12 @@ public:
 
         places << "Hand";
 
+        LogMessage log;
+        log.type = "#InvokeSkill";
+        log.from = zhonghui;
+        log.arg = objectName();
+        room->sendLog(log);
+
         room->fillAG(powers, zhonghui);
         int power = room->askForAG(zhonghui, powers, true, "nospaiyi");
         zhonghui->invoke("clearAG");

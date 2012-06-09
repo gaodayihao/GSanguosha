@@ -1902,20 +1902,7 @@ function SmartAI:getCardRandomly(who, flags)
 	return card:getEffectiveId()
 end
 
-function SmartAI:askForCardChosen(who, flags, reason)
-	self.room:output(reason)
-	local cardchosen = sgs.ai_skill_cardchosen[string.gsub(reason,"%-","_")]
-	local card
-	if type(cardchosen) == "function" then
-		card = cardchosen(self, who, flags)
-		if card then return card:getEffectiveId() end
-	elseif type(cardchosen) == "number" then
-		sgs.ai_skill_cardchosen[string.gsub(reason, "%-", "_")] = nil
-		for _, acard in sgs.qlist(who:getCards(flags)) do
-			if acard:getEffectiveId() == cardchosen then return cardchosen end
-		end
-	end
-
+function SmartAI:askForCardChosenDefault(who, flags)
 	if self:isFriend(who) then
 		if flags:match("j") then
 			local tricks = who:getCards("j")
@@ -2043,6 +2030,23 @@ function SmartAI:askForCardChosen(who, flags, reason)
 	if flags:match("h") then new_flag = "h" end
 	if flags:match("e") then new_flag = new_flag.."e" end
 	return self:getCardRandomly(who, new_flag) or who:getCards(flags):first():getEffectiveId()
+end
+
+function SmartAI:askForCardChosen(who, flags, reason)
+	self.room:output(reason)
+	local cardchosen = sgs.ai_skill_cardchosen[string.gsub(reason,"%-","_")]
+	local card
+	if type(cardchosen) == "function" then
+		card = cardchosen(self, who, flags)
+		if card then return card:getEffectiveId() end
+	elseif type(cardchosen) == "number" then
+		sgs.ai_skill_cardchosen[string.gsub(reason, "%-", "_")] = nil
+		for _, acard in sgs.qlist(who:getCards(flags)) do
+			if acard:getEffectiveId() == cardchosen then return cardchosen end
+		end
+	end
+
+	return self:askForCardChosenDefault(who, flags)
 end
 
 function sgs.ai_skill_cardask.nullfilter(self, data, pattern, target)
