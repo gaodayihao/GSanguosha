@@ -72,7 +72,7 @@ function setInitialTables()
 	sgs.draw_pile = 			global_room:getDrawPile()
 	sgs.lose_equip_skill = 		"xiaoji|xuanfeng|nosxuanfeng"
 	sgs.need_kongcheng = 		"lianying|kongcheng"
-	sgs.masochism_skill = 		"fankui|jieming|yiji|ganglie|enyuan|nosenyuan|fangzhu|guixin|quanji"
+	sgs.masochism_skill = 		"fankui|jieming|yiji|ganglie|enyuan|nosenyuan|fangzhu|guixin|quanji|noszhenggong"
 	sgs.wizard_skill = 			"guicai|guidao|jilve|tiandu"
 	sgs.wizard_harm_skill = 	"guicai|guidao|jilve"
 	sgs.priority_skill = 		"dimeng|haoshi|qingnang|jizhi|guzheng|qixi|jieyin|guose|duanliang|jujian|fanjian|lijian|manjuan|lihun"
@@ -1791,11 +1791,11 @@ function SmartAI:askForNullification(trick, from, to, positive)
 				else
 					if trick:inherits("Snatch") then return null_card end
 					if trick:inherits("FireAttack") and (self:isEquip("Vine", to) or to:getMark("@kuangfeng") > 0 or (to:isChained() and not self:isGoodChainTarget(to))) 
-						and from:objectName() ~= to:objectName() and not from:hasSkill("wuyan") then return null_card end
+						and from:objectName() ~= to:objectName() and not from:hasSkill("wuyan") and not to:hasFlag("TanhuTarget") then return null_card end
 					if self:isWeak(to)  then 
-						if trick:inherits("Duel") and not from:hasSkill("wuyan") then
+						if trick:inherits("Duel") and not from:hasSkill("wuyan") and not to:hasFlag("TanhuTarget") then
 							return null_card
-						elseif trick:inherits("FireAttack") and not from:hasSkill("wuyan") then
+						elseif trick:inherits("FireAttack") and not from:hasSkill("wuyan") and not to:hasFlag("TanhuTarget") then
 							if from:getHandcardNum() > 2  and from:objectName() ~= to:objectName() then return null_card end
 						end
 					end
@@ -1814,7 +1814,7 @@ function SmartAI:askForNullification(trick, from, to, positive)
 					return null_card
 				end
 			end 
-			if trick:inherits("AOE") and not (from:hasSkill("wuyan") and not (menghuo and trick:inherits("SavageAssault"))) then
+			if trick:inherits("AOE") and not (from:hasSkill("wuyan") and not to:hasFlag("TanhuTarget") and not (menghuo and trick:inherits("SavageAssault"))) then
 				local lord = self.room:getLord()
 				local currentplayer = self.room:getCurrent()
 				if self:isFriend(lord) and self:isWeak(lord) and self:aoeIsEffective(trick, lord)and 
@@ -1840,7 +1840,7 @@ function SmartAI:askForNullification(trick, from, to, positive)
 					end
 				end
 			end
-			if trick:inherits("Duel") and not from:hasSkill("wuyan") then
+			if trick:inherits("Duel") and not from:hasSkill("wuyan") and not to:hasFlag("TanhuTarget") then
 				if self.player:objectName() == to:objectName() then
 					if self:hasSkills(sgs.masochism_skill, self.player) and 
 						(self.player:getHp() > 1 or self:getCardsNum("Peach") > 0 or self:getCardsNum("Analeptic") > 0) then

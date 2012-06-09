@@ -437,32 +437,15 @@ public:
     virtual void onDamaged(ServerPlayer *zhonghui, const DamageStruct &damage) const{
         if(damage.from && damage.from->hasEquip())
         {
-            QStringList equip_map;
-            equip_map << "weapon" << "armor" << "dhorse" << "ohorse";
-            QStringList equips;
-
-            for(int i = 0; i < equip_map.length(); i++)
-            {
-                if(damage.from->getEquip(i))
-                    equips << equip_map.at(i);
-            }
-
-            if(equips.isEmpty())
-                return;
-
             QVariant data = QVariant::fromValue((PlayerStar)damage.from);
             if(!zhonghui->askForSkillInvoke(objectName(), data))
                 return;
 
             Room *room = zhonghui->getRoom();
 
-            QString equip_type;
-            if(equips.length() == 1)
-                equip_type = equips.first();
-            else
-                equip_type = room->askForChoice(zhonghui, objectName(), equips.join("+"));
+            int equip = room->askForCardChosen(zhonghui, damage.from, "e", objectName());
 
-            const Card *card = damage.from->getEquip(equip_map.indexOf(equip_type));
+            const Card *card = Sanguosha->getCard(equip);
             room->moveCardTo(card, zhonghui, Player::Hand);
 
             CardUseStruct card_use;
@@ -750,7 +733,7 @@ public:
             if(!zhonghui->isProhibited(target, card) && !target->containsTrick(card->objectName()))
                 places << "Judging";
 
-            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason);
+            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason, true);
         }
         else if(card->inherits("EquipCard"))
         {
@@ -758,10 +741,10 @@ public:
             if(!target->getEquip(equip->location()))
                 places << "Equip";
 
-            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason);
+            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason, true);
         }
         else
-            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason);
+            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason, true);
 
         if(target != zhonghui)
             room->drawCards(zhonghui, 1);

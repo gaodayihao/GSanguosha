@@ -244,29 +244,39 @@ sgs.ai_card_intention.XuanhuoCard = -30
 
 sgs.ai_chaofeng.fazheng = -3
 
-function sgs.ai_skill_invoke.xuanfeng(self, data)
-	local enemynum = 0
-	for _, enemy in ipairs(self.enemies) do
-		if not self:needKongcheng(enemy) then
-			enemynum = enemynum + 1
-		end
-	end
-	return enemynum > 0 
-end
-
 sgs.ai_skill_choice.xuanfeng = function(self, choices)
 	return "discard"
 end
 
-sgs.ai_skill_playerchosen.xuanfeng = function(self, targets)	
-	targets = sgs.QList2Table(targets)
-	self:sort(targets,"defense")
-	for _, enemy in ipairs(self.enemies) do
-		if not self:needKongcheng(enemy) and not enemy:isNude() and
-		not (enemy:hasSkill("guzheng") and self.room:getCurrent():getPhase() == sgs.Player_Discard) then
-			return enemy
+sgs.ai_skill_use["@@xuanfeng"] = function(self, prompt)
+	self:sort(self.enemies,"defense")
+	if #self.enemies == 1 then
+		for _, enemy in ipairs(self.enemies) do
+			if not self:needKongcheng(enemy) and not enemy:isNude() and
+			not (enemy:hasSkill("guzheng") and self.room:getCurrent():getPhase() == sgs.Player_Discard) then
+				return "@XuanfengCard=.->" .. enemy:objectName()
+			end
+		end
+	elseif #self.enemies > 1 then
+		local targets = {}
+		local num = 0
+		for _, enemy in ipairs(self.enemies) do
+			if not self:needKongcheng(enemy) and not enemy:isNude() and
+			not (enemy:hasSkill("guzheng") and self.room:getCurrent():getPhase() == sgs.Player_Discard) then
+				table.insert(targets, enemy:objectName())
+				num = num + 1
+				
+				if num == 2 then break end
+			end
+		end
+		if #targets == 1 then
+			return "@XuanfengCard=.->" .. targets[1]
+		else
+			return ("@XuanfengCard=.->%s+%s"):format(targets[1], targets[2])
 		end
 	end
+	
+	return "."
 end
 
 sgs.ai_skill_invoke.pojun = function(self, data)

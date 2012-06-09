@@ -475,10 +475,69 @@ public:
     }
 };
 
+XuanfengCard::XuanfengCard(){
+}
+
+bool XuanfengCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    if(targets.length() >= 2)
+        return false;
+
+    if(to_select == Self)
+        return false;
+
+    return !to_select->isNude();
+}
+
+void XuanfengCard::onEffect(const CardEffectStruct &effect) const{
+    Room *room = effect.from->getRoom();
+    int card_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanfeng");
+    room->throwCard(card_id, effect.to);
+
+    if(effect.from->getMark("XuanfengTargets") == 1 && !effect.to->isNude())
+    {
+        QString choice;
+        if(effect.from->getAI())
+            choice = "discard";
+        else
+            choice = room->askForChoice(effect.from, "xuanfeng", "discard+nothing");
+
+        if(choice == "discard")
+        {
+            int card_id = room->askForCardChosen(effect.from, effect.to, "he", "xuanfeng");
+            room->throwCard(card_id, effect.to);
+        }
+    }
+}
+
+void XuanfengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
+    room->setPlayerMark(source, "XuanfengTargets", targets.length());
+    SkillCard::use(room, source, targets);
+}
+
+class XuanfengViewAsSkill: public ZeroCardViewAsSkill{
+public:
+    XuanfengViewAsSkill():ZeroCardViewAsSkill("xuanfeng"){
+    }
+
+    virtual const Card *viewAs() const{
+        return new XuanfengCard;
+    }
+
+protected:
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return false;
+    }
+
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
+        return  pattern == "@@xuanfeng";
+    }
+};
+
 class Xuanfeng: public TriggerSkill{
 public:
     Xuanfeng():TriggerSkill("xuanfeng"){
         events << CardLostOnePiece << CardLostOneTime << PhaseChange;
+        view_as_skill = new XuanfengViewAsSkill;
     }
 
     virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *lingtong, QVariant &data) const{
@@ -502,34 +561,7 @@ public:
             {
                 lingtong->tag.remove("InvokeXuanfeng");
 
-                QList<ServerPlayer *> targets;
-                foreach(ServerPlayer *sp,room->getOtherPlayers(lingtong))
-                    if(!sp->isNude())
-                        targets << sp;
-                if(targets.isEmpty())
-                    return false;
-
-                QString choice = room->askForChoice(lingtong, objectName(), "discard+nothing");
-
-                if(choice == "discard")
-                {
-                    room->playSkillEffect(objectName());
-
-                    ServerPlayer *target;
-                    int card_id = -1;
-                    for(int i = 0;i < 2;i ++){
-                        if(i == 1)
-                            if(!room->askForSkillInvoke(lingtong, objectName()))
-                                break;
-                        target = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
-                        if(target){
-                            card_id = room->askForCardChosen(lingtong, target, "he", "xuanfeng");
-                            room->throwCard(card_id, target);
-                            if(target->isNude())
-                                targets.removeOne(target);
-                        }
-                    }
-                }
+                room->askForUseCard(lingtong, "@@xuanfeng", "@xuanfeng-card");
             }
         }
         return false;
@@ -1253,6 +1285,7 @@ YJCMPackage::YJCMPackage():Package("YJCM"){
     addMetaObject<GanluCard>();
     addMetaObject<XianzhenCard>();
     addMetaObject<XianzhenSlashCard>();
+    addMetaObject<XuanfengCard>();
     addMetaObject<JujianCard>();
     addMetaObject<XuanhuoCard>();
     addMetaObject<XinzhanCard>();

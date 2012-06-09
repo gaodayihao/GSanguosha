@@ -226,3 +226,72 @@ end
 sgs.ai_skill_playerchosen.xuanfeng_damage = sgs.ai_skill_playerchosen.damage
 
 sgs.ai_skill_playerchosen.xuanfeng_slash = sgs.ai_skill_playerchosen.zero_card_as_slash
+
+sgs.ai_skill_invoke.noszhenggong = function(self,data)
+	local target = data:toPlayer()
+	
+	if self:isFriend(target) then
+		return (self:hasSkills(sgs.lose_equip_skill, target) and not self:isWeak(target)) or (self:isEquip("SilverLion", target) and target:isWounded())
+	end
+	
+	return true
+end
+
+sgs.ai_skill_use["@@nosquanji"] = function(self, prompt)
+	local current = self.room:getCurrent()
+	if self:isFriend(current) then
+		if current:hasSkill("zhiji") and not current:hasSkill("guanxing") and current:getHandcardNum() == 1 then
+			return "@NosQuanjiCard=" .. self:getMinCard(self.player):getId() .. "->."
+		end
+		
+		if current:hasSkill("kongcheng") and current:getHandcardNum() == 1 then
+			local cards = sgs.QList2Table(self.player:getHandcards())
+			self:sortByKeepValue(cards)
+			return "@NosQuanjiCard=" .. cards[1]:getId() .. "->."
+		end
+	elseif self:isEnemy(current) then
+		if self.player:getHandcardNum() <= 1 and not self:needKongcheng(self.player) then return "." end
+		local invoke = false
+		if current:hasSkill("yinghun") and current:getLostHp() > 2 then invoke = true end
+		if current:hasSkill("luoshen") and not self:isWeak() then invoke = true end
+		if current:hasSkill("baiyin") and not current:hasSkill("jilve") and current:getMark("@bear") >= 4 then invoke = true end
+		if current:hasSkill("zaoxian") and not current:hasSkill("jixi") and current:getPile("field"):length() >= 3 then invoke = true end
+		if current:hasSkill("zhiji") and not current:hasSkill("guanxing") and current:isKongcheng() then invoke = true end
+		if current:hasSkill("zili") and not current:hasSkill("paiyi") and current:getPile("power"):length() >= 3 then invoke = true end
+		if self:isWeak(current) and self.player:getHandcardNum() > 1 and current:getCards("j"):isEmpty() then invoke = true end
+		
+		if invoke and self:getMaxCard(self.player):getNumber() > 7 then
+			return "@NosQuanjiCard=" .. self:getMaxCard(self.player):getId() .. "->."
+		end
+	end
+	
+	return "."
+end
+
+sgs.ai_skill_invoke.nosyexin = function(self,data)
+	return true
+end
+
+local nosyexin_skill={}
+nosyexin_skill.name="nosyexin"
+table.insert(sgs.ai_skills, nosyexin_skill)
+nosyexin_skill.getTurnUseCard = function(self)
+	if self.player:getPile("nospower"):isEmpty() or self.player:hasUsed("NosYexinCard") then
+		return
+	end
+	
+	return sgs.Card_Parse("@NosYexinCard=.")
+end
+
+sgs.ai_skill_use_func.NosYexinCard = function(card, use, self)
+	use.card = sgs.Card_Parse("@NosYexinCard=.")
+end
+
+sgs.ai_skill_askforag.nosyexin = function(self, card_ids)
+	local cards = {}
+	for _, card_id in ipairs(card_ids) do
+		table.insert(cards, sgs.Sanguosha:getCard(card_id))
+	end
+	self:sortByCardNeed(cards)
+	return cards[#cards]:getEffectiveId()
+end

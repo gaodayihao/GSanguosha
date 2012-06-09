@@ -607,6 +607,7 @@ void Photo::updatePile(const QString &pile_name){
     QStringList names = who->getPileNames();
     button->menu()->clear();
 
+    button_widget->setZValue(3.0);
     button_widget->hide();
     int active = 0;
     foreach(QString pile_name,names)

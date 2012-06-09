@@ -81,5 +81,6 @@ return {
 	["nospaiyi:Judging"] = "判定区",
 	["nospaiyi:Equip"] = "装备区",
 	["nospaiyi:Hand"] = "手牌区",
+	["@wake"] = "觉醒",
 }
 
