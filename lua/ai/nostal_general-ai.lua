@@ -267,7 +267,7 @@ sgs.ai_skill_use["@@nosquanji"] = function(self, prompt)
 		if current:hasSkill("baiyin") and not current:hasSkill("jilve") and current:getMark("@bear") >= 4 then invoke = true end
 		if current:hasSkill("zaoxian") and not current:hasSkill("jixi") and current:getPile("field"):length() >= 3 then invoke = true end
 		if current:hasSkill("zili") and not current:hasSkill("paiyi") and current:getPile("power"):length() >= 3 then invoke = true end
-		if current:hasSkill("hunzi") and current:getHp() == 1 then invoke = true end
+		if current:hasSkill("hunzi") and not current:hasSkill("yingzi") and current:getHp() == 1 then invoke = true end
 		if self:isWeak(current) and self.player:getHandcardNum() > 1 and current:getCards("j"):isEmpty() then invoke = true end
 		
 		if invoke and self:getMaxCard(self.player):getNumber() > 7 then
