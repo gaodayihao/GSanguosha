@@ -4161,7 +4161,6 @@ void Room::takeAG(ServerPlayer *player, int card_id){
         discard_pile->prepend(card_id);
         setCardMapping(card_id, NULL, Player::DiscardPile);
         broadcastInvoke("takeAG", QString(".:%1").arg(card_id));
-        setCardFlag(card_id, "-visible");
     }
 }
 
