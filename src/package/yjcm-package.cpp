@@ -495,11 +495,7 @@ void XuanfengCard::onEffect(const CardEffectStruct &effect) const{
 
     if(effect.from->getMark("XuanfengTargets") == 1 && !effect.to->isNude())
     {
-        QString choice;
-        if(effect.from->getAI())
-            choice = "discard";
-        else
-            choice = room->askForChoice(effect.from, "xuanfeng", "discard+nothing");
+        QString choice = room->askForChoice(effect.from, "xuanfeng", "discard+nothing");
 
         if(choice == "discard")
         {
