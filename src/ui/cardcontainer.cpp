@@ -19,12 +19,23 @@ CardContainer::CardContainer()
 }
 
 void CardContainer::fillCards(const QList<int> &card_ids){
-    if(card_ids.isEmpty()) return;
-    else if(!items.isEmpty()){
-        items_stack.push(items);
+    QList<CardItem*> card_items;
+    if(card_ids.isEmpty() && items.isEmpty()) return;
+    else if(card_ids.isEmpty() && !items.isEmpty())
+    {
+        card_items = items;
         items.clear();
     }
-    QList<CardItem*> card_items = _createCards(card_ids);
+    else if(!items.isEmpty()){
+        items_stack.push(items);
+        foreach(CardItem *item, items)
+            item->hide();
+        items.clear();
+    }
+
+    if(card_items.isEmpty())
+        card_items = _createCards(card_ids);
+
 
     static const QPointF pos1(30, 40);
     static const QPointF pos2(30, 184);
@@ -62,6 +73,7 @@ void CardContainer::fillCards(const QList<int> &card_ids){
         item->setOpacity(1.0);
         item->setHomeOpacity(1.0);
         item->setFlag(QGraphicsItem::ItemIsFocusable);
+        item->show();
     }
 }
 
