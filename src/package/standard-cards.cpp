@@ -612,7 +612,6 @@ void AmazingGrace::use(Room *room, ServerPlayer *source, const QList<ServerPlaye
 
     QVariantList ag_list;
     foreach(int card_id, card_ids){
-        room->setCardFlag(card_id, "visible");
         ag_list << card_id;
     }
     room->setTag("AmazingGrace", ag_list);

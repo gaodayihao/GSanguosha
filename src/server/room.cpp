@@ -3027,14 +3027,28 @@ void Room::moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place d
 void Room::moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place dstPlace, const CardMoveReason &reason,
                       bool forceMoveVisible, bool ignoreChanged)
 {
+    bool setfalg = forceMoveVisible && (dstPlace == Player::Hand);
     CardsMoveStruct move;
     if(card->isVirtualCard())
     {
-        move.card_ids = card->getSubcards();
+        if(setfalg)
+        {
+            foreach(int card_id, card->getSubcards())
+            {
+                setCardFlag(card_id, "visible");
+                move.card_ids << card_id;
+            }
+        }
+        else
+            move.card_ids = card->getSubcards();
         if (move.card_ids.size() == 0) return;
     }
     else
+    {
+        if(setfalg)
+            setCardFlag(card->getId(), "visible");
         move.card_ids.append(card->getId());
+    }
     move.to = dstPlayer;
     move.to_place = dstPlace;
     move.reason = reason;
@@ -4121,6 +4135,7 @@ void Room::fillAG(const QList<int> &card_ids, ServerPlayer *who){
 void Room::takeAG(ServerPlayer *player, int card_id){
     if(player){
         player->addCard(Sanguosha->getCard(card_id), Player::Hand);
+        setCardFlag(card_id, "visible");
         setCardMapping(card_id, player, Player::Hand);
         broadcastInvoke("takeAG", QString("%1:%2").arg(player->objectName()).arg(card_id));
         CardMoveStruct move;
@@ -4146,6 +4161,7 @@ void Room::takeAG(ServerPlayer *player, int card_id){
         discard_pile->prepend(card_id);
         setCardMapping(card_id, NULL, Player::DiscardPile);
         broadcastInvoke("takeAG", QString(".:%1").arg(card_id));
+        setCardFlag(card_id, "-visible");
     }
 }
 
