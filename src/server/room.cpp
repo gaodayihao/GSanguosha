@@ -3027,11 +3027,11 @@ void Room::moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place d
 void Room::moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place dstPlace, const CardMoveReason &reason,
                       bool forceMoveVisible, bool ignoreChanged)
 {
-    bool setfalg = forceMoveVisible && (dstPlace == Player::Hand);
+    bool isKnown = forceMoveVisible && (dstPlace == Player::Hand);
     CardsMoveStruct move;
     if(card->isVirtualCard())
     {
-        if(setfalg)
+        if(isKnown)
         {
             foreach(int card_id, card->getSubcards())
             {
@@ -3045,7 +3045,7 @@ void Room::moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place d
     }
     else
     {
-        if(setfalg)
+        if(isKnown)
             setCardFlag(card->getId(), "visible");
         move.card_ids.append(card->getId());
     }

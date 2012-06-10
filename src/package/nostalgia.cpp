@@ -575,10 +575,6 @@ public:
         zhonghui->gainMark("@wake");
         room->setPlayerProperty(zhonghui, "maxhp", zhonghui->getMaxHp() + 1);
 
-        RecoverStruct recover;
-        recover.who = zhonghui;
-        room->recover(zhonghui, recover);
-
         room->acquireSkill(zhonghui, "nosyexin");
         room->detachSkillFromPlayer(zhonghui, "noszhenggong");
         room->detachSkillFromPlayer(zhonghui, "nosquanji");
