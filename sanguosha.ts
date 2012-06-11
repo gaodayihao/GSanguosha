@@ -1639,7 +1639,7 @@
         <translation>重复技能: %1</translation>
     </message>
     <message>
-        <location filename="src/core/engine.cpp" line="415"/>
+        <location filename="src/core/engine.cpp" line="421"/>
         <source>%1 [Scenario mode]</source>
         <translation>%1 【剧情模式】</translation>
     </message>
@@ -2847,7 +2847,7 @@
         <location filename="src/server/room.cpp" line="1731"/>
         <location filename="src/server/room.cpp" line="1787"/>
         <location filename="src/server/room.cpp" line="2121"/>
-        <location filename="src/server/room.cpp" line="4334"/>
+        <location filename="src/server/room.cpp" line="4401"/>
         <source>Contestant</source>
         <translation>选手</translation>
     </message>
@@ -2898,14 +2898,14 @@
         <translation>回复的数据应该是 %1 ，而不是 %2</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="3642"/>
+        <location filename="src/server/room.cpp" line="3656"/>
         <source>Card can not parse:
  %1</source>
         <translation>卡牌字符串无法解析:
 %1</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="4333"/>
+        <location filename="src/server/room.cpp" line="4400"/>
         <source>&lt;font color=#EEB422&gt;The network delay of player &lt;b&gt;%1&lt;/b&gt; is %2 milliseconds.&lt;/font&gt;</source>
         <translation>&lt;font color=#EEB422&gt;玩家 &lt;b&gt;%1&lt;/b&gt; 的网络延迟为 %2 毫秒&lt;/font&gt;</translation>
     </message>

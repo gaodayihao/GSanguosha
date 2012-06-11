@@ -141,12 +141,12 @@ public:
 	void acquireSkill(const char *skill_name);
 	void loseSkill(const char *skill_name);
 	void loseAllSkills();
-	bool hasSkill(const char *skill_name) const;
-	bool hasLordSkill(const char *skill_name) const;
+	bool hasSkill(const char *skill_name, bool includelost = false) const;
+	bool hasLordSkill(const char *skill_name, bool includelost = false) const;
 	bool hasInnateSkill(const char *skill_name) const;
 	
 	bool loseTriggerSkills() const;
-	bool loseViewasSkills() const;
+	bool loseViewAsSkills() const;
 	bool loseProhibitSkills() const;
 	bool loseDistanceSkills() const;
 	bool loseOtherSkills() const;

@@ -134,12 +134,12 @@ public:
     void acquireSkill(const QString &skill_name);
     void loseSkill(const QString &skill_name);
     void loseAllSkills();
-    bool hasSkill(const QString &skill_name) const;
+    bool hasSkill(const QString &skill_name, bool includelost = false) const;
     bool SkillCheck(const QString &skill_name) const;
     bool hasInnateSkill(const QString &skill_name) const;
-    bool hasLordSkill(const QString &skill_name) const;
+    bool hasLordSkill(const QString &skill_name, bool includelost = false) const;
     bool loseTriggerSkills() const;
-    bool loseViewasSkills() const;
+    bool loseViewAsSkills() const;
     bool loseProhibitSkills() const;
     bool loseDistanceSkills() const;
     bool loseOtherSkills() const;

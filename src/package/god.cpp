@@ -96,7 +96,10 @@ public:
             room->playSkillEffect("wuhun", 2);
         }else
             room->playSkillEffect("wuhun", 3);
-
+        QList<ServerPlayer *> killers = room->getAllPlayers();
+        foreach(ServerPlayer *player, killers){
+            player->loseAllMarks("@nightmare");
+        }
         return false;
     }
 };

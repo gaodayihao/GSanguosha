@@ -56,20 +56,27 @@ void LeijiCard::onEffect(const CardEffectStruct &effect) const{
 }
 
 HuangtianCard::HuangtianCard(){
-    once = true;
 }
 
-void HuangtianCard::use(Room *room, ServerPlayer *, const QList<ServerPlayer *> &targets) const{
+void HuangtianCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     ServerPlayer *zhangjiao = targets.first();
     if(zhangjiao->hasLordSkill("huangtian")){
+        int invokeTimes = 0;
+        foreach(ServerPlayer *p, room->getOtherPlayers(source)){
+            if(p->hasLordSkill("huangtian") && !p->hasFlag("HuangtianInvoked"))
+                invokeTimes++;
+        }
+        if(invokeTimes == 0)
+            room->setPlayerFlag(source, "ForbidHuangtian");
+
+        room->setPlayerFlag(zhangjiao, "HuangtianInvoked");
         zhangjiao->obtainCard(this);
         room->setEmotion(zhangjiao, "good");
-        room->setPlayerFlag(zhangjiao, "huangtian_got");
     }
 }
 
 bool HuangtianCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    return targets.isEmpty() && !to_select->hasFlag("huangtian_got") && to_select->hasLordSkill("huangtian") && to_select != Self;
+    return targets.isEmpty() && !to_select->hasFlag("HuangtianInvoked") && to_select->hasLordSkill("huangtian") && to_select != Self;
 }
 
 class GuidaoViewAsSkill:public OneCardViewAsSkill{
@@ -175,8 +182,7 @@ public:
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
-        return player->usedTimes("HuangtianCard") < player->getMark("huangtianTimes")
-                && player->getKingdom() == "qun";
+        return !player->hasFlag("ForbidHuangtian") && player->getKingdom() == "qun";
     }
 
     virtual bool viewFilter(const CardItem *to_select) const{
@@ -203,28 +209,14 @@ public:
     }
 
     virtual bool onPhaseChange(ServerPlayer *target) const{
-        Player::Phase phase = target->getPhase();
-        if(phase != Player::RoundStart && phase != Player::NotActive)
-            return false;
+        if(target->getPhase() == Player::NotActive)
+        {
+            Room *room = target->getRoom();
 
-        Room *room = target->getRoom();
-        if(phase == Player::RoundStart)
-        {
-            int huangtianTimes = 0;
             foreach(ServerPlayer *other, room->getOtherPlayers(target))
             {
-                if(other->hasLordSkill("huangtian"))
-                    huangtianTimes++;
-            }
-            room->setPlayerMark(target, "huangtianTimes", huangtianTimes);
-        }
-        else
-        {
-            room->setPlayerMark(target, "huangtianTimes", 0);
-            foreach(ServerPlayer *other, room->getOtherPlayers(target))
-            {
-                if(other->hasFlag("huangtian_got"))
-                    room->setPlayerFlag(other, "-huangtian_got");
+                if(other->hasFlag("HuangtianInvoked"))
+                    room->setPlayerFlag(other, "-HuangtianInvoked");
             }
         }
         return false;

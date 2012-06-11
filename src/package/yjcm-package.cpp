@@ -46,7 +46,7 @@ public:
 class Luoying: public TriggerSkill{
 public:
     Luoying():TriggerSkill("luoying"){
-        events << CardDiscarded << CardUsed << FinishJudge;
+        events << CardDiscarded << CardUsed << FinishJudge << CardGotOnePiece;
         frequency = Frequent;
         default_choice = "no";
     }
@@ -56,7 +56,7 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return ! target->hasSkill(objectName());
+        return target && !target->hasSkill(objectName());
     }
 
     QList<const Card *> getClubs(const Card *card) const{
@@ -76,6 +76,15 @@ public:
         }
 
         return clubs;
+    }
+
+    ServerPlayer* findcaozhi(Room *room) const{
+        foreach(ServerPlayer *player, room->getAllPlayers()){
+            if(player->hasSkill("luoying"))
+                return player;
+        }
+
+        return NULL;
     }
 
     virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *player, QVariant &data) const{
@@ -99,9 +108,24 @@ public:
             if(room->getCardPlace(judge->card->getEffectiveId()) == Player::DiscardPile
                && judge->card->getSuit() == Card::Club)
                clubs << judge->card;
+            else
+                return false;
+        }else if(event == CardGotOnePiece){
+            CardMoveStar move = data.value<CardMoveStar>();
+            if(move->to_place == Player::DiscardPile)
+            {
+                CardMoveReason reason = move->reason;
+                const Card * card = Sanguosha->getCard(move->card_id);
+                if(reason.m_reason == CardMoveReason::S_REASON_CHANGE_EQUIP && card->getSuit() == Card::Club)
+                    clubs << card;
+                else
+                    return false;
+            }
+            else
+                return false;
         }
 
-        ServerPlayer *caozhi = room->findPlayerBySkillName(objectName());
+        ServerPlayer *caozhi = findcaozhi(room);
         foreach(const Card* card, clubs)
             if(card->objectName() == "shit")
                 if(caozhi && room->askForChoice(caozhi, objectName(), "yes+no") == "no")

@@ -796,7 +796,7 @@ void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
             if (source->isDead()){
                 if(killer->isAlive() && killer->getWeapon()){
                     int card_id = weapon->getId();
-                    room->throwCard(card_id, source);
+                    room->throwCard(card_id, killer);
                 }
             }
             else
@@ -806,7 +806,7 @@ void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
                 }
             }
         }
-        if (source->isDead()){
+        else if (source->isDead()){
             if (killer->isAlive()){
                 if(slash){
                     CardUseStruct use;
@@ -818,13 +818,22 @@ void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
                 else{
                     if(killer->getWeapon()){
                         int card_id = weapon->getId();
-                        room->throwCard(card_id, source);
+                        room->throwCard(card_id, killer);
                     }
                 }
             }
         }
         else{
             if(killer->isDead()) ;
+            else if(!killer->getWeapon()){
+                if(slash){
+                    CardUseStruct use;
+                    use.card = slash;
+                    use.from = killer;
+                    use.to = victims;
+                    room->useCard(use);
+                }
+            }
             else{
                 if(slash){
                     CardUseStruct use;

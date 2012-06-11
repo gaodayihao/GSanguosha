@@ -282,7 +282,7 @@ bool Player::SkillCheck(const QString &skill_name) const{
     if(skill->inherits("TriggerSkill"))
         return !loseTriggerSkills();
     else if(skill->inherits("ViewAsSkill"))
-        return !loseViewasSkills();
+        return !loseViewAsSkills();
     else if(skill->inherits("ProhibitSkill"))
         return !loseProhibitSkills();
     else if(skill->inherits("DistanceSkill"))
@@ -291,9 +291,9 @@ bool Player::SkillCheck(const QString &skill_name) const{
         return !loseOtherSkills();
 }
 
-bool Player::hasSkill(const QString &skill_name) const{
+bool Player::hasSkill(const QString &skill_name, bool includelost) const{
     if(hasInnateSkill(skill_name) || acquired_skills.contains(skill_name))
-        return SkillCheck(skill_name);
+        return SkillCheck(skill_name) || includelost;
     else
         return false;
 }
@@ -308,8 +308,8 @@ bool Player::hasInnateSkill(const QString &skill_name) const{
     return false;
 }
 
-bool Player::hasLordSkill(const QString &skill_name) const{
-    if(!SkillCheck(skill_name))
+bool Player::hasLordSkill(const QString &skill_name, bool includelost) const{
+    if(!SkillCheck(skill_name) && !includelost)
         return false;
 
     if(acquired_skills.contains(skill_name))
@@ -336,7 +336,7 @@ bool Player::loseTriggerSkills() const{
     return (getMark("@duanchang") + getMark("@huoshui") + getMark("@qingcheng1")) > 0;
 }
 
-bool Player::loseViewasSkills() const{
+bool Player::loseViewAsSkills() const{
     return (getMark("@duanchang") + getMark("@huoshui") + getMark("@qingcheng2")) > 0;
 }
 

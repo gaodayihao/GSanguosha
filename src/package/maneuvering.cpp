@@ -249,23 +249,44 @@ Vine::Vine(Suit suit, int number):Armor(suit, number){
 class SilverLionSkill: public ArmorSkill{
 public:
     SilverLionSkill():ArmorSkill("silver_lion"){
-        events << Predamaged;
+        events << Predamaged << CardLostOnePiece;
     }
 
-    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
-        DamageStruct damage = data.value<DamageStruct>();
-        if(damage.damage > 1){
-            LogMessage log;
-            log.type = "#SilverLion";
-            log.from = player;
-            log.arg = QString::number(damage.damage);
-            log.arg2 = objectName();
-            room->sendLog(log);
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target && target->isAlive() && target->getMark("qinggang") == 0;
+    }
 
-            damage.damage = 1;
-            data = QVariant::fromValue(damage);
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
+        if(event == Predamaged && ArmorSkill::triggerable(player))
+        {
+            DamageStruct damage = data.value<DamageStruct>();
+            if(damage.damage > 1){
+                LogMessage log;
+                log.type = "#SilverLion";
+                log.from = player;
+                log.arg = QString::number(damage.damage);
+                log.arg2 = objectName();
+                room->sendLog(log);
 
-            room->setEmotion(player, QString("armor/%1").arg(objectName()));
+                damage.damage = 1;
+                data = QVariant::fromValue(damage);
+
+                room->setEmotion(player, QString("armor/%1").arg(objectName()));
+            }
+        }else if(event == CardLostOnePiece && player->getMark("SilverLionUninstall") > 0)
+        {
+            CardMoveStar move = data.value<CardMoveStar>();
+            const Card *lion = Sanguosha->getCard(move->card_id);
+            if(player->isAlive() && player->getMark("qinggang") == 0&& move->from_place == Player::Equip
+                    && player->getMark("SilverLionUninstall") > 0  && lion->inherits("SilverLion"))
+            {
+                room->setPlayerMark(player, "SilverLionUninstall", 0);
+                RecoverStruct recover;
+                recover.card = lion;
+                if(player->isWounded())
+                    player->getRoom()->setEmotion(player, QString("armor/%1").arg(objectName()));
+                room->recover(player, recover);
+            }
         }
 
         return false;
@@ -279,11 +300,7 @@ SilverLion::SilverLion(Suit suit, int number):Armor(suit, number){
 
 void SilverLion::onUninstall(ServerPlayer *player) const{
     if(player->isAlive() && player->getMark("qinggang") == 0){
-        RecoverStruct recover;
-        recover.card = this;
-        if(player->isWounded())
-            player->getRoom()->setEmotion(player, QString("armor/%1").arg(objectName()));
-        player->getRoom()->recover(player, recover);
+        player->getRoom()->setPlayerMark(player, "SilverLionUninstall", 1);
     }
 }
 

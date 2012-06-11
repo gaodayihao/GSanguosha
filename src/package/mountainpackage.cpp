@@ -526,13 +526,22 @@ ZhibaCard::ZhibaCard(){
 
 bool ZhibaCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
     return targets.isEmpty() && to_select->hasLordSkill("sunce_zhiba")
-            && !to_select->hasFlag("zhiba_pindian")
+            && !to_select->hasFlag("ZhibaInvoked")
             && to_select != Self && !to_select->isKongcheng();
 }
 
 void ZhibaCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     ServerPlayer *sunce = targets.first();
-    room->setPlayerFlag(sunce, "zhiba_pindian");
+    room->setPlayerFlag(sunce, "ZhibaInvoked");
+    int invokeTimes = 0;
+    foreach(ServerPlayer *p, room->getOtherPlayers(source)){
+        if(p->hasLordSkill("sunce_zhiba") && !p->hasFlag("ZhibaInvoked")){
+            invokeTimes++;
+        }
+    }
+    if(invokeTimes == 0)
+        room->setPlayerFlag(source, "ForbidZhiba");
+
     if(sunce->getMark("hunzi") > 0 &&
        room->askForChoice(sunce, "zhiba_pindian", "accept+reject") == "reject")
     {
@@ -551,8 +560,7 @@ public:
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
-        return player->usedTimes("ZhibaCard") < player->getMark("zhibaTimes")
-                && player->getKingdom() == "wu" && !player->isKongcheng();
+        return !player->hasFlag("ForbidZhiba") && player->getKingdom() == "wu" && !player->isKongcheng();
     }
 
     virtual bool viewFilter(const CardItem *to_select) const{
@@ -578,28 +586,14 @@ public:
     }
 
     virtual bool onPhaseChange(ServerPlayer *target) const{
-        Player::Phase phase = target->getPhase();
-        if(phase != Player::RoundStart && phase != Player::NotActive)
-            return false;
+        if(target->getPhase() == Player::NotActive)
+        {
+            Room *room = target->getRoom();
 
-        Room *room = target->getRoom();
-        if(phase == Player::RoundStart)
-        {
-            int zhibaTimes = 0;
             foreach(ServerPlayer *other, room->getOtherPlayers(target))
             {
-                if(other->hasLordSkill("sunce_zhiba"))
-                    zhibaTimes++;
-            }
-            room->setPlayerMark(target, "zhibaTimes", zhibaTimes);
-        }
-        else
-        {
-            room->setPlayerMark(target, "zhibaTimes", 0);
-            foreach(ServerPlayer *other, room->getOtherPlayers(target))
-            {
-                if(other->hasFlag("zhiba_pindian"))
-                    room->setPlayerFlag(other, "-zhiba_pindian");
+                if(other->hasFlag("ZhibaInvoked"))
+                    room->setPlayerFlag(other, "-ZhibaInvoked");
             }
         }
         return false;
