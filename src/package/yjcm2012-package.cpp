@@ -487,6 +487,31 @@ public:
     }
 };
 
+class Zongshi: public MaxCardsSkill{
+public:
+    Zongshi():MaxCardsSkill("zongshi"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if(!target->hasSkill(objectName()))
+            return 0;
+
+        int extra = 0;
+        QSet<QString> kingdom_set;
+        QList<const Player *> players = target->getSiblings();
+        players.prepend(target);
+        foreach(const Player *player, players)
+        {
+            if(player->isAlive()){
+                kingdom_set << player->getKingdom();
+            }
+        }
+        extra = kingdom_set.size();
+        return extra;
+    }
+};
+
 class Shiyong: public TriggerSkill{
 public:
     Shiyong():TriggerSkill("shiyong"){
@@ -494,9 +519,7 @@ public:
         frequency = Compulsory;
     }
 
-    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
-        if (player == NULL) return false;
-
+    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if(damage.card && damage.card->inherits("Slash") &&
                 (damage.card->isRed() || damage.card->hasFlag("drank"))){
@@ -866,7 +889,7 @@ YJCM2012Package::YJCM2012Package():Package("YJCM2012"){
 
     General *liubiao = new General(this, "liubiao", "qun", 4);
     liubiao->addSkill(new Zishou);
-    liubiao->addSkill(new Skill("zongshi", Skill::Compulsory));
+    liubiao->addSkill(new Zongshi);
 
     General *huaxiong = new General(this, "huaxiong", "qun", 6);
     huaxiong->addSkill(new Shiyong);

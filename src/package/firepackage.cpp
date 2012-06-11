@@ -231,6 +231,25 @@ public:
     }
 };
 
+class Xueyi: public MaxCardsSkill{
+public:
+    Xueyi():MaxCardsSkill("xueyi$"){
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if(!target->hasLordSkill(objectName()))
+            return 0;
+
+        int extra = 0;
+        QList<const Player *> players = target->getSiblings();
+        foreach(const Player *player, players){
+            if(player->isAlive() && player->getKingdom() == "qun")
+                extra += 2;
+        }
+        return extra;
+    }
+};
+
 class ShuangxiongViewAsSkill: public OneCardViewAsSkill{
 public:
     ShuangxiongViewAsSkill():OneCardViewAsSkill("shuangxiong"){
@@ -559,7 +578,7 @@ FirePackage::FirePackage()
 
     yuanshao = new General(this, "yuanshao$", "qun");
     yuanshao->addSkill(new Luanji);
-    yuanshao->addSkill(new Skill("xueyi$", Skill::Compulsory));
+    yuanshao->addSkill(new Xueyi);
 
     yanliangwenchou = new General(this, "yanliangwenchou", "qun");
     yanliangwenchou->addSkill(new Shuangxiong);

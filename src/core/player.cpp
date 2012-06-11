@@ -274,9 +274,28 @@ bool Player::isLord() const{
     return getRole() == "lord";
 }
 
+bool Player::SkillCheck(const QString &skill_name) const{
+    const Skill *skill = Sanguosha->getSkill(skill_name);
+    if(skill == NULL)
+        return false;
+
+    if(skill->inherits("TriggerSkill"))
+        return !loseTriggerSkills();
+    else if(skill->inherits("ViewAsSkill"))
+        return !loseViewasSkills();
+    else if(skill->inherits("ProhibitSkill"))
+        return !loseProhibitSkills();
+    else if(skill->inherits("DistanceSkill"))
+        return !loseDistanceSkills();
+    else
+        return !loseOtherSkills();
+}
+
 bool Player::hasSkill(const QString &skill_name) const{
-    return (hasInnateSkill(skill_name)
-            || acquired_skills.contains(skill_name)) && getMark("@duanchang") < 1;
+    if(hasInnateSkill(skill_name) || acquired_skills.contains(skill_name))
+        return SkillCheck(skill_name);
+    else
+        return false;
 }
 
 bool Player::hasInnateSkill(const QString &skill_name) const{
@@ -290,7 +309,7 @@ bool Player::hasInnateSkill(const QString &skill_name) const{
 }
 
 bool Player::hasLordSkill(const QString &skill_name) const{
-    if(getMark("@duanchang") > 0)
+    if(!SkillCheck(skill_name))
         return false;
 
     if(acquired_skills.contains(skill_name))
@@ -311,6 +330,26 @@ bool Player::hasLordSkill(const QString &skill_name) const{
     }
 
     return false;
+}
+
+bool Player::loseTriggerSkills() const{
+    return (getMark("@duanchang") + getMark("@huoshui") + getMark("@qingcheng1")) > 0;
+}
+
+bool Player::loseViewasSkills() const{
+    return (getMark("@duanchang") + getMark("@huoshui") + getMark("@qingcheng2")) > 0;
+}
+
+bool Player::loseProhibitSkills() const{
+    return (getMark("@duanchang") + getMark("@huoshui") + getMark("@qingcheng3")) > 0;
+}
+
+bool Player::loseDistanceSkills() const{
+    return (getMark("@duanchang") + getMark("@huoshui") + getMark("@qingcheng4")) > 0;
+}
+
+bool Player::loseOtherSkills() const{
+    return getMark("@duanchang") > 0;
 }
 
 void Player::addSkill(const QString &skill_name){
@@ -476,48 +515,15 @@ void Player::setFaceUp(bool face_up){
 }
 
 int Player::getMaxCards() const{
-    int extra = 0, total = 0;
+    int rule = 0, total = 0, extra = 0;
     if(Config.MaxHpScheme == 2 && general2){
         total = general->getMaxHp() + general2->getMaxHp();
         if(total % 2 != 0)
-            extra = 1;
+            rule = 1;
     }
+    extra += Sanguosha->correctMaxCards(this);
 
-    int juejing = hasSkill("juejing") ? 2 : 0;
-
-    int xueyi = 0;
-    if(hasLordSkill("xueyi")){
-        QList<const Player *> players = getSiblings();
-        foreach(const Player *player, players){
-            if(player->isAlive() && player->getKingdom() == "qun")
-                xueyi += 2;
-        }
-    }
-
-    int shenwei = 0;
-    if(hasSkill("shenwei"))
-        shenwei = 2;
-
-    int zongshi = 0;
-    if(hasSkill("zongshi")){
-        QSet<QString> kingdom_set;
-        if(parent()){
-            foreach(const Player *player, parent()->findChildren<const Player *>()){
-                if(player->isAlive()){
-                    kingdom_set << player->getKingdom();
-                }
-            }
-        }
-        zongshi = kingdom_set.size();
-    }
-
-    int quanji = 0;
-    if(hasSkill("quanji"))
-        quanji = getPile("power").length();
-
-    total = qMax(hp,0) + extra + juejing + xueyi + shenwei + zongshi + quanji;
-
-    return total;
+    return (qMax(hp,0) + rule + extra);
 }
 
 QString Player::getKingdom() const{

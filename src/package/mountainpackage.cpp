@@ -253,19 +253,34 @@ public:
             room->sendLog(log);
             room->playSkillEffect(objectName());
 
-            QList<const Skill *> skills = damage->from->getVisibleSkillList();
+            /*QList<const Skill *> skills = damage->from->getVisibleSkillList();
             foreach(const Skill *skill, skills){
                 if(skill->getLocation() == Skill::Right)
                     room->detachSkillFromPlayer(damage->from, skill->objectName());
-            }
+            }*/
+
             damage->from->clearPrivatePiles();
-            if(damage->from->getHp() <= 0 && damage->from->isAlive())
-                room->enterDying(damage->from, NULL);
+            damage->from->throwAllMarks();
+            if(damage->from->hasSkill("qixing")){
+                QList<ServerPlayer *> players = room->getAllPlayers();
+                foreach(ServerPlayer *player, players){
+                    player->loseAllMarks("@gale");
+                    player->loseAllMarks("@fog");
+                }
+            }else if(damage->from->hasSkill("wuhun")){
+                QList<ServerPlayer *> players = room->getAllPlayers();
+                foreach(ServerPlayer *player, players){
+                    player->loseAllMarks("@nightmare");
+                }
+            }
             room->setPlayerMark(damage->from, "@duanchang", 1);
             room->setPlayerFlag(damage->from, "willclearCardLock");
             room->setPlayerFlag(damage->from, "willclearFixDistance");
 
-            //room->resetAI(damage->from);
+            if(damage->from->getHp() <= 0 && damage->from->isAlive())
+                room->enterDying(damage->from, NULL);
+
+            room->resetAI(damage->from);
         }
 
         return false;

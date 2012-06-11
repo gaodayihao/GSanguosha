@@ -2026,7 +2026,7 @@
     <message>
         <location filename="src/dialog/mainwindow.ui" line="282"/>
         <source>Acknowledgement</source>
-        <translation>鸣谢</translation>
+        <translation>声明·鸣谢</translation>
     </message>
     <message>
         <location filename="src/dialog/mainwindow.ui" line="290"/>
@@ -2672,12 +2672,12 @@
         <translation>%1 / %2</translation>
     </message>
     <message>
-        <location filename="src/ui/photo.cpp" line="635"/>
+        <location filename="src/ui/photo.cpp" line="636"/>
         <source>Hide</source>
         <translation>不可见</translation>
     </message>
     <message>
-        <location filename="src/ui/photo.cpp" line="647"/>
+        <location filename="src/ui/photo.cpp" line="648"/>
         <source>Multiple</source>
         <translation>多个牌堆</translation>
     </message>
@@ -2834,46 +2834,46 @@
 <context>
     <name>Room</name>
     <message>
-        <location filename="src/server/room.cpp" line="1708"/>
+        <location filename="src/server/room.cpp" line="1711"/>
         <source>disconnected</source>
         <translation>断开</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="2041"/>
+        <location filename="src/server/room.cpp" line="2044"/>
         <source>Computer %1</source>
         <translation>电脑 %1</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1728"/>
-        <location filename="src/server/room.cpp" line="1784"/>
-        <location filename="src/server/room.cpp" line="2118"/>
-        <location filename="src/server/room.cpp" line="4319"/>
+        <location filename="src/server/room.cpp" line="1731"/>
+        <location filename="src/server/room.cpp" line="1787"/>
+        <location filename="src/server/room.cpp" line="2121"/>
+        <location filename="src/server/room.cpp" line="4334"/>
         <source>Contestant</source>
         <translation>选手</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="1729"/>
-        <location filename="src/server/room.cpp" line="1785"/>
+        <location filename="src/server/room.cpp" line="1732"/>
+        <location filename="src/server/room.cpp" line="1788"/>
         <source>&lt;font color=#FFFFFF&gt;Player &lt;b&gt;%1&lt;/b&gt; left the game&lt;/font&gt;</source>
         <translation>&lt;font color=#6e6b6b&gt;玩家 %1 离开了游戏&lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="2019"/>
+        <location filename="src/server/room.cpp" line="2022"/>
         <source>%1: %2 is not invokable</source>
         <translation>%1: 不可调用的方法名 %2</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="2045"/>
+        <location filename="src/server/room.cpp" line="2048"/>
         <source>Hello, I&apos;m a robot</source>
         <translation>大家好，我是一个机器人</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="2079"/>
+        <location filename="src/server/room.cpp" line="2082"/>
         <source>&lt;font color=#EEB422&gt;Game will auto start in 15 sec later&lt;/font&gt;</source>
         <translation>&lt;font color=red&gt;游戏将在15秒后自动开始&lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="2117"/>
+        <location filename="src/server/room.cpp" line="2120"/>
         <source>&lt;font color=#EEB422&gt;Player &lt;b&gt;%1&lt;/b&gt; joined the game&lt;/font&gt;</source>
         <translation>&lt;font color=#EEB422&gt;玩家 &lt;b&gt;%1&lt;/b&gt; 加入了游戏&lt;/font&gt;</translation>
     </message>
@@ -2898,14 +2898,14 @@
         <translation>回复的数据应该是 %1 ，而不是 %2</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="3628"/>
+        <location filename="src/server/room.cpp" line="3642"/>
         <source>Card can not parse:
  %1</source>
         <translation>卡牌字符串无法解析:
 %1</translation>
     </message>
     <message>
-        <location filename="src/server/room.cpp" line="4318"/>
+        <location filename="src/server/room.cpp" line="4333"/>
         <source>&lt;font color=#EEB422&gt;The network delay of player &lt;b&gt;%1&lt;/b&gt; is %2 milliseconds.&lt;/font&gt;</source>
         <translation>&lt;font color=#EEB422&gt;玩家 &lt;b&gt;%1&lt;/b&gt; 的网络延迟为 %2 毫秒&lt;/font&gt;</translation>
     </message>

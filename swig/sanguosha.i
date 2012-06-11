@@ -144,6 +144,12 @@ public:
 	bool hasSkill(const char *skill_name) const;
 	bool hasLordSkill(const char *skill_name) const;
 	bool hasInnateSkill(const char *skill_name) const;
+	
+	bool loseTriggerSkills() const;
+	bool loseViewasSkills() const;
+	bool loseProhibitSkills() const;
+	bool loseDistanceSkills() const;
+	bool loseOtherSkills() const;
 
 	void setEquip(const EquipCard *card);
 	void removeEquip(const EquipCard *equip);
@@ -704,6 +710,7 @@ public:
 	const TriggerSkill *getTriggerSkill(const char *skill_name) const;
 	const ViewAsSkill *getViewAsSkill(const char *skill_name) const;
 	QList<const DistanceSkill *> getDistanceSkills() const;
+	QList<const MaxCardsSkill *> getMaxCardsSkills() const;
 	void addSkills(const QList<const Skill *> &skills);
 
 	int getCardCount() const;

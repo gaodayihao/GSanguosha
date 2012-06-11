@@ -434,6 +434,20 @@ public:
     }
 };
 
+class ShenweiKeep: public MaxCardsSkill{
+public:
+    ShenweiKeep():MaxCardsSkill("#shenwei"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if(target->hasSkill(objectName()))
+            return 2;
+        else
+            return 0;
+    }
+};
+
 class Danji: public PhaseChangeSkill{
 public:
     Danji():PhaseChangeSkill("danji"){
@@ -515,7 +529,9 @@ SPPackage::SPPackage()
     shenlvbu2->addSkill("wushuang");
     shenlvbu2->addSkill(new Xiuluo);
     shenlvbu2->addSkill(new Shenwei);
+    shenlvbu2->addSkill(new ShenweiKeep);
     shenlvbu2->addSkill(new Skill("shenji"));
+    related_skills.insertMulti("shenwei", "#shenwei");
 
     General *sp_guanyu = new General(this, "sp_guanyu", "wei", 4, true, true);
     sp_guanyu->addSkill("wusheng");

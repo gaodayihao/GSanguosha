@@ -1129,7 +1129,7 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return target->getPhase() == Player::NotActive;
+        return target && target->getPhase() == Player::NotActive;
     }
 
     virtual bool onPhaseChange(ServerPlayer *player) const{
@@ -1167,6 +1167,20 @@ public:
         if(player->isWounded())
             player->getRoom()->playSkillEffect(objectName());
         return n + player->getLostHp();
+    }
+};
+
+class JuejingKeep: public MaxCardsSkill{
+public:
+    JuejingKeep():MaxCardsSkill("#juejing"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if(target->hasSkill(objectName()))
+            return 2;
+        else
+            return 0;
     }
 };
 
@@ -1525,8 +1539,10 @@ GodPackage::GodPackage()
 
     General *shenzhaoyun = new General(this, "shenzhaoyun", "god", 2);
     shenzhaoyun->addSkill(new Juejing);
+    shenzhaoyun->addSkill(new JuejingKeep);
     shenzhaoyun->addSkill(new Longhun);
     shenzhaoyun->addSkill(new TransfigureSkill("longpo", "shenzhaoyun", "chudaishenzhaoyun"));
+    related_skills.insertMulti("juejing", "#juejing");
 
     General *shensimayi = new General(this, "shensimayi", "god", 4);
     shensimayi->addSkill(new Renjie);

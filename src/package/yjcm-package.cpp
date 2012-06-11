@@ -1038,6 +1038,20 @@ public:
     }
 };
 
+class QuanjiKeep: public MaxCardsSkill{
+public:
+    QuanjiKeep():MaxCardsSkill("#quanji"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if(target->hasSkill(objectName()))
+            return target->getPile("power").length();
+        else
+            return 0;
+    }
+};
+
 class Zili: public PhaseChangeSkill{
 public:
     Zili():PhaseChangeSkill("zili"){
@@ -1274,8 +1288,10 @@ YJCMPackage::YJCMPackage():Package("YJCM"){
 
     General *zhonghui = new General(this, "zhonghui", "wei");
     zhonghui->addSkill(new Quanji);
+    zhonghui->addSkill(new QuanjiKeep);
     zhonghui->addSkill(new Zili);
     zhonghui->addRelateSkill("paiyi");
+    related_skills.insertMulti("quanji", "#quanji");
 
     addMetaObject<MingceCard>();
     addMetaObject<GanluCard>();

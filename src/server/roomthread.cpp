@@ -446,8 +446,11 @@ void RoomThread::addTriggerSkill(const TriggerSkill *skill){
 
     if(skill->isVisible()){
         foreach(const Skill *skill, Sanguosha->getRelatedSkills(skill->objectName())){
-            const TriggerSkill *trigger_skill = qobject_cast<const TriggerSkill *>(skill);
-            addTriggerSkill(trigger_skill);
+            if(skill->inherits("TriggerSkill"))
+            {
+                const TriggerSkill *trigger_skill = qobject_cast<const TriggerSkill *>(skill);
+                addTriggerSkill(trigger_skill);
+            }
         }
     }
 }
