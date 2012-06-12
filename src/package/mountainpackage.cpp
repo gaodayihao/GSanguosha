@@ -971,7 +971,7 @@ public:
     }
 
     virtual int getPriority() const{
-        return -3;
+        return -4;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -984,7 +984,8 @@ public:
         {
             PlayerStar target = room->getTag("FangquanTarget").value<PlayerStar>();
             room->removeTag("FangquanTarget");
-            target->gainAnExtraTurn();
+            if(target->isAlive())
+                target->gainAnExtraTurn();
         }
 
         return false;

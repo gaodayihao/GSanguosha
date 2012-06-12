@@ -1181,7 +1181,8 @@ public:
         {
             PlayerStar target = room->getTag("LianpoInvoke").value<PlayerStar>();
             room->removeTag("LianpoInvoke");
-            target->gainAnExtraTurn();
+            if(target->isAlive())
+                target->gainAnExtraTurn();
         }
         return false;
     }
