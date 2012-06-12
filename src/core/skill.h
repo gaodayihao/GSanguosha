@@ -114,6 +114,7 @@ public:
     QList<TriggerEvent> getTriggerEvents() const;
 
     virtual int getPriority() const;
+    virtual int secondPriority() const;
     virtual bool triggerable(const ServerPlayer *target) const;
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const = 0;
 
@@ -245,6 +246,7 @@ public:
     WeaponSkill(const QString &name);
 
     virtual bool triggerable(const ServerPlayer *target) const;
+    virtual int secondPriority() const;
 };
 
 class ArmorSkill: public TriggerSkill{
@@ -254,6 +256,7 @@ public:
     ArmorSkill(const QString &name);
 
     virtual bool triggerable(const ServerPlayer *target) const;
+    virtual int secondPriority() const;
 };
 
 class MarkAssignSkill: public GameStartSkill{

@@ -253,11 +253,11 @@ public:
             room->sendLog(log);
             room->playSkillEffect(objectName());
 
-            /*QList<const Skill *> skills = damage->from->getVisibleSkillList();
+            QList<const Skill *> skills = damage->from->getVisibleSkillList();
             foreach(const Skill *skill, skills){
                 if(skill->getLocation() == Skill::Right)
                     room->detachSkillFromPlayer(damage->from, skill->objectName());
-            }*/
+            }
 
             damage->from->clearPrivatePiles();
             damage->from->throwAllMarks();
@@ -927,7 +927,7 @@ public:
             return invoked;
         }
 
-        case Player::Finish: {
+        case Player::NotActive: {
             if(liushan->hasFlag("fangquan")){
                 if(liushan->isKongcheng())
                     return false;
@@ -950,17 +950,7 @@ public:
                 room->sendLog(log);
 
                 PlayerStar p = player;
-                room->setTag("Fangquan", QVariant::fromValue(p));
-            }
-
-            break;
-        }
-
-        case Player::NotActive: {
-            PlayerStar p = room->getTag("Fangquan").value<PlayerStar>();
-            if(p){
-                room->setTag("Fangquan", QVariant());
-                p->gainAnExtraTurn(liushan);
+                room->setTag("FangquanTarget", QVariant::fromValue(p));
             }
 
             break;
@@ -968,6 +958,33 @@ public:
 
         default:
             break;
+        }
+
+        return false;
+    }
+};
+
+class FangquanTo: public PhaseChangeSkill{
+public:
+    FangquanTo():PhaseChangeSkill("#fangquan-to"){
+
+    }
+
+    virtual int getPriority() const{
+        return -3;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->getPhase() == Player::NotActive;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *liushan) const{
+        Room *room = liushan->getRoom();
+        if(!room->getTag("FangquanTarget").isNull())
+        {
+            PlayerStar target = room->getTag("FangquanTarget").value<PlayerStar>();
+            room->removeTag("FangquanTarget");
+            target->gainAnExtraTurn();
         }
 
         return false;
@@ -1297,7 +1314,10 @@ MountainPackage::MountainPackage()
     General *liushan = new General(this, "liushan$", "shu", 3);
     liushan->addSkill(new Xiangle);
     liushan->addSkill(new Fangquan);
+    liushan->addSkill(new FangquanTo);
     liushan->addSkill(new Ruoyu);
+
+    related_skills.insertMulti("fangquan", "#fangquan-to");
 
     General *jiangwei = new General(this, "jiangwei", "shu");
     jiangwei->addSkill(new Tiaoxin);

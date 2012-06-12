@@ -16,12 +16,13 @@ GameRule::GameRule(QObject *)
     // a way to do it.
     //setParent(parent);
 
-    events << GameStart << TurnStart << PhaseChange << CardUsed << CardFinished
-            << CardEffected << HpRecover << HpLost << AskForPeachesDone
-            << AskForPeaches << Death << Dying << GameOverJudge
-            << SlashHit << SlashMissed << SlashEffected << SlashProceed
-            << DamageDone << DamageComplete
-            << StartJudge << FinishJudge << Pindian;
+    events << GameStart << TurnStart << PhaseChange
+           << CardUsed << CardEffected << CardFinished
+           << HpRecover << HpLost << AskForPeachesDone
+           << AskForPeaches << Death << Dying << GameOverJudge
+           << SlashHit << SlashMissed << SlashEffected << SlashProceed
+           << DamageDone << DamageComplete
+           << StartJudge << FinishJudge << Pindian;
 }
 
 bool GameRule::triggerable(const ServerPlayer *) const{
@@ -197,7 +198,9 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
             setGameProcess(room);
             room->setTag("FirstRound", true);
             room->drawCards(room->getPlayers(), 4, false);
+
         }
+
         return false;
     }
 
@@ -207,7 +210,9 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
             if(!player->faceUp())
                 player->turnOver();
             else if(player->isAlive())
+            {
                 player->play();
+            }
 
             break;
         }
@@ -1223,7 +1228,9 @@ bool HulaoPassMode::trigger(TriggerEvent event, Room* room, ServerPlayer *player
                 if(!player->faceUp())
                     player->turnOver();
                 else
+                {
                     player->play();
+                }
             }else{
                 if(player->isDead()){
                     if(player->getHp() + player->getHandcardNum() == 6){
@@ -1254,7 +1261,9 @@ bool HulaoPassMode::trigger(TriggerEvent event, Room* room, ServerPlayer *player
                 }else if(!player->faceUp())
                     player->turnOver();
                 else
+                {
                     player->play();
+                }
             }
 
             return false;

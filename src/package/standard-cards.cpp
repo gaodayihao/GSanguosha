@@ -524,7 +524,7 @@ public:
             else
                 horse_type = horses.first();
 
-            room->setEmotion(damage.to, QString("weapon/%1").arg(objectName()));
+            room->setEmotion(damage.from, QString("weapon/%1").arg(objectName()));
 
             if(horse_type == "dhorse")
                 room->throwCard(damage.to->getDefensiveHorse(), damage.to);

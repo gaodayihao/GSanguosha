@@ -217,6 +217,10 @@ int TriggerSkill::getPriority() const{
     }
 }
 
+int TriggerSkill::secondPriority() const{
+    return 1;
+}
+
 bool TriggerSkill::triggerable(const ServerPlayer *target) const{
     return target != NULL && target->isAlive() && target->hasSkill(objectName());
 }
@@ -402,6 +406,10 @@ bool WeaponSkill::triggerable(const ServerPlayer *target) const{
     return target->hasWeapon(objectName());
 }
 
+int WeaponSkill::secondPriority() const{
+    return 0;
+}
+
 ArmorSkill::ArmorSkill(const QString &name)
     :TriggerSkill(name)
 {
@@ -411,6 +419,10 @@ ArmorSkill::ArmorSkill(const QString &name)
 bool ArmorSkill::triggerable(const ServerPlayer *target) const{
     if (target == NULL) return false;
     return target->hasArmorEffect(objectName()) && target->getArmor()->getSkill() == this;
+}
+
+int ArmorSkill::secondPriority() const{
+    return 0;
 }
 
 MarkAssignSkill::MarkAssignSkill(const QString &mark, int n)

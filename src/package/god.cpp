@@ -1154,8 +1154,35 @@ public:
         log.arg2 = objectName();
         room->sendLog(log);
         room->playSkillEffect(objectName());
-        shensimayi->gainAnExtraTurn(player);
 
+        PlayerStar p = shensimayi;
+        room->setTag("LianpoInvoke", QVariant::fromValue(p));
+
+        return false;
+    }
+};
+
+class LianpoGet: public PhaseChangeSkill{
+public:
+    LianpoGet():PhaseChangeSkill("#lianpo-get"){
+    }
+
+    virtual int getPriority() const{
+        return -3;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target && target->getPhase() == Player::NotActive;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *player) const{
+        Room *room = player->getRoom();
+        if(!room->getTag("LianpoInvoke").isNull())
+        {
+            PlayerStar target = room->getTag("LianpoInvoke").value<PlayerStar>();
+            room->removeTag("LianpoInvoke");
+            target->gainAnExtraTurn();
+        }
         return false;
     }
 };
@@ -1552,11 +1579,13 @@ GodPackage::GodPackage()
     shensimayi->addSkill(new Baiyin);
     shensimayi->addSkill(new Lianpo);
     shensimayi->addSkill(new LianpoCount);
+    shensimayi->addSkill(new LianpoGet);
 
     shensimayi->addRelateSkill("jilve");
 
     related_skills.insertMulti("jilve", "#jilve-clear");
     related_skills.insertMulti("lianpo", "#lianpo-count");
+    related_skills.insertMulti("lianpo", "#lianpo-get");
 
     addMetaObject<GongxinCard>();
     addMetaObject<GreatYeyanCard>();
