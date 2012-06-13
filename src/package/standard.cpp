@@ -206,7 +206,8 @@ DelayedTrick::DelayedTrick(Suit suit, int number, bool movable)
 
 void DelayedTrick::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     ServerPlayer *target = targets.value(0, source);
-    room->moveCardTo(this, target, Player::Judging, true);
+    CardMoveReason reason(CardMoveReason::S_REASON_TRANSFER, source->objectName(), QString(), this->getSkillName(), QString());
+    room->moveCardTo(this, target, Player::Judging, reason, true);
 }
 
 QString DelayedTrick::getSubtype() const{
@@ -253,7 +254,8 @@ void DelayedTrick::onNullified(ServerPlayer *target) const{
             if(room->isProhibited(target, player, this))
                 continue;
 
-            room->moveCardTo(this, player, Player::Judging, true);
+            CardMoveReason reason(CardMoveReason::S_REASON_TRANSFER, target->objectName(), QString(), this->getSkillName(), QString());
+            room->moveCardTo(this, player, Player::Judging, reason, true);
             break;
         }
     }

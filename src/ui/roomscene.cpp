@@ -1250,7 +1250,7 @@ void RoomScene::toggleDiscards(){
 
 PlayerCardContainer* RoomScene::_getPlayerCardContainer(Player::Place place, Player* player)
 {
-    if (place == Player::DiscardPile)
+    if (place == Player::DiscardPile || Player::PlaceTakeoff)
         return m_discardPile;
     else if (place == Player::DrawPile)
         return m_drawPile;
@@ -1278,7 +1278,7 @@ void RoomScene::loseCards(int moveId, QList<CardsMoveStruct> card_moves)
             card->setParentItem(NULL);
         }
         _m_cardsMoveStash[moveId].append(cards);
-        keepLoseCardLog(movement);
+        keepMoveCardLog(movement);
     }
 }
 
@@ -1321,6 +1321,14 @@ QString RoomScene::_translateMovementReason(const CardMoveReason &reason)
         result.append(Sanguosha->translate("recast"));
     else if (reason.m_reason == CardMoveReason::S_REASON_PINDIAN)
         result.append(Sanguosha->translate("pindian"));
+    else if (reason.m_reason == CardMoveReason::S_REASON_PUT)
+        result.append(Sanguosha->translate("put"));
+    else{
+        if (reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE && reason.m_playerId.isEmpty())
+            result.append(Sanguosha->translate("judgedone"));
+        else
+            result.append(Sanguosha->translate("rejudge"));
+    }
     return result;
     //QString("%1:%2:%3:%4").arg(movement.reason.m_reason)
     //            .arg(movement.reason.m_skillName).arg(movement.reason.m_eventName
@@ -1349,7 +1357,7 @@ void RoomScene::getCards(int moveId, QList<CardsMoveStruct> card_moves)
         }
         bringToFront(to_container);
         to_container->addCardItems(cards, movement.to_place);
-        keepGetCardLog(movement);
+        keepMoveCardLog(movement);
         if (movement.from == Self || movement.to == Self)
             doAdjust = true;
     }
@@ -1358,11 +1366,7 @@ void RoomScene::getCards(int moveId, QList<CardsMoveStruct> card_moves)
     _m_cardsMoveStash[moveId].clear();
 }
 
-void RoomScene::keepLoseCardLog(const CardsMoveStruct &move)
-{
-}
-
-void RoomScene::keepGetCardLog(const CardsMoveStruct &move)
+void RoomScene::keepMoveCardLog(const CardsMoveStruct &move)
 {
     if (move.card_ids.isEmpty()) return;
     //DrawNCards

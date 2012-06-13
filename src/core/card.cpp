@@ -460,6 +460,9 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     thread->trigger(CardonUse, room, player, data);
     CardUseStruct use = data.value<CardUseStruct>();
 
+    CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
+    if (card_use.to.size() == 1) reason.m_targetId = card_use.to.first()->objectName();
+    room->moveCardTo(this, NULL, Player::PlaceTakeoff, reason, true);
     LogMessage log;
     log.from = use.from;
     log.to = use.to;
@@ -483,7 +486,6 @@ void Card::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &ta
             room->moveCardTo(this, NULL, Player::DiscardPile, reason);
         }
     }
-
     if(targets.length() == 1){
         room->cardEffect(this, source, targets.first());
     }else{

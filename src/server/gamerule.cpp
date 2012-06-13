@@ -17,12 +17,13 @@ GameRule::GameRule(QObject *)
     //setParent(parent);
 
     events << GameStart << TurnStart << PhaseChange
-           << CardUsed << CardEffected << CardFinished
-           << HpRecover << HpLost << AskForPeachesDone
-           << AskForPeaches << Death << Dying << GameOverJudge
-           << SlashHit << SlashMissed << SlashEffected << SlashProceed
+           << CardUsed << TargetConfirm << TargetConfirmed << CardEffected << CardFinished
+           << HpRecover << HpLost
            << DamageDone << DamageComplete
-           << StartJudge << FinishJudge << Pindian;
+           << AskForPeaches<< AskForPeachesDone << Dying << Death << GameOverJudge
+           << SlashProceed << SlashEffected << SlashHit << SlashMissed
+           << StartJudge << FinishJudge
+           << Pindian;
 }
 
 bool GameRule::triggerable(const ServerPlayer *) const{
@@ -223,12 +224,40 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
                 CardUseStruct card_use = data.value<CardUseStruct>();
                 const Card *card = card_use.card;
 
+                RoomThread *thread = room->getThread();
+                bool targetfix = false;
+                QList<int> changelist;
                 card_use.from->playCardEffect(card);
+                if(card_use.from && !card_use.to.empty()){
+                    foreach(ServerPlayer *to, card_use.to){
+                        if(thread->trigger(TargetConfirm, room, to, data)){
+                            targetfix = true;
+                            changelist << card_use.to.indexOf(to);
+                        }
+                    }
+                }
+                if(targetfix){
+                    card_use = data.value<CardUseStruct>();
+                    foreach(int tmp, changelist){
+                        thread->trigger(TargetConfirm, room, card_use.to.at(tmp), data);
+                    }
+                }
+                foreach(ServerPlayer *p, room->getAlivePlayers())
+                    thread->trigger(TargetConfirmed, room, p, data);
+
+                card_use = data.value<CardUseStruct>();
                 card->use(room, card_use.from, card_use.to);
             }
 
             break;
         }
+
+    case TargetConfirm:{
+        break;
+    }
+    case TargetConfirmed:{
+        break;
+    }
 
     case CardFinished: {
             CardUseStruct use = data.value<CardUseStruct>();
@@ -538,8 +567,8 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
             JudgeStar judge = data.value<JudgeStar>();
             judge->card = Sanguosha->getCard(card_id);
-            room->moveCardTo(judge->card, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_JUDGE, judge->who->objectName(), QString(), QString(), judge->reason));
+            room->moveCardTo(judge->card, NULL, Player::PlaceTakeoff,
+                             CardMoveReason(CardMoveReason::S_REASON_JUDGE, judge->who->objectName(), QString(), QString(), judge->reason), true);
 
             LogMessage log;
             log.type = "$InitialJudge";
@@ -559,8 +588,10 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
     case FinishJudge:{
             JudgeStar judge = data.value<JudgeStar>();
-            CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, QString());
-            room->throwCard(judge->card, reason, NULL);
+            if(room->getCardPlace(judge->card->getEffectiveId()) == Player::PlaceTakeoff){
+                CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, QString());
+                room->throwCard(judge->card, reason, NULL);
+            }
 
             LogMessage log;
             log.type = "$JudgeResult";
@@ -982,9 +1013,8 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
             if(judgeCard->inherits("HeroCard"))
                 room->moveCardTo(judgeCard, NULL, Player::DiscardPile);
             else
-                room->moveCardTo(judge->card, NULL, Player::DiscardPile,
-                                 CardMoveReason(CardMoveReason::S_REASON_JUDGE,
-                                                judge->who->objectName(), QString(), QString(), judge->reason));
+                room->moveCardTo(judge->card, NULL, Player::PlaceTakeoff,
+                                 CardMoveReason(CardMoveReason::S_REASON_JUDGE, judge->who->objectName(), QString(), QString(), judge->reason), true);
             room->getThread()->delay(delay);
         }while(judge->card->inherits("HeroCard"));
 
@@ -1280,7 +1310,7 @@ BasaraMode::BasaraMode(QObject *parent)
 {
     setObjectName("basara_mode");
 
-    events << CardLostOnePiece << Predamaged;
+    events << CardLostOnePiece << DamagedProceed;
 
     skill_mark["niepan"] = "@nirvana";
     skill_mark["smallyeyan"] = "@flame";
@@ -1443,7 +1473,7 @@ bool BasaraMode::trigger(TriggerEvent event, Room* room, ServerPlayer *player, Q
 
         break;
     }
-    case Predamaged:{
+    case DamagedProceed:{
         playerShowed(player);
         break;
     }

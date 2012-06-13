@@ -70,7 +70,8 @@ void Settings::init(){
         banlist << "nostalgia" << "yitian" << "wisdom" << "test"
                 << "disaster"<< "ngod" << "nostal_general" << "yitian_cards"
                 << "Special3v3"
-                << "joy" << "joy_equip" ;
+                << "New3v3Card" << "joy" << "joy_equip" << "hegemony_card"
+                << "hegemony" << "ling";
 
         setValue("BanPackages", banlist);
     }
@@ -228,6 +229,6 @@ void Settings::init(){
     }
 
     QStringList forbid_packages;
-    forbid_packages << "Special3v3" << "ThreeKingdoms";
+    forbid_packages << "New3v3Card" << "ThreeKingdoms";
     setValue("ForbidPackages", forbid_packages.join("+"));
 }

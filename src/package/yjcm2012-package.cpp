@@ -24,12 +24,13 @@ public:
             room->playSkillEffect(objectName());
 
             int card_id = room->drawCard();
-            CardMoveReason reason(CardMoveReason::S_REASON_JUDGE, player->objectName(), "zhenlie", QString());
+            CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, player->objectName(), "zhenlie", QString());
+            reason.m_targetId = player->objectName();
             room->throwCard(judge->card, reason, judge->who);
 
             judge->card = Sanguosha->getCard(card_id);
-            room->moveCardTo(judge->card, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->getGeneralName(), this->objectName(), QString()));
+            room->moveCardTo(judge->card, NULL, Player::PlaceTakeoff,
+                             CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->getGeneralName(), this->objectName(), QString()), true);
 
             LogMessage log;
             log.type = "$ChangedJudge";

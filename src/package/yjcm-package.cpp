@@ -46,7 +46,7 @@ public:
 class Luoying: public TriggerSkill{
 public:
     Luoying():TriggerSkill("luoying"){
-        events << CardDiscarded << CardUsed << FinishJudge << CardGotOnePiece;
+        events << CardGotOneTime;
         frequency = Frequent;
         default_choice = "no";
     }
@@ -55,101 +55,44 @@ public:
         return -1;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target && !target->hasSkill(objectName());
-    }
 
-    QList<const Card *> getClubs(const Card *card) const{
-        QList<const Card *> clubs;
+    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *caozhi, QVariant &data) const{
 
-        if(!card->isVirtualCard()){
-            if(card->getSuit() == Card::Club)
-                clubs << card;
+        CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
+        if(move->to_place == Player::DiscardPile && move->from->objectName() != caozhi->objectName() &&
+            ((move->reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD
+                || (move->reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_JUDGEDONE)){
+            QList<CardsMoveStruct> exchangeMove;
+            CardsMoveStruct luoyingget;
 
-            return clubs;
-        }
-
-        foreach(int card_id, card->getSubcards()){
-            const Card *c = Sanguosha->getCard(card_id);
-            if(c->getSuit() == Card::Club)
-                clubs << c;
-        }
-
-        return clubs;
-    }
-
-    ServerPlayer* findcaozhi(Room *room) const{
-        foreach(ServerPlayer *player, room->getAllPlayers()){
-            if(player->hasSkill("luoying"))
-                return player;
-        }
-
-        return NULL;
-    }
-
-    virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *player, QVariant &data) const{
-        QList<const Card *> clubs;
-
-        if(event == CardUsed){
-            CardUseStruct use = data.value<CardUseStruct>();
-            const SkillCard *skill_card = qobject_cast<const SkillCard *>(use.card);
-            if(skill_card &&
-                    skill_card->subcardsLength() > 0 &&
-                    skill_card->willThrow() &&
-                    !skill_card->isOwnerDiscarded()){
-                clubs = getClubs(skill_card);
+            foreach(int card_id, move->card_ids){
+                if(Sanguosha->getCard(card_id)->getSuit() == Card::Club){
+                        luoyingget.card_ids << card_id;
+                        luoyingget.to = caozhi;
+                        luoyingget.to_place = Player::Hand;
+                }
             }
-        }else if(event == CardDiscarded){
-            const Card *card = data.value<CardStar>();
-
-            clubs = getClubs(card);
-        }else if(event == FinishJudge){
-            JudgeStar judge = data.value<JudgeStar>();
-            if(room->getCardPlace(judge->card->getEffectiveId()) == Player::DiscardPile
-               && judge->card->getSuit() == Card::Club)
-               clubs << judge->card;
-            else
+            if(luoyingget.card_ids.empty())
                 return false;
-        }else if(event == CardGotOnePiece){
-            CardMoveStar move = data.value<CardMoveStar>();
-            if(move->to_place == Player::DiscardPile)
-            {
-                CardMoveReason reason = move->reason;
-                const Card * card = Sanguosha->getCard(move->card_id);
-                if(reason.m_reason == CardMoveReason::S_REASON_CHANGE_EQUIP && card->getSuit() == Card::Club)
-                    clubs << card;
-                else
-                    return false;
-            }
             else
-                return false;
-        }
+            if(caozhi->askForSkillInvoke(objectName(), data)){
+                foreach(int card_id, luoyingget.card_ids){
+                    if(Sanguosha->getCard(card_id)->objectName() == "shit"
+                       && room->askForChoice(caozhi, objectName(), "yes+no") == "no")
+                        luoyingget.card_ids.removeOne(card_id);
+                }
+                if(!luoyingget.card_ids.empty()){
+                    exchangeMove.push_back(luoyingget);
+                    if(move->from->getGeneralName() == "zhenji")
+                        room->playSkillEffect("luoying", 2);
+                    else
+                        room->playSkillEffect("luoying", 1);
 
-        ServerPlayer *caozhi = findcaozhi(room);
-        foreach(const Card* card, clubs)
-            if(card->objectName() == "shit")
-                if(caozhi && room->askForChoice(caozhi, objectName(), "yes+no") == "no")
-                    clubs.removeOne(card);
-
-        if(clubs.isEmpty())
-            return false;
-
-        if(caozhi && caozhi->askForSkillInvoke(objectName(), data)){
-            if(Config.SoundEffectMode == "Qsgs"){
-                if(player->getGeneralName() == "zhenji")
-                    room->playSkillEffect("luoying", 2);
-                else
-                    room->playSkillEffect("luoying", 1);
+                    room->moveCards(exchangeMove, true);
+                }
             }
-            else
-                room->playSkillEffect("luoying");
 
-            room->getThread()->delay(650);
-
-            foreach(const Card *club, clubs)
-                caozhi->obtainCard(club);
         }
-
         return false;
     }
 };
@@ -186,7 +129,7 @@ private:
 class JiushiFlip: public TriggerSkill{
 public:
     JiushiFlip():TriggerSkill("#jiushi-flip"){
-        events << CardUsed << Predamaged << Damaged;
+        events << CardUsed << DamagedProceed << Damaged;
     }
 
     virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *player, QVariant &data) const{
@@ -194,10 +137,10 @@ public:
             CardUseStruct use = data.value<CardUseStruct>();
             if(use.card->getSkillName() == "jiushi")
                 player->turnOver();
-        }else if(event == Predamaged){
-            player->tag["PredamagedFace"] = player->faceUp();
+        }else if(event == DamagedProceed){
+            player->tag["DamagedProceedFace"] = player->faceUp();
         }else if(event == Damaged){
-            bool faceup = player->tag.value("PredamagedFace").toBool();
+            bool faceup = player->tag.value("DamagedProceedFace").toBool();
             if(!faceup && player->askForSkillInvoke("jiushi", data)){
                 room->playSkillEffect("jiushi", 3);
                 player->turnOver();
@@ -211,14 +154,14 @@ public:
 class Wuyan: public TriggerSkill{
 public:
     Wuyan():TriggerSkill("wuyan"){
-        events << DamagedProceed << Predamage;
+        events << Predamaged << Predamage;
         frequency = Compulsory;
     }
 
     virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if(damage.card && damage.card->getTypeId() == Card::Trick){
-            if(event == DamagedProceed){
+            if(event == Predamaged){
                 LogMessage log;
                 log.type = "#WuyanGood";
                 log.from = player;

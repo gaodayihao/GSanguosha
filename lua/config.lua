@@ -14,6 +14,7 @@ config = {
         "SPCard",
         "YitianCard",
         "Nostalgia",
+		"New3v3Card",
         "Joy",
         "Disaster",
         "JoyEquip",
