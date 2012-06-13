@@ -297,11 +297,10 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
         }
 
     case AskForPeaches:{
-            DyingStruct dying = data.value<DyingStruct>();
-
-            if(!dying.savers.contains(player) &&
-                    room->getCurrent()->hasSkill("wansha") && room->getCurrent()->isAlive())
+            if(room->getThread()->trigger(AskForPeachesProceed, room, player, data))
                 break;
+
+            DyingStruct dying = data.value<DyingStruct>();
 
             while(dying.who->getHp() <= 0){
                 const Card *peach = room->askForSinglePeach(player, dying.who);

@@ -307,6 +307,7 @@ enum TriggerEvent{
 
     Dying,
     AskForPeaches,
+    AskForPeachesProceed,
     AskForPeachesDone,
     Death,
     GameOverJudge,

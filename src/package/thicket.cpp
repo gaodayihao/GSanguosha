@@ -636,7 +636,7 @@ class Wansha: public TriggerSkill{
 public:
     Wansha():TriggerSkill("wansha"){
         frequency = Skill::Compulsory;
-        events << Dying;
+        events << Dying << AskForPeachesProceed;
     }
 
     virtual int getPriority() const{
@@ -648,29 +648,38 @@ public:
         return jiaxu->hasSkill(objectName()) && jiaxu->isAlive();
     }
 
-    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
-        room->playSkillEffect(objectName());
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         ServerPlayer *jiaxu = room->getCurrent();
+        if(event == Dying)
+        {
+            room->playSkillEffect(objectName());
 
-        QList<ServerPlayer *> savers;
-        savers << jiaxu;
+            QList<ServerPlayer *> savers;
+            savers << jiaxu;
 
-        LogMessage log;
-        log.from = jiaxu;
-        log.arg = objectName();
-        if(jiaxu != player){
-            savers << player;
-            log.type = "#WanshaTwo";
-            log.to << player;
-        }else{
-            log.type = "#WanshaOne";
+            LogMessage log;
+            log.from = jiaxu;
+            log.arg = objectName();
+            if(jiaxu != player){
+                savers << player;
+                log.type = "#WanshaTwo";
+                log.to << player;
+            }else{
+                log.type = "#WanshaOne";
+            }
+            room->sendLog(log);
+
+            DyingStruct dying = data.value<DyingStruct>();
+            dying.savers = savers;
+
+            data = QVariant::fromValue(dying);
         }
-        room->sendLog(log);
-
-        DyingStruct dying = data.value<DyingStruct>();
-        dying.savers = savers;
-
-        data = QVariant::fromValue(dying);
+        else if(event == AskForPeachesProceed)
+        {
+            DyingStruct dying = data.value<DyingStruct>();
+            if(!dying.savers.contains(player))
+                return true;
+        }
 
         return false;
     }
