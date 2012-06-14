@@ -94,6 +94,7 @@ public:
                     else
                         room->playSkillEffect("luoying", 1);
 
+                    room->getThread()->delay(650);
                     room->moveCards(exchangeMove, true);
                 }
             }

@@ -3412,8 +3412,7 @@ void RoomScene::moveFocus(const QString &who, Countdown countdown){
         if(focused != photo && focused){
             focused->hideProgressBar();
             if(focused->getPlayer()->getPhase() == Player::NotActive || focused->getPlayer()->getPhase() == Player::Finish){
-                if(focused->getPlayer()->getHp() <= 0 && focused->getPlayer()->isAlive()
-                        && focused->getPlayer()->getMaxHp()>0)
+                if(focused->getPlayer()->hasFlag("dying") && focused->getPlayer()->isAlive())
                     focused->setFrame(Photo::SOS);
                 else
                     focused->setFrame(Photo::NoFrame);
@@ -3423,8 +3422,7 @@ void RoomScene::moveFocus(const QString &who, Countdown countdown){
         focused = photo;
         focused->showProgressBar(countdown);
         if(focused->getPlayer()->getPhase() == Player::NotActive){
-            if(focused->getPlayer()->getHp() <= 0 && focused->getPlayer()->isAlive()
-                && focused->getPlayer()->getMaxHp()>0)
+            if(focused->getPlayer()->hasFlag("dying") && focused->getPlayer()->isAlive())
                 focused->setFrame(Photo::SOSR);
             else
                 focused->setFrame(Photo::Responsing);
@@ -3436,8 +3434,7 @@ void RoomScene::moveFocus(const QString &who, Countdown countdown){
     if((self == Self || self->getState() != "online") && focused){
         focused->hideProgressBar();
         if(focused->getPlayer()->getPhase() == Player::NotActive || focused->getPlayer()->getPhase() == Player::Finish){
-            if(focused->getPlayer()->getHp() <= 0 && focused->getPlayer()->isAlive()
-                    && focused->getPlayer()->getMaxHp()>0)
+            if(focused->getPlayer()->hasFlag("dying") && focused->getPlayer()->isAlive())
                 focused->setFrame(Photo::SOS);
             else
                 focused->setFrame(Photo::NoFrame);

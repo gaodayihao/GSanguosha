@@ -353,7 +353,7 @@ void Photo::updateReadyItem(bool visible){
 }
 
 void Photo::refresh(){
-    if(player && player->getHp() <= 0 && player->isAlive() && player->getMaxHp() > 0){
+    if(player->hasFlag("dying") && player->isAlive()){
         if(player->getPhase()==Player::NotActive)
             setFrame(SOS);
         else
@@ -364,8 +364,7 @@ void Photo::refresh(){
             save_me_item = new QGraphicsPixmapItem(save_me, this);
             save_me_item->setPos(5, 15);
         }
-        if(player->hasFlag("dying"))
-            save_me_item->show();
+        save_me_item->show();
     }else{
         if(save_me_item)
             save_me_item->hide();
