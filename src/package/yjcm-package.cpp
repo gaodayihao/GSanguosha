@@ -89,10 +89,15 @@ public:
                 }
                 if(!luoyingget.card_ids.empty()){
                     exchangeMove.push_back(luoyingget);
-                    if(move->from->getGeneralName() == "zhenji")
-                        room->playSkillEffect("luoying", 2);
+                    if(Config.SoundEffectMode == "Qsgs")
+                    {
+                        if(move->from->getGeneralName() == "zhenji")
+                            room->playSkillEffect("luoying", 2);
+                        else
+                            room->playSkillEffect("luoying", 1);
+                    }
                     else
-                        room->playSkillEffect("luoying", 1);
+                        room->playSkillEffect("luoying");
 
                     room->getThread()->delay(650);
                     room->moveCards(exchangeMove, true);

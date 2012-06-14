@@ -148,7 +148,7 @@ public:
             const Card* oldJudge = judge->card;
             judge->card = Sanguosha->getCard(card->getEffectiveId());
 
-            CardsMoveStruct move1(QList<int>(), NULL, Player::PlaceTakeoff,
+            CardsMoveStruct move1(QList<int>(), NULL, Player::DiscardPile,
                                   CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->objectName(), this->objectName(), QString()));
             move1.card_ids.append(card->getEffectiveId());
 

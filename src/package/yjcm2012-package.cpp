@@ -29,7 +29,7 @@ public:
             room->throwCard(judge->card, reason, judge->who);
 
             judge->card = Sanguosha->getCard(card_id);
-            room->moveCardTo(judge->card, NULL, Player::PlaceTakeoff,
+            room->moveCardTo(judge->card, NULL, Player::DiscardPile,
                              CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->getGeneralName(), this->objectName(), QString()), true);
 
             LogMessage log;

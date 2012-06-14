@@ -460,12 +460,12 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     thread->trigger(CardonUse, room, player, data);
     CardUseStruct use = data.value<CardUseStruct>();
 
-    if(will_throw && room->getCardPlace(getEffectiveId()) != Player::DiscardPile)
+    /*if(will_throw && room->getCardPlace(getEffectiveId()) != Player::DiscardPile)
     {
         CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
         if (card_use.to.size() == 1) reason.m_targetId = card_use.to.first()->objectName();
         room->moveCardTo(this, use.from, Player::PlaceTakeoff, reason, true);
-    }
+    }*/
 
     LogMessage log;
     log.from = use.from;

@@ -1033,13 +1033,9 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
             reason.m_skillName = card->getSkillName();
             moveCardTo(card, NULL, Player::DiscardPile, reason);
         }
-        else if(card->getTypeId() != Card::Skill && trigger_event == CardDiscarded){
-            const CardPattern *card_pattern = Sanguosha->getPattern(pattern);
-            if((card_pattern == NULL || card_pattern->willThrow()))
-            {
-                reason.m_reason = CardMoveReason::S_REASON_DISCARD;
-                moveCardTo(card, NULL, Player::DiscardPile, reason);
-            }
+        else if(trigger_event == CardDiscarded){
+            reason.m_reason = CardMoveReason::S_REASON_DISCARD;
+            moveCardTo(card, NULL, Player::DiscardPile, reason);
         }
         else if(card->willThrow() && trigger_event != NonTrigger)
         {
