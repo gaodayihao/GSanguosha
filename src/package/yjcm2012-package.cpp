@@ -310,7 +310,7 @@ public:
 class Qianxi: public TriggerSkill{
 public:
     Qianxi():TriggerSkill("qianxi"){
-        events << DamageProceed;
+        events << Predamage;
     }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
@@ -573,7 +573,11 @@ public:
 class Jiefan : public TriggerSkill{
 public:
     Jiefan():TriggerSkill("jiefan"){
-        events << AskForPeaches << DamageProceed << CardFinished;
+        events << AskForPeaches << Predamage << CardFinished;
+    }
+
+    virtual int getPriority() const{
+        return 3;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *handang, QVariant &data) const{
@@ -581,7 +585,7 @@ public:
             DyingStruct dying = data.value<DyingStruct>();
             forever{
                 if(dying.who->getHp() > 0 || handang->isNude() || room->getCurrent()->isDead() ||
-                        !handang->canSlash(room->getCurrent(),true) || !room->askForSkillInvoke(handang, objectName(), data))
+                    !room->askForSkillInvoke(handang, objectName(), data))
                     break;
 
                 const Card *slash = room->askForCard(handang, "slash", "jiefan-slash-Use:" + dying.who->objectName(), data, NonTrigger);
@@ -599,7 +603,7 @@ public:
                 }
             }
         }
-        else if(event == DamageProceed){
+        else if(event == Predamage){
             DamageStruct damage = data.value<DamageStruct>();
             int id = room->getTag("JiefanSlash").toInt();
             if(damage.card && damage.card->inherits("Slash")

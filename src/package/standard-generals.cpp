@@ -310,7 +310,7 @@ public:
 class LuoyiBuff: public TriggerSkill{
 public:
     LuoyiBuff():TriggerSkill("#luoyi"){
-        events << Predamage;
+        events << DamageBegin;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -325,10 +325,8 @@ public:
         DamageStruct damage = data.value<DamageStruct>();
 
         const Card *reason = damage.card;
-        if(reason == NULL)
-            return false;
 
-        if(reason->inherits("Slash") || reason->inherits("Duel")){
+        if(reason && (reason->inherits("Slash") || reason->inherits("Duel"))){
             LogMessage log;
             log.type = "#LuoyiBuff";
             log.from = xuchu;

@@ -364,7 +364,8 @@ void Photo::refresh(){
             save_me_item = new QGraphicsPixmapItem(save_me, this);
             save_me_item->setPos(5, 15);
         }
-        save_me_item->show();
+        if(player->hasFlag("dying"))
+            save_me_item->show();
     }else{
         if(save_me_item)
             save_me_item->hide();

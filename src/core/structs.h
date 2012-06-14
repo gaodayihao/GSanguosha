@@ -28,6 +28,7 @@ struct DamageStruct{
     int damage;
     Nature nature;
     bool chain;
+    bool PreChain;
 };
 
 struct CardEffectStruct{
@@ -288,6 +289,7 @@ enum TriggerEvent{
     HpRecover,
     HpLost,
     HpChanged,
+    MaxHpChanged,
 
     StartJudge,
     AskForRetrial,
@@ -298,12 +300,13 @@ enum TriggerEvent{
 
     TurnedOver,
 
-    DamageStart,
+    DamageBegin,
+    DamagedBegin,
     Predamage,
     Predamaged,
     DamageProceed,
-    DamagedProceed,
     DamageDone,
+    DamagedProceed,
     Damage,
     Damaged,
     DamageComplete,

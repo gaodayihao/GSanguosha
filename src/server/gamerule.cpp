@@ -19,7 +19,7 @@ GameRule::GameRule(QObject *)
     events << GameStart << TurnStart << PhaseChange
            << CardUsed << TargetConfirm << TargetConfirmed << CardEffected << CardFinished
            << HpRecover << HpLost
-           << DamageDone << DamageComplete
+           << DamageDone << DamagedProceed << DamageComplete
            << AskForPeaches<< AskForPeachesDone << Dying << Death << GameOverJudge
            << SlashProceed << SlashEffected << SlashHit << SlashMissed
            << StartJudge << FinishJudge
@@ -367,13 +367,25 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
             if(damage.from)
                 room->setPlayerStatistics(damage.from, "damage", damage.damage);
 
-            room->applyDamage(player, damage);
-            if(player->getHp() <= 0){
-                room->enterDying(player, &damage);
+            if(player->isChained() && damage.nature != DamageStruct::Normal)
+            {
+                damage.PreChain = true;
+                room->setPlayerProperty(player, "chained", false);
+                data = QVariant::fromValue(damage);
             }
+
+            room->applyDamage(player, damage);
 
             break;
         }
+    case DamagedProceed:{
+        DamageStruct damage = data.value<DamageStruct>();
+        if(player->getHp() <= 0){
+            room->enterDying(player, &damage);
+        }
+
+        break;
+    }
     case DamageComplete:{
             if(room->getMode() == "02_1v1" && player->isDead()){
                 QString new_general = player->tag["1v1ChangeGeneral"].toString();
@@ -382,16 +394,14 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
             }
 
             DamageStruct damage = data.value<DamageStruct>();
-            bool chained = player->isChained();
-            if(!chained || damage.nature == DamageStruct::Normal)
+            if(!damage.PreChain)
                 break;
 
-            room->setPlayerProperty(player, "chained", false);
             // iron chain effect
-            if(room->getTag("chaining").isNull())
-            {
-                room->setTag("chaining", true);
 
+            if(!room->getTag("Chaining").toBool())
+            {
+                room->setTag("Chaining", true);
                 QList<ServerPlayer *> chained_players;
                 if(room->getCurrent()->isDead())
                     chained_players = room->getOtherPlayers(room->getCurrent());
@@ -413,7 +423,7 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
                         room->damage(chain_damage);
                     }
                 }
-                room->removeTag("chaining");
+                room->removeTag("Chaining");
             }
 
             break;
@@ -1310,7 +1320,7 @@ BasaraMode::BasaraMode(QObject *parent)
 {
     setObjectName("basara_mode");
 
-    events << CardLostOnePiece << DamagedProceed;
+    events << CardLostOnePiece << Predamaged;
 
     skill_mark["niepan"] = "@nirvana";
     skill_mark["smallyeyan"] = "@flame";
@@ -1473,7 +1483,7 @@ bool BasaraMode::trigger(TriggerEvent event, Room* room, ServerPlayer *player, Q
 
         break;
     }
-    case DamagedProceed:{
+    case Predamaged:{
         playerShowed(player);
         break;
     }

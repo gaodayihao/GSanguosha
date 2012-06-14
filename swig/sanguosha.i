@@ -470,6 +470,7 @@ enum TriggerEvent{
     HpRecover,
     HpLost,
     HpChanged,
+    MaxHpChanged,
 
     StartJudge,
     AskForRetrial,
@@ -477,13 +478,16 @@ enum TriggerEvent{
 
     Pindian,
 	PindianFinished,
+	
     TurnedOver,
 
+    DamageBegin,
+    DamagedBegin,
     Predamage,
-    DamagedProceed,
-    DamageProceed,
     Predamaged,
+    DamagedProceed,
     DamageDone,
+    DamageProceed,
     Damage,
     Damaged,
     DamageComplete,
@@ -503,8 +507,6 @@ enum TriggerEvent{
     JinkUsed,
 
     CardAsked,
-    CardonUse,
-    CardUsed,
     CardResponsed,
     CardDiscarded,
     CardLostOnePiece,
@@ -514,6 +516,10 @@ enum TriggerEvent{
     CardDrawing,
     CardDrawnDone,
 
+    CardonUse,
+    CardUsed,
+    TargetConfirm,
+    TargetConfirmed,
     CardEffect,
     CardEffected,
     CardFinished,

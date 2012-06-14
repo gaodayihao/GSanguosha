@@ -431,20 +431,15 @@ class Kuanggu: public TriggerSkill{
 public:
     Kuanggu():TriggerSkill("kuanggu"){
         frequency = Compulsory;
-        events << Damage << DamageDone;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return true;
+        events << DamageProceed << Damage;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
 
-        if(event == DamageDone && damage.from && damage.from->hasSkill("kuanggu") && damage.from->isAlive()){
-            ServerPlayer *weiyan = damage.from;
-            weiyan->tag["InvokeKuanggu"] = weiyan->distanceTo(damage.to) <= 1;
-        }else if(event == Damage && player->hasSkill("kuanggu") && player->isAlive()){
+        if(event == DamageProceed){
+            player->tag["InvokeKuanggu"] = player->distanceTo(damage.to) <= 1;
+        }else if(event == Damage){
             bool invoke = player->tag.value("InvokeKuanggu", false).toBool();
             if(invoke){
 
@@ -512,12 +507,12 @@ public:
 class Buqu: public TriggerSkill{
 public:
     Buqu():TriggerSkill("buqu"){
-        events << Dying << AskForPeachesDone;
+        events << DamagedProceed << AskForPeachesDone;
         default_choice = "alive";
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *zhoutai, QVariant &) const{
-        if(event == Dying){
+        if(event == DamagedProceed && zhoutai->getHp() < 1){
             QString choice = room->askForChoice(zhoutai, objectName(), "alive+dead");
             if(choice == "alive"){
                 room->setTag("Buqu", zhoutai->objectName());
@@ -528,9 +523,7 @@ public:
                 int n = need - buqu.length();
                 if(n > 0){
                     QList<int> card_ids = room->getNCards(n);
-                    foreach(int card_id, card_ids){
-                        zhoutai->addToPile("buqu", card_id);
-                    }
+                    zhoutai->addToPile("buqu", card_ids);
                 }
                 const QList<int> &buqunew = zhoutai->getPile("buqu");
                 QList<int> duplicate_numbers;
@@ -548,7 +541,6 @@ public:
 
                 if(duplicate_numbers.isEmpty()){
                     room->setTag("Buqu", QVariant());
-                    zhoutai->setFlags("-dying");
                     return true;
                 }
             }
@@ -567,7 +559,7 @@ public:
                 const Card *card = Sanguosha->getCard(card_id);
                 int number = card->getNumber();
 
-                if(numbers.contains(number)){
+                if(numbers.contains(number) && !duplicate_numbers.contains(number)){
                     duplicate_numbers << number;
                 }else
                     numbers << number;
@@ -678,11 +670,6 @@ void TianxiangCard::onEffect(const CardEffectStruct &effect) const{
     damage.chain = true;
     room->setPlayerFlag(damage.to, "TianxiangTarget");
     room->damage(damage);
-
-    if(damage.to->isAlive() && damage.to->hasFlag("TianxiangTarget")){
-        damage.to->drawCards(damage.to->getLostHp());
-        room->setPlayerFlag(damage.to, "-TianxiangTarget");
-    }
 }
 
 class TianxiangViewAsSkill: public OneCardViewAsSkill{
@@ -714,13 +701,9 @@ public:
 class Tianxiang: public TriggerSkill{
 public:
     Tianxiang():TriggerSkill("tianxiang"){
-        events << DamagedProceed << DamageComplete;
+        events << Predamaged << DamageComplete;
 
         view_as_skill = new TianxiangViewAsSkill;
-    }
-
-    virtual int getPriority() const{
-        return 2;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -732,7 +715,7 @@ public:
             xiaoqiao->drawCards(xiaoqiao->getLostHp());
             room->setPlayerFlag(xiaoqiao, "-TianxiangTarget");
         }
-        else if(event == DamagedProceed && xiaoqiao->hasSkill(objectName()) && !xiaoqiao->isKongcheng()){
+        else if(event == Predamaged && xiaoqiao->hasSkill(objectName()) && !xiaoqiao->isKongcheng()){
             DamageStruct damage = data.value<DamageStruct>();
 
             xiaoqiao->tag["TianxiangDamage"] = QVariant::fromValue(damage);
@@ -746,6 +729,7 @@ public:
 
 GuhuoCard::GuhuoCard(){
     mute = true;
+    will_throw = false;
 }
 
 bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString guhuo_to, const QString to_guhuo) const{
@@ -1002,10 +986,10 @@ const Card *GuhuoCard::validate(const CardUseStruct *card_use) const{
         const Card *card = Sanguosha->getCard(subcards.first());
         Card *use_card = Sanguosha->cloneCard(user_string, card->getSuit(), card->getNumber());
         use_card->setSkillName("guhuo");
-        use_card->addSubcard(this);
+        use_card->addSubcard(this);/*
         // TODO: verify this...
         CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, card_use->from->objectName());
-        room->throwCard(this, reason, NULL);
+        room->throwCard(this, reason, NULL);*/
 
         return use_card;
     }else

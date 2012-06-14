@@ -23,7 +23,7 @@ void GongxinCard::onEffect(const CardEffectStruct &effect) const{
 class Wuhun: public TriggerSkill{
 public:
     Wuhun():TriggerSkill("wuhun"){
-        events << DamageDone;
+        events << Damaged;
         frequency = Compulsory;
     }
 
@@ -757,7 +757,7 @@ public:
     Kuangfeng():TriggerSkill("kuangfeng"){
         view_as_skill = new KuangfengViewAsSkill;
 
-        events << Predamaged;
+        events << DamagedBegin;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -875,11 +875,7 @@ public:
     Dawu():TriggerSkill("dawu"){
         view_as_skill = new DawuViewAsSkill;
 
-        events << Predamaged;
-    }
-
-    virtual int getPriority() const{
-        return 2;
+        events << DamagedBegin;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -910,7 +906,7 @@ public:
 class Renjie: public TriggerSkill{
 public:
     Renjie():TriggerSkill("renjie"){
-        events << DamageDone << CardDiscarded;
+        events << Damaged << CardDiscarded;
         frequency = Compulsory;
     }
 
@@ -924,10 +920,9 @@ public:
                     player->gainMark("@bear", n);
                 }
             }
-        }else if(event == DamageDone){
+        }else if(event == Damaged){
             DamageStruct damage = data.value<DamageStruct>();
-            if(player->getHp() > 0)
-                room->playSkillEffect(objectName());
+            room->playSkillEffect(objectName());
             player->gainMark("@bear", damage.damage);
         }
 

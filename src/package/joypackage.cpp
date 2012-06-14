@@ -309,7 +309,7 @@ QString Monkey::getEffectPath(bool ) const{
 class GaleShellSkill: public ArmorSkill{
 public:
     GaleShellSkill():ArmorSkill("gale-shell"){
-        events << DamagedProceed;
+        events << Predamaged;
     }
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{

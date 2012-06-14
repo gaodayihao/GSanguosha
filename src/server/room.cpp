@@ -1264,6 +1264,10 @@ void Room::setPlayerProperty(ServerPlayer *player, const char *property_name, co
     if(strcmp(property_name, "hp") == 0){
         thread->trigger(HpChanged, this, player);
     }
+
+    if(strcmp(property_name, "maxhp") == 0){
+        thread->trigger(MaxHpChanged, this, player);
+    }
 }
 
 void Room::setPlayerMark(ServerPlayer *player, const QString &mark, int value){
@@ -2626,15 +2630,20 @@ void Room::loseHp(ServerPlayer *victim, int lose){
 
 void Room::loseMaxHp(ServerPlayer *victim, int lose){
     int hp = victim->getHp();
-    victim->setMaxHp(qMax(victim->getMaxHp() - lose, 0));
+    int maxhp = qMax(victim->getMaxHp() - lose, 0);
+    victim->setMaxHp(maxhp);
+
+    bool hp_changed = hp - victim->getHp() != 0;
 
     broadcastInvoke("playAudio", "maxhplost");
 
-    broadcastProperty(victim, "maxhp");
-    broadcastProperty(victim, "hp");
+    setPlayerProperty(victim, "maxhp", maxhp);
+
+    if(hp_changed)
+        setPlayerProperty(victim, "hp", victim->getHp());
 
     LogMessage log;
-    log.type = hp - victim->getHp() == 0 ? "#LoseMaxHp" : "#LostMaxHpPlus";
+    log.type = !hp_changed ? "#LoseMaxHp" : "#LostMaxHpPlus";
     log.from = victim;
     log.arg = QString::number(lose);
     log.arg2 = QString::number(hp - victim->getHp());
@@ -2704,44 +2713,53 @@ void Room::damage(const DamageStruct &damage_data){
 
     QVariant data = QVariant::fromValue(damage_data);
 
+    do
+    {
+        if(damage_data.from && !damage_data.chain){
+            if(thread->trigger(DamageBegin, this, damage_data.from, data))
+                break;
+        }
 
+        bool prevent = thread->trigger(DamagedBegin, this, damage_data.to, data);
+        if(prevent)
+            break;
 
-    if(!damage_data.chain && damage_data.from){
-        // predamage
-        if(thread->trigger(Predamage, this, damage_data.from, data))
-            return;
-    }
+        if(damage_data.from){
+            // Predamage
+            if(thread->trigger(Predamage, this, damage_data.from, data))
+                break;
+        }
 
-    // Predamaged
-    bool prevent = thread->trigger(Predamaged, this, damage_data.to, data);
-    if(prevent)
-        return;
+        // Predamaged
+        prevent = thread->trigger(Predamaged, this, damage_data.to, data);
+        if(prevent)
+            break;
 
-    // DamageProceed
-    if(damage_data.from){
-        if(thread->trigger(DamageProceed, this, damage_data.from, data))
-            return;
-    }
+        // DamageProceed
+        if(damage_data.from){
+            if(thread->trigger(DamageProceed, this, damage_data.from, data))
+                break;
+        }
 
-    // damage done, should not cause damage process broken
-    thread->trigger(DamageDone, this, damage_data.to, data);
+        // damage done, should not cause damage process broken
+        thread->trigger(DamageDone, this, damage_data.to, data);
 
-    // DamagedProceed
-    bool broken = thread->trigger(DamagedProceed, this, damage_data.to, data);
-    if(broken)
-        return;
-
-    // damage
-    if(damage_data.from){
-        bool broken = thread->trigger(Damage, this, damage_data.from, data);
+        // DamagedProceed
+        bool broken = thread->trigger(DamagedProceed, this, damage_data.to, data);
         if(broken)
-            return;
-    }
+            break;
 
-    // damaged
-    broken = thread->trigger(Damaged, this, damage_data.to, data);
-    if(broken)
-        return;
+        // damage
+        if(damage_data.from){
+            bool broken = thread->trigger(Damage, this, damage_data.from, data);
+            if(broken)
+                break;
+        }
+
+        // damaged
+        thread->trigger(Damaged, this, damage_data.to, data);
+
+    }while(false);
 
     thread->trigger(DamageComplete, this, damage_data.to, data);
 }

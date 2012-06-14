@@ -9,7 +9,7 @@
 class YitianSwordSkill : public WeaponSkill{
 public:
     YitianSwordSkill():WeaponSkill("yitian_sword"){
-        events << DamageComplete;
+        events << Damaged;
     }
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &) const{
@@ -683,7 +683,7 @@ public:
 class WulingExEffect: public TriggerSkill{
 public:
     WulingExEffect():TriggerSkill("#wuling-ex-effect"){
-        events << CardEffected << DamagedProceed;
+        events << CardEffected << Predamaged;
     }
 
     virtual int getPriority() const{
@@ -713,7 +713,7 @@ public:
                 log.from = player;
                 room->sendLog(log);
             }
-        }else if(event == DamagedProceed && wuling == "earth"){
+        }else if(event == Predamaged && wuling == "earth"){
             DamageStruct damage = data.value<DamageStruct>();
             if(damage.nature != DamageStruct::Normal && damage.damage > 1){
                 damage.damage = 1;
@@ -733,7 +733,7 @@ public:
 class WulingEffect: public TriggerSkill{
 public:
     WulingEffect():TriggerSkill("#wuling-effect"){
-        events << DamagedProceed;
+        events << Predamaged;
     }
 
     virtual int getPriority() const{
@@ -919,7 +919,7 @@ public:
 class Shenjun: public TriggerSkill{
 public:
     Shenjun():TriggerSkill("shenjun"){
-        events << GameStart << PhaseChange << DamagedProceed;
+        events << GameStart << PhaseChange << Predamaged;
         frequency = Compulsory;
     }
 
@@ -973,7 +973,7 @@ public:
                 QString old_general = new_general.endsWith("f")?"luboyan":"luboyanf";
                 room->transfigure(player, new_general, false, false, old_general);
             }
-        }else if(event == DamagedProceed){
+        }else if(event == Predamaged){
             DamageStruct damage = data.value<DamageStruct>();
             if(damage.nature != DamageStruct::Thunder && damage.from &&
                damage.from->getGeneral()->isMale() != player->getGeneral()->isMale()){
@@ -1021,21 +1021,15 @@ public:
 class Shaoying: public TriggerSkill{
 public:
     Shaoying():TriggerSkill("shaoying"){
-        events << DamageComplete;
+        events << Predamage;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL;
-    }
-
-    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *luboyan, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
 
-        if (damage.from == NULL || !damage.from->hasSkill(objectName()) || damage.to->isChained()
-                || damage.nature != DamageStruct::Fire)
+        if (damage.to->isChained() || damage.nature != DamageStruct::Fire)
             return false;
 
-        ServerPlayer *luboyan = damage.from;
         QList<ServerPlayer *> targets;
         room->setTag("Shaoying", damage.to->objectName());
         foreach(ServerPlayer *p, room->getAlivePlayers()){
@@ -1391,11 +1385,11 @@ public:
 class Sizhan: public TriggerSkill{
 public:
     Sizhan():TriggerSkill("sizhan"){
-        events << DamagedProceed << PhaseChange;
+        events << Predamaged << PhaseChange;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *elai, QVariant &data) const{
-        if(event == DamagedProceed){
+        if(event == Predamaged){
             DamageStruct damage = data.value<DamageStruct>();
 
             LogMessage log;
@@ -1433,7 +1427,11 @@ public:
 class Shenli: public TriggerSkill{
 public:
     Shenli():TriggerSkill("shenli"){
-        events << Predamage;
+        events << DamageBegin;
+    }
+
+    virtual int getPriority() const{
+        return 3;
     }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *elai, QVariant &data) const{

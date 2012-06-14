@@ -1250,7 +1250,7 @@ void RoomScene::toggleDiscards(){
 
 PlayerCardContainer* RoomScene::_getPlayerCardContainer(Player::Place place, Player* player)
 {
-    if (place == Player::DiscardPile || Player::PlaceTakeoff)
+    if (place == Player::DiscardPile)
         return m_discardPile;
     else if (place == Player::DrawPile)
         return m_drawPile;
@@ -1278,7 +1278,7 @@ void RoomScene::loseCards(int moveId, QList<CardsMoveStruct> card_moves)
             card->setParentItem(NULL);
         }
         _m_cardsMoveStash[moveId].append(cards);
-        keepMoveCardLog(movement);
+        //keepMoveCardLog(movement);
     }
 }
 
@@ -1323,8 +1323,9 @@ QString RoomScene::_translateMovementReason(const CardMoveReason &reason)
         result.append(Sanguosha->translate("pindian"));
     else if (reason.m_reason == CardMoveReason::S_REASON_PUT)
         result.append(Sanguosha->translate("put"));
-    else{
-        if (reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE && reason.m_playerId.isEmpty())
+    else if (reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE)
+    {
+        if(reason.m_playerId.isEmpty())
             result.append(Sanguosha->translate("judgedone"));
         else
             result.append(Sanguosha->translate("rejudge"));

@@ -100,7 +100,7 @@ public:
 class Jilei: public TriggerSkill{
 public:
     Jilei():TriggerSkill("jilei"){
-        events << DamagedProceed;
+        events << Predamaged;
     }
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *yangxiu, QVariant &data) const{

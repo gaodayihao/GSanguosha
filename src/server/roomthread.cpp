@@ -31,7 +31,8 @@ QString LogMessage::toString() const{
 }
 
 DamageStruct::DamageStruct()
-    :from(NULL), to(NULL), card(NULL), damage(1), nature(Normal), chain(false)
+    :from(NULL), to(NULL), card(NULL), damage(1),
+      nature(Normal), chain(false), PreChain(false)
 {
 }
 

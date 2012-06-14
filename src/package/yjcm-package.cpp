@@ -55,13 +55,19 @@ public:
         return -1;
     }
 
+    bool InvokeLuoying(CardMoveReason reason) const{
+        if (((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD) ||
+                ((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_JUDGEDONE) ||
+                ((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_CHANGE_EQUIP) ||
+                ((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISMANTLED))
+            return true;
+        return false;
+    }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *caozhi, QVariant &data) const{
 
         CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-        if(move->to_place == Player::DiscardPile && move->from->objectName() != caozhi->objectName() &&
-            ((move->reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD
-                || (move->reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_JUDGEDONE)){
+        if(move->to_place == Player::DiscardPile && move->from->objectName() != caozhi->objectName() && InvokeLuoying(move->reason)){
             QList<CardsMoveStruct> exchangeMove;
             CardsMoveStruct luoyingget;
 
@@ -129,7 +135,7 @@ private:
 class JiushiFlip: public TriggerSkill{
 public:
     JiushiFlip():TriggerSkill("#jiushi-flip"){
-        events << CardUsed << DamagedProceed << Damaged;
+        events << CardUsed << DamageDone << DamageComplete;
     }
 
     virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *player, QVariant &data) const{
@@ -137,10 +143,10 @@ public:
             CardUseStruct use = data.value<CardUseStruct>();
             if(use.card->getSkillName() == "jiushi")
                 player->turnOver();
-        }else if(event == DamagedProceed){
-            player->tag["DamagedProceedFace"] = player->faceUp();
-        }else if(event == Damaged){
-            bool faceup = player->tag.value("DamagedProceedFace").toBool();
+        }else if(event == DamageDone){
+            player->tag["DamageDoneFace"] = player->faceUp();
+        }else if(event == DamageComplete){
+            bool faceup = player->tag.value("DamageDoneFace").toBool();
             if(!faceup && player->askForSkillInvoke("jiushi", data)){
                 room->playSkillEffect("jiushi", 3);
                 player->turnOver();
@@ -1142,7 +1148,7 @@ public:
     Jueqing():TriggerSkill("jueqing")
     {
         frequency = Compulsory;
-        events << Predamage;
+        events << DamageBegin;
     }
 
     virtual bool trigger(TriggerEvent ,  Room* room, ServerPlayer *player, QVariant &data) const
@@ -1164,17 +1170,24 @@ public:
     Shangshi():TriggerSkill("shangshi")
     {
         frequency = Compulsory;
-        events << HpChanged << CardLostOneTime << CardGotOneTime
-               << CardDrawnDone << PhaseChange;
+        events << DamagedProceed << HpLost << HpRecover << MaxHpChanged
+               << CardLostOneTime << CardGotOneTime << CardDrawnDone
+               << PhaseChange;
+    }
+
+    virtual int getPriority() const{
+        return 0;
+    }
+
+    virtual int secondPriority() const{
+        return 0;
     }
 
     virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *player, QVariant &data) const
     {
-        if(event == HpChanged && player->getHp() < 1)
-            return false;
         if(event == CardLostOneTime && player->getPhase() == Player::Discard)
             return false;
-        if(event == PhaseChange && player->getPhase() != Player::NotActive)
+        else if(event == PhaseChange && player->getPhase() != Player::Finish)
             return false;
 
         const int lostHp = qMin(qMin(player->getLostHp(), player->getMaxHp()), 2);

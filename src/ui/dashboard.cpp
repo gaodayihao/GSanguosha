@@ -458,7 +458,8 @@ void Dashboard::setWidth(int width){
     adjustCards();
 
     m_cardTakeOffRegion = middle->boundingRect();
-    m_cardTakeOffRegion.setY(middle->pos().y() - CardItem::S_NORMAL_CARD_HEIGHT * 1.5);
+    m_cardTakeOffRegion.setY(middle->pos().y() - CardItem::S_NORMAL_CARD_HEIGHT * 1);
+    m_cardTakeOffRegion.setX(middle->boundingRect().center().x());
     m_cardTakeOffRegion.setHeight(CardItem::S_NORMAL_CARD_HEIGHT);
 }
 

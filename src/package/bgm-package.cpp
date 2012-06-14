@@ -413,7 +413,7 @@ private:
 class Jie: public TriggerSkill{
 public:
     Jie():TriggerSkill("jie"){
-        events << Predamage;
+        events << DamageBegin;
         frequency = Compulsory;
     }
 

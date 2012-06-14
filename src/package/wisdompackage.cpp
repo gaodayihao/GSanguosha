@@ -585,19 +585,21 @@ public:
 class Wenjiu: public TriggerSkill{
 public:
     Wenjiu():TriggerSkill("wenjiu"){
-        events << Predamage << SlashProceed;
+        events << DamageBegin << SlashProceed;
         frequency = Compulsory;
     }
     virtual bool triggerable(const ServerPlayer *target) const{
         return true;
     }
 
+    virtual int secondPriority() const{
+        return 2;
+    }
+
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *, QVariant &data) const{
-        ServerPlayer *hua = room->findPlayerBySkillName(objectName());
-        if(!hua) return false;
         if(event == SlashProceed){
             SlashEffectStruct effect = data.value<SlashEffectStruct>();
-            if(effect.to == hua && effect.slash->isRed()){
+            if(effect.to->hasSkill(objectName()) && effect.slash->isRed()){
 
                 LogMessage log;
                 log.type = "#Wenjiu1";
@@ -609,21 +611,20 @@ public:
                 return true;
             }
         }
-        else if(event == Predamage){
+        else if(event == DamageBegin){
             DamageStruct damage = data.value<DamageStruct>();
             const Card *reason = damage.card;
-            if(!reason || damage.from != hua)
+            if(!reason || !damage.from->hasSkill(objectName()))
                 return false;
 
             if(reason->inherits("Slash") && reason->isBlack()){
                 LogMessage log;
                 log.type = "#Wenjiu2";
-                log.from = hua;
+                log.from = damage.from;
                 log.to << damage.to;
                 log.arg = QString::number(damage.damage);
-                log.arg2 = QString::number(damage.damage + 1);
-                hua->getRoom()->sendLog(log);
-                damage.damage ++;
+                log.arg2 = QString::number(++ damage.damage);
+                damage.from->getRoom()->sendLog(log);
                 data = QVariant::fromValue(damage);
             }
         }
