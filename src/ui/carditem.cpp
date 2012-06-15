@@ -346,13 +346,14 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     if (m_card) {
         painter->drawPixmap(_m_layout->m_cardSuitArea, cardsuit_pixmap);
         painter->drawPixmap(_m_layout->m_cardNumberArea, number_pixmap);
-        if (this->m_isDescriptionVisible)
-        {
-            // first, draw shadow
-            const QSanRoomSkin::QSanTextFont& font = _m_layout->m_cardFootnoteFont;
-            font.paintText(painter, _m_layout->m_cardFootnoteArea,
-                           (Qt::AlignmentFlag)((int)Qt::AlignHCenter | Qt::AlignBottom | Qt::TextWrapAnywhere), owner_text);
-        }
+    }
+
+    if (this->m_isDescriptionVisible)
+    {
+        // first, draw shadow
+        const QSanRoomSkin::QSanTextFont& font = _m_layout->m_cardFootnoteFont;
+        font.paintText(painter, _m_layout->m_cardFootnoteArea,
+                       (Qt::AlignmentFlag)((int)Qt::AlignHCenter | Qt::AlignBottom | Qt::TextWrapAnywhere), owner_text);
     }
 }
 

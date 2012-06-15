@@ -1250,7 +1250,7 @@ void RoomScene::toggleDiscards(){
 
 PlayerCardContainer* RoomScene::_getPlayerCardContainer(Player::Place place, Player* player)
 {
-    if (place == Player::DiscardPile)
+    if (place == Player::DiscardPile || place == Player::PlaceTakeoff)
         return m_discardPile;
     else if (place == Player::DrawPile)
         return m_drawPile;
@@ -1343,21 +1343,34 @@ void RoomScene::getCards(int moveId, QList<CardsMoveStruct> card_moves)
         CardsMoveStruct &movement = card_moves[i];
         card_container->m_currentPlayer = (ClientPlayer*)movement.to;
         PlayerCardContainer* to_container = _getPlayerCardContainer(movement.to_place, movement.to);
+
         QList<CardItem*> cards = _m_cardsMoveStash[moveId][i];
-        for (int j = 0; j < cards.size(); j++)
+        if(to_container != m_discardPile
+                || to_container != _getPlayerCardContainer(movement.from_place, movement.from)
+                || movement.reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE
+                || (movement.reason.m_skillName == "guhuo" && !movement.reason.m_eventName.isEmpty()))
+            /*this not a good solution*/
         {
-            CardItem* card = cards[j];
-            int card_id = card->getId();
-            if (!card_moves[i].card_ids.contains(card_id))
+            for (int j = 0; j < cards.size(); j++)
             {
-                cards.removeAt(j);
-                j--;
+                CardItem* card = cards[j];
+                int card_id = card->getId();
+                if (!card_moves[i].card_ids.contains(card_id))
+                {
+                    cards.removeAt(j);
+                    j--;
+                }
+                else card->setEnabled(true);
+                card->setFootnote(_translateMovementReason(movement.reason));
             }
-            else card->setEnabled(true);
-            card->setFootnote(_translateMovementReason(movement.reason));
+            bringToFront(to_container);
+            to_container->addCardItems(cards, movement.to_place);
         }
-        bringToFront(to_container);
-        to_container->addCardItems(cards, movement.to_place);
+        else
+        {
+            foreach(CardItem* card, cards)
+                card->deleteLater();
+        }
         keepMoveCardLog(movement);
         if (movement.from == Self || movement.to == Self)
             doAdjust = true;

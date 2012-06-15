@@ -446,7 +446,7 @@ bool Card::targetFilter(const QList<const Player *> &targets, const Player *to_s
     return targets.isEmpty() && to_select != Self;
 }
 
-static bool CompareByActionOrder(ServerPlayer *a, ServerPlayer *b){
+bool Card::CompareByActionOrder(ServerPlayer *a, ServerPlayer *b){
     Room *room = a->getRoom();
 
     return room->getFront(a, b) == a;
@@ -460,12 +460,12 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     thread->trigger(CardonUse, room, player, data);
     CardUseStruct use = data.value<CardUseStruct>();
 
-    /*if(will_throw && room->getCardPlace(getEffectiveId()) != Player::DiscardPile)
+    if(will_throw)
     {
         CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
         if (card_use.to.size() == 1) reason.m_targetId = card_use.to.first()->objectName();
-        room->moveCardTo(this, use.from, Player::PlaceTakeoff, reason, true);
-    }*/
+        room->moveCardTo(this, NULL, Player::PlaceTakeoff, reason, true);
+    }
 
     LogMessage log;
     log.from = use.from;
@@ -495,7 +495,9 @@ void Card::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &ta
         room->cardEffect(this, source, targets.first());
     }else{
         QList<ServerPlayer *> players = targets;
-        qSort(players.begin(), players.end(), CompareByActionOrder);
+
+        if(!this->inherits("Slash"))
+            qSort(players.begin(), players.end(), CompareByActionOrder);
 
         if(room->getMode() == "06_3v3"){
            if(inherits("AOE") || inherits("GlobalEffect"))

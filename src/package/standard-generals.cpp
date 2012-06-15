@@ -290,7 +290,7 @@ public:
             room->throwCard(judge->card, reason, judge->who);
 
             judge->card = Sanguosha->getCard(card->getEffectiveId());
-            room->moveCardTo(judge->card, NULL, Player::DiscardPile,
+            room->moveCardTo(judge->card, NULL, Player::PlaceTakeoff,
                              CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->objectName(), "guicai", QString()), true);
 
             LogMessage log;
@@ -714,12 +714,12 @@ class Jizhi:public TriggerSkill{
 public:
     Jizhi():TriggerSkill("jizhi"){
         frequency = Frequent;
-        events << CardUsed << CardResponsed;
+        events << CardonUse << CardResponsed;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *yueying, QVariant &data) const{
         CardStar card = NULL;
-        if(event == CardUsed){
+        if(event == CardonUse){
             CardUseStruct use = data.value<CardUseStruct>();
             card = use.card;
         }else if(event == CardResponsed)

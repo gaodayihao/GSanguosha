@@ -870,31 +870,34 @@ public:
 class Xiangle: public TriggerSkill{
 public:
     Xiangle():TriggerSkill("xiangle"){
-        events << SlashEffected << CardFinished << TargetConfirm;
+        events << SlashEffected << TargetConfirm;
 
         frequency = Compulsory;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *liushan, QVariant &data) const{
-        CardUseStruct use = data.value<CardUseStruct>();
-        if(event == TargetConfirm && use.card && use.card->inherits("Slash")){
+        if(event == TargetConfirm)
+        {
+            CardUseStruct use = data.value<CardUseStruct>();
+            if(use.card && use.card->inherits("Slash")){
+                room->playSkillEffect(objectName());
 
-            room->playSkillEffect(objectName());
+                LogMessage log;
+                log.type = "#Xiangle";
+                log.from = use.from;
+                log.to << liushan;
+                log.arg = objectName();
+                room->sendLog(log);
 
-            LogMessage log;
-            log.type = "#Xiangle";
-            log.from = use.from;
-            log.to << liushan;
-            log.arg = objectName();
-            room->sendLog(log);
-
-            if(!room->askForCard(use.from, ".Basic", "@xiangle-discard", data, CardDiscarded))
-                room->setPlayerFlag(liushan, "xiangle_invoke");
+                if(!room->askForCard(use.from, ".Basic", "@xiangle-discard", data, CardDiscarded))
+                    room->setCardFlag(use.card, "xiangle_invoke");
+            }
         }
-        else if(event == CardFinished)
-            room->setPlayerFlag(liushan, "-xiangle_invoke");
         else
-            return liushan->hasFlag("xiangle_invoke");
+        {
+            SlashEffectStruct effect = data.value<SlashEffectStruct>();
+            return effect.slash->hasFlag("xiangle_invoke");
+        }
 
         return false;
     }

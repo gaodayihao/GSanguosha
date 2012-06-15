@@ -36,14 +36,18 @@ QString Slash::getSubtype() const{
     return "attack_card";
 }
 
-static bool CompareBySeat(const ServerPlayer *a, const ServerPlayer *b){
-    return a->getSeat() < b->getSeat();
+void Slash::onUse(Room *room, const CardUseStruct &card_use) const{
+    CardUseStruct new_use = card_use;
+    if(new_use.to.length() > 1)
+    {
+        qStableSort(new_use.to.begin(), new_use.to.end(), CompareByActionOrder);
+    }
+
+    BasicCard::onUse(room, new_use);
 }
 
 void Slash::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    QList<ServerPlayer *> temp_targets = targets;
-    qStableSort(temp_targets.begin(), temp_targets.end(), CompareBySeat);
-    BasicCard::use(room, source, temp_targets);
+    BasicCard::use(room, source, targets);
 
     if(this->hasFlag("drank")){
         LogMessage log;
@@ -80,10 +84,10 @@ bool Slash::targetFilter(const QList<const Player *> &targets, const Player *to_
     int slash_targets = 1;
 
     if(Self->hasFlag("halberdusing"))
-        slash_targets += 1;
+        slash_targets ++;
 
     if(Self->hasSkill("shenji") && Self->getWeapon() == NULL)
-        slash_targets = 3;
+        slash_targets += 2;
 
     bool distance_limit = true;
 
@@ -251,7 +255,7 @@ public:
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
 
-        if(effect.to->hasSkill("kongcheng") && effect.to->isKongcheng())
+        if(room->isProhibited(player, effect.to, effect.slash))
             return false;
 
         int blade = player->getWeapon()->getEffectiveId();
@@ -403,7 +407,6 @@ Axe::Axe(Suit suit, int number)
 }
 
 HalberdCard::HalberdCard(){
-    once = true;
 }
 
 bool HalberdCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -448,13 +451,6 @@ public:
         events << CardonUse;
     }
 
-    ServerPlayer *findPlayerByobjectName(Room *room, QString Name) const{
-        foreach(ServerPlayer *sp,room->getAlivePlayers())
-            if(sp->objectName() == Name)
-                return sp;
-        return NULL;
-    }
-
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
 
@@ -475,6 +471,7 @@ public:
                     room->setPlayerFlag(sp, "-newHalberdtarget");
                 }
 
+            qStableSort(use.to.begin(), use.to.end(), Card::CompareByActionOrder);
             data = QVariant::fromValue(use);
         }
 
@@ -602,11 +599,39 @@ AmazingGrace::AmazingGrace(Suit suit, int number)
     setObjectName("amazing_grace");
 }
 
-void AmazingGrace::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
+void AmazingGrace::onUse(Room *room, const CardUseStruct &card_use) const{
+    CardUseStruct use = card_use;
+    use.to = room->getAllPlayers();
+    OnUse(room, use);
+}
+
+void AmazingGrace::OnUse(Room *room, const CardUseStruct &card_use) const{
+    ServerPlayer *player = card_use.from;
+    QVariant data = QVariant::fromValue(card_use);
+    RoomThread *thread = room->getThread();
+
+    thread->trigger(CardonUse, room, player, data);
+    CardUseStruct use = data.value<CardUseStruct>();
+
+    if(will_throw)
+    {
+        CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
+        if (card_use.to.size() == 1) reason.m_targetId = card_use.to.first()->objectName();
+        room->moveCardTo(this, NULL, Player::PlaceTakeoff, reason, true);
+    }
+
+    LogMessage log;
+    log.from = use.from;
+    log.to = use.to;
+    log.type = "#UseCard";
+    log.card_str = use.card->toString();
+    room->sendLog(log);
+
+
+    CardMoveReason reason(CardMoveReason::S_REASON_USE, use.from->objectName());
     room->moveCardTo(this, NULL, Player::DiscardPile, reason);
 
-    QList<ServerPlayer *> players = targets.isEmpty() ? room->getAllPlayers() : targets;
+    QList<ServerPlayer *> players = use.to.isEmpty() ? room->getAllPlayers() : use.to;
     QList<int> card_ids = room->getNCards(players.length());
     room->fillAG(card_ids);
 
@@ -616,9 +641,18 @@ void AmazingGrace::use(Room *room, ServerPlayer *source, const QList<ServerPlaye
     }
     room->setTag("AmazingGrace", ag_list);
 
-    GlobalEffect::use(room, source, players);
+    use.to = players;
+    data = QVariant::fromValue(use);
 
-    ag_list = room->getTag("AmazingGrace").toList();
+    thread->trigger(CardUsed, room, use.from, data);
+
+    thread->trigger(CardFinished, room, use.from, data);
+}
+
+void AmazingGrace::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
+    GlobalEffect::use(room, source, targets);
+
+    QVariantList ag_list = room->getTag("AmazingGrace").toList();
 
     // throw the rest cards
     foreach(QVariant card_id, ag_list){

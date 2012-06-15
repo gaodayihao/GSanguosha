@@ -63,7 +63,7 @@ class GuhuoCard: public SkillCard{
 
 public:
     Q_INVOKABLE GuhuoCard();
-    bool guhuo(ServerPlayer *yuji, const QString guhuo_to, const QString to_guhuo) const;
+    bool guhuo(ServerPlayer *yuji, const QString &guhuo_to) const;
 
     virtual bool targetFixed() const;
     virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;

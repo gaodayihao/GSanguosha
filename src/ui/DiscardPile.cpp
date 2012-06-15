@@ -11,7 +11,7 @@ QList<CardItem*> DiscardPile::removeCardItems(const QList<int> &card_ids, Player
     {
         for (int i = m_visibleCards.size() - 1; i >= 0; i--)
         {
-            if (m_visibleCards[i]->getCard()->getId() == card->getId())
+            if (m_visibleCards[i]->getCard() == NULL || m_visibleCards[i]->getCard()->getId() == card->getId())
             {
                 card->setPos(m_visibleCards[i]->pos());
                 break;
