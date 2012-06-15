@@ -431,15 +431,15 @@ class Kuanggu: public TriggerSkill{
 public:
     Kuanggu():TriggerSkill("kuanggu"){
         frequency = Compulsory;
-        events << DamageProceed << Damage;
+        events << PreHpReuced << PostDamageCaused;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
 
-        if(event == DamageProceed){
+        if(event == PreHpReuced){
             player->tag["InvokeKuanggu"] = player->distanceTo(damage.to) <= 1;
-        }else if(event == Damage){
+        }else if(event == PostDamageCaused){
             bool invoke = player->tag.value("InvokeKuanggu", false).toBool();
             if(invoke){
 
@@ -507,12 +507,12 @@ public:
 class Buqu: public TriggerSkill{
 public:
     Buqu():TriggerSkill("buqu"){
-        events << DamagedProceed << AskForPeachesDone;
+        events << PostHpReduced << AskForPeachesDone;
         default_choice = "alive";
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *zhoutai, QVariant &) const{
-        if(event == DamagedProceed && zhoutai->getHp() < 1){
+        if(event == PostHpReduced && zhoutai->getHp() < 1){
             QString choice = room->askForChoice(zhoutai, objectName(), "alive+dead");
             if(choice == "alive"){
                 room->setTag("Buqu", zhoutai->objectName());
@@ -701,7 +701,7 @@ public:
 class Tianxiang: public TriggerSkill{
 public:
     Tianxiang():TriggerSkill("tianxiang"){
-        events << Predamaged << DamageComplete;
+        events << DamageInflicted << DamageComplete;
 
         view_as_skill = new TianxiangViewAsSkill;
     }
@@ -715,7 +715,7 @@ public:
             xiaoqiao->drawCards(xiaoqiao->getLostHp());
             room->setPlayerFlag(xiaoqiao, "-TianxiangTarget");
         }
-        else if(event == Predamaged && xiaoqiao->hasSkill(objectName()) && !xiaoqiao->isKongcheng()){
+        else if(event == DamageInflicted && xiaoqiao->hasSkill(objectName()) && !xiaoqiao->isKongcheng()){
             DamageStruct damage = data.value<DamageStruct>();
 
             xiaoqiao->tag["TianxiangDamage"] = QVariant::fromValue(damage);

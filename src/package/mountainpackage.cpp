@@ -158,7 +158,7 @@ public:
 class Beige: public TriggerSkill{
 public:
     Beige():TriggerSkill("beige"){
-        events << Damaged;
+        events << PostDamageInflicted;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{

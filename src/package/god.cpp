@@ -23,7 +23,7 @@ void GongxinCard::onEffect(const CardEffectStruct &effect) const{
 class Wuhun: public TriggerSkill{
 public:
     Wuhun():TriggerSkill("wuhun"){
-        events << Damaged;
+        events << PostDamageInflicted;
         frequency = Compulsory;
     }
 
@@ -415,7 +415,7 @@ public:
 class Kuangbao: public TriggerSkill{
 public:
     Kuangbao():TriggerSkill("kuangbao"){
-        events << Damage << Damaged;
+        events << PostDamageCaused << PostDamageInflicted;
         frequency = Compulsory;
     }
 
@@ -423,7 +423,7 @@ public:
         DamageStruct damage = data.value<DamageStruct>();
 
         LogMessage log;
-        log.type = event == Damage ? "#KuangbaoDamage" : "#KuangbaoDamaged";
+        log.type = event == PostDamageCaused ? "#KuangbaoDamage" : "#KuangbaoDamaged";
         log.from = player;
         log.arg = QString::number(damage.damage);
         log.arg2 = objectName();
@@ -757,7 +757,7 @@ public:
     Kuangfeng():TriggerSkill("kuangfeng"){
         view_as_skill = new KuangfengViewAsSkill;
 
-        events << DamagedBegin;
+        events << DamagedForseen;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -875,7 +875,7 @@ public:
     Dawu():TriggerSkill("dawu"){
         view_as_skill = new DawuViewAsSkill;
 
-        events << DamagedBegin;
+        events << DamagedForseen;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -906,7 +906,7 @@ public:
 class Renjie: public TriggerSkill{
 public:
     Renjie():TriggerSkill("renjie"){
-        events << Damaged << CardDiscarded;
+        events << PostDamageInflicted << CardDiscarded;
         frequency = Compulsory;
     }
 
@@ -920,7 +920,7 @@ public:
                     player->gainMark("@bear", n);
                 }
             }
-        }else if(event == Damaged){
+        }else if(event == PostDamageInflicted){
             DamageStruct damage = data.value<DamageStruct>();
             room->playSkillEffect(objectName());
             player->gainMark("@bear", damage.damage);
@@ -1052,7 +1052,7 @@ public:
     Jilve():TriggerSkill("jilve"){
         events << CardUsed << CardResponsed // jizhi
                 << AskForRetrial // guicai
-                << Damaged; // fangzhu
+                << PostDamageInflicted; // fangzhu
 
         view_as_skill = new JilveViewAsSkill;
     }
@@ -1082,7 +1082,7 @@ public:
                 player->loseMark("@bear");
                 guicai->trigger(event, room, player, data);
             }
-        }else if(event == Damaged){
+        }else if(event == PostDamageInflicted){
             const TriggerSkill *fangzhu = Sanguosha->getTriggerSkill("fangzhu");
             if(fangzhu && player->askForSkillInvoke("jilve", data)){
                 player->loseMark("@bear");

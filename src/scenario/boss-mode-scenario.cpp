@@ -126,7 +126,7 @@ public:
 class Daji: public TriggerSkill{
 public:
     Daji():TriggerSkill("daji"){
-        events << Damaged << PhaseChange << CardEffected << Predamaged;
+        events << PostDamageInflicted << PhaseChange << CardEffected << DamageInflicted;
         frequency = Compulsory;
     }
 
@@ -160,7 +160,7 @@ public:
             }
         }
 
-        if(event == Predamaged){
+        if(event == DamageInflicted){
             DamageStruct damage = data.value<DamageStruct>();
             if(damage.damage > 1){
                 damage.damage = damage.damage-1;
@@ -212,14 +212,14 @@ public:
 class Jizhan: public TriggerSkill{
 public:
     Jizhan():TriggerSkill("jizhan"){
-        events << Damage << CardLostOneTime;
+        events << PostDamageCaused << CardLostOneTime;
         frequency = Compulsory;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         if(player->getPhase() != Player::Play) return false;
 
-        if(player->getHp() != player->getMaxHp() && event == Damage){
+        if(player->getHp() != player->getMaxHp() && event == PostDamageCaused){
             RecoverStruct recover;
             recover.who = player;
             recover.recover = 1;
@@ -250,7 +250,7 @@ public:
         :ScenarioRule(scenario)
     {
         events << GameStart << TurnStart << PhaseChange
-               << Death << GameOverJudge << Damaged << HpLost;
+               << Death << GameOverJudge << PostDamageInflicted << HpLost;
 
         boss_banlist << "yuanshao" << "yanliangwenchou" << "zhaoyun" << "guanyu" << "shencaocao";
 
@@ -454,7 +454,7 @@ public:
         }
 
         case HpLost:
-        case Damaged:{
+        case PostDamageInflicted:{
             if(player->isLord()){
                 if(player->getHp() <= 3 && player->getMark("@frantic")<=0){
                     LogMessage log;

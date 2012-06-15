@@ -310,7 +310,7 @@ public:
 class LuoyiBuff: public TriggerSkill{
 public:
     LuoyiBuff():TriggerSkill("#luoyi"){
-        events << DamageBegin;
+        events << DamageForseen;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -1516,7 +1516,7 @@ protected:
 class Shenjia: public TriggerSkill{
 public:
     Shenjia():TriggerSkill("shenjia"){
-        events << Predamaged;
+        events << DamageInflicted;
         frequency = Compulsory;
     }
 

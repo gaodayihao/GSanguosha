@@ -149,7 +149,7 @@ Fan::Fan(Suit suit, int number):Weapon(suit, number, 4){
 class GudingBladeSkill: public WeaponSkill{
 public:
     GudingBladeSkill():WeaponSkill("guding_blade"){
-        events << Predamage;
+        events << DamageCaused;
     }
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
@@ -185,7 +185,7 @@ GudingBlade::GudingBlade(Suit suit, int number):Weapon(suit, number, 2){
 class VineSkill: public ArmorSkill{
 public:
     VineSkill():ArmorSkill("vine"){
-        events << Predamaged << SlashEffected << CardEffected;
+        events << DamageInflicted << SlashEffected << CardEffected;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
@@ -219,7 +219,7 @@ public:
 
                 return true;
             }
-        }else if(event == Predamaged){
+        }else if(event == DamageInflicted){
             DamageStruct damage = data.value<DamageStruct>();
             if(damage.nature == DamageStruct::Fire){
                 LogMessage log;
@@ -249,7 +249,7 @@ Vine::Vine(Suit suit, int number):Armor(suit, number){
 class SilverLionSkill: public ArmorSkill{
 public:
     SilverLionSkill():ArmorSkill("silver_lion"){
-        events << Predamaged << CardLostOnePiece;
+        events << DamageInflicted << CardLostOnePiece;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -257,7 +257,7 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
-        if(event == Predamaged && ArmorSkill::triggerable(player))
+        if(event == DamageInflicted && ArmorSkill::triggerable(player))
         {
             DamageStruct damage = data.value<DamageStruct>();
             if(damage.damage > 1){

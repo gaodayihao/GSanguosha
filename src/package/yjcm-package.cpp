@@ -141,7 +141,7 @@ private:
 class JiushiFlip: public TriggerSkill{
 public:
     JiushiFlip():TriggerSkill("#jiushi-flip"){
-        events << CardUsed << DamageDone << DamageComplete;
+        events << CardUsed << HpReduced << DamageComplete;
     }
 
     virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *player, QVariant &data) const{
@@ -149,10 +149,10 @@ public:
             CardUseStruct use = data.value<CardUseStruct>();
             if(use.card->getSkillName() == "jiushi")
                 player->turnOver();
-        }else if(event == DamageDone){
-            player->tag["DamageDoneFace"] = player->faceUp();
+        }else if(event == HpReduced){
+            player->tag["HpReducedFace"] = player->faceUp();
         }else if(event == DamageComplete){
-            bool faceup = player->tag.value("DamageDoneFace").toBool();
+            bool faceup = player->tag.value("HpReducedFace").toBool();
             if(!faceup && player->askForSkillInvoke("jiushi", data)){
                 room->playSkillEffect("jiushi", 3);
                 player->turnOver();
@@ -166,14 +166,14 @@ public:
 class Wuyan: public TriggerSkill{
 public:
     Wuyan():TriggerSkill("wuyan"){
-        events << Predamaged << Predamage;
+        events << DamageInflicted << DamageCaused;
         frequency = Compulsory;
     }
 
     virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if(damage.card && damage.card->getTypeId() == Card::Trick){
-            if(event == Predamaged){
+            if(event == DamageInflicted){
                 LogMessage log;
                 log.type = "#WuyanGood";
                 log.from = player;
@@ -184,7 +184,7 @@ public:
                 room->setEmotion(player, "skill/wuyan");
             }
 
-            if(event == Predamage){
+            if(event == DamageCaused){
                 LogMessage log;
                 log.type = "#WuyanBad";
                 log.from = player;
@@ -297,7 +297,7 @@ public:
 class Enyuan: public TriggerSkill{
 public:
     Enyuan():TriggerSkill("enyuan"){
-        events << CardGotOneTime << Damaged;
+        events << CardGotOneTime << PostDamageInflicted;
     }
 
     virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *player, QVariant &data) const{
@@ -310,7 +310,7 @@ public:
                 room->drawCards((ServerPlayer*)move->from,1);
                 room->playSkillEffect(objectName(), qrand() % 2 + 1);
             }
-        }else if(event == Damaged){
+        }else if(event == PostDamageInflicted){
             DamageStruct damage = data.value<DamageStruct>();
             ServerPlayer *source = damage.from;
             if(source && source != player){
@@ -546,7 +546,7 @@ public:
 class Pojun: public TriggerSkill{
 public:
     Pojun():TriggerSkill("pojun"){
-        events << Damage;
+        events << PostDamageCaused;
     }
 
     virtual bool trigger(TriggerEvent ,  Room* room, ServerPlayer *player, QVariant &data) const{
@@ -774,7 +774,7 @@ public:
 class Zhichi: public TriggerSkill{
 public:
     Zhichi():TriggerSkill("zhichi"){
-        events << Damaged << CardEffected;
+        events << PostDamageInflicted << CardEffected;
 
         frequency = Compulsory;
     }
@@ -784,7 +784,7 @@ public:
         if(player->getPhase() != Player::NotActive)
             return false;
 
-        if(event == Damaged){
+        if(event == PostDamageInflicted){
             room->setTag("Zhichi", player->objectName());
 
             room->playSkillEffect(objectName());
@@ -1154,7 +1154,7 @@ public:
     Jueqing():TriggerSkill("jueqing")
     {
         frequency = Compulsory;
-        events << DamageBegin;
+        events << DamageForseen;
     }
 
     virtual bool trigger(TriggerEvent ,  Room* room, ServerPlayer *player, QVariant &data) const
@@ -1176,7 +1176,7 @@ public:
     Shangshi():TriggerSkill("shangshi")
     {
         frequency = Compulsory;
-        events << DamagedProceed << HpLost << HpRecover << MaxHpChanged
+        events << PostHpReduced << HpLost << HpRecover << MaxHpChanged
                << CardLostOneTime << CardGotOneTime << CardDrawnDone
                << PhaseChange;
     }

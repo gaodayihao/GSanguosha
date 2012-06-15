@@ -19,7 +19,7 @@ GameRule::GameRule(QObject *)
     events << GameStart << TurnStart << PhaseChange
            << CardUsed << TargetConfirm << TargetConfirmed << CardEffected << CardFinished
            << HpRecover << HpLost
-           << DamageDone << DamagedProceed << DamageComplete
+           << HpReduced << PostHpReduced << DamageComplete
            << AskForPeaches<< AskForPeachesDone << Dying << Death << GameOverJudge
            << SlashProceed << SlashEffected << SlashHit << SlashMissed
            << StartJudge << FinishJudge
@@ -360,7 +360,7 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
             break;
         }
 
-    case DamageDone:{
+    case HpReduced:{
             DamageStruct damage = data.value<DamageStruct>();
             room->sendDamageLog(damage);
 
@@ -378,7 +378,7 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
             break;
         }
-    case DamagedProceed:{
+    case PostHpReduced:{
         DamageStruct damage = data.value<DamageStruct>();
         if(player->getHp() <= 0){
             room->enterDying(player, &damage);
@@ -1320,7 +1320,7 @@ BasaraMode::BasaraMode(QObject *parent)
 {
     setObjectName("basara_mode");
 
-    events << CardLostOnePiece << Predamaged;
+    events << CardLostOnePiece << DamageInflicted;
 
     skill_mark["niepan"] = "@nirvana";
     skill_mark["smallyeyan"] = "@flame";
@@ -1483,7 +1483,7 @@ bool BasaraMode::trigger(TriggerEvent event, Room* room, ServerPlayer *player, Q
 
         break;
     }
-    case Predamaged:{
+    case DamageInflicted:{
         playerShowed(player);
         break;
     }

@@ -113,7 +113,7 @@ public:
 class NosLieren: public TriggerSkill{
 public:
     NosLieren():TriggerSkill("noslieren"){
-        events << Damage;
+        events << PostDamageCaused;
     }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *zhurong, QVariant &data) const{
@@ -279,7 +279,7 @@ public:
 class NosEnyuan: public TriggerSkill{
 public:
     NosEnyuan():TriggerSkill("nosenyuan"){
-        events << HpRecover << Damaged;
+        events << HpRecover << PostDamageInflicted;
         frequency = Compulsory;
     }
 
@@ -302,7 +302,7 @@ public:
                 room->playSkillEffect("enyuan", qrand() % 2 + 1);
 
             }
-        }else if(event == Damaged){
+        }else if(event == PostDamageInflicted){
             DamageStruct damage = data.value<DamageStruct>();
             ServerPlayer *source = damage.from;
             if(source && source != player){
@@ -660,7 +660,7 @@ public:
 class NosYexin: public TriggerSkill{
 public:
     NosYexin():TriggerSkill("nosyexin"){
-        events << Damage << Damaged;
+        events << PostDamageCaused << PostDamageInflicted;
         view_as_skill = new NosYexinViewAsSkill;
     }
 

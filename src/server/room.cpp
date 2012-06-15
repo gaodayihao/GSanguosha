@@ -2712,48 +2712,41 @@ void Room::damage(const DamageStruct &damage_data){
     do
     {
         if(damage_data.from && !damage_data.chain){
-            if(thread->trigger(DamageBegin, this, damage_data.from, data))
+            if(thread->trigger(DamageForseen, this, damage_data.from, data))
                 break;
         }
 
-        bool prevent = thread->trigger(DamagedBegin, this, damage_data.to, data);
+        bool prevent = thread->trigger(DamagedForseen, this, damage_data.to, data);
         if(prevent)
             break;
 
         if(damage_data.from){
-            // Predamage
-            if(thread->trigger(Predamage, this, damage_data.from, data))
+            // DamageCaused
+            if(thread->trigger(DamageCaused, this, damage_data.from, data))
                 break;
         }
 
-        // Predamaged
-        prevent = thread->trigger(Predamaged, this, damage_data.to, data);
+        // DamageInflicted
+        prevent = thread->trigger(DamageInflicted, this, damage_data.to, data);
         if(prevent)
             break;
 
-        // DamageProceed
+        // PreHpReuced
         if(damage_data.from){
-            if(thread->trigger(DamageProceed, this, damage_data.from, data))
-                break;
+            thread->trigger(PreHpReuced, this, damage_data.from, data);
         }
 
         // damage done, should not cause damage process broken
-        thread->trigger(DamageDone, this, damage_data.to, data);
+        thread->trigger(HpReduced, this, damage_data.to, data);
 
-        // DamagedProceed
-        bool broken = thread->trigger(DamagedProceed, this, damage_data.to, data);
-        if(broken)
-            break;
+        // PostHpReduced
+        thread->trigger(PostHpReduced, this, damage_data.to, data);
 
         // damage
-        if(damage_data.from){
-            bool broken = thread->trigger(Damage, this, damage_data.from, data);
-            if(broken)
-                break;
-        }
+        thread->trigger(PostDamageCaused, this, damage_data.from, data);
 
         // damaged
-        thread->trigger(Damaged, this, damage_data.to, data);
+        thread->trigger(PostDamageInflicted, this, damage_data.to, data);
 
     }while(false);
 

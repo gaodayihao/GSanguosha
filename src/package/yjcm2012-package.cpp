@@ -310,7 +310,7 @@ public:
 class Qianxi: public TriggerSkill{
 public:
     Qianxi():TriggerSkill("qianxi"){
-        events << Predamage;
+        events << DamageCaused;
     }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
@@ -516,7 +516,7 @@ public:
 class Shiyong: public TriggerSkill{
 public:
     Shiyong():TriggerSkill("shiyong"){
-        events << Damaged;
+        events << PostDamageInflicted;
         frequency = Compulsory;
     }
 
@@ -573,7 +573,7 @@ public:
 class Jiefan : public TriggerSkill{
 public:
     Jiefan():TriggerSkill("jiefan"){
-        events << AskForPeaches << Predamage << CardFinished;
+        events << AskForPeaches << DamageCaused << CardFinished;
     }
 
     virtual int getPriority() const{
@@ -603,7 +603,7 @@ public:
                 }
             }
         }
-        else if(event == Predamage){
+        else if(event == DamageCaused){
             DamageStruct damage = data.value<DamageStruct>();
             int id = room->getTag("JiefanSlash").toInt();
             if(damage.card && damage.card->inherits("Slash")
@@ -758,12 +758,12 @@ public:
 class Lihuo: public TriggerSkill{
 public:
     Lihuo():TriggerSkill("lihuo"){
-        events << DamageProceed << CardFinished;
+        events << PreHpReuced << CardFinished;
         view_as_skill = new LihuoViewAsSkill;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
-        if(event == DamageProceed){
+        if(event == PreHpReuced){
             DamageStruct damage = data.value<DamageStruct>();
             if(damage.card && damage.card->inherits("Slash") && damage.card->getSkillName() == objectName())
                 player->tag["Invokelihuo"] = true;

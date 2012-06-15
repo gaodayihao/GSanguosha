@@ -194,7 +194,7 @@ private:
 class Huoshou: public TriggerSkill{
 public:
     Huoshou():TriggerSkill("huoshou"){
-        events << DamageBegin;
+        events << DamageForseen;
         frequency = Compulsory;
     }
 
@@ -234,7 +234,7 @@ public:
 class Lieren: public TriggerSkill{
 public:
     Lieren():TriggerSkill("lieren"){
-        events << Damage;
+        events << PostDamageCaused;
     }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *zhurong, QVariant &data) const{
@@ -900,13 +900,13 @@ public:
 class Baonue: public TriggerSkill{
 public:
     Baonue():TriggerSkill("baonue$"){
-        events << Damage << DamageProceed;
+        events << PostDamageCaused << PreHpReuced;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &) const{
-        if(event == DamageProceed)
+        if(event == PreHpReuced)
             player->tag["InvokeBaonue"] = player->getKingdom() == "qun";
-        else if (event == Damage && player->tag.value("InvokeBaonue", false).toBool())
+        else if (event == PostDamageCaused && player->tag.value("InvokeBaonue", false).toBool())
         {
             QList<ServerPlayer *> dongzhuos;
             QList<ServerPlayer *> players = room->getOtherPlayers(player);

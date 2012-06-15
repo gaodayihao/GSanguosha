@@ -242,7 +242,7 @@ bool ScenarioRule::triggerable(const ServerPlayer *) const{
 MasochismSkill::MasochismSkill(const QString &name)
     :TriggerSkill(name)
 {
-    events << Damaged;
+    events << PostDamageInflicted;
 }
 
 int MasochismSkill::getPriority() const{

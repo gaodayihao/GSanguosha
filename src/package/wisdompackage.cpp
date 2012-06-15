@@ -96,7 +96,7 @@ public:
 class Tanlan: public TriggerSkill{
 public:
     Tanlan():TriggerSkill("tanlan"){
-        events << Pindian << Damaged;
+        events << Pindian << PostDamageInflicted;
     }
 
     virtual int getPriority() const{
@@ -104,7 +104,7 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *xuyou, QVariant &data) const{
-        if(event == Damaged){
+        if(event == PostDamageInflicted){
             DamageStruct damage = data.value<DamageStruct>();
             ServerPlayer *from = damage.from;
             if(from && !from->isKongcheng() && !xuyou->isKongcheng() && room->askForSkillInvoke(xuyou, objectName(), data)){
@@ -585,7 +585,7 @@ public:
 class Wenjiu: public TriggerSkill{
 public:
     Wenjiu():TriggerSkill("wenjiu"){
-        events << DamageBegin << SlashProceed;
+        events << DamageForseen << SlashProceed;
         frequency = Compulsory;
     }
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -611,7 +611,7 @@ public:
                 return true;
             }
         }
-        else if(event == DamageBegin){
+        else if(event == DamageForseen){
             DamageStruct damage = data.value<DamageStruct>();
             const Card *reason = damage.card;
             if(!reason || !damage.from->hasSkill(objectName()))
