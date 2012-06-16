@@ -67,7 +67,7 @@ public:
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *caozhi, QVariant &data) const{
 
         CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-        if(move->to_place == Player::DiscardPile && move->from->objectName() != caozhi->objectName() && InvokeLuoying(move->reason)){
+        if(move->to_place == Player::DiscardPile && move->from && move->from->objectName() != caozhi->objectName() && InvokeLuoying(move->reason)){
             QList<CardsMoveStruct> exchangeMove;
             CardsMoveStruct luoyingget;
 
@@ -305,7 +305,7 @@ public:
 
         if(event == CardGotOneTime){
             CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-            if (move->from != NULL && move->card_ids.size() >= 2
+            if (move->from != NULL && move->to_place != Player::DiscardPile && move->card_ids.size() >= 2
                     && room->askForSkillInvoke(player,objectName(),data)){
                 room->drawCards((ServerPlayer*)move->from,1);
                 room->playSkillEffect(objectName(), qrand() % 2 + 1);

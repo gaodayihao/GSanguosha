@@ -1437,7 +1437,7 @@ ServerPlayer *Room::findPlayer(const QString &general_name, bool include_dead) c
 
 QList<ServerPlayer *>Room::findPlayersBySkillName(const QString &skill_name, bool include_dead) const{
     QList<ServerPlayer *> list;
-    foreach(ServerPlayer *player, include_dead ? m_players : getPlayers()){
+    foreach(ServerPlayer *player, include_dead ? m_players : getAllPlayers()){
         if(player->hasSkill(skill_name))
             list << player;
     }
@@ -1445,7 +1445,7 @@ QList<ServerPlayer *>Room::findPlayersBySkillName(const QString &skill_name, boo
 }
 
 ServerPlayer *Room::findPlayerBySkillName(const QString &skill_name, bool include_dead) const{
-    const QList<ServerPlayer *> &list = include_dead ? m_players : getPlayers();
+    const QList<ServerPlayer *> &list = include_dead ? m_players : getAllPlayers();
     foreach(ServerPlayer *player, list){
         if(player->hasSkill(skill_name))
             return player;
@@ -3965,7 +3965,7 @@ void Room::doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target){
         }else if(has_null){
             showCard(target, has_null->getEffectiveId());
             thread->delay();
-            throwCard(has_peach, target);
+            throwCard(has_null, target);
         }
         return;
     }
