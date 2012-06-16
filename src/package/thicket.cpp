@@ -905,6 +905,10 @@ public:
         events << PostDamageCaused << PreHpReuced;
     }
 
+    virtual bool triggerable(const ServerPlayer *) const{
+        return true;
+    }
+
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &) const{
         if(event == PreHpReuced)
             player->tag["InvokeBaonue"] = player->getKingdom() == "qun";

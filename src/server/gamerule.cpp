@@ -603,7 +603,7 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
             JudgeStar judge = data.value<JudgeStar>();
             if(room->getCardPlace(judge->card->getEffectiveId()) == Player::PlaceTakeoff){
                 CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, QString());
-                room->throwCard(judge->card, reason, NULL);
+                room->throwCard(judge->card, reason, judge->who);
             }
 
             LogMessage log;
