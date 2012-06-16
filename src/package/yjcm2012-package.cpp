@@ -588,7 +588,7 @@ public:
                     !room->askForSkillInvoke(handang, objectName(), data))
                     break;
 
-                const Card *slash = room->askForCard(handang, "slash", "jiefan-slash-Use:" + dying.who->objectName(), data, NonTrigger);
+                const Card *slash = room->askForCard(handang, "slash", "jiefan-slash:" + dying.who->objectName(), data, NonTrigger);
 
                 if(slash){
                     room->playSkillEffect(objectName());

@@ -242,10 +242,13 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
                 }
 
 
-                foreach(ServerPlayer *p, room->getAlivePlayers())
-                    thread->trigger(TargetConfirmed, room, p, data);
-
                 card_use = data.value<CardUseStruct>();
+                if(card_use.from && !card_use.to.isEmpty())
+                {
+                    foreach(ServerPlayer *p, room->getAlivePlayers())
+                        thread->trigger(TargetConfirmed, room, p, data);
+                }
+
                 card->use(room, card_use.from, card_use.to);
             }
 
@@ -503,13 +506,13 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
                 damage.damage++;
             }
 
+            effect.to->removeMark("qinggang");
+
             damage.from = effect.from;
             damage.to = effect.to;
             damage.nature = effect.nature;
-
             room->damage(damage);
 
-            effect.to->removeMark("qinggang");
 
             break;
         }

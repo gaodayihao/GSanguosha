@@ -204,6 +204,24 @@ DelayedTrick::DelayedTrick(Suit suit, int number, bool movable)
 {
 }
 
+void DelayedTrick::onUse(Room *room, const CardUseStruct &card_use) const{
+    QVariant data = QVariant::fromValue(card_use);
+    RoomThread *thread = room->getThread();
+
+    thread->trigger(CardonUse, room, card_use.from, data);
+
+    LogMessage log;
+    log.from = card_use.from;
+    log.to = card_use.to;
+    log.type = "#UseCard";
+    log.card_str = toString();
+    room->sendLog(log);
+
+    thread->trigger(CardUsed, room, card_use.from, data);
+
+    thread->trigger(CardFinished, room, card_use.from, data);
+}
+
 void DelayedTrick::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     ServerPlayer *target = targets.value(0, source);
     CardMoveReason reason(CardMoveReason::S_REASON_TRANSFER, source->objectName(), QString(), this->getSkillName(), QString());

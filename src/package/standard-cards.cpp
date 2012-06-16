@@ -219,17 +219,28 @@ DoubleSword::DoubleSword(Suit suit, int number)
 class QinggangSwordSkill: public WeaponSkill{
 public:
     QinggangSwordSkill():WeaponSkill("qinggang_sword"){
-        events << SlashEffect;
+        events << TargetConfirmed;
     }
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *, QVariant &data) const{
-        SlashEffectStruct effect = data.value<SlashEffectStruct>();
-        effect.to->addMark("qinggang");
-
-        if(effect.to->getArmor() || effect.to->hasSkill("bazhen")){
-            room->getThread()->delay(1200);
-            room->setEmotion(effect.from, QString("weapon/%1").arg(objectName()));
+        CardUseStruct use = data.value<CardUseStruct>();
+        bool doAnimate = false;
+        if(use.card->inherits("Slash"))
+        {
+            foreach(ServerPlayer *target, use.to)
+            {
+                target->addMark("qinggang");
+                if(target->getArmor() || target->hasSkill("bazhen"))
+                    doAnimate = true;
+            }
         }
+
+        if(doAnimate)
+        {
+            room->getThread()->delay(1200);
+            room->setEmotion(use.from, QString("weapon/%1").arg(objectName()));
+        }
+
         return false;
     }
 };

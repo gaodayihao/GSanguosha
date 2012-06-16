@@ -240,6 +240,8 @@ public:
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *zhurong, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         ServerPlayer *target = damage.to;
+        if(target->isDead())
+            return false;
         if(damage.card && damage.card->inherits("Slash") && !zhurong->isKongcheng()
             && !target->isKongcheng() && target != zhurong && !damage.chain){
             if(room->askForSkillInvoke(zhurong, objectName(), data)){
@@ -736,7 +738,7 @@ void LuanwuCard::onEffect(const CardEffectStruct &effect) const{
     }
 
     const Card *slash = NULL;
-    if(!luanwu_targets.isEmpty() && (slash = room->askForCard(effect.to, "slash", "@luanwu-slash-Use", QVariant(), NonTrigger))){
+    if(!luanwu_targets.isEmpty() && (slash = room->askForCard(effect.to, "slash", "@luanwu-slash", QVariant(), NonTrigger))){
         ServerPlayer *to_slash;
         if(luanwu_targets.length() == 1)
             to_slash = luanwu_targets.first();

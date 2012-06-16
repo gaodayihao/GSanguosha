@@ -119,6 +119,8 @@ public:
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *zhurong, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         ServerPlayer *target = damage.to;
+        if(target->isDead())
+            return false;
         if(damage.card && damage.card->inherits("Slash") && !zhurong->isKongcheng()
             && !target->isKongcheng() && target != zhurong){
             if(room->askForSkillInvoke(zhurong, objectName(), data)){

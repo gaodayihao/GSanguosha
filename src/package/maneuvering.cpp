@@ -277,7 +277,7 @@ public:
         {
             CardMoveStar move = data.value<CardMoveStar>();
             const Card *lion = Sanguosha->getCard(move->card_id);
-            if(player->isAlive() && player->getMark("qinggang") == 0&& move->from_place == Player::Equip
+            if(player->isAlive() && player->getMark("qinggang") == 0 && move->from_place == Player::Equip
                     && player->getMark("SilverLionUninstall") > 0  && lion->inherits("SilverLion"))
             {
                 room->setPlayerMark(player, "SilverLionUninstall", 0);
