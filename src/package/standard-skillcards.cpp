@@ -9,7 +9,7 @@
 ZhihengCard::ZhihengCard(){
     target_fixed = true;
     once = true;
-    owner_discarded = true;
+    will_throw = true;
 }
 
 void ZhihengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const{
@@ -34,7 +34,9 @@ void RendeCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
     }else
         target = targets.first();
 
-    room->obtainCard(target, this, false);
+    CardMoveReason reason(CardMoveReason::S_REASON_GIVE, source->objectName());
+    reason.m_playerId = target->objectName();
+    room->obtainCard(target, this, reason, false);
 
     int old_value = source->getMark("rende");
     int new_value = old_value + subcards.length();
@@ -51,7 +53,7 @@ void RendeCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
 JieyinCard::JieyinCard(){
     once = true;
     mute = true;
-    owner_discarded = true;
+    will_throw = true;
 }
 
 bool JieyinCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -102,7 +104,8 @@ bool TuxiCard::targetFilter(const QList<const Player *> &targets, const Player *
 void TuxiCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.from->getRoom();
     int card_id = room->askForCardChosen(effect.from, effect.to, "h", "tuxi");
-    room->obtainCard(effect.from, card_id, false);
+    CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
+    room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, false);
 }
 
 FanjianCard::FanjianCard(){
@@ -151,7 +154,7 @@ void KurouCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
 LijianCard::LijianCard(){
     once = true;
     mute = true;
-    owner_discarded = true;
+    will_throw = true;
 }
 
 bool LijianCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -189,7 +192,7 @@ void LijianCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
 
 QingnangCard::QingnangCard(){
     once = true;
-    owner_discarded = true;
+    will_throw = true;
 }
 
 bool QingnangCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -232,7 +235,7 @@ void GuicaiCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
 
 LiuliCard::LiuliCard()
 {
-    owner_discarded = true;
+    will_throw = true;
 }
 
 

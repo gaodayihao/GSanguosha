@@ -159,7 +159,7 @@ public:
     GuanduRule(Scenario *scenario)
         :ScenarioRule(scenario)
     {
-        events << GameStart << PhaseChange << PostDamageInflicted << GameOverJudge;
+        events << GameStart << PhaseChange << Damaged << GameOverJudge;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
@@ -205,7 +205,7 @@ public:
             break;
         }
 
-        case PostDamageInflicted:{
+        case Damaged:{
             bool burned = room->getTag("BurnWuchao").toBool();
             if(burned)
                 return false;

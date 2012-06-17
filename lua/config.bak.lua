@@ -1,10 +1,9 @@
-
 -- this script to store the basic configuration for game program itself
 -- and it is a little different from config.ini
 
 config = {
 	version = "2012050301",
-	version_name = "Ë∏èÈùíÁâà",
+	version_name = "Ã§«‡∞Ê",
 	mod_name = "GDMOD",
 	kingdoms = { "wei", "shu", "wu", "qun", "god"},
 	package_names = {
@@ -14,7 +13,10 @@ config = {
         "SPCard",
         "YitianCard",
         "Nostalgia",
-        "New3v3Card",
+		"New3v3Card",
+        "Joy",
+        "Disaster",
+        "JoyEquip",
 
         "Standard",
         "Wind",
@@ -27,7 +29,12 @@ config = {
         "YJCM",
         "YJCM2012",
         "Special3v3",
-        "BGM";
+        "Ling",
+        "BGM",
+        "NostalGeneral",
+        "Yitian",
+        "Wisdom",
+        "Test";
 	},
 
 	scene_names = {

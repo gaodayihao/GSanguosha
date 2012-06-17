@@ -164,13 +164,18 @@ public:
 
         if(card){
             // the only difference for Guicai & Guidao
-            CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, player->objectName(), "huanshi", QString());
-            reason.m_targetId = player->objectName();
-            room->throwCard(judge->card, reason, judge->who);
+            CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, QString());
+            // remove below after TopDrawPile works
+            if(room->getCardPlace(judge->card->getEffectiveId()) != Player::DiscardPile
+                    || room->getCardPlace(judge->card->getEffectiveId()) != Player::Hand)
+                room->throwCard(judge->card, reason, judge->who);
 
             judge->card = Sanguosha->getCard(card->getEffectiveId());
-            room->moveCardTo(judge->card, NULL, Player::PlaceTakeoff,
-                CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->objectName(), "huanshi", QString()), true);
+            /* revive this when TopDrawPile is OK
+            room->moveCardTo(judge->card, player, NULL, Player::TopDrawPile,
+                CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->objectName(), "huanshi", QString()), true); */
+            room->moveCardTo(judge->card, player, judge->who, Player::Special,
+                             CardMoveReason(CardMoveReason::S_REASON_JUDGEDONE, player->objectName(), "huanshi", QString()), true);
             LogMessage log;
             log.type = "$ChangedJudge";
             log.from = player;
@@ -245,8 +250,8 @@ ADD_PACKAGE(New3v3Card)
 Special3v3Package::Special3v3Package():Package("Special3v3")
 {
     General *zhugejin = new General(this, "zhugejin", "wu", 3, true);
-    zhugejin->addSkill(new Hongyuan);
     zhugejin->addSkill(new Huanshi);
+    zhugejin->addSkill(new Hongyuan);
     zhugejin->addSkill(new Mingzhe);
 
     addMetaObject<HuanshiCard>();

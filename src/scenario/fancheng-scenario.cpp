@@ -10,7 +10,7 @@
 class Guagu: public TriggerSkill{
 public:
     Guagu():TriggerSkill("guagu"){
-        events << PostDamageCaused;
+        events << Damage;
 
         frequency = Compulsory;
     }

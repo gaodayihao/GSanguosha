@@ -71,7 +71,7 @@ public:
             foreach(int card_id, player->getPile("hautain")){
                 if(!xuyou)
                 {
-                    CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, xuyou->objectName(), "hautain", QString());
+                    CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, QString(), "hautain", QString());
                     room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
                 }
                 else
@@ -96,7 +96,7 @@ public:
 class Tanlan: public TriggerSkill{
 public:
     Tanlan():TriggerSkill("tanlan"){
-        events << Pindian << PostDamageInflicted;
+        events << Pindian << Damaged;
     }
 
     virtual int getPriority() const{
@@ -104,7 +104,7 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *xuyou, QVariant &data) const{
-        if(event == PostDamageInflicted){
+        if(event == Damaged){
             DamageStruct damage = data.value<DamageStruct>();
             ServerPlayer *from = damage.from;
             if(from && !from->isKongcheng() && !xuyou->isKongcheng() && room->askForSkillInvoke(xuyou, objectName(), data)){
@@ -266,7 +266,9 @@ public:
            && room->askForSkillInvoke(player, objectName())){
             for(int i = 0; i < 4 - handcardnum; i++){
                 int card_id = room->drawCard();
-                room->moveCardTo(Sanguosha->getCard(card_id), player, Player::PlaceTakeoff, true);
+                /* revive this after TopDrawPile works
+                room->moveCardTo(Sanguosha->getCard(card_id), player, Player::TopDrawPile, true);  */
+                room->moveCardTo(Sanguosha->getCard(card_id), player, Player::Special, true);
                 room->getThread()->delay();
 
                 const Card *card = Sanguosha->getCard(card_id);
@@ -585,7 +587,7 @@ public:
 class Wenjiu: public TriggerSkill{
 public:
     Wenjiu():TriggerSkill("wenjiu"){
-        events << DamageForseen << SlashProceed;
+        events << Predamage << SlashProceed;
         frequency = Compulsory;
     }
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -611,7 +613,7 @@ public:
                 return true;
             }
         }
-        else if(event == DamageForseen){
+        else if(event == Predamage){
             DamageStruct damage = data.value<DamageStruct>();
             const Card *reason = damage.card;
             if(!reason || !damage.from->hasSkill(objectName()))

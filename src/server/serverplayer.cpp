@@ -68,7 +68,8 @@ const Card *ServerPlayer::getRandomHandCard() const{
 }
 
 void ServerPlayer::obtainCard(const Card *card, bool unhide){
-    room->obtainCard(this, card, unhide);
+    CardMoveReason reason(CardMoveReason::S_REASON_GOTCARD, objectName());
+    room->obtainCard(this, card, reason, unhide);
 }
 
 void ServerPlayer::throwAllEquips(){
@@ -118,7 +119,7 @@ void ServerPlayer::clearPrivatePilesExcept(const QString &except){
         QList<int> &pile = piles[pile_name];
 
         foreach(int card_id, pile){
-            CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, this->objectName());
+            CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, QString());
             room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
             QString pile_command = QString("%1:%2-%3").arg(objectName()).arg(pile_name).arg(card_id);
             room->broadcastInvoke("pile", pile_command);

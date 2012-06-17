@@ -23,7 +23,7 @@ void GongxinCard::onEffect(const CardEffectStruct &effect) const{
 class Wuhun: public TriggerSkill{
 public:
     Wuhun():TriggerSkill("wuhun"){
-        events << PostDamageInflicted;
+        events << Damaged;
         frequency = Compulsory;
     }
 
@@ -376,21 +376,29 @@ public:
     virtual void onDamaged(ServerPlayer *shencc, const DamageStruct &damage) const{
         Room *room = shencc->getRoom();
         int i, x = damage.damage;
+        bool can_invoke = false;
+        QList<ServerPlayer *> players = room->getOtherPlayers(shencc);
         for(i=0; i<x; i++){
-            if(shencc->askForSkillInvoke(objectName())){
+            foreach(ServerPlayer *player, players){
+                if(!player->isAllNude()){
+                    can_invoke = true;
+                    break;
+                }
+            }
+            if(can_invoke && shencc->askForSkillInvoke(objectName())){
                 room->playSkillEffect(objectName());
 
-                QList<ServerPlayer *> players = room->getOtherPlayers(shencc);
                 if(players.length() >=5)
                     room->broadcastInvoke("animate", "lightbox:$guixin");
 
                 foreach(ServerPlayer *player, players){
                     if(!player->isAllNude()){
+                        CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, shencc->objectName());
                         int card_id = room->askForCardChosen(shencc, player, "hej", objectName());
-                        room->obtainCard(shencc, card_id, room->getCardPlace(card_id) != Player::Hand);
+                        room->obtainCard(shencc, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::Hand);
                     }
                 }
-
+                can_invoke = false;
                 shencc->turnOver();
             }else
                 break;
@@ -415,7 +423,7 @@ public:
 class Kuangbao: public TriggerSkill{
 public:
     Kuangbao():TriggerSkill("kuangbao"){
-        events << PostDamageCaused << PostDamageInflicted;
+        events << Damage << Damaged;
         frequency = Compulsory;
     }
 
@@ -423,7 +431,7 @@ public:
         DamageStruct damage = data.value<DamageStruct>();
 
         LogMessage log;
-        log.type = event == PostDamageCaused ? "#KuangbaoDamage" : "#KuangbaoDamaged";
+        log.type = event == Damage ? "#KuangbaoDamage" : "#KuangbaoDamaged";
         log.from = player;
         log.arg = QString::number(damage.damage);
         log.arg2 = objectName();
@@ -513,7 +521,6 @@ void ShenfenCard::use(Room *room, ServerPlayer *shenlvbu, const QList<ServerPlay
 }
 
 WuqianCard::WuqianCard(){
-    once = true;
 }
 
 bool WuqianCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -648,7 +655,8 @@ public:
             stars.removeOne(card_id);
             ++n;
 
-            room->obtainCard(shenzhuge, card_id, false);
+            CardMoveReason reason(CardMoveReason::S_REASON_EXCHANGE_FROM_PILE, shenzhuge->objectName());
+            room->obtainCard(shenzhuge, Sanguosha->getCard(card_id), reason, false);
             shenzhuge->invoke("clearAG");
         }
 
@@ -680,7 +688,7 @@ public:
         for(int i = 0; i < n; i++){
             room->fillAG(stars, shenzhuge);
             int card_id = room->askForAG(shenzhuge, stars, false, "qixing-discard");
-            CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, shenzhuge->objectName(), skillName, QString());
+            CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, QString(), skillName, QString());
             room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
             stars.removeOne(card_id);
             shenzhuge->invoke("clearAG");
@@ -757,7 +765,7 @@ public:
     Kuangfeng():TriggerSkill("kuangfeng"){
         view_as_skill = new KuangfengViewAsSkill;
 
-        events << DamagedForseen;
+        events << DamageForseen;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -875,7 +883,7 @@ public:
     Dawu():TriggerSkill("dawu"){
         view_as_skill = new DawuViewAsSkill;
 
-        events << DamagedForseen;
+        events << DamageForseen;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -906,7 +914,7 @@ public:
 class Renjie: public TriggerSkill{
 public:
     Renjie():TriggerSkill("renjie"){
-        events << PostDamageInflicted << CardDiscarded;
+        events << Damaged << CardDiscarded;
         frequency = Compulsory;
     }
 
@@ -920,7 +928,7 @@ public:
                     player->gainMark("@bear", n);
                 }
             }
-        }else if(event == PostDamageInflicted){
+        }else if(event == Damaged){
             DamageStruct damage = data.value<DamageStruct>();
             room->playSkillEffect(objectName());
             player->gainMark("@bear", damage.damage);
@@ -1052,7 +1060,7 @@ public:
     Jilve():TriggerSkill("jilve"){
         events << CardUsed << CardResponsed // jizhi
                 << AskForRetrial // guicai
-                << PostDamageInflicted; // fangzhu
+                << Damaged; // fangzhu
 
         view_as_skill = new JilveViewAsSkill;
     }
@@ -1082,7 +1090,7 @@ public:
                 player->loseMark("@bear");
                 guicai->trigger(event, room, player, data);
             }
-        }else if(event == PostDamageInflicted){
+        }else if(event == Damaged){
             const TriggerSkill *fangzhu = Sanguosha->getTriggerSkill("fangzhu");
             if(fangzhu && player->askForSkillInvoke("jilve", data)){
                 player->loseMark("@bear");

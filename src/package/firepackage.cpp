@@ -11,6 +11,7 @@ QuhuCard::QuhuCard(){
     once = true;
     mute = true;
     will_throw = false;
+    as_pindian = true;
 }
 
 bool QuhuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -149,7 +150,7 @@ public:
 
 QiangxiCard::QiangxiCard(){
     once = true;
-    owner_discarded = true;
+    will_throw = true;
 }
 
 bool QiangxiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -314,6 +315,8 @@ public:
         }else if(event == FinishJudge){
             JudgeStar judge = data.value<JudgeStar>();
             if(judge->reason == "shuangxiong"){
+                CardMoveReason reason(CardMoveReason::S_REASON_GOTBACK, judge->who->objectName());
+                room->obtainCard(shuangxiong, judge->card, reason, false);
                 shuangxiong->obtainCard(judge->card);
                 return true;
             }
@@ -339,7 +342,10 @@ public:
             if(pangde->askForSkillInvoke(objectName(), data)){
                 room->playSkillEffect(objectName());
                 int to_throw = room->askForCardChosen(pangde, effect.to, "he", objectName());
-                room->throwCard(to_throw, effect.to);
+                CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, effect.to->objectName());
+                reason.m_playerId = pangde->objectName();
+                reason.m_targetId = effect.to->objectName();
+                room->moveCardTo(Sanguosha->getCard(to_throw), NULL, NULL, Player::DiscardPile, reason);
             }
         }
 
@@ -492,6 +498,7 @@ public:
 TianyiCard::TianyiCard(){
     once = true;
     will_throw = false;
+    as_pindian = true;
 }
 
 bool TianyiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{

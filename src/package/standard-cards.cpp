@@ -179,29 +179,35 @@ Crossbow::Crossbow(Suit suit, int number)
 class DoubleSwordSkill: public WeaponSkill{
 public:
     DoubleSwordSkill():WeaponSkill("double_sword"){
-        events << SlashEffect;
+        events << TargetConfirmed;
     }
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
-        SlashEffectStruct effect = data.value<SlashEffectStruct>();
+        CardUseStruct use = data.value<CardUseStruct>();
+        if(use.from->objectName() != player->objectName())
+            return false;
+        foreach(ServerPlayer *to, use.to){
+            if(use.from->getGeneral()->isMale() != to->getGeneral()->isMale()
+                && use.card->inherits("Slash")){
+                if(use.from->askForSkillInvoke(objectName())){
+                    bool draw_card = false;
 
-        if(effect.from->getGeneral()->getGender() != effect.to->getGeneral()->getGender()){
-            if(effect.from->askForSkillInvoke(objectName())){
-                bool draw_card = false;
+                    room->setEmotion(player, QString("weapon/%1").arg(objectName()));
 
-                room->setEmotion(player, QString("weapon/%1").arg(objectName()));
-
-                if(effect.to->isKongcheng())
-                    draw_card = true;
-                else{
-                    QString prompt = "double-sword-card:" + effect.from->getGeneralName();
-                    const Card *card = room->askForCard(effect.to, ".", prompt, QVariant(), CardDiscarded);
-                    if(!card)
+                    if(to->isKongcheng())
                         draw_card = true;
-                }
+                    else{
+                        QString prompt = "double-sword-card:" + use.from->getGeneralName();
+                        const Card *card = room->askForCard(to, ".", prompt, QVariant(), CardDiscarded);
+                        if(card){
+                            room->throwCard(card, to);
+                        }else
+                            draw_card = true;
+                    }
 
-                if(draw_card)
-                    effect.from->drawCards(1);
+                    if(draw_card)
+                       use.from->drawCards(1);
+                }
             }
         }
 
@@ -608,62 +614,30 @@ AmazingGrace::AmazingGrace(Suit suit, int number)
     :GlobalEffect(suit, number)
 {
     setObjectName("amazing_grace");
+    has_preact = true;
 }
 
-void AmazingGrace::onUse(Room *room, const CardUseStruct &card_use) const{
-    CardUseStruct use = card_use;
-    use.to = room->getAllPlayers();
-    OnUse(room, use);
-}
-
-void AmazingGrace::OnUse(Room *room, const CardUseStruct &card_use) const{
-    ServerPlayer *player = card_use.from;
-    QVariant data = QVariant::fromValue(card_use);
-    RoomThread *thread = room->getThread();
-
-    thread->trigger(CardonUse, room, player, data);
-    CardUseStruct use = data.value<CardUseStruct>();
-
-    if(will_throw)
-    {
-        CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
-        if (card_use.to.size() == 1) reason.m_targetId = card_use.to.first()->objectName();
-        room->moveCardTo(this, NULL, Player::PlaceTakeoff, reason, true);
-    }
-
-    LogMessage log;
-    log.from = use.from;
-    log.to = use.to;
-    log.type = "#UseCard";
-    log.card_str = use.card->toString();
-    room->sendLog(log);
-
-
-    CardMoveReason reason(CardMoveReason::S_REASON_USE, use.from->objectName());
-    room->moveCardTo(this, NULL, Player::DiscardPile, reason);
-
-    QList<ServerPlayer *> players = use.to.isEmpty() ? room->getAllPlayers() : use.to;
+void AmazingGrace::doPreAction(Room *room, const CardUseStruct &card_use) const{
+    QList<ServerPlayer *> players = card_use.to.isEmpty() ? room->getAllPlayers() : card_use.to;
     QList<int> card_ids = room->getNCards(players.length());
     room->fillAG(card_ids);
 
     QVariantList ag_list;
     foreach(int card_id, card_ids){
+        room->setCardFlag(card_id, "visible");
         ag_list << card_id;
     }
     room->setTag("AmazingGrace", ag_list);
-
-    use.to = players;
-    data = QVariant::fromValue(use);
-
-    thread->trigger(CardUsed, room, use.from, data);
-
-    thread->trigger(CardFinished, room, use.from, data);
 }
 
 void AmazingGrace::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    GlobalEffect::use(room, source, targets);
+    CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
+    room->moveCardTo(this, source, NULL, Player::DiscardPile, reason);
 
-    QVariantList ag_list = room->getTag("AmazingGrace").toList();
+    QList<ServerPlayer *> players = targets.isEmpty() ? room->getAllPlayers() : targets;
+    GlobalEffect::use(room, source, players);
+    QVariantList ag_list;
+    ag_list = room->getTag("AmazingGrace").toList();
 
     // throw the rest cards
     foreach(QVariant card_id, ag_list){
@@ -671,7 +645,6 @@ void AmazingGrace::use(Room *room, ServerPlayer *source, const QList<ServerPlaye
     }
 
     room->broadcastInvoke("clearAG");
-    room->removeTag("AmazingGrace");
 }
 
 void AmazingGrace::onEffect(const CardEffectStruct &effect) const{
@@ -763,11 +736,6 @@ void ArcheryAttack::onEffect(const CardEffectStruct &effect) const{
 }
 
 void SingleTargetTrick::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
-    reason.m_skillName = this->getSkillName();
-    if (targets.size() == 1) reason.m_targetId = targets.first()->objectName();
-    room->moveCardTo(this, NULL, Player::DiscardPile, reason);
-
     CardEffectStruct effect;
     effect.card = this;
     effect.from = source;
@@ -781,6 +749,11 @@ void SingleTargetTrick::use(Room *room, ServerPlayer *source, const QList<Server
         effect.to = source;
         room->cardEffect(effect);
     }
+
+    CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
+    reason.m_skillName = this->getSkillName();
+    if (targets.size() == 1) reason.m_targetId = targets.first()->objectName();
+    room->moveCardTo(this, source, NULL, Player::DiscardPile, reason);
 }
 
 Collateral::Collateral(Card::Suit suit, int number)
@@ -905,7 +878,7 @@ Nullification::Nullification(Suit suit, int number)
 void Nullification::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const{
     // does nothing, just throw it
     CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
-    room->moveCardTo(this, NULL, Player::DiscardPile, reason);
+    room->moveCardTo(this, source, NULL, Player::DiscardPile, reason);
 }
 
 bool Nullification::isAvailable(const Player *) const{
@@ -1020,7 +993,8 @@ void Snatch::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.to->getRoom();
     int card_id = room->askForCardChosen(effect.from, effect.to, "hej", objectName());
 
-    room->obtainCard(effect.from, card_id, room->getCardPlace(card_id) != Player::Hand);
+    CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
+    room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::Hand);
 }
 
 Dismantlement::Dismantlement(Suit suit, int number)
@@ -1056,8 +1030,10 @@ void Dismantlement::onEffect(const CardEffectStruct &effect) const{
 
     Room *room = effect.to->getRoom();
     int card_id = room->askForCardChosen(effect.from, effect.to, "hej", objectName());
-    CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLED, effect.to->objectName());
-    room->throwCard(Sanguosha->getCard(card_id), reason, effect.to);
+    CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, effect.to->objectName());
+    reason.m_playerId = effect.from->objectName();
+    reason.m_targetId = effect.to->objectName();
+    room->moveCardTo(Sanguosha->getCard(card_id), NULL, NULL, Player::DiscardPile, reason);
     // room->throwCard(card_id, room->getCardPlace(card_id) == Player::Judging ? NULL : effect.to);
 
     LogMessage log;
@@ -1146,11 +1122,17 @@ public:
             room->setEmotion(player, QString("weapon/%1").arg(objectName()));
 
             int card_id = room->askForCardChosen(player, damage.to, "he", "ice_sword");
-            room->throwCard(card_id, damage.to);
+            CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, damage.to->objectName());
+            reason.m_playerId = damage.from->objectName();
+            reason.m_targetId = damage.to->objectName();
+            room->moveCardTo(Sanguosha->getCard(card_id), NULL, NULL, Player::DiscardPile, reason);
 
             if(!damage.to->isNude()){
                 card_id = room->askForCardChosen(player, damage.to, "he", "ice_sword");
-                room->throwCard(card_id, damage.to);
+                CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, damage.to->objectName());
+                reason.m_playerId = damage.from->objectName();
+                reason.m_targetId = damage.to->objectName();
+                room->moveCardTo(Sanguosha->getCard(card_id), NULL, NULL, Player::DiscardPile, reason);
             }
 
             return true;

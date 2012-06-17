@@ -146,7 +146,8 @@ SOURCES += \
         src/ui/GeneralCardContainerUI.cpp \
         src/ui/DiscardPile.cpp \
         src/core/structs.cpp \
-    src/ui/SkinBank.cpp
+    src/ui/SkinBank.cpp \
+    src/package/lingpackage.cpp
 
 HEADERS += \
         src/client/aux-skills.h \
@@ -278,7 +279,8 @@ HEADERS += \
 	src/ui/GeneralCardContainerUI.h \
         src/ui/DiscardPile.h \
         src/core/structs.h \
-    src/ui/SkinBank.h
+    src/ui/SkinBank.h \
+    src/package/lingpackage.h
 	
 FORMS += \
         src/dialog/cardoverview.ui \

@@ -148,8 +148,11 @@ public:
             const Card* oldJudge = judge->card;
             judge->card = Sanguosha->getCard(card->getEffectiveId());
 
-            CardsMoveStruct move1(QList<int>(), NULL, Player::PlaceTakeoff,
-                                  CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->objectName(), this->objectName(), QString()));
+            /* revive this after TopDrawPile works
+            CardsMoveStruct move1(QList<int>(), NULL, Player::TopDrawPile,
+                CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->objectName(), this->objectName(), QString()));  */
+            CardsMoveStruct move1(QList<int>(), NULL, Player::DiscardPile,
+                                  CardMoveReason(CardMoveReason::S_REASON_JUDGEDONE, player->objectName(), this->objectName(), QString()));
             move1.card_ids.append(card->getEffectiveId());
 
             CardsMoveStruct move2(QList<int>(), player, Player::Hand,
@@ -401,28 +404,49 @@ public:
     }
 };
 
-class Liegong: public SlashBuffSkill{
+class Liegong:public TriggerSkill{
 public:
-    Liegong():SlashBuffSkill("liegong"){
-
+    Liegong():TriggerSkill("liegong"){
+        events << TargetConfirmed;
     }
 
-    virtual bool buff(const SlashEffectStruct &effect) const{
-        ServerPlayer *huangzhong = effect.from;
-        Room *room = huangzhong->getRoom();
-        if(huangzhong->getPhase() != Player::Play)
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
+        CardUseStruct use = data.value<CardUseStruct>();
+        ServerPlayer *huangzhong = use.from;
+
+        if(!huangzhong || huangzhong == player || !huangzhong->hasSkill(objectName()) ||
+                huangzhong->getPhase() != Player::Play || !use.card->inherits("Slash"))
             return false;
 
-        int num = effect.to->getHandcardNum();
-        if(num >= huangzhong->getHp() || num <= huangzhong->getAttackRange()){
-            if(huangzhong->askForSkillInvoke(objectName(), QVariant::fromValue(effect))){
-                room->playSkillEffect(objectName());
-                room->slashResult(effect, NULL);
+        bool canInvoke = use.to.contains(player);
 
-                return true;
-            }
+        int handcardnum = player->getHandcardNum();
+        if(canInvoke && (handcardnum >= huangzhong->getHp() || handcardnum <= huangzhong->getAttackRange()) &&
+           huangzhong->askForSkillInvoke("liegong", QVariant::fromValue(player))){
+            room->playSkillEffect(objectName());
+            room->setPlayerFlag(player, "LiegongTarget");
         }
+         return false;
+    }
+};
 
+class LiegongHit:public TriggerSkill{
+public:
+    LiegongHit():TriggerSkill("#liegong"){
+        events  << SlashProceed;
+    }
+
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *, QVariant &data) const{
+        SlashEffectStruct effect = data.value<SlashEffectStruct>();
+        if(effect.to->hasFlag("LiegongTarget")){
+            room->slashResult(effect, NULL);
+            room->setPlayerFlag(effect.to, "-LiegongTarget");
+            return true;
+        }
         return false;
     }
 };
@@ -431,7 +455,7 @@ class Kuanggu: public TriggerSkill{
 public:
     Kuanggu():TriggerSkill("kuanggu"){
         frequency = Compulsory;
-        events << PreHpReuced << PostDamageCaused;
+        events << PreHpReuced << Damage;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
@@ -439,7 +463,7 @@ public:
 
         if(event == PreHpReuced){
             player->tag["InvokeKuanggu"] = player->distanceTo(damage.to) <= 1;
-        }else if(event == PostDamageCaused){
+        }else if(event == Damage){
             bool invoke = player->tag.value("InvokeKuanggu", false).toBool();
             if(invoke){
 
@@ -476,7 +500,7 @@ public:
         Room *room = zhoutai->getRoom();
         QList<int> buqu(zhoutai->getPile("buqu"));
 
-        CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, zhoutai->objectName(), "buqu", QString());
+        CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, QString(), "buqu", QString());
         int need = 1 - zhoutai->getHp();
         if(need <= 0){
             // clear all the buqu cards
@@ -507,14 +531,13 @@ public:
 class Buqu: public TriggerSkill{
 public:
     Buqu():TriggerSkill("buqu"){
-        events << PostHpReduced << AskForPeachesDone;
+        events << PostHpReuced << AskForPeachesDone;
         default_choice = "alive";
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *zhoutai, QVariant &) const{
-        if(event == PostHpReduced && zhoutai->getHp() < 1){
-            QString choice = room->askForChoice(zhoutai, objectName(), "alive+dead");
-            if(choice == "alive"){
+        if(event == PostHpReuced && zhoutai->getHp() < 1){
+            if(room->askForSkillInvoke(zhoutai, objectName())){
                 room->setTag("Buqu", zhoutai->objectName());
                 room->playSkillEffect(objectName());
                 const QList<int> &buqu = zhoutai->getPile("buqu");
@@ -660,7 +683,7 @@ public:
 
 TianxiangCard::TianxiangCard()
 {
-    owner_discarded = true;
+    will_throw = true;
 }
 
 void TianxiangCard::onEffect(const CardEffectStruct &effect) const{
@@ -737,7 +760,11 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to) const{
     room->setTag("Guhuoing", true);
     room->setTag("GuhuoType", this->user_string);
 
-    room->moveCardTo(this, yuji, Player::PlaceTakeoff,
+    // this card should put in to the DealingArea with the back on top(for UI)
+    /* revive this after DealingArea works
+    room->moveCardTo(this, yuji, NULL, Player::DealingArea,
+                     CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), "guhuo", user_string), false);  */
+    room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
                      CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), "guhuo", user_string), false);
 
     QList<ServerPlayer *> players = room->getOtherPlayers(yuji);
@@ -790,11 +817,11 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to) const{
         foreach(ServerPlayer *player, players)
             room->setEmotion(player, ".");
         if(yuji->getPhase() == Player::Play)
-            room->moveCardTo(this, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_USE, yuji->objectName(), "guhuo", user_string), true, false);
+            room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
+                             CardMoveReason(CardMoveReason::S_REASON_USE, yuji->objectName(), QString(), user_string), true, false);
         else if(yuji->getPhase() == Player::NotActive)
-            room->moveCardTo(this, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), "guhuo", user_string), true, false);
+            room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
+                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), QString(), user_string), true, false);
 
     }else{
         const Card *card = Sanguosha->getCard(subcards.first());
@@ -807,14 +834,14 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to) const{
         success = real && card->getSuit() == Card::Heart;
 
         if(success && yuji->getPhase() == Player::Play)
-            room->moveCardTo(this, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_USE, yuji->objectName(), "guhuo", user_string), true, false);
+            room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
+                             CardMoveReason(CardMoveReason::S_REASON_USE, yuji->objectName(), QString(), user_string), true, false);
         else if(success && yuji->getPhase() == Player::NotActive)
-            room->moveCardTo(this, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), "guhuo", user_string), true, false);
+            room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
+                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), QString(), user_string), true, false);
         else
-            room->moveCardTo(this, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_PUT, yuji->objectName(), "guhuo", user_string), true, false);
+            room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
+                             CardMoveReason(CardMoveReason::S_REASON_PUT, yuji->objectName(), QString(), user_string), true, false);
 
         foreach(ServerPlayer *player, players){
             room->setEmotion(player, ".");
@@ -980,8 +1007,8 @@ const Card *GuhuoCard::validate(const CardUseStruct *card_use) const{
         const Card *card = Sanguosha->getCard(subcards.first());
         Card *use_card = Sanguosha->cloneCard(user_string, card->getSuit(), card->getNumber());
         use_card->setSkillName("guhuo");
-        use_card->addSubcard(this);/*
-        // TODO: verify this...
+        use_card->addSubcard(this);
+        /* TODO: verify this...
         CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, card_use->from->objectName());
         room->throwCard(this, reason, NULL);*/
 
@@ -1076,6 +1103,8 @@ WindPackage::WindPackage()
 
     huangzhong = new General(this, "huangzhong", "shu");
     huangzhong->addSkill(new Liegong);
+    huangzhong->addSkill(new LiegongHit);
+    related_skills.insertMulti("liegong", "#liegong");
 
     weiyan = new General(this, "weiyan", "shu");
     weiyan->addSkill(new Kuanggu);
@@ -1099,10 +1128,9 @@ WindPackage::WindPackage()
     skills << new HuangtianOthers;
 
     General *xiaoqiao = new General(this, "xiaoqiao", "wu", 3, false);
+    xiaoqiao->addSkill(new Tianxiang);
     xiaoqiao->addSkill(new Hongyan);
     xiaoqiao->addSkill(new HongyanRetrial);
-    xiaoqiao->addSkill(new Tianxiang);
-
     related_skills.insertMulti("hongyan", "#hongyan-retrial");
 
     General *yuji = new General(this, "yuji", "qun", 3);

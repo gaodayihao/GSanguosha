@@ -52,7 +52,7 @@ QString HeroCard::getDescription() const{
 PrepareCard::PrepareCard(){
     target_fixed = true;
     once = true;
-    owner_discarded = true;
+    will_throw = true;
 }
 
 void PrepareCard::onUse(Room *room, const CardUseStruct &card_use) const{
@@ -91,7 +91,7 @@ public:
 
 RecastHeroCard::RecastHeroCard(){
     target_fixed = true;
-    owner_discarded = true;
+    will_throw = true;
     mute = true;
 }
 
@@ -153,7 +153,7 @@ public:
 UseHeroCard::UseHeroCard(){
     target_fixed = true;
     once = true;
-    owner_discarded = true;
+    will_throw = true;
 }
 
 void UseHeroCard::onUse(Room *room, const CardUseStruct &card_use) const{

@@ -113,7 +113,7 @@ public:
 class NosLieren: public TriggerSkill{
 public:
     NosLieren():TriggerSkill("noslieren"){
-        events << PostDamageCaused;
+        events << Damage;
     }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *zhurong, QVariant &data) const{
@@ -136,10 +136,8 @@ public:
 
                 if(!target->isNude()){
                     int card_id = room->askForCardChosen(zhurong, target, "he", objectName());
-                    if(room->getCardPlace(card_id) == Player::Hand)
-                        room->moveCardTo(Sanguosha->getCard(card_id), zhurong, Player::Hand, false);
-                    else
-                        room->obtainCard(zhurong, card_id);
+                    CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, zhurong->objectName());
+                    room->obtainCard(zhurong, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::Hand);
                 }
             }
         }
@@ -208,7 +206,7 @@ public:
 
 NosJujianCard::NosJujianCard(){
     once = true;
-    owner_discarded = true;
+    will_throw = true;
     mute = true;
 }
 
@@ -281,7 +279,7 @@ public:
 class NosEnyuan: public TriggerSkill{
 public:
     NosEnyuan():TriggerSkill("nosenyuan"){
-        events << HpRecover << PostDamageInflicted;
+        events << HpRecover << Damaged;
         frequency = Compulsory;
     }
 
@@ -304,7 +302,7 @@ public:
                 room->playSkillEffect("enyuan", qrand() % 2 + 1);
 
             }
-        }else if(event == PostDamageInflicted){
+        }else if(event == Damaged){
             DamageStruct damage = data.value<DamageStruct>();
             ServerPlayer *source = damage.from;
             if(source && source != player){
@@ -339,12 +337,17 @@ void NosXuanhuoCard::onEffect(const CardEffectStruct &effect) const{
         return;
 
     int card_id = room->askForCardChosen(effect.from, effect.to, "he", objectName());
-    room->obtainCard(effect.from, card_id, room->getCardPlace(card_id) != Player::Hand);
+    CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
+    room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::Hand);
 
     QList<ServerPlayer *> targets = room->getOtherPlayers(effect.to);
     ServerPlayer *target = room->askForPlayerChosen(effect.from, targets, "nosxuanhuo");
     if(target != effect.from)
-        room->obtainCard(target, card_id, false);
+    {
+        CardMoveReason reason(CardMoveReason::S_REASON_GIVE, effect.from->objectName());
+        reason.m_playerId = target->objectName();
+        room->obtainCard(target, Sanguosha->getCard(card_id), reason, false);
+    }
 }
 
 class NosXuanhuo: public OneCardViewAsSkill{
@@ -662,7 +665,7 @@ public:
 class NosYexin: public TriggerSkill{
 public:
     NosYexin():TriggerSkill("nosyexin"){
-        events << PostDamageCaused << PostDamageInflicted;
+        events << Damage << Damaged;
         view_as_skill = new NosYexinViewAsSkill;
     }
 
@@ -737,7 +740,7 @@ public:
             if(!zhonghui->isProhibited(target, card) && !target->containsTrick(card->objectName()))
                 places << "Judging";
 
-            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason, true);
+            room->moveCardTo(card, zhonghui, target, _m_place[getPlace(room, zhonghui, places)], reason, true);
         }
         else if(card->inherits("EquipCard"))
         {
@@ -745,10 +748,10 @@ public:
             if(!target->getEquip(equip->location()))
                 places << "Equip";
 
-            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason, true);
+            room->moveCardTo(card, zhonghui, target, _m_place[getPlace(room, zhonghui, places)], reason, true);
         }
         else
-            room->moveCardTo(card, target, _m_place[getPlace(room, zhonghui, places)], reason, true);
+            room->moveCardTo(card, zhonghui, target, _m_place[getPlace(room, zhonghui, places)], reason, true);
 
         if(target != zhonghui)
             room->drawCards(zhonghui, 1);

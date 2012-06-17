@@ -17,9 +17,9 @@ GameRule::GameRule(QObject *)
     //setParent(parent);
 
     events << GameStart << TurnStart << PhaseChange
-           << CardUsed << TargetConfirm << TargetConfirmed << CardEffected << CardFinished
+           << CardUsed << TargetConfirming << TargetConfirmed << CardEffected << CardFinished
            << HpRecover << HpLost
-           << HpReduced << PostHpReduced << DamageComplete
+           << DamageDone << PostHpReuced << DamageComplete
            << AskForPeaches<< AskForPeachesDone << Dying << Death << GameOverJudge
            << SlashProceed << SlashEffected << SlashHit << SlashMissed
            << StartJudge << FinishJudge
@@ -230,10 +230,12 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
                 ServerPlayer *target;
                 QList<ServerPlayer *> targets = card_use.to;
 
+                if(card_use.card->hasPreAction())
+                    card_use.card->doPreAction(room, card_use);
                 if(card_use.from && !card_use.to.empty()){
                     foreach(ServerPlayer *to, card_use.to){
                         target = to;
-                        while(thread->trigger(TargetConfirm, room, target, data)){
+                        while(thread->trigger(TargetConfirming, room, target, data)){
                             CardUseStruct new_use = data.value<CardUseStruct>();
                             target = new_use.to.at(targets.indexOf(target));
                             targets = new_use.to;
@@ -255,7 +257,7 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
             break;
         }
 
-    case TargetConfirm:{
+    case TargetConfirming:{
         break;
     }
     case TargetConfirmed:{
@@ -363,7 +365,7 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
             break;
         }
 
-    case HpReduced:{
+    case DamageDone:{
             DamageStruct damage = data.value<DamageStruct>();
             room->sendDamageLog(damage);
 
@@ -381,7 +383,7 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
             break;
         }
-    case PostHpReduced:{
+    case PostHpReuced:{
         DamageStruct damage = data.value<DamageStruct>();
         if(player->getHp() <= 0){
             room->enterDying(player, &damage);
@@ -479,10 +481,10 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
                                         .arg(bgm_zhangfei->objectName())
                                         .arg("dahe"),
                                         data,
-                                        JinkUsed);
+                                        CardUsed);
             }
             else
-                jink = room->askForCard(effect.to, "jink", "slash-jink:" + slasher, data, JinkUsed);
+                jink = room->askForCard(effect.to, "jink", "slash-jink:" + slasher, data, CardUsed);
             room->slashResult(effect, jink);
 
             break;
@@ -580,9 +582,11 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
             JudgeStar judge = data.value<JudgeStar>();
             judge->card = Sanguosha->getCard(card_id);
-            room->moveCardTo(judge->card, NULL, Player::PlaceTakeoff,
+            /* revive this after TopDrawPile works
+            room->moveCardTo(judge->card, NULL, NULL, Player::TopDrawPile,
+                            CardMoveReason(CardMoveReason::S_REASON_JUDGE, judge->who->objectName(), QString(), QString(), judge->reason), true);  */
+            room->moveCardTo(judge->card, NULL, judge->who, Player::Special,
                              CardMoveReason(CardMoveReason::S_REASON_JUDGE, judge->who->objectName(), QString(), QString(), judge->reason), true);
-
             LogMessage log;
             log.type = "$InitialJudge";
             log.from = player;
@@ -601,8 +605,8 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
     case FinishJudge:{
             JudgeStar judge = data.value<JudgeStar>();
-            if(room->getCardPlace(judge->card->getEffectiveId()) == Player::PlaceTakeoff){
-                CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, QString());
+            if(room->getCardPlace(judge->card->getEffectiveId()) == Player::Special){
+                CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, judge->who->objectName(), QString(), QString());
                 room->throwCard(judge->card, reason, judge->who);
             }
 
@@ -616,6 +620,12 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
             room->getThread()->delay();
 
+            room->sendJudgeResult(judge);
+            /* revive this after TopDrawPile works
+            if(room->getCardPlace(judge->card->getEffectiveId()) == Player::TopDrawPile){
+              CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, juege->who->objectName(), QString(), QString());
+              room->throwCard(judge->card, reason, judge->who);
+            }  */
             break;
         }
 
@@ -624,9 +634,13 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
 
             LogMessage log;
 
+
             CardMoveReason reason(CardMoveReason::S_REASON_PINDIAN, pindian->from->objectName(), pindian->to->objectName(),
                                   pindian->reason, QString());
-            room->moveCardTo(pindian->from_card, NULL, Player::DiscardPile, reason);
+            /* revive this when DealingArea works
+            room->moveCardTo(pindian->from_card, pindian->from, NULL, Player::DealingArea, reason);   */
+            room->moveCardTo(pindian->from_card, pindian->from, NULL, Player::DiscardPile, reason);
+
             log.type = "$PindianResult";
             log.from = pindian->from;
             log.card_str = pindian->from_card->getEffectIdString();
@@ -634,7 +648,10 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
             room->getThread()->delay();
 
             CardMoveReason reason2(CardMoveReason::S_REASON_PINDIAN, pindian->to->objectName());
-            room->moveCardTo(pindian->to_card, NULL, Player::DiscardPile, reason2);
+            /* revive this when DealingArea works
+            room->moveCardTo(pindian->to_card, pindian->to, NULL, Player::DealingArea, reason);   */
+            room->moveCardTo(pindian->to_card, pindian->to, NULL, Player::DiscardPile, reason2);
+
             log.type = "$PindianResult";
             log.from = pindian->to;
             log.card_str = pindian->to_card->getEffectIdString();
@@ -893,7 +910,9 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
 
                 room->setCardFlag(hero, "-justdraw");
                 room->setCardFlag(heroTarget, "-justdraw");
-                CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLED, effect.to->objectName());
+                CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, effect.to->objectName());
+                reason.m_playerId = player->objectName();
+                reason.m_targetId = target->objectName();
                 room->throwCard(hero, player);
                 room->throwCard(Sanguosha->getCard(heroTarget), reason, target);
                 return true;
@@ -1026,7 +1045,10 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
             if(judgeCard->inherits("HeroCard"))
                 room->moveCardTo(judgeCard, NULL, Player::DiscardPile);
             else
-                room->moveCardTo(judge->card, NULL, Player::PlaceTakeoff,
+                /* revive this after TopDrawPile works
+                room->moveCardTo(judge->card, NULL, NULL, Player::TopDrawPile,
+                                CardMoveReason(CardMoveReason::S_REASON_JUDGE, judge->who->objectName(), QString(), QString(), judge->reason), true);  */
+                room->moveCardTo(judge->card, NULL, judge->who, Player::Special,
                                  CardMoveReason(CardMoveReason::S_REASON_JUDGE, judge->who->objectName(), QString(), QString(), judge->reason), true);
             room->getThread()->delay(delay);
         }while(judge->card->inherits("HeroCard"));

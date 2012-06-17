@@ -288,6 +288,7 @@ QWidget *ServerDialog::createAITab(){
 
     role_predictable_checkbox = new QCheckBox(tr("Role predictable"));
     role_predictable_checkbox->setChecked(Config.value("RolePredictable", false).toBool());
+    role_predictable_checkbox->setDisabled(true);
 
     ai_chat_checkbox = new QCheckBox(tr("AI Chat"));
     ai_chat_checkbox->setChecked(Config.value("AIChat", true).toBool());
@@ -450,11 +451,14 @@ void BanlistDialog::addGeneral(const QString &name){
     }
     else{
         const General *general = Sanguosha->getGeneral(name);
-        QIcon icon(general->getPixmapPath("tiny"));
-        QString text = Sanguosha->translate(name);
-        QListWidgetItem *item = new QListWidgetItem(icon, text, list);
-        item->setSizeHint(QSize(60,60));
-        item->setData(Qt::UserRole, name);
+        if(general)
+        {
+            QIcon icon(general->getPixmapPath("tiny"));
+            QString text = Sanguosha->translate(name);
+            QListWidgetItem *item = new QListWidgetItem(icon, text, list);
+            item->setSizeHint(QSize(60,60));
+            item->setData(Qt::UserRole, name);
+        }
     }
 }
 

@@ -9,7 +9,7 @@
 class YitianSwordSkill : public WeaponSkill{
 public:
     YitianSwordSkill():WeaponSkill("yitian_sword"){
-        events << PostDamageInflicted;
+        events << Damaged;
     }
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &) const{
@@ -1427,7 +1427,7 @@ public:
 class Shenli: public TriggerSkill{
 public:
     Shenli():TriggerSkill("shenli"){
-        events << DamageForseen;
+        events << Predamage;
     }
 
     virtual int getPriority() const{
@@ -1736,7 +1736,10 @@ public:
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
-        if(room->obtainable(effect.jink, player) && player->askForSkillInvoke(objectName(), data))
+
+        if(player->getRoom()->getCardPlace(effect.jink->getEffectiveId()) == Player::DiscardPile
+                 && player->askForSkillInvoke(objectName(), data))
+
             player->obtainCard(effect.jink);
 
         return false;

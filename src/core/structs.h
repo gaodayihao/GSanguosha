@@ -107,25 +107,46 @@ public:
     static const int S_REASON_USE = 0x01;
     static const int S_REASON_RESPONSE = 0x02;
     static const int S_REASON_DISCARD = 0x03;
-    static const int S_REASON_JUDGE = 0x04;
+    static const int S_REASON_RECAST = 0x04;          // ironchain etc.
     static const int S_REASON_PINDIAN = 0x05;
-    static const int S_REASON_TRANSFER = 0x06;
-    static const int S_REASON_JUDGEDONE = 0x07;
-    static const int S_REASON_DRAW = 0x08;
-    static const int S_REASON_PUT = 0x09; // Theoretically, this should not be here because "put" will not
-                                          // trigger event such as "manjuan". But let's do a dirty fix for
-                                          // now.
-    static const int S_REASON_SHOW = 0x0A; // For "fire attack" and "fuhun"
-    static const int S_REASON_RECAST = 0x0B; // Tiesuolianhuan
-    static const int S_REASON_NATURAL_ENTER = 0x0C;
-    static const int S_REASON_REMOVE_FROM_PILE = 0x0D;
+    static const int S_REASON_DRAW = 0x06;
+    static const int S_REASON_GOTCARD = 0x07;
+    static const int S_REASON_SHOW = 0x08;
+    static const int S_REASON_TRANSFER = 0x09;
+    static const int S_REASON_PUT = 0x0A;
+
+    //subcategory of use
+    static const int S_REASON_LETUSE = 0x11;           // use a card when self is not current
+
+    //subcategory of response
+    static const int S_REASON_RETRIAL = 0x12;
+
+    //subcategory of discard
+    static const int S_REASON_RULEDISCARD = 0x13;       //  discard at one's Player::Discard for gamerule
+    static const int S_REASON_THROW = 0x23;             /*  gamerule(dying or punish)
+                                                                as the cost of some skills   */
+    static const int S_REASON_CHANGE_EQUIP = 0x33;      //  replace existed equip
+    static const int S_REASON_JUDGEDONE = 0x43;         //  judge card move into discardpile
+    static const int S_REASON_DISMANTLE = 0x53;         //  one throw card of another
+    static const int S_REASON_NATURAL_ENTER = 0x63;     //  a card with no-owner move into discardpile
+    static const int S_REASON_REMOVE_FROM_PILE = 0x73;  //  cards moved out of game go back into discardpile
+
+    //subcategory of gotcard
+    static const int S_REASON_GIVE = 0x17;              // from one hand to another hand
+    static const int S_REASON_EXTRACTION = 0x27;        // from another's place to one's hand
+    static const int S_REASON_GOTBACK = 0x37;           // from dealingerea or topdrawpile to hand
+    static const int S_REASON_RECYCLE = 0x47;           // from discardpile to hand
+    static const int S_REASON_ROB = 0x57;               // got a definite card from other's hand
+
+    //subcategory of show
+    static const int S_REASON_TURNOVER = 0x18;          // show n cards to topdrawpile from drawpile
+    static const int S_REASON_JUDGE = 0x28;             // show a card to topdrawpile from drawpile for judge
+    static const int S_REASON_PREVIEW = 0x38;           // Not done yet, plan for view some cards for self only(guanxing yiji miji)
 
     //subcategory of transfer
-    static const int S_REASON_SWAP = 0x16; // for "dimeng", "ganlu"
-    static const int S_REASON_OVERRIDE = 0x26; // for "guidao"
-    //subcategory of discard
-    static const int S_REASON_DISMANTLED = 0x13; // for "guohechaiqiao"
-    static const int S_REASON_CHANGE_EQUIP = 0x23; // for replacing existing equips
+    static const int S_REASON_SWAP = 0x19;              // exchange card for two players
+    static const int S_REASON_OVERRIDE = 0x29;          // exchange cards from cards in game
+    static const int S_REASON_EXCHANGE_FROM_PILE = 0x39;// exchange cards from cards moved out of game (for qixing only)
 
     static const int S_MASK_BASIC_REASON = 0x0F;
 };
@@ -180,6 +201,16 @@ struct CardsMoveStruct{
         from = NULL;
         to = NULL;
         countAsOneTime = false;
+    }
+
+    inline CardsMoveStruct(const QList<int> &ids, Player* from, Player* to, Player::Place to_place, CardMoveReason reason)
+    {
+        this->card_ids = ids;
+        this->from_place = Player::PlaceUnknown;
+        this->to_place = to_place;
+        this->from = from;
+        this->to = to;
+        this->reason = reason;
     }
 
     inline CardsMoveStruct(const QList<int> &ids, Player* to, Player::Place to_place, CardMoveReason reason)
@@ -280,7 +311,7 @@ struct PhaseChangeStruct{
 };
 
 enum TriggerEvent{
-    NonTrigger,
+    NonTrigger, //those two events actually trigger nothing
 
     GameStart,
     TurnStart,
@@ -300,15 +331,15 @@ enum TriggerEvent{
 
     TurnedOver,
 
+    Predamage,
     DamageForseen,
-    DamagedForseen,
     DamageCaused,
     DamageInflicted,
     PreHpReuced,
-    HpReduced,
-    PostHpReduced,
-    PostDamageCaused,
-    PostDamageInflicted,
+    DamageDone,
+    PostHpReuced,
+    Damage,
+    Damaged,
     DamageComplete,
 
     Dying,
@@ -325,8 +356,6 @@ enum TriggerEvent{
     SlashHit,
     SlashMissed,
 
-    JinkUsed,
-
     CardAsked,
     CardResponsed,
     CardDiscarded,
@@ -339,7 +368,7 @@ enum TriggerEvent{
 
     CardonUse,
     CardUsed,
-    TargetConfirm,
+    TargetConfirming,
     TargetConfirmed,
     CardEffect,
     CardEffected,

@@ -380,7 +380,7 @@ void IronChain::onUse(Room *room, const CardUseStruct &card_use) const{
     if(card_use.to.isEmpty()){
         CardMoveReason reason(CardMoveReason::S_REASON_RECAST, card_use.from->objectName());
         reason.m_skillName = this->getSkillName();
-        room->moveCardTo(this, NULL, Player::DiscardPile, reason);
+        room->moveCardTo(this, card_use.from, NULL, Player::DiscardPile, reason);
         card_use.from->playCardEffect("@recast");
         card_use.from->drawCards(1);
     }else

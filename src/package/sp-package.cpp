@@ -132,37 +132,30 @@ public:
 class Danlao: public TriggerSkill{
 public:
     Danlao():TriggerSkill("danlao"){
-        events << CardUsed << CardEffected;
+        events << TargetConfirmed << CardEffected;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
-        if(event == CardUsed){
+        if(event == TargetConfirmed){
             CardUseStruct use = data.value<CardUseStruct>();
-
-            if (use.to.length() < 2 || use.card->inherits("Collateral") || !use.card->inherits("TrickCard"))
+            if(use.to.length() <= 1 || !use.to.contains(player) ||
+                    !use.card->inherits("TrickCard") || use.card->inherits("Collateral") ||
+                    !room->askForSkillInvoke(player, objectName(), data))
                 return false;
 
-            QList<ServerPlayer*> yangxius = room->findPlayersBySkillName(objectName());
-            foreach(ServerPlayer *yangxiu, yangxius){
-                if(use.to.contains(yangxiu)){
-                    if(room->askForSkillInvoke(yangxiu, objectName(), data)){
-                        yangxiu->tag["Danlao"] = use.card->getEffectiveId();
+            player->tag["Danlao"] = use.card->getEffectiveId();
+            room->playSkillEffect(objectName());
 
-                        room->playSkillEffect(objectName());
+            LogMessage log;
 
-                        LogMessage log;
+            log.type = "#DanlaoAvoid";
+            log.from = player;
+            log.arg = use.card->objectName();
+            log.arg2 = objectName();
 
-                        log.type = "#DanlaoAvoid";
-                        log.from = yangxiu;
-                        log.arg = use.card->objectName();
-                        log.arg2 = objectName();
+            room->sendLog(log);
 
-                        room->sendLog(log);
-
-                        yangxiu->drawCards(1);
-                    }
-                }
-            }
+            player->drawCards(1);
         }
         else{
             if(!player->isAlive() || !player->hasSkill(objectName()))
@@ -172,14 +165,10 @@ public:
             if(player->tag["Danlao"].isNull() || player->tag["Danlao"].toInt() != effect.card->getEffectiveId())
                 return false;
 
-            player->tag.remove("Danlao");
+            player->tag["Danlao"] = QVariant(QString());
             return true;
         }
         return false;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target->getRoom()->findPlayerBySkillName(objectName());
     }
 };
 
@@ -189,6 +178,10 @@ public:
     Yongsi():TriggerSkill("yongsi"){
         events << DrawNCards << PhaseChange;
         frequency = Compulsory;
+    }
+
+    virtual int getPriority() const{
+        return 4;
     }
 
     int getKingdoms(ServerPlayer *yuanshu) const{
@@ -206,6 +199,7 @@ public:
             int x = getKingdoms(yuanshu);
             data = data.toInt() + x;
 
+            Room *room = yuanshu->getRoom();
             LogMessage log;
             log.type = "#YongsiGood";
             log.from = yuanshu;
@@ -213,59 +207,65 @@ public:
             log.arg2 = objectName();
             room->sendLog(log);
 
-            room->playSkillEffect("yongsi", qrand() % 2 + 1);
+            room->playSkillEffect("yongsi");
 
-        }else if(event == PhaseChange && yuanshu->getPhase() == Player::Discard){
-            int x = getKingdoms(yuanshu);
-            int total = yuanshu->getEquips().length() + yuanshu->getHandcardNum();
-            Room *room = yuanshu->getRoom();
+        }else if(event == PhaseChange){
+            PhaseChangeStruct phase_change = data.value<PhaseChangeStruct>();
 
-            if(total <= x){
-                yuanshu->throwAllHandCards();
-                yuanshu->throwAllEquips();
+            if(phase_change.from == Player::Play){
+                int x = getKingdoms(yuanshu);
+                int total = yuanshu->getEquips().length() + yuanshu->getHandcardNum();
+                Room *room = yuanshu->getRoom();
 
-                LogMessage log;
-                log.type = "#YongsiWorst";
-                log.from = yuanshu;
-                log.arg = QString::number(total);
-                log.arg2 = objectName();
-                room->sendLog(log);
+                if(total <= x){
+                    room->playSkillEffect("yongsi");
+                    yuanshu->throwAllHandCards();
+                    yuanshu->throwAllEquips();
 
-            }else if(yuanshu->hasFlag("jilei")){
-                QSet<const Card *> jilei_cards;
-                QList<const Card *> handcards = yuanshu->getHandcards();
-                foreach(const Card *card, handcards){
-                    if(yuanshu->isJilei(card))
-                        jilei_cards << card;
-                }
-                int total = handcards.size() - jilei_cards.size() + yuanshu->getEquips().length();
-                if(x > total){
-                    // show all his cards
-                    room->showAllCards(yuanshu);
                     LogMessage log;
-                    log.type = "#YongsiBad";
+                    log.type = "#YongsiWorst";
                     log.from = yuanshu;
                     log.arg = QString::number(total);
                     log.arg2 = objectName();
                     room->sendLog(log);
-                    yuanshu->throwAllEquips();
-                    DummyCard *dummy_card = new DummyCard;
-                    foreach(const Card *card, handcards.toSet() - jilei_cards){
-                        dummy_card->addSubcard(card);
-                    }
-                    room->throwCard(dummy_card, yuanshu);
-                }
-            }else{
-                room->askForDiscard(yuanshu, "yongsi", x, x, false, true);
 
-                LogMessage log;
-                log.type = "#YongsiBad";
-                log.from = yuanshu;
-                log.arg = QString::number(x);
-                log.arg2 = objectName();
-                room->sendLog(log);
+                }else if(yuanshu->hasFlag("jilei")){
+                    QSet<const Card *> jilei_cards;
+                    QList<const Card *> handcards = yuanshu->getHandcards();
+                    foreach(const Card *card, handcards){
+                        if(yuanshu->isJilei(card))
+                            jilei_cards << card;
+                    }
+                    int total = handcards.size() - jilei_cards.size() + yuanshu->getEquips().length();
+                    if(x > total){
+                        // show all his cards
+                        room->showAllCards(yuanshu);
+                        LogMessage log;
+                        log.type = "#YongsiBad";
+                        log.from = yuanshu;
+                        log.arg = QString::number(total);
+                        log.arg2 = objectName();
+                        room->sendLog(log);
+                        yuanshu->throwAllEquips();
+                        DummyCard *dummy_card = new DummyCard;
+                        foreach(const Card *card, handcards.toSet() - jilei_cards){
+                            dummy_card->addSubcard(card);
+                        }
+                        room->throwCard(dummy_card, yuanshu);
+                        room->playSkillEffect("yongsi");
+                    }
+                }else{
+                    room->askForDiscard(yuanshu, "yongsi", x, x, false, true);
+
+                    LogMessage log;
+                    log.type = "#YongsiBad";
+                    log.from = yuanshu;
+                    log.arg = QString::number(x);
+                    log.arg2 = objectName();
+                    room->sendLog(log);
+                    room->playSkillEffect("yongsi");
+                }
             }
-            room->playSkillEffect("yongsi", qrand() % 2 + 3);
         }
 
         return false;

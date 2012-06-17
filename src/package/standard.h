@@ -105,8 +105,7 @@ class AmazingGrace:public GlobalEffect{
 
 public:
     Q_INVOKABLE AmazingGrace(Card::Suit suit, int number);
-    virtual void OnUse(Room *room, const CardUseStruct &card_use) const;
-    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
+    virtual void doPreAction(Room *room, const CardUseStruct &card_use) const;
     virtual void use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const;
     virtual void onEffect(const CardEffectStruct &effect) const;
 };

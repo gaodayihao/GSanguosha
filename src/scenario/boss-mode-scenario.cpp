@@ -126,7 +126,7 @@ public:
 class Daji: public TriggerSkill{
 public:
     Daji():TriggerSkill("daji"){
-        events << PostDamageInflicted << PhaseChange << CardEffected << DamageInflicted;
+        events << Damaged << PhaseChange << CardEffected << DamageInflicted;
         frequency = Compulsory;
     }
 
@@ -212,14 +212,14 @@ public:
 class Jizhan: public TriggerSkill{
 public:
     Jizhan():TriggerSkill("jizhan"){
-        events << PostDamageCaused << CardLostOneTime;
+        events << Damage << CardLostOneTime;
         frequency = Compulsory;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         if(player->getPhase() != Player::Play) return false;
 
-        if(player->getHp() != player->getMaxHp() && event == PostDamageCaused){
+        if(player->getHp() != player->getMaxHp() && event == Damage){
             RecoverStruct recover;
             recover.who = player;
             recover.recover = 1;
@@ -250,7 +250,7 @@ public:
         :ScenarioRule(scenario)
     {
         events << GameStart << TurnStart << PhaseChange
-               << Death << GameOverJudge << PostDamageInflicted << HpLost;
+               << Death << GameOverJudge << Damaged << HpLost;
 
         boss_banlist << "yuanshao" << "yanliangwenchou" << "zhaoyun" << "guanyu" << "shencaocao";
 
@@ -454,7 +454,7 @@ public:
         }
 
         case HpLost:
-        case PostDamageInflicted:{
+        case Damaged:{
             if(player->isLord()){
                 if(player->getHp() <= 3 && player->getMark("@frantic")<=0){
                     LogMessage log;

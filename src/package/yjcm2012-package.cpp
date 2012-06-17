@@ -17,21 +17,25 @@ public:
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
         JudgeStar judge = data.value<JudgeStar>();
-        if(!judge->who->hasSkill(objectName()))
+        if(judge->who != player)
             return false;
 
         if(player->askForSkillInvoke(objectName(), data)){
             room->playSkillEffect(objectName());
 
             int card_id = room->drawCard();
-            CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, player->objectName(), "zhenlie", QString());
-            reason.m_targetId = player->objectName();
+            CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, player->objectName(), QString(), QString());
+            // remove below after TopDrawPile works
+            if(room->getCardPlace(judge->card->getEffectiveId()) != Player::DiscardPile &&
+                    room->getCardPlace(judge->card->getEffectiveId()) != Player::Hand)
             room->throwCard(judge->card, reason, judge->who);
 
             judge->card = Sanguosha->getCard(card_id);
-            room->moveCardTo(judge->card, NULL, Player::PlaceTakeoff,
-                             CardMoveReason(CardMoveReason::S_REASON_JUDGE, player->getGeneralName(), this->objectName(), QString()), true);
-
+            /* revive this after TopDrawPile works
+            room->moveCardTo(judge->card, player, NULL, Player::TopDrawPile,
+                            CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->getGeneralName(), this->objectName(), QString()), true);  */
+            room->moveCardTo(judge->card, player, judge->who, Player::Special,
+                             CardMoveReason(CardMoveReason::S_REASON_JUDGEDONE, player->getGeneralName(), this->objectName(), QString()), true);
             LogMessage log;
             log.type = "$ChangedJudge";
             log.from = player;
@@ -99,7 +103,7 @@ public:
 };
 
 QiceCard::QiceCard(){
-    will_throw = true;
+    will_throw = false;
     mute = true;
 }
 
@@ -418,8 +422,11 @@ public:
         Room *room = player->getRoom();
         int card_id = room->drawCard();
         const Card *card = Sanguosha->getCard(card_id);
-        room->moveCardTo(card, player, Player::PlaceTakeoff,
-                         CardMoveReason(CardMoveReason::S_REASON_SHOW, player->getGeneralName(), "fuhun", QString()), true);
+        /* revive this after TopDrawPile works
+        room->moveCardTo(card, NULL, NULL, Player::DealingArea,
+                    CardMoveReason(CardMoveReason::S_REASON_TURNOVER, player->getGeneralName(), "fuhun", QString()), true);   */
+        room->moveCardTo(card, NULL, player, Player::Special,
+                         CardMoveReason(CardMoveReason::S_REASON_TURNOVER, player->getGeneralName(), "fuhun", QString()), true);
         room->getThread()->delay();
 
         player->obtainCard(card, true);
@@ -516,7 +523,7 @@ public:
 class Shiyong: public TriggerSkill{
 public:
     Shiyong():TriggerSkill("shiyong"){
-        events << PostDamageInflicted;
+        events << Damaged;
         frequency = Compulsory;
     }
 
@@ -668,7 +675,8 @@ void AnxuCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *>
     ServerPlayer *to = selecteds.takeFirst();
     int id = room->askForCardChosen(from, to, "h", "anxu");
     const Card *cd = Sanguosha->getCard(id);
-    room->obtainCard(from, cd);
+    CardMoveReason reason(CardMoveReason::S_REASON_GIVE, source->objectName());
+    room->obtainCard(from, cd, reason);
     room->showCard(from, id);
     if(cd->getSuit() != Card::Spade)
         source->drawCards(1);
@@ -836,7 +844,7 @@ public:
                 room->broadcastInvoke("clearAG");
                 if(card_id != -1){
                     room->playSkillEffect(objectName());
-                    CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, chengpu->objectName(), "chunlao", QString());
+                    CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, QString(), "chunlao", QString());
                     room->throwCard(Sanguosha->getCard(card_id), reason, NULL);
                     Analeptic *analeptic = new Analeptic(Card::NoSuit, 0);
                     analeptic->setSkillName(objectName());

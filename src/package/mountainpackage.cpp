@@ -47,7 +47,8 @@ void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlay
         room->playSkillEffect("qiaobian", 2);
         foreach(ServerPlayer *target, targets){
             int card_id = room->askForCardChosen(zhanghe, target, "h", "qiaobian");
-            room->obtainCard(zhanghe, card_id, false);
+            CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, zhanghe->objectName());
+            room->obtainCard(zhanghe, Sanguosha->getCard(card_id), reason, false);
         }
     }else if(zhanghe->getPhase() == Player::Play){
         room->playSkillEffect("qiaobian", 3);
@@ -85,7 +86,7 @@ void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlay
         room->setTag("QiaobianTarget", QVariant::fromValue(from));
         ServerPlayer *to = room->askForPlayerChosen(zhanghe, tos, "qiaobian");
         if(to)
-            room->moveCardTo(card, to, place,
+            room->moveCardTo(card, from, to, place,
                              CardMoveReason(CardMoveReason::S_REASON_TRANSFER, zhanghe->objectName(), "qiaobian", QString()));
         room->removeTag("QiaobianTarget");
     }
@@ -158,7 +159,7 @@ public:
 class Beige: public TriggerSkill{
 public:
     Beige():TriggerSkill("beige"){
-        events << PostDamageInflicted;
+        events << Damaged;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -453,25 +454,15 @@ public:
 class Jiang: public TriggerSkill{
 public:
     Jiang():TriggerSkill("jiang"){
-        events << CardUsed << CardEffected;
+        events << TargetConfirmed;
 
         frequency = Frequent;
     }
 
-    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *sunce, QVariant &data) const{
-        const Card *card = NULL;
-        if(event == CardUsed){
-            CardUseStruct use = data.value<CardUseStruct>();
-            card = use.card;
-        }else if(event == CardEffected){
-            CardEffectStruct effect = data.value<CardEffectStruct>();
-            card = effect.card;
-        }
+    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *sunce, QVariant &data) const{
+        CardUseStruct use = data.value<CardUseStruct>();
 
-        if(card == NULL)
-            return false;
-
-        if(card->inherits("Duel") || (card->inherits("Slash") && card->isRed())){
+        if((use.from == sunce || use.to.contains(sunce)) && (use.card->inherits("Duel") || use.card->inherits("Slash")) && use.card->isRed()){
             if(sunce->askForSkillInvoke(objectName(), data))
                 room->playSkillEffect(objectName());
                 sunce->drawCards(1);
@@ -520,8 +511,8 @@ public:
 };
 
 ZhibaCard::ZhibaCard(){
-    will_throw = false;
     mute = true;
+    as_pindian = true;
 }
 
 bool ZhibaCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -747,7 +738,7 @@ bool ZhijianCard::targetFilter(const QList<const Player *> &targets, const Playe
 
 void ZhijianCard::onEffect(const CardEffectStruct &effect) const{
     ServerPlayer *erzhang = effect.from;
-    erzhang->getRoom()->moveCardTo(this, effect.to, Player::Equip,
+    erzhang->getRoom()->moveCardTo(this, erzhang, effect.to, Player::Equip,
                                    CardMoveReason(CardMoveReason::S_REASON_USE, erzhang->objectName(), "zhijian", QString()));
     erzhang->drawCards(1);
 }
@@ -870,13 +861,13 @@ public:
 class Xiangle: public TriggerSkill{
 public:
     Xiangle():TriggerSkill("xiangle"){
-        events << SlashEffected << TargetConfirm;
+        events << SlashEffected << TargetConfirming;
 
         frequency = Compulsory;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *liushan, QVariant &data) const{
-        if(event == TargetConfirm)
+        if(event == TargetConfirming)
         {
             CardUseStruct use = data.value<CardUseStruct>();
             if(use.card && use.card->inherits("Slash")){

@@ -69,7 +69,7 @@ class Player: public QObject
 {
 public:
 	enum Phase {RoundStart, Start, Judge, Draw, Play, Discard, Finish, NotActive};
-	enum Place {Hand, Equip, Judging, Special, DiscardPile, DrawPile, PlaceTakeoff, PlaceUnknown};
+	enum Place {Hand, Equip, Judging, Special, DiscardPile, DrawPile, TopDrawPile, DealingArea, PlaceTakeoff, PlaceUnknown};
 	enum Role {Lord, Loyalist, Rebel, Renegade};
 
 	explicit Player(QObject *parent);
@@ -481,15 +481,15 @@ enum TriggerEvent{
 	
     TurnedOver,
 
+    Predamage,
     DamageForseen,
-    DamagedForseen,
     DamageCaused,
     DamageInflicted,
     PreHpReuced,
-    HpReduced,
-    PostHpReduced,
-    PostDamageCaused,
-    PostDamageInflicted,
+    DamageDone,
+    PostHpReuced,
+    Damage,
+    Damaged,
     DamageComplete,
 
     Dying,
@@ -504,8 +504,6 @@ enum TriggerEvent{
     SlashHit,
     SlashMissed,
 	
-    JinkUsed,
-
     CardAsked,
     CardResponsed,
     CardDiscarded,
@@ -518,7 +516,7 @@ enum TriggerEvent{
 
     CardonUse,
     CardUsed,
-    TargetConfirm,
+    TargetConfirming,
     TargetConfirmed,
     CardEffect,
     CardEffected,
@@ -620,7 +618,8 @@ public:
 	bool isMute() const;
 	bool willThrow() const;
 	bool canJilei() const;
-	bool isOwnerDiscarded() const;
+	bool hasPreAction() const;
+	bool asPindian() const;
 	
 	void setFlags(const char *flag) const;
 	bool hasFlag(const char *flag) const;
@@ -836,7 +835,6 @@ public:
 	void slashResult(const SlashEffectStruct &effect, const Card *jink);
 	void attachSkillToPlayer(ServerPlayer *player, const char *skill_name);
 	void detachSkillFromPlayer(ServerPlayer *player, const char *skill_name, bool sendlog = true);
-	bool obtainable(const Card *card, ServerPlayer *player);
 	void setPlayerFlag(ServerPlayer *player, const char *flag);
 	void setPlayerProperty(ServerPlayer *player, const char *property_name, const QVariant &value);
 	void setPlayerMark(ServerPlayer *player, const char *mark, int value);
@@ -877,6 +875,8 @@ public:
 	void swapPile();
 	QList<int> getDiscardPile();
 	QList<int> getDrawPile();
+	QList<int> getDealingArea();
+	QList<int> getTopDrawPile();
 	int getCardFromPile(const char *card_name);
 	ServerPlayer *findPlayer(const char *general_name, bool include_dead = false) const;
 	ServerPlayer *findPlayerBySkillName(const char *skill_name, bool include_dead = false) const;
@@ -919,7 +919,7 @@ public:
 
 	void throwCard(const Card *card, ServerPlayer *who);
 	void throwCard(int card_id, ServerPlayer *who);
-	void moveCardTo(const Card *card, ServerPlayer *to, Player::Place place, const CardMoveReason &reason, bool open = true);
+	void moveCardTo(const Card *card, ServerPlayer *from, ServerPlayer *to, Player::Place place, const CardMoveReason &reason, bool open = true);
 
 	// interactive methods
 	void activate(ServerPlayer *player, CardUseStruct &card_use);

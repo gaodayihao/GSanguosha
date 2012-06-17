@@ -56,7 +56,6 @@ public:
     void slashResult(const SlashEffectStruct &effect, const Card *jink);
     void attachSkillToPlayer(ServerPlayer *player, const QString &skill_name);
     void detachSkillFromPlayer(ServerPlayer *player, const QString &skill_name, bool sendlog = true);
-    bool obtainable(const Card *card, ServerPlayer *player);
     void setPlayerFlag(ServerPlayer *player, const QString &flag);
     void clearPlayerFlags(ServerPlayer *player);
     void setPlayerProperty(ServerPlayer *player, const char *property_name, const QVariant &value);
@@ -201,6 +200,8 @@ public:
     void swapPile();
     QList<int> getDiscardPile();
     QList<int> getDrawPile();
+    QList<int> getDealingArea();
+    QList<int> getTopDrawPile();
     int getCardFromPile(const QString &card_name);
     QList<ServerPlayer *> findPlayersBySkillName(const QString &skill_name, bool include_dead = false) const;
     ServerPlayer *findPlayer(const QString &general_name, bool include_dead = false) const;
@@ -242,6 +243,7 @@ public:
     void drawCards(QList<ServerPlayer*> players, int n, const QString &reason);
     void obtainCard(ServerPlayer *target, const Card *card, bool unhide = true);
     void obtainCard(ServerPlayer *target, int card_id, bool unhide = true);
+    void obtainCard(ServerPlayer *target, const Card *card,  const CardMoveReason &reason, bool unhide = true);
 
     void throwCard(int card_id, ServerPlayer *who);
     void throwCard(const Card *card, ServerPlayer *who);
@@ -249,8 +251,8 @@ public:
 
     void moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place dstPlace,
                     bool forceMoveVisible = false, bool ignoreChanged = true);
-    void moveCardTo(const Card* card, ServerPlayer* dstPlayer, Player::Place dstPlace, const CardMoveReason &reason,
-                    bool forceMoveVisible = false, bool ignoreChanged = true);
+    void moveCardTo(const Card* card, ServerPlayer* srcPlayer, ServerPlayer* dstPlayer, Player::Place dstPlace,
+                    const CardMoveReason &reason, bool forceMoveVisible = false, bool ignoreChanged = true);
     void moveCardsAtomic(QList<CardsMoveStruct> cards_move, bool forceMoveVisible);
     void moveCards(CardsMoveStruct cards_move, bool forceMoveVisible, bool ignoreChanged = true);
     void moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible, bool ignoreChanged = true);
@@ -334,9 +336,12 @@ private:
     QString mode;
     int player_count;
     ServerPlayer *current;
-    QList<int> pile1, pile2;
+    QList<int> pile1, pile2, pile3, pile4;
     QList<int> table_cards;
-    QList<int> *draw_pile, *discard_pile;
+    QList<int> *draw_pile, *discard_pile, *deal_pile, *top_drawpile;
+    /* @todo: modify this
+    QMap<> _m_tablePiles;
+    QList getTablePile(const QString &pile_name); */
 
     // 20111222
     QTimer *monitor_timer;
