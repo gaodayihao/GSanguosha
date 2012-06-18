@@ -175,7 +175,7 @@ void Room::outputEventStack(){
 }
 
 void Room::enterDying(ServerPlayer *player, DamageStruct *reason){
-    player->setFlags("dying");
+    setPlayerFlag(player, "dying");
 
     QString sos_filename;
     if(player->getGeneral()->isMale())
@@ -3511,7 +3511,7 @@ bool Room::notifyMoveCards(bool isLostPhase, QList<CardsMoveStruct> cards_moves,
                 cards_moves[i].from_place == Player::DiscardPile || cards_moves[i].to_place == Player::DiscardPile ||
                 // @todo: fix this: all cards except yuji's guhuocard,when enters DealingArea,should be visible
                 // All cards leave DealingArea should be visible
-                (cards_moves[i].to_place == Player::DealingArea) || cards_moves[i].from_place == Player::DealingArea ||
+                (cards_moves[i].to_place == Player::DealingArea && cards_moves[i].reason.m_skillName != "guhuo") || cards_moves[i].from_place == Player::DealingArea ||
                 // any card from/to draw-pile-top should be visible
                 (player != NULL && player == dongchaer && (cards_moves[i].isRelevant(dongchaee))));
                 // card from/to dongchaee is also visible to dongchaer
@@ -4198,17 +4198,23 @@ void Room::makeDamage(const QString& source, const QString& target, QSanProtocol
     ServerPlayer* targetPlayer = findChild<ServerPlayer *>(target);
     if (targetPlayer == NULL) return;
     // damage
-    if (nature == S_CHEAT_HP_LOSE)
-    {
+    if (nature == S_CHEAT_HP_LOSE){
         loseHp(targetPlayer, point);
         return;
     }
-    else if (nature == S_CHEAT_HP_RECOVER)
-    {
+    else if (nature == S_CHEAT_MAX_HP_LOSE){
+        loseMaxHp(targetPlayer, point);
+        return;
+    }
+    else if (nature == S_CHEAT_HP_RECOVER){
         RecoverStruct recover;
         recover.who = sourcePlayer;
         recover.recover = point;
         this->recover(targetPlayer, recover);
+        return;
+    }
+    else if (nature == S_CHEAT_MAX_HP_RESET){
+        setPlayerProperty(targetPlayer, "maxhp", point);
         return;
     }
 

@@ -1250,7 +1250,7 @@ void RoomScene::toggleDiscards(){
 
 PlayerCardContainer* RoomScene::_getPlayerCardContainer(Player::Place place, Player* player)
 {
-    if (place == Player::DiscardPile || place == Player::PlaceTakeoff)
+    if (place == Player::DiscardPile || place == Player::DealingArea || place == Player::TopDrawPile)
         return m_discardPile;
     else if (place == Player::DrawPile)
         return m_drawPile;
@@ -1328,7 +1328,10 @@ QString RoomScene::_translateMovementReason(const CardMoveReason &reason)
             result.append(Sanguosha->translate("change equip"));
         }
         else if (reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE){
-            result.append(Sanguosha->translate("judgedone"));
+            if(reason.m_targetId.isEmpty())
+                result.append(Sanguosha->translate("judgedone"));
+            else
+                result.append(Sanguosha->translate("retrialed"));
         }
         else if (reason.m_reason == CardMoveReason::S_REASON_DISMANTLE){
             result.append(Sanguosha->translate("throw"));
@@ -1376,7 +1379,7 @@ void RoomScene::getCards(int moveId, QList<CardsMoveStruct> card_moves)
         if(to_container != m_discardPile
                 || to_container != _getPlayerCardContainer(movement.from_place, movement.from)
                 || movement.reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE
-                /*|| (movement.reason.m_skillName == "guhuo" && !movement.reason.m_eventName.isEmpty())*/)
+                || (movement.reason.m_skillName == "guhuo" && !movement.reason.m_eventName.isEmpty()))
             /*this not a good solution*/
         {
             for (int j = 0; j < cards.size(); j++)
@@ -2825,8 +2828,10 @@ DamageMakerDialog::DamageMakerDialog(QWidget *parent)
     damage_nature->addItem(tr("Normal"), S_CHEAT_NORMAL_DAMAGE);
     damage_nature->addItem(tr("Thunder"), S_CHEAT_THUNDER_DAMAGE);
     damage_nature->addItem(tr("Fire"), S_CHEAT_FIRE_DAMAGE);
-    damage_nature->addItem(tr("HP recover"), S_CHEAT_HP_RECOVER);
+    damage_nature->addItem(tr("Recover HP"), S_CHEAT_HP_RECOVER);
     damage_nature->addItem(tr("Lose HP"), S_CHEAT_HP_LOSE);
+    damage_nature->addItem(tr("Lose Max HP"), S_CHEAT_MAX_HP_LOSE);
+    damage_nature->addItem(tr("Set Max HP"), S_CHEAT_MAX_HP_RESET);
 
     damage_point = new QSpinBox;
     damage_point->setRange(1, 1000);

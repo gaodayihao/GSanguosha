@@ -18,12 +18,7 @@ public:
     virtual void onDamaged(ServerPlayer *caocao, const DamageStruct &damage) const{
         Room *room = caocao->getRoom();
         const Card *card = damage.card;
-        /* revive this after DealingArea works
-        if(room->getCardPlace(card->getEffectiveId()) == Player::DealingArea){  */
-        ServerPlayer *owner = room->getCardOwner(card->getEffectiveId());
-        if((!card->isVirtualCard() || card->getSubcards().length() > 0)
-            && (!owner || owner->objectName() != caocao->objectName())){
-
+        if(room->getCardPlace(card->getEffectiveId()) == Player::DealingArea){
             QVariant data = QVariant::fromValue(card);
             if(room->askForSkillInvoke(caocao, "jianxiong", data)){
                 room->playSkillEffect(objectName());
@@ -289,19 +284,12 @@ public:
         const Card *card = room->askForCard(player, "@guicai", prompt, data);
 
         if(card){
-            // the only difference for Guicai & Guidao
-            CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, judge->who->objectName(), QString(), QString());
-            // remove below after TopDrawPile works
-            if(room->getCardPlace(judge->card->getEffectiveId()) != Player::DiscardPile
-                    || room->getCardPlace(judge->card->getEffectiveId()) != Player::Hand)
-            room->throwCard(judge->card, reason, judge->who);
+            if(room->getCardPlace(judge->card->getEffectiveId()) == Player::TopDrawPile)
+                room->throwCard(judge->card, judge->who);
 
             judge->card = Sanguosha->getCard(card->getEffectiveId());
-            /* revive this after TopDrawPile works
             room->moveCardTo(judge->card, player, NULL, Player::TopDrawPile,
-                             CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->objectName(), "guicai", QString()), true);  */
-            room->moveCardTo(judge->card, player, judge->who, Player::Special,
-                             CardMoveReason(CardMoveReason::S_REASON_JUDGEDONE, player->objectName(), "guicai", QString()), true);
+                             CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->objectName(), "guicai", QString()), true);
             LogMessage log;
             log.type = "$ChangedJudge";
             log.from = player;
@@ -802,7 +790,7 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return target->hasLordSkill("jiuyuan");
+        return target && target->hasLordSkill("jiuyuan");
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *sunquan, QVariant &data) const{
@@ -824,21 +812,21 @@ public:
             if(use.card->inherits("Peach") && use.from && use.from->getKingdom() == "wu"
                     && sunquan != use.from && sunquan->hasFlag("dying"))
             {
-                int index;
-                if(Config.SoundEffectMode == "Qsgs")
-                    index = use.from->getGeneral()->isMale() ? 2 : 3;
-                else
-                    index = 1;
-                room->playSkillEffect("jiuyuan", index);
-                sunquan->setFlags("jiuyuan");
-                room->setCardFlag(use.card->getEffectiveId(), "jiuyuan");
-
+                room->setPlayerFlag(sunquan, "jiuyuan");
+                room->setCardFlag(use.card, "jiuyuan");
             }
+            break;
         }
         case HpRecover: {
             RecoverStruct rec = data.value<RecoverStruct>();
             if(rec.card && rec.card->hasFlag("jiuyuan"))
             {
+                int index = -1;
+                if(Config.SoundEffectMode == "Qsgs")
+                    index = rec.who->getGeneral()->isMale() ? 2 : 3;
+
+                room->playSkillEffect("jiuyuan", index);
+
                 LogMessage log;
                 log.type = "#JiuyuanExtraRecover";
                 log.from = sunquan;
@@ -850,17 +838,15 @@ public:
 
                 data = QVariant::fromValue(rec);
             }
+            break;
         }
 
         case AskForPeachesDone: {
-            if(sunquan->getHp() > 0 && sunquan->hasFlag("jiuyuan")){
-                room->getThread()->delay();
-                if(Config.SoundEffectMode == "Qsgs")
-                    room->playSkillEffect("jiuyuan", 4);
-                else
-                    room->playSkillEffect("jiuyuan", 2);
+            if(sunquan->getHp() > 0 && sunquan->hasFlag("jiuyuan") && Config.SoundEffectMode == "Qsgs"){
+                room->getThread()->delay(2000);
+                room->playSkillEffect("jiuyuan", 4);
             }
-            sunquan->setFlags("-jiuyuan");
+            room->setPlayerFlag(sunquan, "-jiuyuan");
             break;
         }
 

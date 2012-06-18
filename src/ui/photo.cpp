@@ -353,7 +353,7 @@ void Photo::updateReadyItem(bool visible){
 }
 
 void Photo::refresh(){
-    if(player->hasFlag("dying") && player->isAlive()){
+    if(player->getHp() < 1 && player->getMaxHp() >0 && player->isAlive()){
         if(player->getPhase()==Player::NotActive)
             setFrame(SOS);
         else
