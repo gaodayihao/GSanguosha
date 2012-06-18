@@ -1328,10 +1328,7 @@ QString RoomScene::_translateMovementReason(const CardMoveReason &reason)
             result.append(Sanguosha->translate("change equip"));
         }
         else if (reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE){
-            if(reason.m_targetId.isEmpty())
-                result.append(Sanguosha->translate("judgedone"));
-            else
-                result.append(Sanguosha->translate("retrialed"));
+            result.append(Sanguosha->translate("judgedone"));
         }
         else if (reason.m_reason == CardMoveReason::S_REASON_DISMANTLE){
             result.append(Sanguosha->translate("throw"));

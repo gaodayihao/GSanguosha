@@ -572,7 +572,7 @@ public:
 class Jiefan : public TriggerSkill{
 public:
     Jiefan():TriggerSkill("jiefan"){
-        events << AskForPeaches << DamageCaused << CardFinished;
+        events << AskForPeaches << DamageCaused << CardFinished << CardonUse;
     }
 
     virtual int getPriority() const{
@@ -580,6 +580,16 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *handang, QVariant &data) const{
+        if(event == CardonUse && handang->hasFlag("jiefanUsed"))
+        {
+            CardUseStruct use = data.value<CardUseStruct>();
+            if(use.card->inherits("Slash"))
+            {
+                room->playSkillEffect(objectName());
+                room->setPlayerFlag(handang, "-jiefanUsed");
+                room->setCardFlag(use.card, "jiefan-slash");
+            }
+        }
         if(event == AskForPeaches && handang->getPhase() == Player::NotActive){
             DyingStruct dying = data.value<DyingStruct>();
             forever{
@@ -587,17 +597,35 @@ public:
                     !room->askForSkillInvoke(handang, objectName(), data))
                     break;
 
-                const Card *slash = room->askForCard(handang, "slash", "jiefan-slash:" + dying.who->objectName(), data, NonTrigger);
+                if(handang->getAI())
+                {
+                    const Card *slash = room->askForCard(handang, "slash", "jiefan-slash:" + dying.who->objectName(), data, NonTrigger);
 
-                if(slash){
-                    room->playSkillEffect(objectName());
+                    if(slash){
+                        room->playSkillEffect(objectName());
+                        room->setTag("JiefanTarget", data);
+                        room->setCardFlag(slash, "jiefan-slash");
+                        CardUseStruct use;
+                        use.card = slash;
+                        use.from = handang;
+                        use.to << room->getCurrent();
+                        room->useCard(use);
+                    }
+                }
+                else
+                {
+                    room->setPlayerFlag(handang, "SlashUsing");
+                    room->setPlayerFlag(room->getCurrent(), "SlashTarget");
+                    room->setPlayerFlag(handang, "jiefanUsed");
                     room->setTag("JiefanTarget", data);
-                    room->setCardFlag(slash, "jiefan-slash");
-                    CardUseStruct use;
-                    use.card = slash;
-                    use.from = handang;
-                    use.to << room->getCurrent();
-                    room->useCard(use);
+
+                    if(!room->askForUseCard(handang, "slash", "jiefan-slash:" + dying.who->objectName()))
+                    {
+                        room->setPlayerFlag(handang, "-SlashUsing");
+                        room->setPlayerFlag(room->getCurrent(), "-SlashTarget");
+                        room->setPlayerFlag(handang, "-jiefanUsed");
+                        room->removeTag("JiefanTarget");
+                    }
                 }
             }
         }

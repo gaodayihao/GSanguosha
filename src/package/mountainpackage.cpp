@@ -648,16 +648,30 @@ void TiaoxinCard::onEffect(const CardEffectStruct &effect) const{
     else
         room->playSkillEffect("tiaoxin", qrand() % 2 + 1);
 
-    const Card *slash = room->askForCard(effect.to, "slash", "@tiaoxin-slash:" + effect.from->objectName(), QVariant(), NonTrigger);
+    if(effect.to->getAI())
+    {
+        const Card *slash = room->askForCard(effect.to, "slash", "@tiaoxin-slash:" + effect.from->objectName(), QVariant(), NonTrigger);
 
-    if(slash){
-        CardUseStruct use;
-        use.card = slash;
-        use.to << effect.from;
-        use.from = effect.to;
-        room->useCard(use);
-    }else if(!effect.to->isNude()){
-        room->throwCard(room->askForCardChosen(effect.from, effect.to, "he", "tiaoxin"), effect.to);
+        if(slash){
+            CardUseStruct use;
+            use.card = slash;
+            use.to << effect.from;
+            use.from = effect.to;
+            room->useCard(use);
+        }else if(!effect.to->isNude()){
+            room->throwCard(room->askForCardChosen(effect.from, effect.to, "he", "tiaoxin"), effect.to);
+        }
+    }
+    else
+    {
+        room->setPlayerFlag(effect.to, "SlashUsing");
+        room->setPlayerFlag(effect.from, "SlashTarget");
+        if(!room->askForUseCard(effect.to, "slash", "@tiaoxin-slash:" + effect.from->objectName()))
+        {
+            room->setPlayerFlag(effect.to, "-SlashUsing");
+            room->setPlayerFlag(effect.from, "-SlashTarget");
+            room->throwCard(room->askForCardChosen(effect.from, effect.to, "he", "tiaoxin"), effect.to);
+        }
     }
 }
 

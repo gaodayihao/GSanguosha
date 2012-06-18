@@ -2605,8 +2605,6 @@ void Room::useCard(const CardUseStruct &card_use, bool add_history){
 
     card = card_use.card->validate(&card_use);
 
-    if(card == card_use.card && card->hasPreAction())
-        card_use.card->doPreAction(this, card_use);
     if(card == card_use.card)
         card_use.card->onUse(this, card_use);
     else if(card){

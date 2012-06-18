@@ -58,10 +58,20 @@ void ClientPlayer::addKnownHandCard(const Card *card){
 }
 
 bool ClientPlayer::isLastHandCard(const Card *card) const{
-    if(known_cards.length() != 1)
-        return false;
+    if(card->isVirtualCard()){
+        if(card->getSubcards().length() != known_cards.length())
+            return false;
 
-    return known_cards.first()->getEffectiveId() == card->getEffectiveId();
+        foreach(int card_id, card->getSubcards())
+            if(hasEquip(Sanguosha->getCard(card_id)))
+                return false;
+    }else{
+        if(known_cards.length() != 1)
+            return false;
+
+        return card->getEffectiveId() == known_cards.first()->getEffectiveId();
+    }
+    return true;
 }
 
 void ClientPlayer::removeCard(const Card *card, Place place){

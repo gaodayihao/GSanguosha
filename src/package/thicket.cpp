@@ -737,7 +737,9 @@ void LuanwuCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
     QList<ServerPlayer *> players = room->getOtherPlayers(source);
     foreach(ServerPlayer *player, players){
         if(player->isAlive())
+        {
             room->cardEffect(this, source, player);
+        }
     }
 }
 
@@ -763,17 +765,37 @@ void LuanwuCard::onEffect(const CardEffectStruct &effect) const{
     }
 
     const Card *slash = NULL;
-    if(!luanwu_targets.isEmpty() && (slash = room->askForCard(effect.to, "slash", "@luanwu-slash", QVariant(), NonTrigger))){
-        ServerPlayer *to_slash;
-        if(luanwu_targets.length() == 1)
-            to_slash = luanwu_targets.first();
+    if(!luanwu_targets.isEmpty()){
+
+        if(effect.to->getAI()){
+            if((slash = room->askForCard(effect.to, "slash", "@luanwu-slash", QVariant(), NonTrigger))){
+
+                ServerPlayer *to_slash;
+                if(luanwu_targets.length() == 1)
+                    to_slash = luanwu_targets.first();
+                else
+                    to_slash = room->askForPlayerChosen(effect.to, luanwu_targets, "luanwu");
+
+                CardUseStruct use;
+                use.card = slash;
+                use.from = effect.to;
+                use.to << to_slash;
+                room->useCard(use);
+            }
+            else
+                room->loseHp(effect.to);
+        }
         else
-            to_slash = room->askForPlayerChosen(effect.to, luanwu_targets, "luanwu");
-        CardUseStruct use;
-        use.card = slash;
-        use.from = effect.to;
-        use.to << to_slash;
-        room->useCard(use);
+        {
+            room->setPlayerFlag(effect.to, "Luanwu");
+            room->setPlayerMark(effect.to, "Luanwu", nearest);
+            if(!room->askForUseCard(effect.to, "slash", "@luanwu-slash"))
+            {
+                room->loseHp(effect.to);
+            }
+            room->setPlayerMark(effect.to, "Luanwu", 0);
+            room->setPlayerFlag(effect.to, "-Luanwu");
+        }
     }else
         room->loseHp(effect.to);
 }

@@ -603,13 +603,26 @@ void XianzhenSlashCard::onUse(Room *room, const CardUseStruct &card_use) const{
     if(!card_use.from->canSlash(target, false))
         return;
 
-    const Card *slash = room->askForCard(card_use.from, "slash", "@xianzhen-slash", QVariant(), NonTrigger);
-    if(slash){
-        CardUseStruct use;
-        use.card = slash;
-        use.from = card_use.from;
-        use.to << target;
-        room->useCard(use);
+    if(card_use.from->getAI())
+    {
+        const Card *slash = room->askForCard(card_use.from, "slash", "@xianzhen-slash", QVariant(), NonTrigger);
+        if(slash){
+            CardUseStruct use;
+            use.card = slash;
+            use.from = card_use.from;
+            use.to << target;
+            room->useCard(use);
+        }
+    }
+    else
+    {
+        room->setPlayerFlag(card_use.from, "SlashUsing");
+        room->setPlayerFlag(target, "SlashTarget");
+        if(!room->askForUseCard(card_use.from, "slash", "@xianzhen-slash"))
+        {
+            room->setPlayerFlag(card_use.from, "-SlashUsing");
+            room->setPlayerFlag(target, "-SlashTarget");
+        }
     }
 }
 

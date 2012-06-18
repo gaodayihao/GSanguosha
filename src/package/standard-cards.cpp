@@ -38,6 +38,26 @@ QString Slash::getSubtype() const{
 
 void Slash::onUse(Room *room, const CardUseStruct &card_use) const{
     CardUseStruct new_use = card_use;
+
+    if(new_use.from->hasFlag("SlashUsing"))
+    {
+        room->setPlayerFlag(new_use.from, "-SlashUsing");
+        foreach(ServerPlayer *target, room->getAlivePlayers())
+            if(target->hasFlag("SlashTarget"))
+            {
+                room->setPlayerFlag(target, "-SlashTarget");
+                new_use.to << target;
+            }
+    }
+
+    if(card_use.to.length() > 1 && card_use.from->hasWeapon("halberd")
+            && card_use.from->isLastHandCard(card_use.card)
+            && !subcards.contains(card_use.from->getWeapon()->getEffectiveId()))
+    {
+        room->setEmotion(card_use.from, QString("weapon/%1").arg("halberd"));
+        room->getThread()->delay(1200);
+    }
+
     if(new_use.to.length() > 1)
     {
         qStableSort(new_use.to.begin(), new_use.to.end(), CompareByActionOrder);
@@ -76,15 +96,22 @@ void Slash::onEffect(const CardEffectStruct &card_effect) const{
     room->slashEffect(effect);
 }
 
-bool Slash::targetsFeasible(const QList<const Player *> &targets, const Player *) const{
-    return !targets.isEmpty();
+bool Slash::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+    return Self->hasFlag("SlashUsing") || !targets.isEmpty();
 }
 
 bool Slash::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    int slash_targets = 1;
+    if(to_select->hasFlag("SlashTarget"))
+        return false;
 
-    if(Self->hasFlag("halberdusing"))
+    int slash_targets = 0;
+
+    if(!Self->hasFlag("SlashUsing"))
         slash_targets ++;
+
+    if(Self->hasWeapon("halberd") && Self->isLastHandCard(this)
+            && !subcards.contains(Self->getWeapon()->getEffectiveId()))
+        slash_targets += 2;
 
     if(Self->hasSkill("shenji") && Self->getWeapon() == NULL)
         slash_targets += 2;
@@ -113,6 +140,12 @@ bool Slash::targetFilter(const QList<const Player *> &targets, const Player *to_
     if(Self->getOffensiveHorse() && subcards.contains(Self->getOffensiveHorse()->getEffectiveId()))
         distance_fix += 1;
 
+
+    if(Self->hasFlag("Luanwu") && targets.isEmpty())
+    {
+        return Self->distanceTo(to_select) == Self->getMark("Luanwu") && Self->canSlash(to_select, distance_limit, distance_fix);
+    }
+
     return Self->canSlash(to_select, distance_limit, distance_fix);
 }
 
@@ -138,10 +171,6 @@ Peach::Peach(Suit suit, int number):BasicCard(suit, number){
 QString Peach::getSubtype() const{
     return "recover_card";
 }
-
-//QString Peach::getEffectPath(bool is_male) const{
-//    return Card::getEffectPath();
-//}
 
 void Peach::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     BasicCard::use(room, source, targets);
@@ -423,91 +452,10 @@ Axe::Axe(Suit suit, int number)
     attach_skill = true;
 }
 
-HalberdCard::HalberdCard(){
-}
-
-bool HalberdCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    if(to_select->hasFlag("Halberdtarget"))
-        return false;
-
-    Card *slash = Sanguosha->cloneCard("slash", Card::NoSuit, 0);
-    return slash->targetFilter(targets, to_select, Self) && !Self->isProhibited(to_select, slash);
-}
-
-bool HalberdCard::targetsFeasible(const QList<const Player *> &targets, const Player *) const{
-    return !targets.isEmpty();
-}
-
-void HalberdCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-
-    foreach(ServerPlayer *target, targets)
-        room->setPlayerFlag(target, "newHalberdtarget");
-
-    room->setEmotion(source, QString("weapon/%1").arg("halberd"));
-    room->getThread()->delay(1200);
-}
-
-class HalberdViewAsSkill: public ZeroCardViewAsSkill{
-public:
-    HalberdViewAsSkill():ZeroCardViewAsSkill("halberd"){
-
-    }
-
-    virtual const Card *viewAs() const{
-        return new HalberdCard;
-    }
-
-    virtual bool isEnabledAtPlay(const Player *player) const{
-        return false;
-    }
-};
-
-class HalberdSkill: public WeaponSkill{
-public:
-    HalberdSkill():WeaponSkill("halberd"){
-        events << CardonUse;
-    }
-
-    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
-        CardUseStruct use = data.value<CardUseStruct>();
-
-        if(!use.card->inherits("Slash") || !player->isLastHandCard(use.card))
-            return false;
-
-        foreach(ServerPlayer *sp, use.to){
-            room->setPlayerFlag(sp, "Halberdtarget");
-        }
-
-        room->setPlayerFlag(player, "halberdusing");
-
-        if(room->askForUseCard(player, "@halberd", "halberd")){
-
-            foreach(ServerPlayer *sp, room->getAllPlayers())
-                if(sp->hasFlag("newHalberdtarget")){
-                    use.to << sp;
-                    room->setPlayerFlag(sp, "-newHalberdtarget");
-                }
-
-            qStableSort(use.to.begin(), use.to.end(), Card::CompareByActionOrder);
-            data = QVariant::fromValue(use);
-        }
-
-
-        foreach(ServerPlayer *sp, room->getAllPlayers())
-            room->setPlayerFlag(sp, "-Halberdtarget");
-
-        room->setPlayerFlag(player, "-halberdusing");
-
-        return false;
-    }
-};
-
 Halberd::Halberd(Suit suit, int number)
     :Weapon(suit, number, 4)
 {
     setObjectName("halberd");
-    skill = new HalberdSkill;
-    attach_skill = true;
 }
 
 class KylinBowSkill: public WeaponSkill{
@@ -790,6 +738,22 @@ bool Collateral::targetFilter(const QList<const Player *> &targets, const Player
         return false;
 }
 
+bool Collateral::doCollateral(Room *room, ServerPlayer *killer, ServerPlayer *victim, QString prompt) const{
+    bool useSlash = false;
+    if(killer->canSlash(victim))
+    {
+        room->setPlayerFlag(killer, "SlashUsing");
+        room->setPlayerFlag(victim, "SlashTarget");
+        useSlash = room->askForUseCard(killer, "slash", prompt);
+        if(!useSlash)
+        {
+            room->setPlayerFlag(killer, "-SlashUsing");
+            room->setPlayerFlag(victim, "-SlashTarget");
+        }
+    }
+    return useSlash;
+}
+
 void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
     CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName(), targets[0]->objectName(), QString(), QString());
     room->throwCard(this, reason, NULL);
@@ -809,7 +773,10 @@ void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
                 .arg(source->objectName()).arg(victims.first()->objectName());
         const Card *slash = NULL;
         if(killer->canSlash(victims.first()))
-            slash = room->askForCard(killer, "slash", prompt, QVariant(), NonTrigger);
+        {
+            if(killer->getAI())
+                slash = room->askForCard(killer, "slash", prompt, QVariant(), NonTrigger);
+        }
         if (victims.first()->isDead()){
             if (source->isDead()){
                 if(killer->isAlive() && killer->getWeapon()){
@@ -833,7 +800,7 @@ void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
                     use.to = victims;
                     room->useCard(use);
                 }
-                else{
+                else if(!doCollateral(room, killer, victims.first(), prompt)){
                     if(killer->getWeapon()){
                         int card_id = weapon->getId();
                         room->throwCard(card_id, killer);
@@ -851,6 +818,8 @@ void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
                     use.to = victims;
                     room->useCard(use);
                 }
+                else
+                    doCollateral(room, killer, victims.first(), prompt);
             }
             else{
                 if(slash){
@@ -860,7 +829,7 @@ void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer 
                     use.to = victims;
                     room->useCard(use);
                 }
-                else{
+                else if(!doCollateral(room, killer, victims.first(), prompt)){
                     if(killer->getWeapon())
                         source->obtainCard(weapon);
                 }
@@ -1340,10 +1309,7 @@ StandardCardPackage::StandardCardPackage()
     foreach(Card *card, cards)
         card->setParent(this);
 
-    skills << new SpearSkill << new AxeViewAsSkill
-           << new HalberdViewAsSkill;
-
-    addMetaObject<HalberdCard>();
+    skills << new SpearSkill << new AxeViewAsSkill;
 }
 
 StandardExCardPackage::StandardExCardPackage()
