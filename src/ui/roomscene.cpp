@@ -1304,8 +1304,8 @@ QString RoomScene::_translateMovementReason(const CardMoveReason &reason)
         .arg(Sanguosha->translate(Self->getGeneralName())).arg(Sanguosha->translate("yourself"));
     }
     QString result(playerName + targetName);
-    result.append(Sanguosha->translate(reason.m_eventName));
     result.append(Sanguosha->translate(reason.m_skillName));
+    result.append(Sanguosha->translate(reason.m_eventName));
     if ((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_USE && reason.m_skillName.isEmpty()){
         result.append(Sanguosha->translate("use"));
     }
@@ -1318,27 +1318,27 @@ QString RoomScene::_translateMovementReason(const CardMoveReason &reason)
         }
     }
     else if ((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD){
-        if(reason.m_reason == CardMoveReason::S_REASON_RULEDISCARD){
-            result.append(Sanguosha->translate("discard"));
-        }
-        if(reason.m_reason == CardMoveReason::S_REASON_THROW){
-            result.append(Sanguosha->translate("throw"));
-        }
-        else if (reason.m_reason == CardMoveReason::S_REASON_CHANGE_EQUIP){
-            result.append(Sanguosha->translate("change equip"));
-        }
-        else if (reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE){
-            result.append(Sanguosha->translate("judgedone"));
-        }
-        else if (reason.m_reason == CardMoveReason::S_REASON_DISMANTLE){
-            result.append(Sanguosha->translate("throw"));
-        }
-        else if (reason.m_reason == CardMoveReason::S_REASON_REMOVE_FROM_PILE){
-            result.append(Sanguosha->translate("backinto"));
-        }
-        else if (reason.m_reason == CardMoveReason::S_REASON_NATURAL_ENTER){
-            result.append(Sanguosha->translate("enter"));
-        }
+            if(reason.m_reason == CardMoveReason::S_REASON_RULEDISCARD){
+                result.append(Sanguosha->translate("discard"));
+            }
+            if(reason.m_reason == CardMoveReason::S_REASON_THROW){
+                result.append(Sanguosha->translate("throw"));
+            }
+            else if (reason.m_reason == CardMoveReason::S_REASON_CHANGE_EQUIP){
+                result.append(Sanguosha->translate("change equip"));
+            }
+            else if (reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE){
+                result.append(Sanguosha->translate("judgedone"));
+            }
+            else if (reason.m_reason == CardMoveReason::S_REASON_DISMANTLE){
+                    result.append(Sanguosha->translate("throw"));
+            }
+            else if (reason.m_reason == CardMoveReason::S_REASON_REMOVE_FROM_PILE){
+                    result.append(Sanguosha->translate("backinto"));
+            }
+            else if (reason.m_reason == CardMoveReason::S_REASON_NATURAL_ENTER){
+                result.append(Sanguosha->translate("enter"));
+            }
     }
     else if (reason.m_reason == CardMoveReason::S_REASON_RECAST){
         result.append(Sanguosha->translate("recast"));
@@ -2147,6 +2147,7 @@ void RoomScene::showPromptBox()
 }
 
 void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus){
+    m_reverseSelectionButton->setEnabled(false);
     switch(newStatus){
     case Client::NotActive:{
             if (oldStatus == Client::ExecDialog)
@@ -2218,10 +2219,10 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
 
     case Client::Discarding:{
             showPromptBox();
-
             ok_button->setEnabled(false);
             cancel_button->setEnabled(ClientInstance->m_isDiscardActionRefusable);
             discard_button->setEnabled(false);
+            m_reverseSelectionButton->setEnabled(true);
 
             discard_skill->setNum(ClientInstance->discard_num);
             discard_skill->setMinNum(ClientInstance->min_num);

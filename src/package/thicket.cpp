@@ -711,10 +711,9 @@ public:
     }
 };
 
-class Luanwu: public ZeroCardViewAsSkill{
+class LuanwuViewAsSkill: public ZeroCardViewAsSkill{
 public:
-    Luanwu():ZeroCardViewAsSkill("luanwu"){
-        frequency = Limited;
+    LuanwuViewAsSkill():ZeroCardViewAsSkill("luanwu"){
     }
 
     virtual const Card *viewAs() const{
@@ -723,6 +722,25 @@ public:
 
     virtual bool isEnabledAtPlay(const Player *player) const{
         return player->getMark("@chaos") >= 1;
+    }
+};
+
+class Luanwu: public TriggerSkill{
+public:
+    Luanwu():TriggerSkill("luanwu"){
+        frequency = Limited;
+        view_as_skill = new LuanwuViewAsSkill;
+        events << CardonUse;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target && target->hasFlag("Luanwu");
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
+        room->setPlayerFlag(player, "-Luanwu");
+        room->setPlayerMark(player, "Luanwu", 0);
+        return false;
     }
 };
 
@@ -792,9 +810,9 @@ void LuanwuCard::onEffect(const CardEffectStruct &effect) const{
             if(!room->askForUseCard(effect.to, "slash", "@luanwu-slash"))
             {
                 room->loseHp(effect.to);
+                room->setPlayerFlag(effect.to, "-Luanwu");
+                room->setPlayerMark(effect.to, "Luanwu", 0);
             }
-            room->setPlayerMark(effect.to, "Luanwu", 0);
-            room->setPlayerFlag(effect.to, "-Luanwu");
         }
     }else
         room->loseHp(effect.to);

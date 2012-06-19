@@ -69,23 +69,31 @@ public:
                 ((move->reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD)){
             QList<CardsMoveStruct> exchangeMove;
             CardsMoveStruct luoyingget;
-
+            luoyingget.to = caozhi;
+            luoyingget.to_place = Player::Hand;
             foreach(int card_id, move->card_ids){
-                if(Sanguosha->getCard(card_id)->getSuit() == Card::Club
-                        && Sanguosha->getCard(card_id)->objectName() != "shit"){
+                if(Sanguosha->getCard(card_id)->getSuit() == Card::Club){
                         luoyingget.card_ids << card_id;
-                        luoyingget.to = caozhi;
-                        luoyingget.to_place = Player::Hand;
                 }
             }
+
             if(luoyingget.card_ids.empty())
                 return false;
             else if(caozhi->askForSkillInvoke(objectName(), data)){
-                foreach(int card_id, luoyingget.card_ids){
-                    if(Sanguosha->getCard(card_id)->objectName() == "shit"
-                            && room->askForChoice(caozhi, objectName(), "yes+no") == "no")
-                        luoyingget.card_ids.removeOne(card_id);
+
+                while(!luoyingget.card_ids.isEmpty())
+                {
+                    room->fillAG(luoyingget.card_ids, caozhi);
+                    int id = room->askForAG(caozhi, luoyingget.card_ids, true, objectName());
+                    if(id == -1)
+                    {
+                        caozhi->invoke("clearAG");
+                        break;
+                    }
+                    luoyingget.card_ids.removeOne(id);
+                    caozhi->invoke("clearAG");
                 }
+
                 if(!luoyingget.card_ids.empty()){
                     exchangeMove.push_back(luoyingget);
                     if(Config.SoundEffectMode == "Qsgs")
@@ -98,11 +106,9 @@ public:
                     else
                         room->playSkillEffect("luoying");
 
-                    room->getThread()->delay(650);
                     room->moveCards(exchangeMove, true);
                 }
             }
-
         }
         return false;
     }

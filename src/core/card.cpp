@@ -469,7 +469,7 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     if(isVirtualCard()){
         if(asPindian()){
             CardMoveReason reason(CardMoveReason::S_REASON_PINDIAN, player->objectName(), QString(), this->getSkillName(), QString());
-            room->moveCardTo(this, card_use.from, NULL, Player::PlaceTakeoff, reason, true);
+            room->moveCardTo(this, card_use.from, card_use.from, Player::PlaceTakeoff, reason, false);
         }
         else if(subcardsLength() > 0 && getTypeId() != Skill){
             CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());

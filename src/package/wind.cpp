@@ -752,13 +752,19 @@ GuhuoCard::GuhuoCard(){
     will_throw = false;
 }
 
-bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to) const{
+bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to, ServerPlayer *to, const QString &to_guhuo) const{
     Room *room = yuji->getRoom();
     room->setTag("Guhuoing", true);
     room->setTag("GuhuoType", this->user_string);
 
+    room->playSkillEffect("guhuo");
+
+    QString to_name = to ? to->objectName() : QString();
+    QString guhuo_card_name = to_guhuo == QString() ? user_string : to_guhuo ;
+
+
     room->moveCardTo(this, yuji, NULL, Player::DealingArea,
-                     CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), "guhuo", user_string), false);
+                     CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), to_name, "guhuo", guhuo_card_name), false);
 
     QList<ServerPlayer *> players = room->getOtherPlayers(yuji);
     QSet<ServerPlayer *> questioned;
@@ -811,30 +817,26 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to) const{
             room->setEmotion(player, ".");
         if(yuji->getPhase() == Player::Play)
             room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_USE, yuji->objectName(), QString(), user_string), true, false);
+                             CardMoveReason(CardMoveReason::S_REASON_USE, yuji->objectName(), to_name, "guhuo", guhuo_card_name), true, false);
         else if(yuji->getPhase() == Player::NotActive)
             room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), QString(), user_string), true, false);
+                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), to_name, "guhuo", guhuo_card_name), true, false);
 
     }else{
         const Card *card = Sanguosha->getCard(subcards.first());
-        bool real;
-        if(user_string == "peach+analeptic")
-            real = card->objectName() == "peach" || card->objectName() == "analeptic";
-        else
-            real = card->match(user_string);
+        bool real = card->match(guhuo_card_name);
 
         success = real && card->getSuit() == Card::Heart;
 
         if(success && yuji->getPhase() == Player::Play)
             room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_USE, yuji->objectName(), QString(), user_string), true, false);
+                             CardMoveReason(CardMoveReason::S_REASON_USE, yuji->objectName(), "guhuo", guhuo_card_name), true, false);
         else if(success && yuji->getPhase() == Player::NotActive)
             room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), QString(), user_string), true, false);
+                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), "guhuo", guhuo_card_name), true, false);
         else
             room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_PUT, yuji->objectName(), QString(), user_string), true, false);
+                             CardMoveReason(CardMoveReason::S_REASON_PUT, yuji->objectName(), "guhuo", guhuo_card_name), true, false);
 
         foreach(ServerPlayer *player, players){
             room->setEmotion(player, ".");
@@ -972,10 +974,26 @@ bool GuhuoCard::targetFilter(const QList<const Player *> &targets, const Player 
 
 bool GuhuoCard::targetFixed() const{
     if(ClientInstance->getStatus() == Client::Responsing)
-        return true;
-
-    CardStar card = Self->tag.value("guhuo").value<CardStar>();
-    return card && card->targetFixed();
+    {
+        if(Self->hasFlag("Luanwu") || Self->hasFlag("SlashUsing"))
+        {
+            Card *c = Sanguosha->cloneCard(user_string, Card::NoSuit, 0);
+            c->setSkillName("guhuo");
+            c->addSubcard(this->getSubcards().first());
+            Self->tag["guhuo"] = QVariant::fromValue((CardStar)c);
+            return c->targetFixed();
+        }
+        else
+            return true;
+    }
+    else
+    {
+        Card *card = Sanguosha->cloneCard(user_string, Card::NoSuit, 0);
+        card->addSubcard(this->getSubcards().first());
+        Self->tag["guhuo"] = QVariant::fromValue((CardStar)card);
+        return card->targetFixed();
+    }
+    return false;
 }
 
 bool GuhuoCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
@@ -985,7 +1003,6 @@ bool GuhuoCard::targetsFeasible(const QList<const Player *> &targets, const Play
 
 const Card *GuhuoCard::validate(const CardUseStruct *card_use) const{
     Room *room = card_use->from->getRoom();
-    room->playSkillEffect("guhuo");
 
     LogMessage log;
     log.type = card_use->to.isEmpty() ? "#GuhuoNoTarget" : "#Guhuo";
@@ -996,14 +1013,19 @@ const Card *GuhuoCard::validate(const CardUseStruct *card_use) const{
 
     room->sendLog(log);
 
-    if(guhuo(card_use->from, log.toString())){
+    const Card *card = Self->tag.value("guhuo").value<CardStar>();
+    if(card && card->subcardsLength() > 0)
+    {
+        Self->tag.remove("guhuo");
+        delete card;
+    }
+
+    if(guhuo(card_use->from, log.toString(), card_use->to.length() == 1 ? card_use->to.first() : NULL)){
+        card_use->from->playCardEffect(user_string);
         const Card *card = Sanguosha->getCard(subcards.first());
         Card *use_card = Sanguosha->cloneCard(user_string, card->getSuit(), card->getNumber());
         use_card->setSkillName("guhuo");
         use_card->addSubcard(this);
-        /* TODO: verify this...
-        CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, card_use->from->objectName());
-        room->throwCard(this, reason, NULL);*/
 
         return use_card;
     }else
@@ -1014,11 +1036,12 @@ const Card *GuhuoCard::validateInResposing(ServerPlayer *yuji, bool *continuable
     *continuable = true;
 
     Room *room = yuji->getRoom();
-    room->playSkillEffect("guhuo");
 
     QString to_guhuo;
     if(user_string == "peach+analeptic")
+    {
         to_guhuo = room->askForChoice(yuji, "guhuo-saveself", user_string);
+    }
     else
         to_guhuo = user_string;
 
@@ -1029,7 +1052,15 @@ const Card *GuhuoCard::validateInResposing(ServerPlayer *yuji, bool *continuable
     log.arg2 = "guhuo";
     room->sendLog(log);
 
-    if (guhuo(yuji, log.toString())){
+    const Card *card = Self->tag.value("guhuo").value<CardStar>();
+    if(card && card->subcardsLength() > 0)
+    {
+        Self->tag.remove("guhuo");
+        delete card;
+    }
+
+    if (guhuo(yuji, log.toString(), NULL, to_guhuo)){
+        yuji->playCardEffect(to_guhuo);
         const Card *card = Sanguosha->getCard(subcards.first());
         Card *use_card = Sanguosha->cloneCard(to_guhuo, card->getSuit(), card->getNumber());
         use_card->setSkillName("guhuo");

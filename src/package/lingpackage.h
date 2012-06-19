@@ -28,5 +28,4 @@ public:
     virtual void onEffect(const CardEffectStruct &effect) const;
 };
 
-
 #endif // LINGPACKAGE_H

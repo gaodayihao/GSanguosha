@@ -698,10 +698,13 @@ void SingleTargetTrick::use(Room *room, ServerPlayer *source, const QList<Server
         room->cardEffect(effect);
     }
 
-    CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
-    reason.m_skillName = this->getSkillName();
-    if (targets.size() == 1) reason.m_targetId = targets.first()->objectName();
-    room->moveCardTo(this, source, NULL, Player::DiscardPile, reason);
+    if(room->getCardPlace(this->getEffectiveId()) == Player::DealingArea)
+    {
+        CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
+        reason.m_skillName = this->getSkillName();
+        if (targets.size() == 1) reason.m_targetId = targets.first()->objectName();
+        room->moveCardTo(this, source, NULL, Player::DiscardPile, reason);
+    }
 }
 
 Collateral::Collateral(Card::Suit suit, int number)
@@ -1002,7 +1005,7 @@ void Dismantlement::onEffect(const CardEffectStruct &effect) const{
     CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, effect.to->objectName());
     reason.m_playerId = effect.from->objectName();
     reason.m_targetId = effect.to->objectName();
-    room->moveCardTo(Sanguosha->getCard(card_id), NULL, NULL, Player::DiscardPile, reason);
+    room->moveCardTo(Sanguosha->getCard(card_id), effect.to, NULL, Player::DiscardPile, reason);
     // room->throwCard(card_id, room->getCardPlace(card_id) == Player::Judging ? NULL : effect.to);
 
     LogMessage log;
@@ -1094,14 +1097,14 @@ public:
             CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, damage.to->objectName());
             reason.m_playerId = damage.from->objectName();
             reason.m_targetId = damage.to->objectName();
-            room->moveCardTo(Sanguosha->getCard(card_id), NULL, NULL, Player::DiscardPile, reason);
+            room->moveCardTo(Sanguosha->getCard(card_id), damage.to, NULL, Player::DiscardPile, reason);
 
             if(!damage.to->isNude()){
                 card_id = room->askForCardChosen(player, damage.to, "he", "ice_sword");
                 CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, damage.to->objectName());
                 reason.m_playerId = damage.from->objectName();
                 reason.m_targetId = damage.to->objectName();
-                room->moveCardTo(Sanguosha->getCard(card_id), NULL, NULL, Player::DiscardPile, reason);
+                room->moveCardTo(Sanguosha->getCard(card_id), damage.to, NULL, Player::DiscardPile, reason);
             }
 
             return true;

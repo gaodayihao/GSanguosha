@@ -110,6 +110,7 @@ Photo::Photo(): player(NULL),
     role_combobox = NULL;
     pile_button = NULL;
     game_start = false;
+    this->_m_old_frame = NoFrame;
 }
 
 QRectF Photo::boundingRect() const
@@ -530,10 +531,13 @@ void Photo::drawHp(QPainter *painter){
 }
 
 void Photo::setFrame(FrameType type){
+    if(type != Selected)
+        this->_m_old_frame = type;
     static QPixmap playing_frame("image/system/frame/playing.png");
     static QPixmap responsing_frame("image/system/frame/responsing.png");
     static QPixmap sos_frame("image/system/frame/sos.png");
     static QPixmap sosr_frame("image/system/frame/sosr.png");
+    static QPixmap selected_frame("image/system/frame/selected.png");
 
     QPixmap *to_draw = NULL;
     switch(type){
@@ -541,6 +545,7 @@ void Photo::setFrame(FrameType type){
     case Responsing: to_draw = &responsing_frame; break;
     case SOS: to_draw = &sos_frame; break;
     case SOSR: to_draw = &sosr_frame; break;
+    case Selected: to_draw = &selected_frame; break;
     default:
         break;
     }
@@ -768,8 +773,18 @@ QVariant Photo::itemChange(GraphicsItemChange change, const QVariant &value){
         if(!ServerInfo.EnableSame)
             order_item->setVisible(flags() & ItemIsSelectable);
     }
+    if(change == ItemSelectedHasChanged){
+        if(value.toBool()){
+            setFrame(Selected);
+        }else
+            setFrame(this->_m_old_frame);
 
-    return Pixmap::itemChange(change, value);
+        emit selected_changed();
+    }else if(change == ItemEnabledHasChanged){
+        emit enable_changed();
+    }
+
+    return QGraphicsObject::itemChange(change, value);
 }
 
 void Photo::killPlayer(){

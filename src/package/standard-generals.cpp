@@ -18,7 +18,7 @@ public:
     virtual void onDamaged(ServerPlayer *caocao, const DamageStruct &damage) const{
         Room *room = caocao->getRoom();
         const Card *card = damage.card;
-        if(room->getCardPlace(card->getEffectiveId()) == Player::DealingArea){
+        if(card && room->getCardPlace(card->getEffectiveId()) == Player::DealingArea){
             QVariant data = QVariant::fromValue(card);
             if(room->askForSkillInvoke(caocao, "jianxiong", data)){
                 room->playSkillEffect(objectName());
@@ -1437,6 +1437,8 @@ void StandardPackage::addGenerals(){
     diaochan->addSkill(new Biyue);
     diaochan->addSkill(new Tuoqiao);
 
+    new General(this, "anjiang", "god", 4,true, true, true);
+
     // for skill cards
     addMetaObject<ZhihengCard>();
     addMetaObject<RendeCard>();
@@ -1610,8 +1612,6 @@ TestPackage::TestPackage()
 
     new General(this, "sujiang", "god", 5, true, true);
     new General(this, "sujiangf", "god", 5, false, true);
-
-    new General(this, "anjiang", "god", 4,true, true, true);
     addMetaObject<YihunCard>();
 }
 

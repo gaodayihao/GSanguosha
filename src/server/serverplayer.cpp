@@ -439,7 +439,8 @@ void ServerPlayer::addCard(const Card *card, Place place){
 
 bool ServerPlayer::isLastHandCard(const Card *card) const{
     if(card->isVirtualCard()){
-        if(card->getSubcards().length() != handcards.length())
+        if(card->getSubcards().length() != handcards.length()
+                && !(card->getSkillName() == "guhuo" && this->isKongcheng()))
             return false;
 
         foreach(int card_id, card->getSubcards())

@@ -81,7 +81,6 @@ FreeDiscardSkill::FreeDiscardSkill(QObject *parent)
     :ViewAsSkill("free-discard")
 {
     setParent(parent);
-    card = new DummyCard;
 }
 
 bool FreeDiscardSkill::isEnabledAtPlay(const Player *) const{

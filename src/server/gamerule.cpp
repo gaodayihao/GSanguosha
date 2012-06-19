@@ -972,7 +972,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
     case CardGotOnePiece:{
         CardMoveStar move = data.value<CardMoveStar>();
         const Card *card = Sanguosha->getCard(move->card_id);
-        if(card->inherits("HeroCard"))
+        if(card->inherits("HeroCard") && move->to_place != Player::DiscardPile)
         {
             sendHeroCardsToPileLog(move->card_id, player);
             player->addToPile("heros", card, false);

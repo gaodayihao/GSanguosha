@@ -8,6 +8,11 @@
 #include "client.h"
 #include "exppattern.h"
 #include "settings.h"
+BasicCard::BasicCard(Suit suit, int number)
+    :Card(suit, number)
+{
+    will_throw = false;
+}
 
 QString BasicCard::getType() const{
     return "basic";

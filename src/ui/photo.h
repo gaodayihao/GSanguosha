@@ -58,7 +58,8 @@ public:
         Responsing,
         SOS,
         NoFrame,
-        SOSR
+        SOSR,
+        Selected
     };
 
     void setFrame(FrameType type);
@@ -119,6 +120,7 @@ private:
     QGraphicsPixmapItem *emotion_item, *frame_item;
     QGraphicsSimpleTextItem *skill_name_item;
     QGraphicsRectItem *avatar_area, *small_avatar_area;
+    FrameType _m_old_frame;
 
     void drawEquip(QPainter *painter, CardItem *equip, int order);
     void drawHp(QPainter *painter);

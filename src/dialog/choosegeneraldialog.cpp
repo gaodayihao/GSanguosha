@@ -241,6 +241,10 @@ FreeChooseDialog::FreeChooseDialog(QWidget *parent, bool pair_choose)
     QList<const General *> all_generals = Sanguosha->findChildren<const General *>();
     QMap<QString, QList<const General*> > map;
     foreach(const General *general, all_generals){
+
+        if(general->isTotallyHidden())
+            continue;
+
         map[general->getKingdom()] << general;
     }
 
@@ -317,8 +321,6 @@ QWidget *FreeChooseDialog::createTab(const QList<const General *> &generals){
     for(int i=0; i<generals.length(); i++){
         const General *general = generals.at(i);
         QString general_name = general->objectName();
-        if(general->isTotallyHidden())
-            continue;
 
         QString text = QString("%1[%2]")
                        .arg(Sanguosha->translate(general_name))

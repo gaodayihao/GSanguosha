@@ -100,6 +100,7 @@ bool CardMoveReason::tryParse(const Json::Value& arg)
     m_playerId = arg[1].asCString();
     m_skillName = arg[2].asCString();
     m_eventName = arg[3].asCString();
+    m_targetId = arg[4].asCString();
     return true; // TODO: fix this
 }
 

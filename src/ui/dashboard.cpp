@@ -938,10 +938,9 @@ void Dashboard::reverseSelection(){
 
     foreach(CardItem *item, m_handCards){
         if(view_as_skill->viewFilter(pendings, item) && !selected_set.contains(item)){
-            selectCard(item, false);
             pendings << item;
-
             item->setEnabled(true);
+            selectCard(item, true);
         }
     }
 

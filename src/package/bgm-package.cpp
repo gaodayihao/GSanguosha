@@ -23,7 +23,7 @@ public:
                     room->removeTag("ChongzhenSource");
                 }
 
-                if(target && !target->isKongcheng()){
+                if(target && !target->isKongcheng() && player->askForSkillInvoke(objectName())){
                     int card_id = room->askForCardChosen(player, target, "h", objectName());
                     CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, player->objectName());
                     room->obtainCard(player, Sanguosha->getCard(card_id), reason, false);
@@ -38,15 +38,16 @@ public:
                     if(p->isKongcheng())
                         continue;
 
+                    if(!player->askForSkillInvoke(objectName()))
+                        continue;
+
                     int card_id = room->askForCardChosen(player, p, "h", objectName());
                     CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, player->objectName());
                     room->obtainCard(player, Sanguosha->getCard(card_id), reason, false);
                     room->playSkillEffect("chongzhen");
                 }
             }
-            else if(use.to.contains(player) && !use.card->inherits("Collateral")
-                    && use.card->getSkillName() != "luanwu"
-                    && use.card->getSkillName() != "tiaoxin"){
+            else if(use.to.contains(player)){
                 room->setTag("ChongzhenSource", QVariant::fromValue((PlayerStar)use.from));
             }
         }
