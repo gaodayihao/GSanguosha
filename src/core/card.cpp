@@ -475,14 +475,14 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
             CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
             if (card_use.to.size() == 1)
                 reason.m_targetId = card_use.to.first()->objectName();
-            room->moveCardTo(this, card_use.from, NULL, Player::DealingArea, reason, true);
+            room->moveCardTo(this, room->getCardOwner(this->getEffectiveId()), NULL, Player::DealingArea, reason, true);
         }
     }
     else{
         CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
         if (card_use.to.size() == 1)
             reason.m_targetId = card_use.to.first()->objectName();
-        room->moveCardTo(this, card_use.from, NULL, Player::DealingArea, reason, true);
+        room->moveCardTo(this, room->getCardOwner(this->getEffectiveId()), NULL, Player::DealingArea, reason, true);
     }
 
     LogMessage log;

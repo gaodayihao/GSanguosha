@@ -57,7 +57,7 @@ public:
             const Card *jink = room->askForCard(liege, "jink", "@hujia-jink:" + caocao->objectName(), tohelp, NonTrigger);
             if(jink){
                 LogMessage log;
-                log.type = "#Hujia";
+                log.type = "#SkillResponsed";
                 log.from = liege;
                 log.to << caocao;
                 log.arg = objectName();
@@ -517,7 +517,7 @@ public:
             const Card *slash = room->askForCard(liege, "slash", "@jijiang-slash:" + liubei->objectName(), tohelp, NonTrigger);
             if(slash){
                 LogMessage log;
-                log.type = "#Jijiang";
+                log.type = "#SkillResponsed";
                 log.from = liege;
                 log.to << liubei;
                 log.arg = "jijiang";

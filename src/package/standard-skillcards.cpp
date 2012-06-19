@@ -279,7 +279,7 @@ void JijiangCard::use(Room *room, ServerPlayer *liubei, const QList<ServerPlayer
         slash = room->askForCard(liege, "slash", "@jijiang-slash:" + liubei->objectName(), tohelp, NonTrigger);
         if(slash){
             LogMessage log;
-            log.type = "#Jijiang";
+            log.type = "#SkillResponsed";
             log.from = liege;
             log.to << liubei;
             log.arg = "jijiang";
