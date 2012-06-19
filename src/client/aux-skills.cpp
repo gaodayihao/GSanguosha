@@ -80,6 +80,7 @@ const Card *ResponseSkill::viewAs(CardItem *card_item) const{
 FreeDiscardSkill::FreeDiscardSkill(QObject *parent)
     :ViewAsSkill("free-discard")
 {
+    card = new DummyCard;
     setParent(parent);
 }
 

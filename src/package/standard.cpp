@@ -26,6 +26,7 @@ TrickCard::TrickCard(Suit suit, int number, bool aggressive)
     :Card(suit, number), aggressive(aggressive),
     cancelable(true)
 {
+    will_throw = false;
 }
 
 bool TrickCard::isAggressive() const{

@@ -1799,7 +1799,22 @@ void RoomScene::updateSelectedTargets(){
         if(item->isSelected()){
             selected_targets.append(player);
         }else{
-            selected_targets.removeOne(player);
+            if(Self->hasFlag("Luanwu") && Self->distanceTo(player) == Self->getMark("Luanwu"))
+            {
+                selected_targets.removeOne(player);
+                QList<QGraphicsItem *> temp_items;
+                foreach(QGraphicsItem *_item, item2player.keys()){
+                    if(_item->isSelected() && Self->distanceTo(item2player[_item]) != Self->getMark("Luanwu"))
+                    {
+                        selected_targets.removeOne(item2player[_item]);
+                        temp_items << _item;
+                    }
+                }
+                foreach(QGraphicsItem *_item, temp_items)
+                    _item->setSelected(false);
+            }
+            else
+                selected_targets.removeOne(player);
         }
 
 

@@ -1016,11 +1016,10 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
     card = card->validateInResposing(player, &continuable);
 
     if(card){
-        CardMoveReason reason(CardMoveReason::S_REASON_RESPONSE, player->objectName());
         if(trigger_event == CardUsed){
             CardMoveReason reason(CardMoveReason::S_REASON_LETUSE, player->objectName());
             reason.m_skillName = card->getSkillName();
-            moveCardTo(card, player, NULL, Player::DiscardPile, reason);
+            moveCardTo(card, getCardOwner(card->getEffectiveId()), NULL, Player::DiscardPile, reason);
         }
         else if(trigger_event == CardDiscarded){
             CardMoveReason reason(CardMoveReason::S_REASON_THROW, player->objectName());
@@ -1051,25 +1050,6 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
             thread->trigger(trigger_event, this, player, card_star);   */
             thread->trigger(CardResponsed, this, player, card_star);
         }
-        /*else if(trigger_event == CardDiscarded){
-            LogMessage log;
-            log.type = "$DiscardCard";
-            log.from = player;
-            QList<int> to_discard;
-            if(card->isVirtualCard())
-                to_discard.append(card->getSubcards());
-            else
-                to_discard << card->getEffectiveId();
-
-            foreach(int card_id, to_discard){
-                if(log.card_str.isEmpty())
-                    log.card_str = QString::number(card_id);
-                else
-                    log.card_str += "+" + QString::number(card_id);
-            }
-            sendLog(log);
-        }
-        thread->trigger(trigger_event, this, player, card_star);*/
     }else if(continuable)
         return askForCard(player, pattern, prompt);
 
