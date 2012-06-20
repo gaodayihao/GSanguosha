@@ -115,7 +115,6 @@ private:
     QGraphicsTextItem *mark_item;
     QGraphicsPixmapItem *action_item;
 
-    int sort_type;
     QGraphicsSimpleTextItem *handcard_num;
     QList<CardItem*> m_handCards;
     QList<CardItem *> m_takenOffCards;

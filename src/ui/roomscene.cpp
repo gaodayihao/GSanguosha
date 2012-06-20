@@ -443,7 +443,7 @@ void RoomScene::createControlButtons(){
 
 void RoomScene::createExtraButtons(){
     m_reverseSelectionButton = dashboard->createButton("reverse-select");
-    m_reverseSelectionButton->setEnabled(true);
+    m_reverseSelectionButton->setEnabled(false);
 
     /*dashboard->addWidget(m_reverseSelectionButton, room_layout->m_scenePadding
                          + room_layout->m_photoRoomPadding * 3 + Photo::S_NORMAL_PHOTO_WIDTH, true);*/
@@ -1354,6 +1354,7 @@ void RoomScene::getCards(int moveId, QList<CardsMoveStruct> card_moves)
         card_container->m_currentPlayer = (ClientPlayer*)movement.to;
         PlayerCardContainer* to_container = _getPlayerCardContainer(movement.to_place, movement.to);
 
+        bool drawFootNote = movement.to != Self;
         QList<CardItem*> cards = _m_cardsMoveStash[moveId][i];
         if(to_container != m_discardPile
                 || to_container != _getPlayerCardContainer(movement.from_place, movement.from)
@@ -1371,7 +1372,8 @@ void RoomScene::getCards(int moveId, QList<CardsMoveStruct> card_moves)
                     j--;
                 }
                 else card->setEnabled(true);
-                card->setFootnote(_translateMovementReason(movement.reason));
+                if(drawFootNote)
+                    card->setFootnote(_translateMovementReason(movement.reason));
             }
             bringToFront(to_container);
             to_container->addCardItems(cards, movement.to_place);
@@ -2153,7 +2155,6 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
                 if(skill)
                     dashboard->startPending(skill);
             }else{
-                dashboard->selectCard(pattern);
                 response_skill->setPattern(pattern);
                 dashboard->startPending(response_skill);
             }

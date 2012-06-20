@@ -281,7 +281,7 @@ public:
         prompt_list << "@guicai-card" << judge->who->objectName()
                 << objectName() << judge->reason << judge->card->getEffectIdString();
         QString prompt = prompt_list.join(":");
-        const Card *card = room->askForCard(player, "@guicai", prompt, data);
+        const Card *card = room->askForCard(player, "@guicai", prompt, data, NonTrigger);
 
         if(card){
             if(room->getCardPlace(judge->card->getEffectiveId()) == Player::TopDrawPile)
@@ -290,6 +290,7 @@ public:
             judge->card = Sanguosha->getCard(card->getEffectiveId());
             room->moveCardTo(judge->card, player, NULL, Player::TopDrawPile,
                              CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->objectName(), "guicai", QString()), true);
+            player->playCardEffect(card);
             LogMessage log;
             log.type = "$ChangedJudge";
             log.from = player;

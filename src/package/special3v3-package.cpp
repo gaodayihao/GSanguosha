@@ -160,12 +160,13 @@ public:
         QString prompt = prompt_list.join(":");
 
         player->tag["Judge"] = data;
-        const Card *card = room->askForCard(player, "@huanshi", prompt, data);
+        const Card *card = room->askForCard(player, "@huanshi", prompt, data, NonTrigger);
 
         if(card){
             if(room->getCardPlace(judge->card->getEffectiveId()) == Player::TopDrawPile)
                 room->throwCard(judge->card, judge->who);
 
+            player->playCardEffect(card);
             judge->card = Sanguosha->getCard(card->getEffectiveId());
             room->moveCardTo(judge->card, player, NULL, Player::TopDrawPile,
                 CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->objectName(), "huanshi", QString()), true);

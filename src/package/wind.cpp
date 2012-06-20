@@ -141,12 +141,13 @@ public:
         prompt_list << "@guidao-card" << judge->who->objectName()
                 << objectName() << judge->reason << judge->card->getEffectIdString();
         QString prompt = prompt_list.join(":");
-        const Card *card = room->askForCard(player, "@guidao", prompt, data);
+        const Card *card = room->askForCard(player, "@guidao", prompt, data, NonTrigger);
 
         if(card){
             // the only difference for Guicai & Guidao
             const Card* oldJudge = judge->card;
             judge->card = Sanguosha->getCard(card->getEffectiveId());
+            player->playCardEffect(card);
 
             CardsMoveStruct move1(QList<int>(), NULL, Player::TopDrawPile,
                 CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->objectName(), this->objectName(), QString()));
@@ -812,6 +813,8 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to, ServerPlayer 
 
         room->sendLog(log);
     }
+
+    room->getThread()->delay();
 
     LogMessage log;
     log.type = "$GuhuoResult";

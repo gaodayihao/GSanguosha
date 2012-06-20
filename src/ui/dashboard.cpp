@@ -39,8 +39,6 @@ Dashboard::Dashboard(QGraphicsItem *button_widget)
 
     setMiddleWidth(middle_width);
 
-    sort_type = 0;
-
     animations = new EffectAnimation();
 
     QPointF specialCenter = mapFromItem(avatar, avatar->boundingRect().width() / 2, 0);
