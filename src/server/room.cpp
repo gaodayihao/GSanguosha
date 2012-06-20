@@ -1015,11 +1015,24 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
     card_use.from = player;
     card = card->validateInResposing(player, &continuable);
 
+    QList<int> card_ids;
+    if(card->isVirtualCard()){
+        foreach(int card_id, card->getSubcards()){
+            card_ids << card_id;
+        }
+    }
+    else{
+        card_ids << card_use.card->getEffectiveId();
+    }
+    QList<CardsMoveStruct> moves;
+
     if(card){
         if(trigger_event == CardUsed){
             CardMoveReason reason(CardMoveReason::S_REASON_LETUSE, player->objectName());
             reason.m_skillName = card->getSkillName();
-            moveCardTo(card, getCardOwner(card->getEffectiveId()), NULL, Player::DiscardPile, reason);
+            CardsMoveStruct move(card_ids, getCardOwner(card->getEffectiveId()), NULL, Player::DiscardPile, reason);
+            moves.append(move);
+            moveCardsAtomic(moves, false);
         }
         else if(trigger_event == CardDiscarded){
             CardMoveReason reason(CardMoveReason::S_REASON_THROW, player->objectName());
@@ -1029,7 +1042,9 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
         else if(trigger_event != NonTrigger){
             CardMoveReason reason(CardMoveReason::S_REASON_RESPONSE, player->objectName());
             reason.m_skillName = card->getSkillName();
-            moveCardTo(card, player, NULL, Player::DiscardPile, reason);
+            CardsMoveStruct move(card_ids, getCardOwner(card->getEffectiveId()), NULL, Player::DiscardPile, reason);
+            moves.append(move);
+            moveCardsAtomic(moves, false);
         }
 
         QVariant decisionData = QVariant::fromValue("cardResponsed:"+pattern+":"+prompt+":_"+card->toString()+"_");

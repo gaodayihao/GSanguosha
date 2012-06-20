@@ -23,7 +23,7 @@ void RoleComboboxItem::setRole(const QString& role){
         load(QString("image/system/roles/%1.png").arg(m_role), m_size, false);
 }
 
-void RoleComboboxItem::mousePressEvent(QGraphicsSceneMouseEvent *event){
+void RoleComboboxItem::mousePressEvent(QGraphicsSceneMouseEvent *){
     emit clicked();
 }
 
@@ -34,11 +34,29 @@ RoleCombobox::RoleCombobox(Photo *photo):QObject(photo)
     m_currentRole = new RoleComboboxItem("unknown", index, size);
     m_currentRole->setParentItem(photo);
     connect(m_currentRole, SIGNAL(clicked()), this, SLOT(expand()));
-    items << new RoleComboboxItem("loyalist", index, size)
+    items << new RoleComboboxItem("unknown", index, size)
+          << new RoleComboboxItem("loyalist", index, size)
           << new RoleComboboxItem("rebel", index, size)
           << new RoleComboboxItem("renegade", index, size);
     foreach(RoleComboboxItem *item, items){
         item->setParentItem(photo);
+        item->hide();
+        connect(item, SIGNAL(clicked()), this, SLOT(collapse()));
+    }
+}
+
+RoleCombobox::RoleCombobox(QGraphicsRectItem *item)
+{
+    int index = Sanguosha->getRoleIndex();
+    QSize size(S_ROLE_COMBO_BOX_WIDTH, S_ROLE_COMBO_BOX_HEIGHT);
+    m_currentRole = new RoleComboboxItem("unknown", index, size);
+    m_currentRole->setParentItem(item);
+    connect(m_currentRole, SIGNAL(clicked()), this, SLOT(expand()));
+    items << new RoleComboboxItem("loyalist", index, size)
+          << new RoleComboboxItem("rebel", index, size)
+          << new RoleComboboxItem("renegade", index, size);
+    foreach(RoleComboboxItem *item, items){
+        item->setParentItem(item);
         item->hide();
         connect(item, SIGNAL(clicked()), this, SLOT(collapse()));
     }

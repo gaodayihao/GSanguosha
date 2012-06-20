@@ -9,6 +9,7 @@
 #include "protocol.h"
 #include "TimedProgressBar.h"
 #include "GeneralCardContainerUI.h"
+#include "rolecombobox.h"
 
 #include <QPushButton>
 #include <QComboBox>
@@ -51,6 +52,8 @@ public:
 
     void adjustCards(bool playAnimation = true);
 
+    void createRoleCombobox();
+
     QList<CardItem*> removeCardItems(const QList<int> &card_ids, Player::Place place);
 
     // pending operations
@@ -77,7 +80,7 @@ public slots:
     void updateReadyItem(bool visible);
     void refresh();
     void doFilter();
-    void sortCards(int sort_type, bool doAnmiation = true);
+    void sortCards(bool doAnmiation = true);
     void reverseSelection();
 
 protected:
@@ -128,11 +131,16 @@ private:
     QGraphicsRectItem *trusting_item;
     QGraphicsSimpleTextItem *trusting_text;
 
+    QPushButton *m_sortHandcardButton;
+
+    RoleCombobox *role_combobox;
+
     //for animated effects
     EffectAnimation *animations;
 
     // UI control creation
     void _addProgressBar();
+    void _addSortHandCardButton();
 
     // for parts creation
     void createLeft();

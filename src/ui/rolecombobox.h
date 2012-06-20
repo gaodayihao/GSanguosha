@@ -34,6 +34,7 @@ class RoleCombobox : public QObject
 
 public:
     RoleCombobox(Photo *photo);
+    RoleCombobox(QGraphicsRectItem *item);
     void hide();
     void show();
     void setPos(qreal x, qreal y);

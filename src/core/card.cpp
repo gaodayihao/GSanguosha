@@ -466,24 +466,6 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     thread->trigger(CardonUse, room, player, data);
     CardUseStruct use = data.value<CardUseStruct>();
 
-    if(isVirtualCard()){
-        if(asPindian()){
-            CardMoveReason reason(CardMoveReason::S_REASON_PINDIAN, player->objectName(), QString(), this->getSkillName(), QString());
-            room->moveCardTo(this, card_use.from, card_use.from, Player::PlaceTakeoff, reason, false);
-        }
-        else if(subcardsLength() > 0 && getTypeId() != Skill){
-            CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
-            if (card_use.to.size() == 1)
-                reason.m_targetId = card_use.to.first()->objectName();
-            room->moveCardTo(this, room->getCardOwner(this->getEffectiveId()), NULL, Player::DealingArea, reason, true);
-        }
-    }
-    else{
-        CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
-        if (card_use.to.size() == 1)
-            reason.m_targetId = card_use.to.first()->objectName();
-        room->moveCardTo(this, room->getCardOwner(this->getEffectiveId()), NULL, Player::DealingArea, reason, true);
-    }
 
     LogMessage log;
     log.from = use.from;
@@ -491,6 +473,49 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     log.type = "#UseCard";
     log.card_str = use.card->toString();
     room->sendLog(log);
+
+    QList<int> used_cards;
+    QList<CardsMoveStruct> moves;
+    if(card_use.card->isVirtualCard()){
+        foreach(int card_id, card_use.card->getSubcards()){
+            used_cards << card_id;
+        }
+    }
+    else{
+        used_cards << card_use.card->getEffectiveId();
+    }
+
+    if(!used_cards.isEmpty() && room->getCardPlace(this->getEffectiveId()) != Player::DealingArea)
+    {
+        if(isVirtualCard()){
+            if(asPindian()){
+                CardMoveReason reason(CardMoveReason::S_REASON_PINDIAN, player->objectName(), QString(), this->getSkillName(), QString());
+                CardsMoveStruct move(used_cards, card_use.from, card_use.from, Player::PlaceTakeoff, reason);
+                moves.append(move);
+                room->moveCardsAtomic(moves, false);
+            }
+            else if(subcardsLength() > 0 && getTypeId() != Skill){
+                CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
+                if (card_use.to.size() == 1)
+                    reason.m_targetId = card_use.to.first()->objectName();
+                CardsMoveStruct move(used_cards, room->getCardOwner(this->getEffectiveId()), NULL, Player::DealingArea, reason);
+                moves.append(move);
+                room->moveCardsAtomic(moves, true);
+            }
+            else if(will_throw)
+            {
+                room->throwCard(this, card_use.from);
+            }
+        }
+        else{
+            CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
+            if (card_use.to.size() == 1)
+                reason.m_targetId = card_use.to.first()->objectName();
+            CardsMoveStruct move(used_cards, room->getCardOwner(this->getEffectiveId()), NULL, Player::DealingArea, reason);
+            moves.append(move);
+            room->moveCardsAtomic(moves, true);
+        }
+    }
 
     thread->trigger(CardUsed, room, use.from, data);
 

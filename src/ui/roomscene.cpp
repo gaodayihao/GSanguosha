@@ -89,15 +89,14 @@ RoomScene::RoomScene(QMainWindow *main_window):
     {
         createControlButtons();
         QGraphicsItem *button_widget = NULL;
-        if(ClientInstance->getReplayer() == NULL){
-            QString path = "image/system/button/irregular/background.png";
-            button_widget = new QGraphicsPixmapItem(QPixmap(path));
 
-            ok_button->setParentItem(button_widget);
-            cancel_button->setParentItem(button_widget);
-            discard_button->setParentItem(button_widget);
-            trust_button->setParentItem(button_widget);
-        }
+        QString path = "image/system/button/irregular/background.png";
+        button_widget = new QGraphicsPixmapItem(QPixmap(path));
+
+        ok_button->setParentItem(button_widget);
+        cancel_button->setParentItem(button_widget);
+        discard_button->setParentItem(button_widget);
+        trust_button->setParentItem(button_widget);
 
         // create drawpile
         m_drawPile = new DrawPile;
@@ -119,25 +118,9 @@ RoomScene::RoomScene(QMainWindow *main_window):
         connect(ClientInstance, SIGNAL(do_filter()), dashboard, SLOT(doFilter()));
         connect(dashboard, SIGNAL(card_selected(const Card*)), this, SLOT(enableTargets(const Card*)));
         connect(dashboard, SIGNAL(card_to_use()), this, SLOT(doOkButton()));
-
-        sort_combobox = new QComboBox;
-
-        sort_combobox->addItem(tr("No sort"));
-        sort_combobox->addItem(tr("Sort by color"));
-        sort_combobox->addItem(tr("Sort by suit"));
-        sort_combobox->addItem(tr("Sort by type"));
-        sort_combobox->addItem(tr("Sort by availability"));
-
-        connect(sort_combobox, SIGNAL(currentIndexChanged(int)), dashboard, SLOT(sortCards(int)));
     }
 
     connect(Self, SIGNAL(pile_changed(QString)), this, SLOT(updatePileButton(QString)));
-
-    // add role combobox
-    role_combobox = new QComboBox;
-    role_combobox->addItem(tr("Your role"));
-    role_combobox->addItem(tr("Unknown"));
-    connect(Self, SIGNAL(role_changed(QString)), this, SLOT(updateRoleComboBox(QString)));
 
     createExtraButtons();
     if(ClientInstance->getReplayer())
@@ -374,7 +357,6 @@ RoomScene::RoomScene(QMainWindow *main_window):
 
     main_window->statusBar()->setObjectName("skill_bar_container");
     //main_window->statusBar()->setLayout(skill_dock_layout);
-    addWidgetToSkillDock(sort_combobox, true);
     main_window->statusBar()->show();
 
     m_rolesBoxBackground.load("image/system/state.png");
@@ -879,7 +861,7 @@ void RoomScene::keyReleaseEvent(QKeyEvent *event){
     switch(event->key()){
     case Qt::Key_F1: break;
     case Qt::Key_F2: chooseSkillButton(); break;
-    case Qt::Key_F3: sort_combobox->showPopup(); break;
+    case Qt::Key_F3: dashboard->sortCards(); break;
 
     case Qt::Key_S: dashboard->selectCard("slash");  break;
     case Qt::Key_J: dashboard->selectCard("jink"); break;
@@ -1663,57 +1645,12 @@ void RoomScene::updateSkillButtons(){
             if(Self->getRole() != "lord" || ServerInfo.GameMode == "06_3v3")
                 continue;
         }
-
         addSkillButton(skill);
     }
-
-    addWidgetToSkillDock(role_combobox);
 
     // disable all skill buttons
     foreach(QAbstractButton *button, skill_buttons)
         button->setDisabled(true);
-}
-
-void RoomScene::updateRoleComboBox(const QString &new_role){
-    QMap<QString, QString> normal_mode, threeV3_mode, hegemony_mode;
-    normal_mode["lord"] = tr("Lord");
-    normal_mode["loyalist"] = tr("Loyalist");
-    normal_mode["rebel"] = tr("Rebel");
-    normal_mode["renegade"] = tr("Renegade");
-
-    threeV3_mode["lord"] = threeV3_mode["renegade"] = tr("Marshal");
-    threeV3_mode["loyalist"] = threeV3_mode["rebel"] = tr("Vanguard");
-
-    hegemony_mode["lord"] = tr("Wei");
-    hegemony_mode["loyalist"] = tr("Shu");
-    hegemony_mode["rebel"] = tr("Wu");
-    hegemony_mode["renegade"] = tr("Qun");
-
-    QMap<QString, QString> *map = NULL;
-    switch(Sanguosha->getRoleIndex()){
-    case 4: map = &threeV3_mode; break;
-    case 5: map = &hegemony_mode; break;
-    default:
-        map = &normal_mode;
-    }
-
-    if(ServerInfo.EnableHegemony){
-        QMap<QString, QString> hegemony_roles;
-
-        hegemony_roles["lord"] = "wei";
-        hegemony_roles["loyalist"] = "shu";
-        hegemony_roles["rebel"] = "wu";
-        hegemony_roles["renegade"] = "qun";
-
-        role_combobox->setItemText(1, map->value(new_role));
-        role_combobox->setItemIcon(1, QIcon(QString("image/kingdom/icon/%1.png").arg(hegemony_roles[new_role])));
-        role_combobox->setCurrentIndex(5);
-    }
-    else{
-        role_combobox->setItemText(1, map->value(new_role));
-        role_combobox->setItemIcon(1, QIcon(QString("image/system/roles/%1.png").arg(new_role)));
-        role_combobox->setCurrentIndex(1);
-    }
 }
 
 void RoomScene::enableTargets(const Card *card){
@@ -2216,6 +2153,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
                 if(skill)
                     dashboard->startPending(skill);
             }else{
+                dashboard->selectCard(pattern);
                 response_skill->setPattern(pattern);
                 dashboard->startPending(response_skill);
             }

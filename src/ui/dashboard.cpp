@@ -26,8 +26,8 @@ Dashboard::Dashboard(QGraphicsItem *button_widget)
     weapon(NULL), armor(NULL), defensive_horse(NULL), offensive_horse(NULL),
     view_as_skill(NULL), filter(NULL)
 {
-    createLeft();
     createMiddle();
+    createLeft();
     death_item = NULL;
 
     if(button_widget)
@@ -48,7 +48,10 @@ Dashboard::Dashboard(QGraphicsItem *button_widget)
                                  specialCenter.y(),
                                  CardItem::S_NORMAL_CARD_WIDTH * 3,
                                  CardItem::S_NORMAL_CARD_HEIGHT);
+
+    role_combobox = NULL;
     _addProgressBar();
+    _addSortHandCardButton();
 }
 
 void Dashboard::createLeft(){
@@ -92,10 +95,12 @@ void Dashboard::createMiddle(){
 
     trusting_item->hide();
     trusting_text->hide();
+
 }
 
 void Dashboard::createRight(){
     right = new QGraphicsRectItem(QRectF(right_pixmap.rect()), this);
+    right->setZValue(10086);
 
     avatar = new Pixmap;
     avatar->setPos(6, 6);
@@ -112,14 +117,9 @@ void Dashboard::createRight(){
     back_icon->setZValue(10001);
     back_icon->hide();
 
-    if(button_widget){
-        kingdom = new QGraphicsPixmapItem(button_widget);
-        kingdom->setPos(57, 0);
-    }else{
-        kingdom = new QGraphicsPixmapItem(right);
-        kingdom->setPos(75, -4);
-        kingdom->setZValue(2.0);
-    }
+    kingdom = new QGraphicsPixmapItem(right);
+    kingdom->setPos(75, -4);
+    kingdom->setZValue(2.0);
 
     ready_item = new QGraphicsPixmapItem(QPixmap("image/system/ready.png"), avatar);
     ready_item->setPos(2, 43);
@@ -130,19 +130,6 @@ void Dashboard::createRight(){
     chain_icon->setZValue(10086);
     chain_icon->hide();
 
-    QGraphicsPixmapItem *handcard_pixmap = new QGraphicsPixmapItem(right);
-    handcard_pixmap->setPixmap(QPixmap("image/system/handcard.png"));
-    handcard_pixmap->setPos(9, 69);
-
-    handcard_num = new QGraphicsSimpleTextItem(handcard_pixmap);
-    handcard_num->setPos(6,8);
-
-    QFont serifFont("Times", 10, QFont::Bold);
-    handcard_num->setFont(serifFont);
-    handcard_num->setBrush(Qt::white);
-
-    handcard_pixmap->hide();
-
     mark_item = new QGraphicsTextItem(right);
     if(button_widget)
         mark_item->setPos(-119 - getButtonWidgetWidth(), 6);
@@ -152,6 +139,33 @@ void Dashboard::createRight(){
     mark_item->setZValue(10086);
 
     action_item = NULL;
+
+    QGraphicsPixmapItem *handcard_pixmap = new QGraphicsPixmapItem(right);
+    handcard_pixmap->setPixmap(QPixmap("image/system/handcard.png"));
+    handcard_pixmap->setParentItem(right);
+    handcard_pixmap->setPos(-(button_widget ? button_widget->boundingRect().width() - 20 : 0)
+                            - handcard_pixmap->boundingRect().width() - 2
+                            , 145);
+    handcard_pixmap->setZValue(9);
+
+    handcard_num = new QGraphicsSimpleTextItem(handcard_pixmap);
+    handcard_num->setPos(3,2);
+
+    QFont serifFont("Times", 10, QFont::Bold);
+    handcard_num->setFont(serifFont);
+    handcard_num->setBrush(Qt::black);
+
+    handcard_pixmap->hide();
+
+    createRoleCombobox();
+}
+
+void Dashboard::createRoleCombobox(){
+    role_combobox = new RoleCombobox(right);
+    role_combobox->setPos(-RoleCombobox::S_ROLE_COMBO_BOX_WIDTH - 5, 7);
+    role_combobox->fix("unknown");
+
+    connect(Self, SIGNAL(role_changed(QString)), role_combobox, SLOT(fix(QString)));
 }
 
 void Dashboard::setActionState(){
@@ -221,7 +235,7 @@ bool Dashboard::_addCardItems(QList<CardItem*> &card_items, Player::Place place)
     }
 
     if (place == Player::Hand)
-        sortCards(sort_type, true);
+        adjustCards();
     return false;
 }
 
@@ -232,6 +246,8 @@ void Dashboard::_addHandCard(CardItem* card_item){
         card_item->setEnabled(card_item->getFilteredCard()->isAvailable(Self));
     else
         card_item->setEnabled(false);
+
+    card_item->setParentItem(this);
 
     card_item->setHomeOpacity(1.0); // @todo: it's 1.0 even if disabled?
     card_item->setRotation(0.0);
@@ -275,8 +291,7 @@ void Dashboard::updateAvatar(){
         avatar->setPixmap(pixmap);
     }
 
-    QString folder = button_widget ? "button" : "icon";
-    kingdom->setPixmap(QPixmap(QString("image/kingdom/%1/%2.png").arg(folder).arg(Self->getKingdom())));
+    kingdom->setPixmap(QPixmap(QString("image/kingdom/icon/%1.png").arg(Self->getKingdom())));
 
     avatar->show();
     kingdom->show();
@@ -521,6 +536,22 @@ void Dashboard::_addProgressBar()
     m_progressBar.hide();
 }
 
+void Dashboard::_addSortHandCardButton()
+{
+    m_sortHandcardButton = createButton("sort-handcard");
+    QGraphicsProxyWidget *button = new QGraphicsProxyWidget(this);
+    button->setWidget(m_sortHandcardButton);
+    button->setParentItem(right);
+    button->setZValue(10085);
+    button->setPos(-(button_widget ? button_widget->boundingRect().width() : 0)
+                   - button->boundingRect().width() - 8
+                   , 120);
+    m_sortHandcardButton->hide();
+
+    m_sortHandcardButton->setEnabled(true);
+    connect(m_sortHandcardButton, SIGNAL(clicked()), this, SLOT(sortCards()));
+}
+
 void Dashboard::hideProgressBar()
 {
     m_progressBar.hide();
@@ -609,6 +640,7 @@ void Dashboard::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidg
         handcard_num->parentItem()->hide();
     else{
         handcard_num->setText(QString::number(Self->getHandcardNum()));
+        handcard_num->parentItem()->show();
     }
 
     // draw the left side and right side
@@ -722,6 +754,11 @@ void Dashboard::_adjustCards(){
 
     int n = m_handCards.length();
 
+    if(n > 7)
+        m_sortHandcardButton->show();
+    else
+        m_sortHandcardButton->hide();
+
     if(n > MaxCards){
         if(n > MaxCards * 2)
             MaxCards *= 2;
@@ -769,7 +806,7 @@ void Dashboard::_adjustCards(const QList<CardItem *> &list, int y){
     if (list.isEmpty()) return;
 
     int max_width = middle->rect().width() - getButtonWidgetWidth() - 15;
-    int start_x = left->boundingRect().width();
+    int start_x = left->rect().width();
 
     if(list.length() == 1){
         list.first()->setHomePos(QPointF(start_x, y));
@@ -781,6 +818,9 @@ void Dashboard::_adjustCards(const QList<CardItem *> &list, int y){
     int card_skip = 0;
     if (n > 1)
         card_skip = (total_width - n * card_width ) / (n - 1) + card_width;
+
+    if(card_skip >= card_width)
+        card_skip += 2;
 
     for(int i = 0; i < n; i++){
         if(m_handCards.length() <= Config.MaxCards)
@@ -882,43 +922,12 @@ QList<CardItem*> Dashboard::removeCardItems(const QList<int> &card_ids, Player::
     return result;
 }
 
-typedef bool (*CompareFunc)(const CardItem *, const CardItem *);
-
-static bool CompareByColor(const CardItem *a, const CardItem *b){
-    return Card::CompareByColor(a->getCard(), b->getCard());
-}
-
-static bool CompareBySuitNumber(const CardItem *a, const CardItem *b){
-    return Card::CompareBySuitNumber(a->getCard(), b->getCard());
-}
-
 static bool CompareByType(const CardItem *a, const CardItem *b){
     return Card::CompareByType(a->getCard(), b->getCard());
 }
 
-static bool CompareByAvailability(const CardItem *a, const CardItem *b){
-    bool x = a->isEnabled();
-    bool y = b->isEnabled();
-    if(x != y)
-        return y;
-    else
-        return CompareBySuitNumber(a, b);
-}
-
-void Dashboard::sortCards(int sort_type, bool doAnimation){
-    this->sort_type = sort_type;
-
-    static CompareFunc compare_funcs[] = {
-        NULL,
-        CompareByColor,
-        CompareBySuitNumber,
-        CompareByType,
-        CompareByAvailability,
-    };
-
-    CompareFunc func = compare_funcs[sort_type];
-    if(func)
-        qSort(m_handCards.begin(), m_handCards.end(), func);
+void Dashboard::sortCards(bool doAnimation){
+    qSort(m_handCards.begin(), m_handCards.end(), CompareByType);
     if (doAnimation)
         adjustCards();
 }
@@ -1076,18 +1085,14 @@ void Dashboard::onCardItemThrown(){
 
 void Dashboard::onCardItemHover()
 {
-    QGraphicsItem *card_item = qobject_cast<QGraphicsItem *>(sender());
-    if(!card_item)return;
-
-    animations->emphasize(card_item);
+    CardItem *card = qobject_cast<CardItem *>(sender());
+    card->setFrame("card_selected");
 }
 
 void Dashboard::onCardItemLeaveHover()
 {
-    QGraphicsItem *card_item = qobject_cast<QGraphicsItem *>(sender());
-    if(!card_item)return;
-
-    animations->effectOut(card_item);
+    CardItem *card = qobject_cast<CardItem *>(sender());
+    card->hideFrame();
 }
 
 void Dashboard::onMarkChanged(){

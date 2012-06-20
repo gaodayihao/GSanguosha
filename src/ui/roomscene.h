@@ -213,7 +213,6 @@ private:
     DrawPile *m_drawPile;
     // QQueue<CardItem*> piled_discards;
     QMainWindow *main_window;
-    QComboBox *role_combobox;
     IrregularButton *ok_button, *cancel_button, *discard_button;
     TrustButton *trust_button;
     QPushButton *m_reverseSelectionButton, *m_freeDiscardButton;
@@ -221,7 +220,6 @@ private:
     Window *prompt_box;
     QGraphicsItem *control_panel;
     QMap<QGraphicsItem *, const ClientPlayer *> item2player;
-    QComboBox *sort_combobox;
     QDialog *m_choiceDialog; // Dialog for choosing generals, suits, card/equip, or kingdoms
 
     int timer_id;
@@ -326,7 +324,6 @@ private slots:
     void fillHero(const QList<int>& card_ids);
     void updateSkillButtons();
     void acquireSkill(const ClientPlayer *player, const QString &skill_name, bool animation);
-    void updateRoleComboBox(const QString &new_role);
     void updateSelectedTargets();
     void updateTrustButton();
     void updatePileButton(const QString &pile_name);

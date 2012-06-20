@@ -229,6 +229,10 @@ public:
 
     }
 
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target && target->hasLordSkill(objectName());
+    }
+
     virtual void onGameStart(ServerPlayer *zhangjiao) const{
         Room *room = zhangjiao->getRoom();
         QList<ServerPlayer *> players = room->getAlivePlayers();
@@ -762,9 +766,15 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to, ServerPlayer 
     QString to_name = to ? to->objectName() : QString();
     QString guhuo_card_name = to_guhuo == QString() ? user_string : to_guhuo ;
 
-
-    room->moveCardTo(this, yuji, NULL, Player::DealingArea,
-                     CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), to_name, "guhuo", guhuo_card_name), false);
+    QList<int> used_cards;
+    QList<CardsMoveStruct> moves;
+    foreach(int card_id, getSubcards()){
+        used_cards << card_id;
+    }
+    CardMoveReason reason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), to_name, "guhuo", guhuo_card_name);
+    CardsMoveStruct move(used_cards, yuji, NULL, Player::DealingArea, reason);
+    moves.append(move);
+    room->moveCardsAtomic(moves, false);
 
     QList<ServerPlayer *> players = room->getOtherPlayers(yuji);
     QSet<ServerPlayer *> questioned;
@@ -810,31 +820,15 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to, ServerPlayer 
     room->sendLog(log);
 
     bool success = false;
-    if(questioned.isEmpty()){
+    if(questioned.isEmpty())
         success = true;
-
-        foreach(ServerPlayer *player, players)
-            room->setEmotion(player, ".");
-        if(yuji->getPhase() == Player::Play)
-            room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_USE, yuji->objectName(), to_name, "guhuo", guhuo_card_name), true, false);
-        else if(yuji->getPhase() == Player::NotActive)
-            room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), to_name, "guhuo", guhuo_card_name), true, false);
-
-    }else{
+    else{
         const Card *card = Sanguosha->getCard(subcards.first());
         bool real = card->match(guhuo_card_name);
 
         success = real && card->getSuit() == Card::Heart;
 
-        if(success && yuji->getPhase() == Player::Play)
-            room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_USE, yuji->objectName(), "guhuo", guhuo_card_name), true, false);
-        else if(success && yuji->getPhase() == Player::NotActive)
-            room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
-                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), "guhuo", guhuo_card_name), true, false);
-        else
+        if(!success)
             room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
                              CardMoveReason(CardMoveReason::S_REASON_PUT, yuji->objectName(), "guhuo", guhuo_card_name), true, false);
 

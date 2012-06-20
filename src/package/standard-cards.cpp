@@ -260,7 +260,7 @@ public:
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
         bool doAnimate = false;
-        if(use.card->inherits("Slash"))
+        if(use.from && use.from->hasWeapon(objectName()) && use.card->inherits("Slash"))
         {
             foreach(ServerPlayer *target, use.to)
             {
