@@ -254,26 +254,34 @@ DoubleSword::DoubleSword(Suit suit, int number)
 class QinggangSwordSkill: public WeaponSkill{
 public:
     QinggangSwordSkill():WeaponSkill("qinggang_sword"){
-        events << TargetConfirmed;
+        events << TargetConfirmed << Death;
     }
 
-    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *, QVariant &data) const{
-        CardUseStruct use = data.value<CardUseStruct>();
-        bool doAnimate = false;
-        if(use.from && use.from->hasWeapon(objectName()) && use.card->inherits("Slash"))
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *, QVariant &data) const{
+        if(event == TargetConfirmed)
         {
-            foreach(ServerPlayer *target, use.to)
+            CardUseStruct use = data.value<CardUseStruct>();
+            bool doAnimate = false;
+            if(use.from && use.from->hasWeapon(objectName()) && use.card->inherits("Slash"))
             {
-                target->addMark("qinggang");
-                if(target->getArmor() || target->hasSkill("bazhen"))
-                    doAnimate = true;
+                foreach(ServerPlayer *target, use.to)
+                {
+                    target->addMark("qinggang");
+                    if(target->getArmor() || target->hasSkill("bazhen"))
+                        doAnimate = true;
+                }
+            }
+
+            if(doAnimate)
+            {
+                room->getThread()->delay(1200);
+                room->setEmotion(use.from, QString("weapon/%1").arg(objectName()));
             }
         }
-
-        if(doAnimate)
+        else
         {
-            room->getThread()->delay(1200);
-            room->setEmotion(use.from, QString("weapon/%1").arg(objectName()));
+            foreach(ServerPlayer *player,room->getAlivePlayers())
+                player->removeMark("qinggang");
         }
 
         return false;

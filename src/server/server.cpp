@@ -1784,7 +1784,7 @@ void Server::processCmdLine()
         emit server_message(show);
         return;
     }
-    else if(servercmd.indexOf("delroom ")!=-1){
+    else if(servercmd.indexOf("delroom ") != -1){
         QStringList tmplist=servercmd.split(" ");
         QString tmp=tmplist[1];
         int roomid=tmp.toInt();
@@ -1795,7 +1795,7 @@ void Server::processCmdLine()
         else{emit server_message("Room del fail.");}
         return;
     }
-    else if(servercmd.startsWith("kick ")!=-1){
+    else if(servercmd.startsWith("kick ")){
         QStringList tmplist=servercmd.split(" ");
         QString name=tmplist[1];
         bool result = false;

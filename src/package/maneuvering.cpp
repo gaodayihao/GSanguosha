@@ -253,7 +253,7 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return target && target->isAlive() && target->getMark("qinggang") == 0;
+        return target && target->isAlive() && target->getMark("qinggang") == 0 && !target->hasFlag("wuqian");
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
@@ -277,7 +277,8 @@ public:
         {
             CardMoveStar move = data.value<CardMoveStar>();
             const Card *lion = Sanguosha->getCard(move->card_id);
-            if(player->isAlive() && player->getMark("qinggang") == 0 && move->from_place == Player::Equip
+            if(player->isAlive() && player->getMark("qinggang") == 0 && !player->hasFlag("wuqian")
+                    && move->from_place == Player::Equip
                     && player->getMark("SilverLionUninstall") > 0  && lion->inherits("SilverLion"))
             {
                 room->setPlayerMark(player, "SilverLionUninstall", 0);
@@ -299,7 +300,7 @@ SilverLion::SilverLion(Suit suit, int number):Armor(suit, number){
 }
 
 void SilverLion::onUninstall(ServerPlayer *player) const{
-    if(player->isAlive() && player->getMark("qinggang") == 0){
+    if(player->isAlive() && player->getMark("qinggang") == 0 && !player->hasFlag("wuqian")){
         player->getRoom()->setPlayerMark(player, "SilverLionUninstall", 1);
     }
 }

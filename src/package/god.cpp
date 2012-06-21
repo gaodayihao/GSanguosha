@@ -532,9 +532,7 @@ void WuqianCard::onEffect(const CardEffectStruct &effect) const{
 
     effect.from->loseMark("@wrath", 2);
     room->acquireSkill(effect.from, "wushuang", false);
-    effect.from->setFlags("wuqian_used");
-
-    room->setTag("WuqianTarget", QVariant::fromValue(effect.to));
+    room->setPlayerFlag(effect.to,"wuqian");
 }
 
 class WuqianViewAsSkill: public ZeroCardViewAsSkill{
@@ -555,34 +553,22 @@ public:
 class Wuqian: public TriggerSkill{
 public:
     Wuqian():TriggerSkill("wuqian"){
-        events << CardUsed << CardFinished << PhaseChange << Death;
+        events << PhaseChange << Death;
         view_as_skill = new WuqianViewAsSkill;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return true;
+        return target && target->hasSkill(objectName());
     }
 
-    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
-        ServerPlayer *target = room->getTag("WuqianTarget").value<PlayerStar>();
-        if(!target)
-            return false;
-
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &) const{
         if(event == PhaseChange || event == Death){
             if(player->hasSkill(objectName()) && (event == Death || player->getPhase() == Player::NotActive)){
-                room->removeTag("WuqianTarget");
-
+                foreach(ServerPlayer *p , room->getAllPlayers())
+                    if(p->hasFlag("wuqian"))
+                        room->setPlayerFlag(p, "-wuqian");
                 if(!player->hasInnateSkill("wushuang"))
-                    player->loseSkill("wushuang");
-            }
-        }
-        else{
-            CardUseStruct use = data.value<CardUseStruct>();
-            if(use.to.contains(target)){
-                if(event == CardUsed)
-                    target->addMark("qinggang");
-                else
-                    target->removeMark("qinggang");
+                    room->detachSkillFromPlayer(player, "wushuang", false);
             }
         }
 

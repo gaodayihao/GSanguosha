@@ -67,6 +67,9 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="package\head">
+      <UniqueIdentifier>{fed04347-4fb4-4445-ba03-894b77462055}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\swig\sanguosha_wrap.cxx">
@@ -375,6 +378,15 @@
     <ClCompile Include="..\..\src\ui\SkinBank.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\package\lingpackage.cpp">
+      <Filter>package</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_lingpackage.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_lingpackage.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\server\ai.h">
@@ -479,60 +491,6 @@
     <CustomBuild Include="..\..\src\dialog\scenario-overview.h">
       <Filter>dialog</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\src\package\bgm-package.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\special3v3-package.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\standard-equips.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\standard-skillcards.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\standard.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\wind.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\wisdompackage.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\yitianpackage.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\yjcm-package.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\yjcm2012-package.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\thicket.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\mountainpackage.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\maneuvering.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\joypackage.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\god.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\firepackage.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\sp-package.h">
-      <Filter>package</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\src\package\package.h">
-      <Filter>package</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\src\scenario\zombie-mode-scenario.h">
       <Filter>scenario</Filter>
     </CustomBuild>
@@ -599,9 +557,6 @@
     <CustomBuild Include="..\..\src\ui\window.h">
       <Filter>ui</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\src\package\nostalgia.h">
-      <Filter>package</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\src\util\socket.h">
       <Filter>util</Filter>
     </CustomBuild>
@@ -628,6 +583,66 @@
     </CustomBuild>
     <CustomBuild Include="..\..\src\ui\GeneralCardContainerUI.h">
       <Filter>ui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\bgm-package.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\firepackage.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\god.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\joypackage.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\lingpackage.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\maneuvering.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\mountainpackage.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\nostalgia.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\package.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\sp-package.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\special3v3-package.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\standard-equips.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\standard-skillcards.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\standard.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\thicket.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\wind.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\wisdompackage.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\yitianpackage.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\yjcm-package.h">
+      <Filter>package\head</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\yjcm2012-package.h">
+      <Filter>package\head</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -1198,9 +1213,6 @@
     <ClInclude Include="..\..\src\core\statistics.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\package\exppattern.h">
-      <Filter>package</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\scenario\scenerule.h">
       <Filter>scenario</Filter>
     </ClInclude>
@@ -1215,6 +1227,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\ui\SkinBank.h">
       <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\package\exppattern.h">
+      <Filter>package\head</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

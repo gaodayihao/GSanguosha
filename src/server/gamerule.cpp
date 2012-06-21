@@ -1022,7 +1022,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
 
                 room->setPlayerFlag(player, "willclearCardLock");
                 room->setPlayerFlag(player, "willclearFixDistance");
-                if(player->getHp() <= 0 and player->isAlive())
+                if(player->getHp() <= 0 && player->isAlive())
                     room->enterDying(player, NULL);
             }
         }

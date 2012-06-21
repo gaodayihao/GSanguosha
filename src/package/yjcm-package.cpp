@@ -594,6 +594,7 @@ void XianzhenCard::onEffect(const CardEffectStruct &effect) const{
         effect.from->tag["XianzhenTarget"] = QVariant::fromValue(target);
         room->setPlayerFlag(effect.from, "xianzhen_success");
         room->setFixedDistance(effect.from, effect.to, 1);
+        room->setPlayerFlag(effect.to, "wuqian");
     }else{
         room->setPlayerFlag(effect.from, "xianzhen_failed");
     }
@@ -678,26 +679,22 @@ public:
     Xianzhen():TriggerSkill("xianzhen"){
         view_as_skill = new XianzhenViewAsSkill;
 
-        events << PhaseChange << CardUsed << CardFinished;
+        events << PhaseChange << Death;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target && target->hasSkill(objectName());
     }
 
     virtual bool trigger(TriggerEvent event,  Room* room, ServerPlayer *gaoshun, QVariant &data) const{
         ServerPlayer *target = gaoshun->tag["XianzhenTarget"].value<PlayerStar>();
 
-        if(event == PhaseChange){
-            if(gaoshun->getPhase() == Player::Finish && target){
+        if(event == Death || event == PhaseChange){
+            if((event == Death || gaoshun->getPhase() == Player::Finish) && target){
+                Room *room = gaoshun->getRoom();
                 room->setFixedDistance(gaoshun, target, -1);
                 gaoshun->tag.remove("XianzhenTarget");
-                target->removeMark("qinggang");
-            }
-        }else{
-            CardUseStruct use = data.value<CardUseStruct>();
-
-            if(target && use.to.contains(target)){
-                if(event == CardUsed)
-                    target->addMark("qinggang");
-                else
-                    target->removeMark("qinggang");
+                room->setPlayerFlag(target, "-wuqian");
             }
         }
 
@@ -805,7 +802,7 @@ public:
         if(player->getPhase() != Player::NotActive)
             return false;
 
-        if(event == Damaged){
+        if(event == Damaged && room->getCurrent()->isAlive()){
             room->setTag("Zhichi", player->objectName());
 
             room->playSkillEffect(objectName());
@@ -814,7 +811,6 @@ public:
             log.type = "#ZhichiDamaged";
             log.from = player;
             room->sendLog(log);
-
         }else if(event == CardEffected){
             if(room->getTag("Zhichi").toString() != player->objectName())
                 return false;
