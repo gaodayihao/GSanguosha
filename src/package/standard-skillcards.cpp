@@ -9,7 +9,6 @@
 ZhihengCard::ZhihengCard(){
     target_fixed = true;
     once = true;
-    will_throw = true;
 }
 
 void ZhihengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const{

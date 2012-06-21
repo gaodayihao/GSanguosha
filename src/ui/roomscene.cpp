@@ -292,6 +292,7 @@ RoomScene::RoomScene(QMainWindow *main_window):
 
         log_box_widget = addWidget(log_box);
         log_box_widget->setObjectName("log_box_widget");
+        log_box_widget->setZValue(-3.0);
         connect(ClientInstance, SIGNAL(log_received(QString)), log_box, SLOT(appendLog(QString)));
     }
 
@@ -927,9 +928,9 @@ void RoomScene::keyReleaseEvent(QKeyEvent *event){
     case Qt::Key_D:{
             // for debugging use
 
-            if(prompt_box && prompt_box->isVisible()){
-                QString msg = QString("chat_box_widget (%1, %2)")
-                              .arg(prompt_box->x()).arg(prompt_box->y());
+            if(m_discardPile && m_drawPile){
+                QString msg = QString("m_discardPile (%1, %2)\nm_drawPile (%3, %4)")
+                        .arg(m_discardPile->x()).arg(m_discardPile->y()).arg(m_drawPile->x()).arg(m_drawPile->y());
 
                 QMessageBox::information(main_window, "", msg);
             }
@@ -1254,7 +1255,10 @@ void RoomScene::loseCards(int moveId, QList<CardsMoveStruct> card_moves)
         QList<CardItem*> cards = from_container->removeCardItems(movement.card_ids, movement.from_place);
         foreach (CardItem* card, cards)
         {
-            card->setHomePos(from_container->mapToScene(card->homePos()));
+            if(movement.to_place == Player::DrawPile)
+                card->setHomePos(QPointF(0, 0));
+            else
+                card->setHomePos(from_container->mapToScene(card->homePos()));
             card->setPos(from_container->mapToScene(card->pos()));
             card->goBack(true);
             card->setParentItem(NULL);
@@ -1359,7 +1363,8 @@ void RoomScene::getCards(int moveId, QList<CardsMoveStruct> card_moves)
         if(to_container != m_discardPile
                 || to_container != _getPlayerCardContainer(movement.from_place, movement.from)
                 || movement.reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE
-                || (movement.reason.m_skillName == "guhuo" && !movement.reason.m_eventName.isEmpty()))
+                || (movement.reason.m_skillName == "guhuo"
+                    && (movement.to_place != Player::DiscardPile || movement.reason.m_reason == CardMoveReason::S_REASON_PUT)))
             /*this not a good solution*/
         {
             for (int j = 0; j < cards.size(); j++)

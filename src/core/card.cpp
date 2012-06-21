@@ -485,7 +485,7 @@ void Card::onUse(Room *room, const CardUseStruct &card_use) const{
         used_cards << card_use.card->getEffectiveId();
     }
 
-    if(!used_cards.isEmpty() && room->getCardPlace(this->getEffectiveId()) != Player::DealingArea)
+    if(!used_cards.isEmpty() && room->getCardPlace(use.card->getEffectiveId()) != Player::DealingArea)
     {
         if(isVirtualCard()){
             if(asPindian()){

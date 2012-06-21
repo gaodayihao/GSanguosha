@@ -10,6 +10,15 @@ function sgs.ai_skill_invoke.jiushi(self, data)
 	return not self.player:faceUp()
 end
 
+sgs.ai_skill_askforag.luoying = function(self, card_ids)
+	for _, id in ipairs(card_ids) do
+		if sgs.Sanguosha:getCard(id):inherits("Shit") then
+			return id
+		end
+	end
+	return -1
+end
+
 sgs.ai_skill_use["@@jujian"] = function(self, prompt)
 	local needfriend = 0
 	local nobasiccard = -1

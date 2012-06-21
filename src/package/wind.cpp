@@ -56,6 +56,7 @@ void LeijiCard::onEffect(const CardEffectStruct &effect) const{
 }
 
 HuangtianCard::HuangtianCard(){
+    will_throw = false;
 }
 
 void HuangtianCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
@@ -824,14 +825,25 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to, ServerPlayer 
 
     bool success = false;
     if(questioned.isEmpty())
+    {
         success = true;
+        foreach(ServerPlayer *player, players){
+            room->setEmotion(player, ".");
+        }
+
+        room->moveCardTo(this, yuji, NULL, Player::DealingArea,
+                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), to_name, "guhuo", guhuo_card_name), true);
+    }
     else{
         const Card *card = Sanguosha->getCard(subcards.first());
         bool real = card->match(guhuo_card_name);
 
         success = real && card->getSuit() == Card::Heart;
 
-        if(!success)
+        if(success)
+            room->moveCardTo(this, yuji, NULL, Player::DealingArea,
+                             CardMoveReason(CardMoveReason::S_REASON_RESPONSE, yuji->objectName(), to_name, "guhuo", guhuo_card_name), true);
+        else
             room->moveCardTo(this, yuji, NULL, Player::DiscardPile,
                              CardMoveReason(CardMoveReason::S_REASON_PUT, yuji->objectName(), "guhuo", guhuo_card_name), true, false);
 

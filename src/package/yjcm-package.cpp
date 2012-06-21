@@ -61,6 +61,9 @@ public:
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *, QVariant &data) const{
         ServerPlayer *caozhi = room->findPlayerBySkillName(objectName());
+        if(!caozhi)
+            return false;
+
         CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
 
         if(move->from_places.contains(Player::Judging) || move->from_places.contains(Player::Special))
@@ -310,7 +313,7 @@ public:
 
         if(event == CardGotOneTime){
             CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-            if (move->from != NULL && move->to_place != Player::DiscardPile && move->card_ids.size() >= 2
+            if (move->from != NULL && move->card_ids.size() >= 2
                     && room->askForSkillInvoke(player,objectName(),data)){
                 room->drawCards((ServerPlayer*)move->from,1);
                 room->playSkillEffect(objectName(), qrand() % 2 + 1);

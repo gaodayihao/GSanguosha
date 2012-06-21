@@ -1438,6 +1438,8 @@ void StandardPackage::addGenerals(){
     diaochan->addSkill(new Biyue);
     diaochan->addSkill(new Tuoqiao);
 
+    new General(this, "sujiang", "god", 5, true, true, true);
+    new General(this, "sujiangf", "god", 5, false, true, true);
     new General(this, "anjiang", "god", 4,true, true, true);
 
     // for skill cards
@@ -1611,8 +1613,6 @@ TestPackage::TestPackage()
     nanhua->addSkill(new Chushi);
     nanhua->addSkill(new Shihun);
 
-    new General(this, "sujiang", "god", 5, true, true);
-    new General(this, "sujiangf", "god", 5, false, true);
     addMetaObject<YihunCard>();
 }
 

@@ -508,13 +508,12 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
                 damage.damage++;
             }
 
-            effect.to->removeMark("qinggang");
-
             damage.from = effect.from;
             damage.to = effect.to;
             damage.nature = effect.nature;
             room->damage(damage);
 
+            effect.to->removeMark("qinggang");
 
             break;
         }
@@ -972,7 +971,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
     case CardGotOnePiece:{
         CardMoveStar move = data.value<CardMoveStar>();
         const Card *card = Sanguosha->getCard(move->card_id);
-        if(card->inherits("HeroCard") && move->to_place != Player::DiscardPile)
+        if(card->inherits("HeroCard"))
         {
             sendHeroCardsToPileLog(move->card_id, player);
             player->addToPile("heros", card, false);

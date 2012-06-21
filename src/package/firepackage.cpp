@@ -10,7 +10,6 @@
 QuhuCard::QuhuCard(){
     once = true;
     mute = true;
-    will_throw = false;
     as_pindian = true;
 }
 
@@ -497,7 +496,6 @@ public:
 
 TianyiCard::TianyiCard(){
     once = true;
-    will_throw = false;
     as_pindian = true;
 }
 

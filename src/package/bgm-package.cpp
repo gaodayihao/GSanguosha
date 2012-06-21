@@ -442,7 +442,6 @@ public:
 DaheCard::DaheCard(){
     once = true;
     mute = true;
-    will_throw = false;
     as_pindian = true;
 }
 
@@ -529,7 +528,6 @@ public:
 
 TanhuCard::TanhuCard(){
     once = true;
-    will_throw = false;
     as_pindian = true;
 }
 

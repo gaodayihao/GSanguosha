@@ -1015,18 +1015,18 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
     card_use.from = player;
     card = card->validateInResposing(player, &continuable);
 
-    QList<int> card_ids;
-    if(card->isVirtualCard()){
-        foreach(int card_id, card->getSubcards()){
-            card_ids << card_id;
-        }
-    }
-    else{
-        card_ids << card_use.card->getEffectiveId();
-    }
-    QList<CardsMoveStruct> moves;
-
     if(card){
+        QList<int> card_ids;
+        if(card->isVirtualCard()){
+            foreach(int card_id, card->getSubcards()){
+                card_ids << card_id;
+            }
+        }
+        else{
+            card_ids << card_use.card->getEffectiveId();
+        }
+        QList<CardsMoveStruct> moves;
+
         if(trigger_event == CardUsed){
             CardMoveReason reason(CardMoveReason::S_REASON_LETUSE, player->objectName());
             reason.m_skillName = card->getSkillName();
@@ -2738,7 +2738,8 @@ void Room::damage(const DamageStruct &damage_data){
         thread->trigger(PostHpReuced, this, damage_data.to, data);
 
         // damage
-        thread->trigger(Damage, this, damage_data.from, data);
+        if(damage_data.from)
+            thread->trigger(Damage, this, damage_data.from, data);
 
         // damaged
         thread->trigger(Damaged, this, damage_data.to, data);
@@ -3245,12 +3246,6 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardGotOnePiece, this, (ServerPlayer*)cards_move.to, data);
             }
-            else if(cards_move.from && cards_move.to_place == Player::DiscardPile)
-            {
-                CardMoveStar move_star = &moves[j];
-                QVariant data = QVariant::fromValue(move_star);
-                thread->trigger(CardGotOnePiece, this, (ServerPlayer*)cards_move.from, data);
-            }
             Sanguosha->getCard(cards_move.card_ids[j])->onMove(moves[j]);
         }
         moveOneTimeStruct.card_ids.append(cards_move.card_ids);
@@ -3293,7 +3288,8 @@ QList<CardsMoveStruct> Room::_breakDownCardMoves(QList<CardsMoveStruct> &cards_m
         {
             CardsMoveStruct sub_move = move;
             cls.copyTo(sub_move);
-            if ((sub_move.from == sub_move.to && sub_move.from_place == sub_move.to_place)
+            if ((sub_move.from == sub_move.to
+                 && (sub_move.from_place == sub_move.to_place && sub_move.from_place != Player::DealingArea))
                 || sub_move.card_ids.size() == 0)
                 continue;
             sub_move.card_ids = moveMap[cls];
@@ -3449,12 +3445,6 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
                 CardMoveStar move_star = &moves[j];
                 QVariant data = QVariant::fromValue(move_star);
                 thread->trigger(CardGotOnePiece, this, (ServerPlayer*)cards_move.to, data);
-            }
-            else if(cards_move.from && cards_move.to_place == Player::DiscardPile)
-            {
-                CardMoveStar move_star = &moves[j];
-                QVariant data = QVariant::fromValue(move_star);
-                thread->trigger(CardGotOnePiece, this, (ServerPlayer*)cards_move.from, data);
             }
             Sanguosha->getCard(card_id)->onMove(moves[j]);
         }
