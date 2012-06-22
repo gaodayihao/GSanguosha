@@ -18,9 +18,9 @@ QiaobianCard::QiaobianCard(){
 
 bool QiaobianCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
     if(Self->getPhase() == Player::Draw)
-        return targets.length() <= 2 && !targets.isEmpty();
+        return targets.length() <= 2;
     else if(Self->getPhase() == Player::Play)
-        return targets.length() == 1;
+        return targets.length() <= 1;
     else
         return targets.isEmpty();
 }
@@ -42,15 +42,21 @@ void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlay
     }
 
     room->throwCard(this, zhanghe);
+	
+	if(zhanghe->getPhase() == Player::Judge)
+        room->playSkillEffect("qiaobian", 1);
+
+	if(targets.isEmpty())
+		return;
 
     if(zhanghe->getPhase() == Player::Draw){
         room->playSkillEffect("qiaobian", 2);
-        foreach(ServerPlayer *target, targets){
-            int card_id = room->askForCardChosen(zhanghe, target, "h", "qiaobian");
-            CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, zhanghe->objectName());
-            room->obtainCard(zhanghe, Sanguosha->getCard(card_id), reason, false);
+		QList<ServerPlayer *> players = targets;
+		qSort(players.begin(), players.end(), Card::CompareByActionOrder);
+        foreach(ServerPlayer *target, players){
+			room->cardEffect(this, zhanghe, target);
         }
-    }else if(zhanghe->getPhase() == Player::Play){
+	}else if(zhanghe->getPhase() == Player::Play){
         room->playSkillEffect("qiaobian", 3);
         PlayerStar from = targets.first();
         if(!from->hasEquip() && from->getJudgingArea().isEmpty())
@@ -90,8 +96,20 @@ void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlay
                              CardMoveReason(CardMoveReason::S_REASON_TRANSFER, zhanghe->objectName(), "qiaobian", QString()));
         room->removeTag("QiaobianTarget");
     }
-    else if(zhanghe->getPhase() == Player::Judge)
-        room->playSkillEffect("qiaobian", 1);
+}
+
+void QiaobianCard::onEffect(const CardEffectStruct &effect) const{
+	if(effect.from->getPhase() == Player::Draw){
+		Room *room = effect.from->getRoom();
+		if(!effect.to->isKongcheng()){
+			int card_id = room->askForCardChosen(effect.from, effect.to, "h", "qiaobian");
+			CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
+			room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, false);
+
+			room->setEmotion(effect.to, "bad");
+			room->setEmotion(effect.from, "good");
+		}
+	}
 }
 
 class QiaobianViewAsSkill: public OneCardViewAsSkill{
@@ -274,14 +292,21 @@ public:
                     player->loseAllMarks("@nightmare");
                 }
             }
-            room->setPlayerMark(damage->from, "@duanchang", 1);
-            room->setPlayerFlag(damage->from, "willclearCardLock");
-            room->setPlayerFlag(damage->from, "willclearFixDistance");
 
-            if(damage->from->getHp() <= 0 && damage->from->isAlive())
-                room->enterDying(damage->from, NULL);
+			if(damage->from->getKingdom() != damage->from->getGeneral()->getKingdom() 
+				&& damage->from->getKingdom() != "god")
+				room->setPlayerProperty(damage->from, "kingdom", damage->from->getGeneral()->getKingdom());
+			if(damage->from->getGeneralName() == "zuocif")
+				room->transfigure(damage->from, "zuoci", false, false);
 
-            room->resetAI(damage->from);
+			room->setPlayerMark(damage->from, "@duanchang", 1);
+			room->setPlayerFlag(damage->from, "willclearCardLock");
+			room->setPlayerFlag(damage->from, "willclearFixDistance");
+
+			if(damage->from->getHp() <= 0 && damage->from->isAlive())
+				room->enterDying(damage->from, NULL);
+
+			room->resetAI(damage->from);
         }
 
         return false;

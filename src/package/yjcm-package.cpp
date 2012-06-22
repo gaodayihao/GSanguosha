@@ -212,6 +212,7 @@ public:
 
 JujianCard::JujianCard(){
     mute = true;
+	will_throw = true;
 }
 
 bool JujianCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{

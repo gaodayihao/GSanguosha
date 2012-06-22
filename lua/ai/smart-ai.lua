@@ -1725,12 +1725,16 @@ function SmartAI:askForChoice(skill_name, choices)
 	end
 end
 
-function SmartAI:askForDiscard(reason, discard_num, optional, include_equip)
+function SmartAI:askForDiscard(reason, discard_num, min_num, optional, include_equip)
 	local callback = sgs.ai_skill_discard[reason]
 	self:assignKeep(self.player:getHp(),true)
 	if type(callback) == "function" then
-		if callback(self, discard_num, optional, include_equip) then return callback(self, discard_num, optional, include_equip) end
-	elseif optional then return {} end
+		if callback(self, discard_num, min_num, optional, include_equip) then 
+			return callback(self, discard_num, min_num, optional, include_equip) 
+		end
+	elseif optional then 
+		return {} 
+	end
 
 	local flag = "h"
 	if include_equip and (self.player:getEquips():isEmpty() or not self.player:isJilei(self.player:getEquips():first())) then flag = flag .. "e" end
@@ -1738,15 +1742,15 @@ function SmartAI:askForDiscard(reason, discard_num, optional, include_equip)
 	local to_discard = {}
 	cards = sgs.QList2Table(cards)
 	local aux_func = function(card)
-		local place = self.room:getCardPlace(card:getEffectiveId())
-		if place == sgs.Player_Equip then
-			if card:inherits("GaleShell") then return -2
-			elseif card:inherits("SilverLion") and self.player:isWounded() then return -2
-			elseif card:inherits("YitianSword") then return -1
-			elseif card:inherits("OffensiveHorse") then return 1
-			elseif card:inherits("Weapon") then return 2
-			elseif card:inherits("DefensiveHorse") then return 3
-			elseif card:inherits("Armor") then return 4 end
+	local place = self.room:getCardPlace(card:getEffectiveId())
+	if place == sgs.Player_Equip then
+		if card:inherits("GaleShell") then return -2
+		elseif card:inherits("SilverLion") and self.player:isWounded() then return -2
+		elseif card:inherits("YitianSword") then return -1
+		elseif card:inherits("OffensiveHorse") then return 1
+		elseif card:inherits("Weapon") then return 2
+		elseif card:inherits("DefensiveHorse") then return 3
+		elseif card:inherits("Armor") then return 4 end
 		elseif self:hasSkills(sgs.lose_equip_skill) then return 5
 		else return 0 end
 	end
@@ -1756,8 +1760,12 @@ function SmartAI:askForDiscard(reason, discard_num, optional, include_equip)
 	end
 
 	table.sort(cards, compare_func)
+	local least = min_num
+	if discard_num - min_num > 1 then
+		least = discard_num -1
+	end
 	for _, card in ipairs(cards) do
-		if #to_discard >= discard_num then break end
+		if (self.player:hasSkill("qinyin") and #to_discard >= least) or #to_discard >= discard_num then break end
 		if not self.player:isJilei(card) then table.insert(to_discard, card:getId()) end
 	end
 	

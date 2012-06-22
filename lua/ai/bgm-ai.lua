@@ -89,7 +89,7 @@ sgs.ai_skill_use_func.LihunCard = function(card,use,self)
 	end
 end
 
-sgs.ai_skill_discard.lihun = function(self, discard_num, optional, include_equip)
+sgs.ai_skill_discard.lihun = function(self, discard_num, min_num, optional, include_equip)
 	local to_discard = {}
 	
 	local cards = sgs.QList2Table(self.player:getCards("he"))

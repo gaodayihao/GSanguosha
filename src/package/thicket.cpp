@@ -236,7 +236,7 @@ public:
                 log.from = menghuo;
                 log.to << damage.to;
                 log.arg = player->getGeneralName();
-                log.arg2 = objectName();
+                log.arg2 = "huoshou";
                 room->sendLog(log);
 
                 damage.from = menghuo;
@@ -1029,9 +1029,11 @@ ThicketPackage::ThicketPackage()
     menghuo = new General(this, "menghuo", "shu");
     menghuo->addSkill(new SavageAssaultAvoid("huoshou"));
     menghuo->addSkill(new Huoshou);
+    menghuo->addSkill(new HuoshouDamage);
     menghuo->addSkill(new Zaiqi);
 
     related_skills.insertMulti("huoshou", "#sa_avoid_huoshou");
+    related_skills.insertMulti("huoshou", "#huoshou");
 
     zhurong = new General(this, "zhurong", "shu", 4, false);
     zhurong->addSkill(new SavageAssaultAvoid("juxiang"));

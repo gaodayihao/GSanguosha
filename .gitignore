@@ -20,3 +20,4 @@ QSanguosha.pro.user*
 etc/customScenes/custom_scenario.txt
 builds/vs2010/*.sdf
 builds/vs2010/*.user
+builds/vs2010/QSanguosha.suo

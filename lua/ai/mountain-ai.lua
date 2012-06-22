@@ -272,9 +272,10 @@ end
 
 sgs.ai_playerchosen_intention.fangquan = -40
 
-sgs.ai_skill_discard.fangquan = function(self, discard_num, optional, include_equip)
+sgs.ai_skill_discard.fangquan = function(self, discard_num, min_num, optional, include_equip)
 	local to_discard = {}
 	local cards = sgs.QList2Table(self.player:getHandcards())
+	local index = 0
 	local all_peaches = 0
 	for _, card in ipairs(cards) do
 		if card:inherits("Peach") then
@@ -290,7 +291,8 @@ sgs.ai_skill_discard.fangquan = function(self, discard_num, optional, include_eq
 		if not card:inherits("Peach") and not self.player:isJilei(card) then
 			table.insert(to_discard, card:getEffectiveId())
 			table.remove(cards, i)
-			break;
+			index = index + 1
+			if index == 1 then break end
 		end
 	end	
 	if #to_discard < 1 then return {} 
