@@ -100,7 +100,7 @@ Photo::Photo(): player(NULL),
     _m_kingdomIcon->setPos(-2, -2);
     _m_kingdomIcon->setZValue(2.5);
 
-    phase = new PhasePixmap(this, _m_photoLayout->m_phaseArea, _m_roomSkin);
+    phase = new PhasePixmap(this, _m_photoLayout->m_phaseArea);
     phase->hide();
 
     mark_item = new QGraphicsTextItem(this);
@@ -565,7 +565,7 @@ void Photo::updatePhase(){
         int index = static_cast<int>(player->getPhase());
         if(!phase->isVisible())
             phase->show();
-        phase->setPhase(index);
+        phase->setPhase(QSanRoomSkin::S_SKIN_KEY_PHOTO_PHASE, index);
         setFrame(Playing);
     }
     else{
@@ -802,14 +802,15 @@ void Photo::killPlayer(){
         save_me_item->hide();
 }
 
-PhasePixmap::PhasePixmap(QGraphicsItem *parent, const QRect &Area, const QSanRoomSkin* roomSkin)
-    : _m_Area(Area), _m_roomSkin(roomSkin)
+PhasePixmap::PhasePixmap(QGraphicsItem *parent, const QRect &Area)
+    : _m_Area(Area)
 {
+    _m_roomSkin = &QSanSkinFactory::getInstance().getCurrentSkinScheme().getRoomSkin();
     setParentItem(parent);
     setPos(_m_Area.left(), _m_Area.top());
     setZValue(1.8);
 }
 
-void PhasePixmap::setPhase(int index){
-    load(_m_roomSkin->getPath(QString(QSanRoomSkin::S_SKIN_KEY_PHOTO_PHASE).arg(index)));
+void PhasePixmap::setPhase(const char *typeofPhase, int index){
+    load(_m_roomSkin->getPath(QString(typeofPhase).arg(index)));
 }

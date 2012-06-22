@@ -22,8 +22,8 @@ class PhasePixmap : public Pixmap
 {
     Q_OBJECT
 public:
-    explicit PhasePixmap(QGraphicsItem *parent, const QRect &Area, const QSanRoomSkin* roomSkin);
-    void setPhase(int index);
+    explicit PhasePixmap(QGraphicsItem *parent, const QRect &Area);
+    void setPhase(const char* typeofPhase, int index);
 
 private:
     QRect _m_Area;

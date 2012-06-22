@@ -20,6 +20,7 @@ class HeroCardContainer;
 class IrregularButton;
 class TrustButton;
 class QGroupBox;
+class PhasePixmap;
 struct RoomLayout;
 
 #include <QGraphicsScene>
@@ -259,6 +260,7 @@ private:
     QGraphicsTextItem *m_pileCardNumInfoTextBox;
 
     bool inReplay;
+    PhasePixmap *m_phase;
 #ifdef AUDIO_SUPPORT
     QSharedMemory *memory;
 #endif
@@ -345,6 +347,7 @@ private slots:
     void updateRolesBox();
     void updateRoles(const QString &roles);
     void adjustPrompt();
+    void _updatePhase();
 
     void resetPiles();
     void removeLightBox();

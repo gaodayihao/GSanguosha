@@ -56,6 +56,7 @@ public:
         double m_photoRoomPadding;
         double m_photoPhotoPadding;
         QSize m_minimumSceneSize;
+        QRect m_dashboardPhaseArea;
     };
     struct PhotoLayout
     {
@@ -89,6 +90,7 @@ public:
     static const char* S_SKIN_KEY_PHOTO;
     static const char* S_SKIN_KEY_COMMON;
     static const char* S_SKIN_KEY_ROOM;
+    static const char* S_SKIN_KEY_DASHBOARD_PHASE;
     static const char* S_SKIN_KEY_PHOTO_MAINFRAME;
     static const char* S_SKIN_KEY_PHOTO_HANDCARDNUM;
     static const char* S_SKIN_KEY_PHOTO_FACETURNEDMASK;

@@ -231,8 +231,10 @@ ThreeKingdomsPackage::ThreeKingdomsPackage():Package("ThreeKingdoms")
     QSet<QString> all, ban_set;
 
     foreach(const General *general, generals){
-        all << general->objectName();
+        if(!general->isTotallyHidden())
+            all << general->objectName();
     }
+
     all << "yuanshu" << "yangxiu" << "gongsunzan";
 
     ban_set = Config.value("Banlist/ThreeKingdoms").toStringList().toSet();

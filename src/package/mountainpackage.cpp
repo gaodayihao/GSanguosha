@@ -488,9 +488,10 @@ public:
         CardUseStruct use = data.value<CardUseStruct>();
 
         if((use.from == sunce || use.to.contains(sunce)) && (use.card->inherits("Duel") || (use.card->inherits("Slash") && use.card->isRed()))){
-            if(sunce->askForSkillInvoke(objectName(), data))
+            if(sunce->askForSkillInvoke(objectName(), data)){
                 room->playSkillEffect(objectName());
-            sunce->drawCards(1);
+                sunce->drawCards(1);
+			}
         }
 
         return false;

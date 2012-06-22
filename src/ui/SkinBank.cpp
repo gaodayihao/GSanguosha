@@ -7,6 +7,7 @@ using namespace std;
 const char* QSanRoomSkin::S_SKIN_KEY_PHOTO = "photo";
 const char* QSanRoomSkin::S_SKIN_KEY_ROOM = "room";
 const char* QSanRoomSkin::S_SKIN_KEY_COMMON = "common";
+const char* QSanRoomSkin::S_SKIN_KEY_DASHBOARD_PHASE = "dashboardPhase%1";
 const char* QSanRoomSkin::S_SKIN_KEY_PHOTO_MAINFRAME = "photoMainFrame";
 const char* QSanRoomSkin::S_SKIN_KEY_PHOTO_HANDCARDNUM = "photoHandCardNum";
 const char* QSanRoomSkin::S_SKIN_KEY_PHOTO_FACETURNEDMASK = "photoFaceTurnedMask";
@@ -131,6 +132,7 @@ bool QSanRoomSkin::_loadLayoutConfig()
     _m_roomLayout.m_infoPlaneWidthPercentage = config["infoPlaneWidthPercentage"].asDouble();
     _m_roomLayout.m_logBoxHeightPercentage = config["logBoxHeightPercentage"].asDouble();
     _m_roomLayout.m_minimumSceneSize = QSize(config["minimumSceneSize"][0].asInt(), config["minimumSceneSize"][1].asInt());
+    QSanProtocol::Utils::tryParse(config["dashboardPhaseArea"], _m_roomLayout.m_dashboardPhaseArea);
     _m_roomLayout.m_photoPhotoPadding = config["photoPhotoPadding"].asInt();
     _m_roomLayout.m_photoRoomPadding = config["photoRoomPadding"].asInt();
     _m_roomLayout.m_roleBoxHeight = config["roleBoxHeight"].asInt();

@@ -281,7 +281,10 @@ RoomScene::RoomScene(QMainWindow *main_window):
         connect(chat_widget,SIGNAL(chat_widget_msg(QString)),this, SLOT(appendChatEdit(QString)));
 
         if(ServerInfo.DisableChat)
-            chat_edit_widget->hide();
+            chat_edit_widget->setEnabled(false);
+
+        m_phase = new PhasePixmap(chat_edit_widget, _m_roomLayout->m_dashboardPhaseArea);
+        connect(Self, SIGNAL(phase_changed()), this, SLOT(_updatePhase()));
     }
 
     {
@@ -576,9 +579,10 @@ void RoomScene::adjustItems(){
     chat_edit->resize(infoPlane.width() - chat_widget->boundingRect().width(), _m_roomLayout->m_chatTextBoxHeight);
     chat_widget->setPos(infoPlane.right() - chat_widget->boundingRect().width(),
         chat_edit_widget->y() + (_m_roomLayout->m_chatTextBoxHeight - chat_widget->boundingRect().height()) / 2);
+    m_phase->setPos(_m_roomLayout->m_dashboardPhaseArea.left(), _m_roomLayout->m_dashboardPhaseArea.top());
 
     if(hero_box)
-        hero_box->setPos(-2*93 - 15, chat_box_widget->boundingRect().height()+82 - 9);
+        hero_box->setPos(-2*93 - 15, chat_box_widget->boundingRect().height()+82 - 24);
 
     if (self_box)
         self_box->setPos(infoPlane.left() - padding - self_box->boundingRect().width(),
@@ -588,6 +592,17 @@ void RoomScene::adjustItems(){
 
     updateTable();
     updateRolesBox();
+}
+
+void RoomScene::_updatePhase(){
+    if(Self->getPhase() != Player::NotActive){
+        int index = static_cast<int>(Self->getPhase());
+        if(!m_phase->isVisible())
+            m_phase->show();
+        m_phase->setPhase(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_PHASE, index);
+    }
+    else if(m_phase->isVisible())
+        m_phase->hide();
 }
 
 void RoomScene::_dispersePhotos(QList<Photo*> &photos, QRectF fillRegion, int minDistanceBetweenPhotos, Qt::Alignment align)
@@ -696,8 +711,8 @@ void RoomScene::updateTable()
         QRectF(col2, 0, col1, row2),
         QRectF(0, 0, col1, row2),
         QRectF(0, 0, col1 + col2, row1),
-        QRectF(col2, row1 - photoh * 0.5, col1, row2 - row1 + photoh * 0.5),
-        QRectF(0, row1 - photoh * 0.5, col1, row2 - row1 + photoh * 0.5)
+        QRectF(col2, row1 - photoh * 0.7, col1, row2 - row1 + photoh * 0.7),
+        QRectF(0, row1 - photoh * 0.7, col1, row2 - row1 + photoh * 0.7)
     };
 
     QRectF tableRect(col1, row1, col2 - col1, row2 - row1);
