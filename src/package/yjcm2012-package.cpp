@@ -580,8 +580,11 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *handang, QVariant &data) const{
-        if(event == CardonUse && handang->hasFlag("jiefanUsed"))
+        if(event == CardonUse)
         {
+            if(!handang->hasFlag("jiefanUsed"))
+                return false;
+
             CardUseStruct use = data.value<CardUseStruct>();
             if(use.card->inherits("Slash"))
             {
@@ -589,8 +592,10 @@ public:
                 room->setPlayerFlag(handang, "-jiefanUsed");
                 room->setCardFlag(use.card, "jiefan-slash");
             }
-        }
-        if(event == AskForPeaches && handang->getPhase() == Player::NotActive){
+        }else if(event == AskForPeaches){
+            if(handang->getPhase() != Player::NotActive)
+                return false;
+
             DyingStruct dying = data.value<DyingStruct>();
             forever{
                 if(dying.who->getHp() > 0 || handang->isNude() || room->getCurrent()->isDead() ||
@@ -614,15 +619,10 @@ public:
                 }
                 else
                 {
-                    room->setPlayerFlag(handang, "SlashUsing");
-                    room->setPlayerFlag(room->getCurrent(), "SlashTarget");
                     room->setPlayerFlag(handang, "jiefanUsed");
                     room->setTag("JiefanTarget", data);
-
-                    if(!room->askForUseCard(handang, "slash", "jiefan-slash:" + dying.who->objectName()))
+                    if(!room->askForSlashTo(handang, room->getCurrent(), "jiefan-slash:" + dying.who->objectName()))
                     {
-                        room->setPlayerFlag(handang, "-SlashUsing");
-                        room->setPlayerFlag(room->getCurrent(), "-SlashTarget");
                         room->setPlayerFlag(handang, "-jiefanUsed");
                         room->removeTag("JiefanTarget");
                     }
@@ -653,7 +653,7 @@ public:
             }
             return false;
         }
-        else{
+        else if(event == CardFinished){
             if(room->getTag("JiefanSlash").isNull())
                 return false;
             CardUseStruct use = data.value<CardUseStruct>();

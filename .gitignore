@@ -1,5 +1,6 @@
 tools/
 debug/
+Bin/
 release/
 ui_*
 Makefile*
@@ -18,6 +19,10 @@ liblua5.1.dylib
 font/font.ttf
 QSanguosha.pro.user*
 etc/customScenes/custom_scenario.txt
+lib/lua.lib
+lib/jsoncpp.lib
 builds/vs2010/*.sdf
 builds/vs2010/*.user
 builds/vs2010/QSanguosha.suo
+builds/vs2010/Win32/
+builds/vs2010/ipch/

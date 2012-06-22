@@ -42,21 +42,21 @@ void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlay
     }
 
     room->throwCard(this, zhanghe);
-	
-	if(zhanghe->getPhase() == Player::Judge)
+
+    if(zhanghe->getPhase() == Player::Judge)
         room->playSkillEffect("qiaobian", 1);
 
-	if(targets.isEmpty())
-		return;
+    if(targets.isEmpty())
+        return;
 
     if(zhanghe->getPhase() == Player::Draw){
         room->playSkillEffect("qiaobian", 2);
-		QList<ServerPlayer *> players = targets;
-		qSort(players.begin(), players.end(), Card::CompareByActionOrder);
+        QList<ServerPlayer *> players = targets;
+        qSort(players.begin(), players.end(), Card::CompareByActionOrder);
         foreach(ServerPlayer *target, players){
-			room->cardEffect(this, zhanghe, target);
+            room->cardEffect(this, zhanghe, target);
         }
-	}else if(zhanghe->getPhase() == Player::Play){
+    }else if(zhanghe->getPhase() == Player::Play){
         room->playSkillEffect("qiaobian", 3);
         PlayerStar from = targets.first();
         if(!from->hasEquip() && from->getJudgingArea().isEmpty())
@@ -99,17 +99,17 @@ void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlay
 }
 
 void QiaobianCard::onEffect(const CardEffectStruct &effect) const{
-	if(effect.from->getPhase() == Player::Draw){
-		Room *room = effect.from->getRoom();
-		if(!effect.to->isKongcheng()){
-			int card_id = room->askForCardChosen(effect.from, effect.to, "h", "qiaobian");
-			CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
-			room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, false);
+    if(effect.from->getPhase() == Player::Draw){
+        Room *room = effect.from->getRoom();
+        if(!effect.to->isKongcheng()){
+            int card_id = room->askForCardChosen(effect.from, effect.to, "h", "qiaobian");
+            CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
+            room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, false);
 
-			room->setEmotion(effect.to, "bad");
-			room->setEmotion(effect.from, "good");
-		}
-	}
+            room->setEmotion(effect.to, "bad");
+            room->setEmotion(effect.from, "good");
+        }
+    }
 }
 
 class QiaobianViewAsSkill: public OneCardViewAsSkill{
@@ -159,9 +159,9 @@ public:
         case Player::Start:
         case Player::Finish:return false;
         case Player::NotActive:{
-             if(!room->getTag("QiaobianCost").isNull())
-                 room->removeTag("QiaobianCost");
-             return false;
+            if(!room->getTag("QiaobianCost").isNull())
+                room->removeTag("QiaobianCost");
+            return false;
         }
 
         case Player::Judge: return room->askForUseCard(zhanghe, "@qiaobian", "@qiaobian-judge");
@@ -204,38 +204,38 @@ public:
 
                 switch(judge.card->getSuit()){
                 case Card::Heart:{
-                        room->playSkillEffect(objectName(), 4);
-                        RecoverStruct recover;
-                        recover.who = caiwenji;
-                        room->recover(player, recover);
+                    room->playSkillEffect(objectName(), 4);
+                    RecoverStruct recover;
+                    recover.who = caiwenji;
+                    room->recover(player, recover);
 
-                        break;
-                    }
+                    break;
+                }
 
                 case Card::Diamond:{
-                        room->playSkillEffect(objectName(), 3);
-                        player->drawCards(2);
-                        break;
-                    }
+                    room->playSkillEffect(objectName(), 3);
+                    player->drawCards(2);
+                    break;
+                }
 
                 case Card::Club:{
-                        room->playSkillEffect(objectName(), 1);
-                        if(damage.from && damage.from->isAlive()){
-                            int to_discard = qMin(2, damage.from->getCardCount(true));
-                            if(to_discard != 0)
-                                room->askForDiscard(damage.from, "beige", to_discard, to_discard, false, true);
-                        }
-
-                        break;
+                    room->playSkillEffect(objectName(), 1);
+                    if(damage.from && damage.from->isAlive()){
+                        int to_discard = qMin(2, damage.from->getCardCount(true));
+                        if(to_discard != 0)
+                            room->askForDiscard(damage.from, "beige", to_discard, to_discard, false, true);
                     }
+
+                    break;
+                }
 
                 case Card::Spade:{
-                        room->playSkillEffect(objectName(), 2);
-                        if(damage.from && damage.from->isAlive())
-                            damage.from->turnOver();
+                    room->playSkillEffect(objectName(), 2);
+                    if(damage.from && damage.from->isAlive())
+                        damage.from->turnOver();
 
-                        break;
-                    }
+                    break;
+                }
 
                 default:
                     break;
@@ -293,20 +293,20 @@ public:
                 }
             }
 
-			if(damage->from->getKingdom() != damage->from->getGeneral()->getKingdom() 
-				&& damage->from->getKingdom() != "god")
-				room->setPlayerProperty(damage->from, "kingdom", damage->from->getGeneral()->getKingdom());
-			if(damage->from->getGeneralName() == "zuocif")
-				room->transfigure(damage->from, "zuoci", false, false);
+            if(damage->from->getKingdom() != damage->from->getGeneral()->getKingdom()
+                    && damage->from->getKingdom() != "god")
+                room->setPlayerProperty(damage->from, "kingdom", damage->from->getGeneral()->getKingdom());
+            if(damage->from->getGeneralName() == "zuocif")
+                room->transfigure(damage->from, "zuoci", false, false);
 
-			room->setPlayerMark(damage->from, "@duanchang", 1);
-			room->setPlayerFlag(damage->from, "willclearCardLock");
-			room->setPlayerFlag(damage->from, "willclearFixDistance");
+            room->setPlayerMark(damage->from, "@duanchang", 1);
+            room->setPlayerFlag(damage->from, "willclearCardLock");
+            room->setPlayerFlag(damage->from, "willclearFixDistance");
 
-			if(damage->from->getHp() <= 0 && damage->from->isAlive())
-				room->enterDying(damage->from, NULL);
+            if(damage->from->getHp() <= 0 && damage->from->isAlive())
+                room->enterDying(damage->from, NULL);
 
-			room->resetAI(damage->from);
+            room->resetAI(damage->from);
         }
 
         return false;
@@ -490,7 +490,7 @@ public:
         if((use.from == sunce || use.to.contains(sunce)) && (use.card->inherits("Duel") || (use.card->inherits("Slash") && use.card->isRed()))){
             if(sunce->askForSkillInvoke(objectName(), data))
                 room->playSkillEffect(objectName());
-                sunce->drawCards(1);
+            sunce->drawCards(1);
         }
 
         return false;
@@ -559,7 +559,7 @@ void ZhibaCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
         room->setPlayerFlag(source, "ForbidZhiba");
 
     if(sunce->getMark("hunzi") > 0 &&
-       room->askForChoice(sunce, "zhiba_pindian", "accept+reject") == "reject")
+            room->askForChoice(sunce, "zhiba_pindian", "accept+reject") == "reject")
     {
         room->playSkillEffect("sunce_zhiba", 4);
         return;
@@ -689,14 +689,8 @@ void TiaoxinCard::onEffect(const CardEffectStruct &effect) const{
     }
     else
     {
-        room->setPlayerFlag(effect.to, "SlashUsing");
-        room->setPlayerFlag(effect.from, "SlashTarget");
-        if(!room->askForUseCard(effect.to, "slash", "@tiaoxin-slash:" + effect.from->objectName()))
-        {
-            room->setPlayerFlag(effect.to, "-SlashUsing");
-            room->setPlayerFlag(effect.from, "-SlashTarget");
+        if(!room->askForSlashTo(effect.to, effect.from, "@tiaoxin-slash:" + effect.from->objectName()))
             room->throwCard(room->askForCardChosen(effect.from, effect.to, "he", "tiaoxin"), effect.to);
-        }
     }
 }
 
@@ -1202,7 +1196,7 @@ public:
 
             foreach(const Skill *skill, general->getVisibleSkillList()){
                 if(skill->isLordSkill() || skill->getFrequency() == Skill::Limited
-                   || skill->getFrequency() == Skill::Wake)
+                        || skill->getFrequency() == Skill::Wake)
                     continue;
 
                 skill_names << skill->objectName();

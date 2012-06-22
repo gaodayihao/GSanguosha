@@ -626,15 +626,7 @@ void XianzhenSlashCard::onUse(Room *room, const CardUseStruct &card_use) const{
         }
     }
     else
-    {
-        room->setPlayerFlag(card_use.from, "SlashUsing");
-        room->setPlayerFlag(target, "SlashTarget");
-        if(!room->askForUseCard(card_use.from, "slash", "@xianzhen-slash"))
-        {
-            room->setPlayerFlag(card_use.from, "-SlashUsing");
-            room->setPlayerFlag(target, "-SlashTarget");
-        }
-    }
+        room->askForSlashTo(card_use.from, target, "@xianzhen-slash");
 }
 
 class XianzhenViewAsSkill: public ViewAsSkill{

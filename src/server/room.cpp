@@ -1111,6 +1111,20 @@ bool Room::askForUseCard(ServerPlayer *player, const QString &pattern, const QSt
     return false;
 }
 
+// @TODO: victim should be victims
+bool Room::askForSlashTo(ServerPlayer *killer, ServerPlayer *victim, const QString &prompt){
+    setPlayerFlag(killer, "SlashUsing");
+    setPlayerFlag(victim, "SlashAssignee");
+    bool use = true;
+    if(!askForUseCard(killer, "slash", prompt))
+    {
+        use = false;
+        setPlayerFlag(killer, "-SlashUsing");
+        setPlayerFlag(victim, "-SlashAssignee");
+    }
+    return use;
+}
+
 int Room::askForAG(ServerPlayer *player, const QList<int> &card_ids, bool refusable, const QString &reason){
     notifyMoveFocus(player, S_COMMAND_AMAZING_GRACE);
     Q_ASSERT(card_ids.length()>0);

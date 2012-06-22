@@ -43,9 +43,9 @@ void Slash::onUse(Room *room, const CardUseStruct &card_use) const{
     {
         room->setPlayerFlag(new_use.from, "-SlashUsing");
         foreach(ServerPlayer *target, room->getAlivePlayers())
-            if(target->hasFlag("SlashTarget"))
+            if(target->hasFlag("SlashAssignee"))
             {
-                room->setPlayerFlag(target, "-SlashTarget");
+                room->setPlayerFlag(target, "-SlashAssignee");
                 new_use.to << target;
             }
     }
@@ -101,7 +101,7 @@ bool Slash::targetsFeasible(const QList<const Player *> &targets, const Player *
 }
 
 bool Slash::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    if(to_select->hasFlag("SlashTarget"))
+    if(to_select->hasFlag("SlashAssignee"))
         return false;
 
     int slash_targets = 0;
@@ -749,18 +749,11 @@ bool Collateral::targetFilter(const QList<const Player *> &targets, const Player
         return false;
 }
 
-bool Collateral::doCollateral(Room *room, ServerPlayer *killer, ServerPlayer *victim, QString prompt) const{
+bool Collateral::doCollateral(Room *room, ServerPlayer *killer, ServerPlayer *victim, const QString &prompt) const{
     bool useSlash = false;
     if(killer->canSlash(victim))
     {
-        room->setPlayerFlag(killer, "SlashUsing");
-        room->setPlayerFlag(victim, "SlashTarget");
-        useSlash = room->askForUseCard(killer, "slash", prompt);
-        if(!useSlash)
-        {
-            room->setPlayerFlag(killer, "-SlashUsing");
-            room->setPlayerFlag(victim, "-SlashTarget");
-        }
+        useSlash = room->askForSlashTo(killer, victim, prompt);
     }
     return useSlash;
 }
