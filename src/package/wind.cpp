@@ -303,8 +303,6 @@ bool ShensuCard::targetFilter(const QList<const Player *> &targets, const Player
 }
 
 void ShensuCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    room->throwCard(this, source);
-
     Slash *slash = new Slash(Card::NoSuit, 0);
     slash->setSkillName("shensu");
     CardUseStruct use;
@@ -686,7 +684,6 @@ public:
 
 TianxiangCard::TianxiangCard()
 {
-    will_throw = true;
 }
 
 void TianxiangCard::onEffect(const CardEffectStruct &effect) const{
@@ -778,7 +775,8 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji, const QString &guhuo_to, ServerPlayer 
     moves.append(move);
     room->moveCardsAtomic(moves, false);
 
-    QList<ServerPlayer *> players = room->getOtherPlayers(yuji);
+    QList<ServerPlayer *> players = room->getAllPlayers();
+    players.removeOne(yuji);
     QSet<ServerPlayer *> questioned;
 
     foreach(ServerPlayer *player, players)

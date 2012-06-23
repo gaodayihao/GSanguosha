@@ -9,7 +9,6 @@
 
 LuoyiCard::LuoyiCard(){
     once = true;
-    will_throw = true;
 }
 
 bool LuoyiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{

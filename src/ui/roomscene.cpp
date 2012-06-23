@@ -601,7 +601,7 @@ void RoomScene::_updatePhase(){
             m_phase->show();
         m_phase->setPhase(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_PHASE, index);
     }
-    else if(m_phase->isVisible())
+    else
         m_phase->hide();
 }
 

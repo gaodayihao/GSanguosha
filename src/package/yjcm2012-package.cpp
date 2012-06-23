@@ -417,7 +417,7 @@ public:
         Room *room = player->getRoom();
         int card_id = room->drawCard();
         const Card *card = Sanguosha->getCard(card_id);
-        room->moveCardTo(card, NULL, NULL, Player::DealingArea,
+		room->moveCardTo(card, NULL, NULL, Player::TopDrawPile,
                     CardMoveReason(CardMoveReason::S_REASON_TURNOVER, player->getGeneralName(), "fuhun", QString()), true);
         room->getThread()->delay();
 

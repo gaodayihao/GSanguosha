@@ -41,8 +41,6 @@ void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlay
         room->playSkillEffect("qiaobian", 4);
     }
 
-    room->throwCard(this, zhanghe);
-
     if(zhanghe->getPhase() == Player::Judge)
         room->playSkillEffect("qiaobian", 1);
 

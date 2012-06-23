@@ -569,8 +569,7 @@ void Photo::updatePhase(){
         setFrame(Playing);
     }
     else{
-        if(phase->isVisible())
-            phase->hide();
+        phase->hide();
         setFrame(NoFrame);
     }
 }

@@ -206,7 +206,6 @@ public:
 
 NosJujianCard::NosJujianCard(){
     once = true;
-    will_throw = true;
     mute = true;
 }
 
