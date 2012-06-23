@@ -184,9 +184,9 @@ void LijianCard::onUse(Room *room,const CardUseStruct &card_use) const{
 
     LogMessage log;
     log.from = card_use.from;
-    log.to == card_use.to;
     log.type = "#Lijian";
     log.arg = this->getSkillName();
+	log.to << card_use.to;
     room->sendLog(log);
 
     room->broadcastInvoke("animate", QString("indicate:%1:%2").arg(card_use.from->objectName()).arg(card_use.to.at(1)->objectName()));

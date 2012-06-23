@@ -125,15 +125,23 @@ public:
 
         if(card->isBlack()){
             if (player == NULL) return false;
-            QList<ServerPlayer *> players = room->getOtherPlayers(player);
+            QList<ServerPlayer *> caopis;
+            QList<ServerPlayer *> players = room->getAllPlayers();
+            players.removeOne(player);
             foreach(ServerPlayer *p, players){
-                QVariant who = QVariant::fromValue(p);
-                if(p->hasLordSkill("songwei") && player->askForSkillInvoke("songwei", who)){
+                if(p->hasLordSkill("songwei"))
+                    caopis << p;
+            }
+            foreach(ServerPlayer *caopi, caopis){
+                QVariant who = QVariant::fromValue(caopi);
+                if(caopis.length() > 1)
+                    player->invoke("animate", QString("indicate:%1:%2").arg(player->objectName()).arg(caopi->objectName()));
+                if(player->askForSkillInvoke("songwei", who)){
                     if(player->getGeneral()->isMale())
                         room->playSkillEffect(objectName(), 1);
                     else
                         room->playSkillEffect(objectName(), 2);
-                    p->drawCards(1);
+                    caopi->drawCards(1);
                 }
             }
         }
@@ -260,7 +268,7 @@ public:
         if(target->isDead())
             return false;
         if(damage.card && damage.card->inherits("Slash") && !zhurong->isKongcheng()
-            && !target->isKongcheng() && target != zhurong && !damage.chain){
+                && !target->isKongcheng() && target != zhurong && !damage.chain){
             if(room->askForSkillInvoke(zhurong, objectName(), data)){
                 room->playSkillEffect(objectName(), 1);
 
@@ -980,7 +988,8 @@ public:
         else if (event == Damage && player->tag.value("InvokeBaonue", false).toBool())
         {
             QList<ServerPlayer *> dongzhuos;
-            QList<ServerPlayer *> players = room->getOtherPlayers(player);
+            QList<ServerPlayer *> players = room->getAllPlayers();
+            players.removeOne(player);
             foreach(ServerPlayer *p, players){
                 if(p->hasLordSkill("baonue")){
                     dongzhuos << p;
@@ -989,6 +998,8 @@ public:
 
             foreach(ServerPlayer *dongzhuo, dongzhuos){
                 QVariant who = QVariant::fromValue(dongzhuo);
+                if(dongzhuos.length() > 1)
+                    player->invoke("animate", QString("indicate:%1:%2").arg(player->objectName()).arg(dongzhuo->objectName()));
                 if(player->askForSkillInvoke(objectName(), who)){
                     JudgeStruct judge;
                     judge.pattern = QRegExp("(.*):(spade):(.*)");
