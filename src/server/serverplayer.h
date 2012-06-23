@@ -38,6 +38,7 @@ public:
     void throwAllEquips();
     void throwAllHandCards();
     void throwAllCards();
+	virtual void clearHistory();
     void bury();
     void throwAllMarks();
     void clearPrivatePiles();

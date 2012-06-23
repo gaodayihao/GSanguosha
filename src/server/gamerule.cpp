@@ -72,8 +72,6 @@ void GameRule::onPhaseChange(ServerPlayer *player) const{
         }
 
     case Player::Play: {
-            player->clearHistory();
-
             while(player->isAlive()){
                 CardUseStruct card_use;
                 room->activate(player, card_use);
@@ -267,7 +265,6 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
     case CardFinished: {
             CardUseStruct use = data.value<CardUseStruct>();
             room->clearCardFlag(use.card);
-
             break;
         }
 

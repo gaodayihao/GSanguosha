@@ -143,6 +143,11 @@ void ServerPlayer::clearPrivatePiles(){
     piles.clear();
 }
 
+void ServerPlayer::clearHistory(){
+	history.clear();
+	room->broadcastInvoke("clearPlayerHistory", this->objectName());
+}
+
 void ServerPlayer::bury(){
     room->clearPlayerFlags(this);
     clearHistory();

@@ -59,6 +59,7 @@ Client::Client(QObject *parent, const QString &filename)
     //callbacks["showCard"] = &Client::showCard;
     callbacks["setMark"] = &Client::setMark;
     callbacks["clearPlayerFlags"] = &Client::clearPlayerFlags;
+    callbacks["clearPlayerHistory"] = &Client::clearPlayerHistory;
     callbacks["doFilter"] = &Client::doFilter;
     callbacks["log"] = &Client::log;
     callbacks["speak"] = &Client::speak;
@@ -1360,6 +1361,11 @@ void Client::clearPlayerFlags(const QString &player_name){
     player->clearFlags();
 }
 
+void Client::clearPlayerHistory(const QString &player_name){
+    ClientPlayer *player = getPlayer(player_name);
+	player->clearHistory();
+}
+
 void Client::doFilter(const QString &){
     emit do_filter();
 }
@@ -1490,17 +1496,6 @@ void Client::clearTurnTag(){
         QApplication::alert(QApplication::focusWidget());
         break;
     }
-
-    case Player::Play:{
-            Self->clearHistory();
-            break;
-        }
-
-    case Player::NotActive:{
-            Self->clearFlags();
-            break;
-        }
-
     default:
         break;
     }

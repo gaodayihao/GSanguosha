@@ -442,6 +442,7 @@ DaheCard::DaheCard(){
     once = true;
     mute = true;
     as_pindian = true;
+    will_throw = false;
 }
 
 bool DaheCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -528,6 +529,7 @@ public:
 TanhuCard::TanhuCard(){
     once = true;
     as_pindian = true;
+    will_throw = false;
 }
 
 bool TanhuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{

@@ -114,6 +114,7 @@ public:
     void warn(const QString &);
     void setMark(const QString &mark_str);
     void clearPlayerFlags(const QString &player_name);
+    void clearPlayerHistory(const QString &player_name);
     void doFilter(const QString &);
     void showCard(const Json::Value &show_str);
     void log(const QString &log_str);

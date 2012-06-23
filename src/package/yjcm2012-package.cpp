@@ -599,7 +599,7 @@ public:
             DyingStruct dying = data.value<DyingStruct>();
             forever{
                 if(dying.who->getHp() > 0 || handang->isNude() || room->getCurrent()->isDead() ||
-                        !room->askForSkillInvoke(handang, objectName(), data))
+                        !handang->canSlash(room->getCurrent(), false) || !handang->askForSkillInvoke(objectName(), data))
                     break;
 
                 if(handang->getAI())

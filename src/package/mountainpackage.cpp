@@ -539,6 +539,7 @@ public:
 ZhibaCard::ZhibaCard(){
     mute = true;
     as_pindian = true;
+    will_throw = false;
 }
 
 bool ZhibaCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -562,6 +563,7 @@ void ZhibaCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
     if(sunce->getMark("hunzi") > 0 &&
             room->askForChoice(sunce, "zhiba_pindian", "accept+reject") == "reject")
     {
+        room->moveCardTo(this, source, Player::Hand);
         room->playSkillEffect("sunce_zhiba", 4);
         return;
     }

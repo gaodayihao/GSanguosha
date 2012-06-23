@@ -3264,7 +3264,7 @@ void Room::moveCardsAtomic(QList<CardsMoveStruct> cards_moves, bool forceMoveVis
         for (int j = 0; j < cards_move.card_ids.size(); j++)
         {
             if (cards_move.to &&
-                    (cards_move.to != cards_move.from || (cards_move.from_place == Player::PlaceTakeoff && cards_move.to != cards_move.from)) &&
+				(cards_move.to != cards_move.from || cards_move.from_place ==Player::TopDrawPile) &&
                     (cards_move.to_place == Player::Hand || cards_move.to_place == Player::Equip)
                     && !cards_move.to->hasFlag("CardMoving"))
             {
@@ -3465,7 +3465,7 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
             setCardMapping(card_id, (ServerPlayer*)cards_move.to, cards_move.to_place);
 
             if (cards_move.to &&
-                    (cards_move.to != cards_move.from || (cards_move.from_place == Player::PlaceTakeoff && cards_move.to == cards_move.from)) &&
+				(cards_move.to != cards_move.from || cards_move.from_place == Player::TopDrawPile) &&
                     (cards_move.to_place == Player::Hand || cards_move.to_place == Player::Equip)
                     && !cards_move.to->hasFlag("CardMoving")) {
                 CardMoveStar move_star = &moves[j];

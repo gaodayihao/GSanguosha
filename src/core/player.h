@@ -191,7 +191,7 @@ public:
     QString getPileName(int card_id) const;
 
     void addHistory(const QString &name, int times = 1);
-    void clearHistory();
+    virtual void clearHistory();
     bool hasUsed(const QString &card_class) const;
     int usedTimes(const QString &card_class) const;
     int getSlashCount() const;
