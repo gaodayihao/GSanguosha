@@ -579,6 +579,7 @@ public:
 
 XianzhenCard::XianzhenCard(){
     once = true;
+    as_pindian = true;
 }
 
 bool XianzhenCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{

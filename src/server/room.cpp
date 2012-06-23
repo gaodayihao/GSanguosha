@@ -838,7 +838,19 @@ bool Room::isCanceled(const CardEffectStruct &effect){
         decisionData = QVariant::fromValue(effect.card);
         setTag("NullifyingCard",decisionData);
         setTag("NullifyingTimes",0);
-        return askForNullification(trick, effect.from, effect.to, true);
+        bool canceled = askForNullification(trick, effect.from, effect.to, true);
+        if(canceled && effect.from && effect.from->hasSkill("tanhu") && effect.to->hasFlag("TanhuTarget"))
+        {
+            LogMessage log;
+            log.type = "#NullificaiotnNullify";
+            log.from = effect.from;
+            log.arg = "tanhu";
+            log.arg2 = "nullification";
+            sendLog(log);
+            return false;
+        }
+        else
+            return canceled;
     }else
         return false;
 }
