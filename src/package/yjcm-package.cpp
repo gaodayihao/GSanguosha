@@ -1055,6 +1055,7 @@ public:
 
     virtual bool onPhaseChange(ServerPlayer *zhonghui) const{
         Room *room = zhonghui->getRoom();
+        room->setPlayerMark(zhonghui, "zili", 1);
 
         LogMessage log;
         log.type = "#ZiliWake";
@@ -1069,18 +1070,20 @@ public:
 
         room->loseMaxHp(zhonghui);
 
-        if(zhonghui->isWounded())
-            if(room->askForChoice(zhonghui, objectName(), "recover+draw") == "recover"){
-                RecoverStruct recover;
-                recover.who = zhonghui;
-                room->recover(zhonghui, recover);
-            }else
+        if(zhonghui->hasSkill(objectName()))
+        {
+            if(zhonghui->isWounded())
+                if(room->askForChoice(zhonghui, objectName(), "recover+draw") == "recover"){
+                    RecoverStruct recover;
+                    recover.who = zhonghui;
+                    room->recover(zhonghui, recover);
+                }else
+                    room->drawCards(zhonghui, 2);
+            else
                 room->drawCards(zhonghui, 2);
-        else
-            room->drawCards(zhonghui, 2);
 
-        room->setPlayerMark(zhonghui, "zili", 1);
-        room->acquireSkill(zhonghui, "paiyi");
+            room->acquireSkill(zhonghui, "paiyi");
+        }
 
         return false;
     }
@@ -1102,6 +1105,8 @@ void PaiyiCard::onUse(Room *room, const CardUseStruct &card_use) const{
     ServerPlayer *zhonghui = card_use.from;
     ServerPlayer *target = card_use.to.first();
     QList<int> powers = zhonghui->getPile("power");
+    if(powers.isEmpty())
+        return;
 
     int card_id;
     if(powers.length() == 1)
@@ -1112,7 +1117,7 @@ void PaiyiCard::onUse(Room *room, const CardUseStruct &card_use) const{
         zhonghui->invoke("clearAG");
 
         if(card_id == -1)
-            return;
+            card_id = powers.first();
     }
 
     CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, zhonghui->objectName(),

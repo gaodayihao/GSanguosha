@@ -427,26 +427,37 @@ public:
 
         int handcardnum = player->getHandcardNum();
         if(canInvoke && (handcardnum >= huangzhong->getHp() || handcardnum <= huangzhong->getAttackRange()) &&
-           huangzhong->askForSkillInvoke("liegong", QVariant::fromValue(player))){
+                huangzhong->askForSkillInvoke("liegong", QVariant::fromValue(player))){
             room->playSkillEffect(objectName());
             room->setPlayerFlag(player, "LiegongTarget");
         }
-         return false;
+        return false;
     }
 };
 
 class LiegongHit:public TriggerSkill{
 public:
     LiegongHit():TriggerSkill("#liegong"){
-        events  << SlashProceed;
+        events  << SlashProceed << CardFinished;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *, QVariant &data) const{
-        SlashEffectStruct effect = data.value<SlashEffectStruct>();
-        if(effect.to->hasFlag("LiegongTarget")){
-            room->slashResult(effect, NULL);
-            room->setPlayerFlag(effect.to, "-LiegongTarget");
-            return true;
+        if(event == SlashProceed)
+        {
+            SlashEffectStruct effect = data.value<SlashEffectStruct>();
+            if(effect.to->hasFlag("LiegongTarget")){
+                room->slashResult(effect, NULL);
+                return true;
+            }
+        }
+        else
+        {
+            CardUseStruct use = data.value<CardUseStruct>();
+            if(use.card->inherits("Slash"))
+            {
+                foreach(ServerPlayer *target, use.to)
+                    room->setPlayerFlag(target, "-LiegongTarget");
+            }
         }
         return false;
     }

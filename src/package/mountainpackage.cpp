@@ -382,9 +382,7 @@ public:
 
     virtual bool onPhaseChange(ServerPlayer *dengai) const{
         Room *room = dengai->getRoom();
-
         room->setPlayerMark(dengai, "zaoxian", 1);
-        room->loseMaxHp(dengai);
 
         LogMessage log;
         log.type = "#ZaoxianWake";
@@ -397,7 +395,9 @@ public:
         room->broadcastInvoke("animate", "lightbox:$zaoxian:4000");
         room->getThread()->delay(4000);
 
-        room->acquireSkill(dengai, "jixi");
+        room->loseMaxHp(dengai);
+        if(dengai->hasSkill(objectName()))
+            room->acquireSkill(dengai, "jixi");
 
         return false;
     }
@@ -511,6 +511,7 @@ public:
 
     virtual bool onPhaseChange(ServerPlayer *sunce) const{
         Room *room = sunce->getRoom();
+        room->setPlayerMark(sunce, "hunzi", 1);
 
         LogMessage log;
         log.type = "#HunziWake";
@@ -524,11 +525,12 @@ public:
 
         room->loseMaxHp(sunce);
 
-        room->acquireSkill(sunce, "yinghun");
-        room->getThread()->delay();
-        room->acquireSkill(sunce, "yingzi");
-
-        room->setPlayerMark(sunce, "hunzi", 1);
+        if(sunce->hasSkill(objectName()))
+        {
+            room->acquireSkill(sunce, "yinghun");
+            room->getThread()->delay();
+            room->acquireSkill(sunce, "yingzi");
+        }
 
         return false;
     }
@@ -723,6 +725,7 @@ public:
 
     virtual bool onPhaseChange(ServerPlayer *jiangwei) const{
         Room *room = jiangwei->getRoom();
+        room->setPlayerMark(jiangwei, "zhiji", 1);
 
         LogMessage log;
         log.type = "#ZhijiWake";
@@ -744,11 +747,9 @@ public:
         else
             room->drawCards(jiangwei, 2);
 
-
-        room->setPlayerMark(jiangwei, "zhiji", 1);
-        room->acquireSkill(jiangwei, "guanxing");
-
         room->loseMaxHp(jiangwei);
+        if(jiangwei->hasSkill(objectName()))
+            room->acquireSkill(jiangwei, "guanxing");
 
         return false;
     }

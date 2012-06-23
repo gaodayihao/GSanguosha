@@ -663,15 +663,26 @@ public:
 class TiejiHit:public TriggerSkill{
 public:
     TiejiHit():TriggerSkill("#tieji"){
-        events << SlashProceed;
+        events << SlashProceed << CardFinished;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *, QVariant &data) const{
-        SlashEffectStruct effect = data.value<SlashEffectStruct>();
-        if(effect.to->hasFlag("TiejiTarget")){
-            room->slashResult(effect, NULL);
-            room->setPlayerFlag(effect.to, "-TiejiTarget");
-            return true;
+        if(event == SlashProceed)
+        {
+            SlashEffectStruct effect = data.value<SlashEffectStruct>();
+            if(effect.to->hasFlag("TiejiTarget")){
+                room->slashResult(effect, NULL);
+                return true;
+            }
+        }
+        else
+        {
+            CardUseStruct use = data.value<CardUseStruct>();
+            if(use.card->inherits("Slash"))
+            {
+                foreach(ServerPlayer *target, use.to)
+                    room->setPlayerFlag(target, "-TiejiTarget");
+            }
         }
         return false;
     }

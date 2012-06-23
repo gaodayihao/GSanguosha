@@ -30,7 +30,7 @@ public:
 
             judge->card = Sanguosha->getCard(card_id);
             room->moveCardTo(judge->card, player, NULL, Player::TopDrawPile,
-                            CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->getGeneralName(), this->objectName(), QString()), true);
+                             CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->getGeneralName(), this->objectName(), QString()), true);
             LogMessage log;
             log.type = "$ChangedJudge";
             log.from = player;
@@ -417,8 +417,8 @@ public:
         Room *room = player->getRoom();
         int card_id = room->drawCard();
         const Card *card = Sanguosha->getCard(card_id);
-		room->moveCardTo(card, NULL, NULL, Player::TopDrawPile,
-                    CardMoveReason(CardMoveReason::S_REASON_TURNOVER, player->getGeneralName(), "fuhun", QString()), true);
+        room->moveCardTo(card, NULL, NULL, Player::TopDrawPile,
+                         CardMoveReason(CardMoveReason::S_REASON_TURNOVER, player->getGeneralName(), "fuhun", QString()), true);
         room->getThread()->delay();
 
         player->obtainCard(card, true);
@@ -429,38 +429,38 @@ public:
     virtual bool onPhaseChange(ServerPlayer *shuangying) const{
         switch(shuangying->getPhase()){
         case Player::Draw:{
-                if(shuangying->askForSkillInvoke(objectName())){
-                    Room *room = shuangying->getRoom();
-                    room->playSkillEffect(objectName());
-                    const Card *first = getCard(shuangying);
-                    const Card *second = getCard(shuangying);
+            if(shuangying->askForSkillInvoke(objectName())){
+                Room *room = shuangying->getRoom();
+                room->playSkillEffect(objectName());
+                const Card *first = getCard(shuangying);
+                const Card *second = getCard(shuangying);
 
-                    if(first->getColor() != second->getColor()){
-                        room->setEmotion(shuangying, "good");
-                        room->acquireSkill(shuangying, "wusheng");
-                        room->getThread()->delay();
-                        room->acquireSkill(shuangying, "paoxiao");
+                if(first->getColor() != second->getColor()){
+                    room->setEmotion(shuangying, "good");
+                    room->acquireSkill(shuangying, "wusheng");
+                    room->getThread()->delay();
+                    room->acquireSkill(shuangying, "paoxiao");
 
-                        shuangying->setFlags(objectName());
-                    }else
-                        room->setEmotion(shuangying, "bad");
+                    shuangying->setFlags(objectName());
+                }else
+                    room->setEmotion(shuangying, "bad");
 
-                    return true;
-                }
-
-                break;
+                return true;
             }
+
+            break;
+        }
 
         case Player::NotActive:{
-                if(shuangying->hasFlag(objectName())){
-                    Room *room = shuangying->getRoom();
-                    room->detachSkillFromPlayer(shuangying, "wusheng");
-                    room->detachSkillFromPlayer(shuangying, "paoxiao");
-                }
-
-                break;
-
+            if(shuangying->hasFlag(objectName())){
+                Room *room = shuangying->getRoom();
+                room->detachSkillFromPlayer(shuangying, "wusheng");
+                room->detachSkillFromPlayer(shuangying, "paoxiao");
             }
+
+            break;
+
+        }
 
         default:
             break;
@@ -599,7 +599,7 @@ public:
             DyingStruct dying = data.value<DyingStruct>();
             forever{
                 if(dying.who->getHp() > 0 || handang->isNude() || room->getCurrent()->isDead() ||
-                    !room->askForSkillInvoke(handang, objectName(), data))
+                        !room->askForSkillInvoke(handang, objectName(), data))
                     break;
 
                 if(handang->getAI())
@@ -730,7 +730,7 @@ public:
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
         DamageStar damage = data.value<DamageStar>();
         QList<ServerPlayer *> targets = (damage && damage->from) ?
-                                        room->getOtherPlayers(damage->from) : room->getAlivePlayers();
+                    room->getOtherPlayers(damage->from) : room->getAlivePlayers();
 
         if(targets.isEmpty() || !player->askForSkillInvoke(objectName(), data))
             return false;

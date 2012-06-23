@@ -139,8 +139,7 @@ public:
         if(event == TargetConfirmed){
             CardUseStruct use = data.value<CardUseStruct>();
             if(use.to.length() <= 1 || !use.to.contains(player) ||
-                    !use.card->inherits("TrickCard") || use.card->inherits("Collateral") ||
-                    !room->askForSkillInvoke(player, objectName(), data))
+                    !use.card->inherits("TrickCard") || !room->askForSkillInvoke(player, objectName(), data))
                 return false;
 
             player->tag["Danlao"] = use.card->getEffectiveId();

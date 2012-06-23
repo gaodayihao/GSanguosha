@@ -673,7 +673,7 @@ void GameRule::changeGeneral1v1(ServerPlayer *player) const{
     QString new_general = player->tag["1v1ChangeGeneral"].toString();
     player->tag.remove("1v1ChangeGeneral");
 
-    QSet<QString> skills = player->getAcquiredSkills();
+    QSet<QString> skills = player->getAdditionalSkills();
     if(!skills.isEmpty())
         foreach(QString skill, skills.toList())
             room->detachSkillFromPlayer(player, skill);

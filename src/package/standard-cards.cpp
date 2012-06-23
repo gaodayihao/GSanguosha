@@ -217,7 +217,7 @@ public:
             return false;
         foreach(ServerPlayer *to, use.to){
             if(use.from->getGeneral()->isMale() != to->getGeneral()->isMale()
-                && use.card->inherits("Slash")){
+                    && use.card->inherits("Slash")){
                 if(use.from->askForSkillInvoke(objectName())){
                     bool draw_card = false;
 
@@ -235,7 +235,7 @@ public:
                     }
 
                     if(draw_card)
-                       use.from->drawCards(1);
+                        use.from->drawCards(1);
                 }
             }
         }
@@ -758,85 +758,134 @@ bool Collateral::doCollateral(Room *room, ServerPlayer *killer, ServerPlayer *vi
     return useSlash;
 }
 
-void Collateral::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName(), targets[0]->objectName(), QString(), QString());
-    room->throwCard(this, reason, NULL);
+void Collateral::onUse(Room *room, const CardUseStruct &card_use) const{
+    ServerPlayer *source = card_use.from;
+    ServerPlayer *killer = card_use.to.at(0);
+    ServerPlayer *victim = card_use.to.at(1);
+    RoomThread *thread = room->getThread();
 
-    ServerPlayer *killer = targets[0];
-    QList<ServerPlayer *> victims = targets;
-    if(victims.length() > 1)
-        victims.removeAt(0);
+    CardUseStruct new_use = card_use;
+    new_use.to.removeAt(1);
+    QVariant data = QVariant::fromValue(new_use);
+
+    room->setTag("collateralVictim", QVariant::fromValue((PlayerStar)victim));
+
+    thread->trigger(CardonUse, room, source, data);
+
+    LogMessage log;
+    log.from = source;
+    log.to << killer;
+    log.type = "#UseCard";
+    log.card_str = this->toString();
+    room->sendLog(log);
+
+    log = LogMessage();
+    log.from = killer;
+    log.to << victim;
+    log.type = "#Collateral";
+    room->sendLog(log);
+
+    room->broadcastInvoke("animate", QString("indicate:%1:%2").arg(killer->objectName()).arg(victim->objectName()));
+
+    QList<int> used_cards;
+    QList<CardsMoveStruct> moves;
+    if(this->isVirtualCard()){
+        foreach(int card_id, this->getSubcards()){
+            used_cards << card_id;
+        }
+    }
+    else{
+        used_cards << this->getEffectiveId();
+    }
+
+    if(!used_cards.isEmpty() && this->getEffectiveId() > 0 && room->getCardPlace(this->getEffectiveId()) != Player::DealingArea)
+    {
+        CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName(), QString(), this->getSkillName(), QString());
+        reason.m_targetId = killer->objectName();
+        CardsMoveStruct move(used_cards, source, NULL, Player::DealingArea, reason);
+        moves.append(move);
+        room->moveCardsAtomic(moves, true);
+    }
+
+    thread->trigger(CardUsed, room, source, data);
+
+    thread->trigger(CardFinished, room, source, data);
+}
+
+void Collateral::onEffect(const CardEffectStruct &effect) const{
+    ServerPlayer *source = effect.from;
+    Room *room = source->getRoom();
+    ServerPlayer *killer = effect.to;
+    ServerPlayer *victim = room->getTag("collateralVictim").value<PlayerStar>();
+    room->removeTag("collateralVictim");
     const Weapon *weapon = killer->getWeapon();
-
-    if(weapon == NULL)
+    if(!weapon)
         return;
 
-    bool on_effect = room->cardEffect(this, source, killer);
-    if(on_effect){
-        QString prompt = QString("collateral-slash:%1:%2")
-                .arg(source->objectName()).arg(victims.first()->objectName());
-        const Card *slash = NULL;
-        if(killer->canSlash(victims.first()))
-        {
-            if(killer->getAI())
-                slash = room->askForCard(killer, "slash", prompt, QVariant(), NonTrigger);
+    QString prompt = QString("collateral-slash:%1:%2")
+            .arg(source->objectName()).arg(victim->objectName());
+    const Card *slash = NULL;
+
+    if(killer->canSlash(victim))
+    {
+        if(killer->getAI())
+            slash = room->askForCard(killer, "slash", prompt, QVariant(), NonTrigger);
+    }
+    if (victim->isDead()){
+        if (source->isDead()){
+            if(killer->isAlive() && killer->getWeapon()){
+                int card_id = weapon->getId();
+                room->throwCard(card_id, killer);
+            }
         }
-        if (victims.first()->isDead()){
-            if (source->isDead()){
-                if(killer->isAlive() && killer->getWeapon()){
+        else
+        {
+            if(killer->isAlive() && killer->getWeapon()){
+                source->obtainCard(weapon);
+            }
+        }
+    }
+    else if (source->isDead()){
+        if (killer->isAlive()){
+            if(slash){
+                CardUseStruct use;
+                use.card = slash;
+                use.from = killer;
+                use.to << victim;
+                room->useCard(use);
+            }
+            else if(!doCollateral(room, killer, victim, prompt)){
+                if(killer->getWeapon()){
                     int card_id = weapon->getId();
                     room->throwCard(card_id, killer);
                 }
             }
-            else
-            {
-                if(killer->isAlive() && killer->getWeapon()){
-                    source->obtainCard(weapon);
-                }
-            }
         }
-        else if (source->isDead()){
-            if (killer->isAlive()){
-                if(slash){
-                    CardUseStruct use;
-                    use.card = slash;
-                    use.from = killer;
-                    use.to = victims;
-                    room->useCard(use);
-                }
-                else if(!doCollateral(room, killer, victims.first(), prompt)){
-                    if(killer->getWeapon()){
-                        int card_id = weapon->getId();
-                        room->throwCard(card_id, killer);
-                    }
-                }
+    }
+    else{
+        if(killer->isDead()) ;
+        else if(!killer->getWeapon()){
+            if(slash){
+                CardUseStruct use;
+                use.card = slash;
+                use.from = killer;
+                use.to << victim;
+                room->useCard(use);
             }
+            else
+                doCollateral(room, killer, victim, prompt);
         }
         else{
-            if(killer->isDead()) ;
-            else if(!killer->getWeapon()){
-                if(slash){
-                    CardUseStruct use;
-                    use.card = slash;
-                    use.from = killer;
-                    use.to = victims;
-                    room->useCard(use);
-                }
-                else
-                    doCollateral(room, killer, victims.first(), prompt);
+            if(slash){
+                CardUseStruct use;
+                use.card = slash;
+                use.from = killer;
+                use.to << victim;
+                room->useCard(use);
             }
-            else{
-                if(slash){
-                    CardUseStruct use;
-                    use.card = slash;
-                    use.from = killer;
-                    use.to = victims;
-                    room->useCard(use);
-                }
-                else if(!doCollateral(room, killer, victims.first(), prompt)){
-                    if(killer->getWeapon())
-                        source->obtainCard(weapon);
-                }
+            else if(!doCollateral(room, killer, victim, prompt)){
+                if(killer->getWeapon())
+                    source->obtainCard(weapon);
             }
         }
     }

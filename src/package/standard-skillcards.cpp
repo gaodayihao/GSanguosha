@@ -7,223 +7,246 @@
 #include "settings.h"
 
 ZhihengCard::ZhihengCard(){
-	target_fixed = true;
-	once = true;
-	will_throw = false;
+    target_fixed = true;
+    once = true;
+    will_throw = false;
 }
 
 void ZhihengCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const{
-	CardMoveReason reason(CardMoveReason::S_REASON_THROW, source->objectName(), this->getSkillName(), QString());
-	room->moveCardTo(this, source, NULL, Player::DiscardPile, reason);
-	if(source->isAlive())
-		room->drawCards(source, subcards.length());
+    CardMoveReason reason(CardMoveReason::S_REASON_THROW, source->objectName(), this->getSkillName(), QString());
+    room->moveCardTo(this, source, NULL, Player::DiscardPile, reason);
+    if(source->isAlive())
+        room->drawCards(source, subcards.length());
 }
 
 RendeCard::RendeCard(){
-	will_throw = false;
+    will_throw = false;
 }
 
 void RendeCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-	ServerPlayer *target = NULL;
-	if(targets.isEmpty()){
-		foreach(ServerPlayer *player, room->getAlivePlayers()){
-			if(player != source){
-				target = player;
-				break;
-			}
-		}
-	}else
-		target = targets.first();
+    ServerPlayer *target = NULL;
+    if(targets.isEmpty()){
+        foreach(ServerPlayer *player, room->getAlivePlayers()){
+            if(player != source){
+                target = player;
+                break;
+            }
+        }
+    }else
+        target = targets.first();
 
-	CardMoveReason reason(CardMoveReason::S_REASON_GIVE, source->objectName());
-	reason.m_playerId = target->objectName();
-	room->obtainCard(target, this, reason, false);
+    CardMoveReason reason(CardMoveReason::S_REASON_GIVE, source->objectName());
+    reason.m_playerId = target->objectName();
+    room->obtainCard(target, this, reason, false);
 
-	int old_value = source->getMark("rende");
-	int new_value = old_value + subcards.length();
-	room->setPlayerMark(source, "rende", new_value);
+    int old_value = source->getMark("rende");
+    int new_value = old_value + subcards.length();
+    room->setPlayerMark(source, "rende", new_value);
 
-	if(old_value < 2 && new_value >= 2){
-		RecoverStruct recover;
-		recover.card = this;
-		recover.who = source;
-		room->recover(source, recover);
-	}
+    if(old_value < 2 && new_value >= 2){
+        RecoverStruct recover;
+        recover.card = this;
+        recover.who = source;
+        room->recover(source, recover);
+    }
 }
 
 JieyinCard::JieyinCard(){
-	once = true;
-	mute = true;
+    once = true;
+    mute = true;
 }
 
 bool JieyinCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-	if(!targets.isEmpty())
-		return false;
+    if(!targets.isEmpty())
+        return false;
 
-	return to_select->getGeneral()->isMale() && to_select->isWounded();
+    return to_select->getGeneral()->isMale() && to_select->isWounded();
 }
 
 void JieyinCard::onEffect(const CardEffectStruct &effect) const{
-	Room *room = effect.from->getRoom();
+    Room *room = effect.from->getRoom();
 
-	RecoverStruct recover;
-	recover.card = this;
-	recover.who = effect.from;
+    RecoverStruct recover;
+    recover.card = this;
+    recover.who = effect.from;
 
-	room->recover(effect.from, recover, true);
-	room->recover(effect.to, recover, true);
+    room->recover(effect.from, recover, true);
+    room->recover(effect.to, recover, true);
 
-	int index = -1;
-	if(effect.from->getGeneral()->isMale()){
-		if(effect.from == effect.to)
-			index = 5;
-		else if(effect.from->getHp() >= effect.to->getHp())
-			index = 3;
-		else
-			index = 4;
-	}else{
-		index = 1 + qrand() % 2;
-	}
+    int index = -1;
+    if(effect.from->getGeneral()->isMale()){
+        if(effect.from == effect.to)
+            index = 5;
+        else if(effect.from->getHp() >= effect.to->getHp())
+            index = 3;
+        else
+            index = 4;
+    }else{
+        index = 1 + qrand() % 2;
+    }
 
-	room->playSkillEffect("jieyin", index);
+    room->playSkillEffect("jieyin", index);
 }
 
 TuxiCard::TuxiCard(){
 }
 
 bool TuxiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-	if(targets.length() >= 2)
-		return false;
+    if(targets.length() >= 2)
+        return false;
 
-	if(to_select == Self)
-		return false;
+    if(to_select == Self)
+        return false;
 
-	return !to_select->isKongcheng();
+    return !to_select->isKongcheng();
 }
 
 void TuxiCard::onEffect(const CardEffectStruct &effect) const{
-	Room *room = effect.from->getRoom();
-	if(!effect.to->isKongcheng()){
-		int card_id = room->askForCardChosen(effect.from, effect.to, "h", "tuxi");
-		CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
-		room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, false);
-	}
+    Room *room = effect.from->getRoom();
+    if(!effect.to->isKongcheng()){
+        int card_id = room->askForCardChosen(effect.from, effect.to, "h", "tuxi");
+        CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
+        room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, false);
+    }
 }
 
 FanjianCard::FanjianCard(){
-	once = true;
+    once = true;
 }
 
 void FanjianCard::onEffect(const CardEffectStruct &effect) const{
-	ServerPlayer *zhouyu = effect.from;
-	ServerPlayer *target = effect.to;
-	Room *room = zhouyu->getRoom();
+    ServerPlayer *zhouyu = effect.from;
+    ServerPlayer *target = effect.to;
+    Room *room = zhouyu->getRoom();
 
-	int card_id = zhouyu->getRandomHandCardId();
-	const Card *card = Sanguosha->getCard(card_id);
-	Card::Suit suit = room->askForSuit(target, "fanjian");
+    int card_id = zhouyu->getRandomHandCardId();
+    const Card *card = Sanguosha->getCard(card_id);
+    Card::Suit suit = room->askForSuit(target, "fanjian");
 
-	LogMessage log;
-	log.type = "#ChooseSuit";
-	log.from = target;
-	log.arg = Card::Suit2String(suit);
-	room->sendLog(log);
+    LogMessage log;
+    log.type = "#ChooseSuit";
+    log.from = target;
+    log.arg = Card::Suit2String(suit);
+    room->sendLog(log);
 
-	room->getThread()->delay();
-	target->obtainCard(card);
-	room->showCard(target, card_id);
+    room->getThread()->delay();
+    target->obtainCard(card);
+    room->showCard(target, card_id);
 
-	if(card->getSuit() != suit){
-		DamageStruct damage;
-		damage.card = NULL;
-		damage.from = zhouyu;
-		damage.to = target;
+    if(card->getSuit() != suit){
+        DamageStruct damage;
+        damage.card = NULL;
+        damage.from = zhouyu;
+        damage.to = target;
 
-		room->damage(damage);
-	}
+        room->damage(damage);
+    }
 }
 
 KurouCard::KurouCard(){
-	target_fixed = true;
+    target_fixed = true;
 }
 
 void KurouCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &) const{
-	room->loseHp(source);
-	if(source->isAlive())
-		room->drawCards(source, 2);
+    room->loseHp(source);
+    if(source->isAlive())
+        room->drawCards(source, 2);
 }
 
 LijianCard::LijianCard(){
-	once = true;
-	mute = true;
+    once = true;
+    mute = true;
 }
 
 bool LijianCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-	if(!to_select->getGeneral()->isMale())
-		return false;
+    if(!to_select->getGeneral()->isMale())
+        return false;
 
-	if(targets.isEmpty() && to_select->hasSkill("kongcheng") && to_select->isKongcheng()){
-		return false;
-	}
+    if(targets.isEmpty() && to_select->hasSkill("kongcheng") && to_select->isKongcheng()){
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool LijianCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
-	return targets.length() == 2;
+    return targets.length() == 2;
+}
+
+void LijianCard::onUse(Room *room,const CardUseStruct &card_use) const{
+    CardMoveReason reason(CardMoveReason::S_REASON_THROW, card_use.from->objectName(), QString(), card_use.card->getSkillName(), QString());
+    room->moveCardTo(card_use.card, card_use.from, NULL, Player::DiscardPile, reason, true);
+
+    QVariant data = QVariant::fromValue(card_use);
+    RoomThread *thread = room->getThread();
+
+    thread->trigger(CardonUse, room, card_use.from, data);
+
+    LogMessage log;
+    log.from = card_use.from;
+    log.to == card_use.to;
+    log.type = "#Lijian";
+    log.arg = this->getSkillName();
+    room->sendLog(log);
+
+    room->broadcastInvoke("animate", QString("indicate:%1:%2").arg(card_use.from->objectName()).arg(card_use.to.at(1)->objectName()));
+
+    thread->trigger(CardUsed, room, card_use.from, data);
+
+    thread->trigger(CardFinished, room, card_use.from, data);
 }
 
 void LijianCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-	room->playSkillEffect("lijian");
+    room->playSkillEffect("lijian");
 
-	ServerPlayer *to = targets.at(0);
-	ServerPlayer *from = targets.at(1);
+    ServerPlayer *to = targets.at(0);
+    ServerPlayer *from = targets.at(1);
 
-	Duel *duel = new Duel(Card::NoSuit, 0);
-	duel->setSkillName("lijian");
-	duel->setCancelable(false);
+    Duel *duel = new Duel(Card::NoSuit, 0);
+    duel->setSkillName("lijian");
+    duel->setCancelable(false);
 
-	CardUseStruct use;
-	use.from = from;
-	use.to << to;
-	use.card = duel;
-	room->useCard(use);
+    CardUseStruct use;
+    use.from = from;
+    use.to << to;
+    use.card = duel;
+    room->useCard(use);
 }
 
 QingnangCard::QingnangCard(){
-	once = true;
+    once = true;
 }
 
 bool QingnangCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-	return targets.isEmpty() && to_select->isWounded();
+    return targets.isEmpty() && to_select->isWounded();
 }
 
 bool QingnangCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
-	return targets.value(0, Self)->isWounded();
+    return targets.value(0, Self)->isWounded();
 }
 
 void QingnangCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-	ServerPlayer *target = targets.value(0, source);
+    ServerPlayer *target = targets.value(0, source);
 
-	CardEffectStruct effect;
-	effect.card = this;
-	effect.from = source;
-	effect.to = target;
+    CardEffectStruct effect;
+    effect.card = this;
+    effect.from = source;
+    effect.to = target;
 
-	room->cardEffect(effect);
+    room->cardEffect(effect);
 }
 
 void QingnangCard::onEffect(const CardEffectStruct &effect) const{
-	RecoverStruct recover;
-	recover.card = this;
-	recover.who = effect.from;
-	effect.to->getRoom()->recover(effect.to, recover);
+    RecoverStruct recover;
+    recover.card = this;
+    recover.who = effect.from;
+    effect.to->getRoom()->recover(effect.to, recover);
 }
 
 GuicaiCard::GuicaiCard(){
-	target_fixed = true;
-	will_throw = false;
-	can_jilei = true;
+    target_fixed = true;
+    will_throw = false;
+    can_jilei = true;
 }
 
 void GuicaiCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
@@ -236,26 +259,26 @@ LiuliCard::LiuliCard()
 
 
 bool LiuliCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-	if(!targets.isEmpty())
-		return false;
+    if(!targets.isEmpty())
+        return false;
 
-	if(to_select->hasFlag("slash_source"))
-		return false;
+    if(to_select->hasFlag("slash_source"))
+        return false;
 
-	if(!Self->canSlash(to_select))
-		return false;
+    if(!Self->canSlash(to_select))
+        return false;
 
-	int card_id = subcards.first();
-	if(Self->getWeapon() && Self->getWeapon()->getId() == card_id)
-		return Self->distanceTo(to_select) <= 1;
-	else if(Self->getOffensiveHorse() && Self->getOffensiveHorse()->getId() == card_id)
-		return Self->distanceTo(to_select,1) <= (Self->getWeapon()?Self->getWeapon()->getRange():1);
-	else
-		return true;
+    int card_id = subcards.first();
+    if(Self->getWeapon() && Self->getWeapon()->getId() == card_id)
+        return Self->distanceTo(to_select) <= 1;
+    else if(Self->getOffensiveHorse() && Self->getOffensiveHorse()->getId() == card_id)
+        return Self->distanceTo(to_select,1) <= (Self->getWeapon()?Self->getWeapon()->getRange():1);
+    else
+        return true;
 }
 
 void LiuliCard::onEffect(const CardEffectStruct &effect) const{
-	effect.to->getRoom()->setPlayerFlag(effect.to, "liuli_target");
+    effect.to->getRoom()->setPlayerFlag(effect.to, "liuli_target");
 }
 
 JijiangCard::JijiangCard(){
@@ -263,30 +286,30 @@ JijiangCard::JijiangCard(){
 }
 
 bool JijiangCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-	return targets.isEmpty() && Self->canSlash(to_select);
+    return targets.isEmpty() && Self->canSlash(to_select);
 }
 
 void JijiangCard::use(Room *room, ServerPlayer *liubei, const QList<ServerPlayer *> &targets) const{
-	QList<ServerPlayer *> lieges = room->getLieges("shu", liubei);
-	const Card *slash = NULL;
+    QList<ServerPlayer *> lieges = room->getLieges("shu", liubei);
+    const Card *slash = NULL;
 
-	QVariant tohelp = QVariant::fromValue((PlayerStar)liubei);
-	foreach(ServerPlayer *liege, lieges){
-		slash = room->askForCard(liege, "slash", "@jijiang-slash:" + liubei->objectName(), tohelp, NonTrigger);
-		if(slash){
-			LogMessage log;
-			log.type = "#SkillResponsed";
-			log.from = liege;
-			log.to << liubei;
-			log.arg = "jijiang";
-			room->sendLog(log);
-			CardUseStruct card_use;
-			card_use.card = slash;
-			card_use.from = liubei;
-			card_use.to << targets.first();
+    QVariant tohelp = QVariant::fromValue((PlayerStar)liubei);
+    foreach(ServerPlayer *liege, lieges){
+        slash = room->askForCard(liege, "slash", "@jijiang-slash:" + liubei->objectName(), tohelp, NonTrigger);
+        if(slash){
+            LogMessage log;
+            log.type = "#SkillResponsed";
+            log.from = liege;
+            log.to << liubei;
+            log.arg = "jijiang";
+            room->sendLog(log);
+            CardUseStruct card_use;
+            card_use.card = slash;
+            card_use.from = liubei;
+            card_use.to << targets.first();
 
-			room->useCard(card_use);
-			return;
-		}
-	}
+            room->useCard(card_use);
+            return;
+        }
+    }
 }
