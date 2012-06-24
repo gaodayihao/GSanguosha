@@ -230,7 +230,7 @@ public:
         if(from && !from->isNude() && room->askForSkillInvoke(simayi, "fankui", data)){
             int card_id = room->askForCardChosen(simayi, from, "he", "fankui");
             CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, simayi->objectName());
-            room->obtainCard(simayi, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::Hand);
+            room->obtainCard(simayi, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::PlaceHand);
             room->playSkillEffect(objectName());
         }
     }
@@ -734,7 +734,7 @@ public:
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *player, QVariant &data) const{
         if(player->isKongcheng()){
             CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-            if(move->from_places.contains(Player::Hand))
+            if(move->from_places.contains(Player::PlaceHand))
                 room->playSkillEffect("kongcheng");
         }
 
@@ -956,7 +956,7 @@ public:
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *luxun, QVariant &data) const{
         if (luxun == NULL) return false;
         CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-        if(luxun->isKongcheng() && move->from_places.contains(Player::Hand)){
+        if(luxun->isKongcheng() && move->from_places.contains(Player::PlaceHand)){
             if(room->askForSkillInvoke(luxun, objectName(), data)){
                 room->playSkillEffect(objectName());
                 luxun->drawCards(1);
@@ -1128,7 +1128,7 @@ public:
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *sunshangxiang, QVariant &data) const{
         if (sunshangxiang == NULL) return false;
         CardMoveStar move = data.value<CardMoveStar>();
-        if(move->from_place == Player::Equip){
+        if(move->from_place == Player::PlaceEquip){
             if(room->askForSkillInvoke(sunshangxiang, objectName())){
                 room->playSkillEffect(objectName());
                 sunshangxiang->drawCards(2);

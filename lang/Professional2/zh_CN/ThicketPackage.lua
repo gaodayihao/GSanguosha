@@ -88,6 +88,8 @@ return {
 	["@roulin1-jink-2"] = "董卓触发【肉林】，你还需要使用一张【闪】才能抵消",
 	["@roulin2-jink-1"] = "你触发【肉林】，需连续使用两张【闪】才能抵消",
 	["@roulin2-jink-2"] = "你触发【肉林】，还需要使用一张【闪】才能抵消",
+	["#BenghuaiLoseHp"] = "%from 触发了【崩坏】，流失了一点体力",
+	["#BenghuaiLoseMaxHp"] = "%from 触发了【崩坏】，流失了一点体力上限",
 	[":benghuai:"] = "请选择失去1点体力还是减1点体力上限:",
 	["benghuai:hp"] = "失去1点体力",
 	["benghuai:maxhp"] = "减1点体力上限",

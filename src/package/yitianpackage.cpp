@@ -31,7 +31,7 @@ YitianSword::YitianSword(Suit suit, int number)
 }
 
 void YitianSword::onMove(const CardMoveStruct &move) const{
-    if(move.from_place == Player::Equip && move.from->isAlive()){
+    if(move.from_place == Player::PlaceEquip && move.from->isAlive()){
         ServerPlayer* from = (ServerPlayer*) move.from;
         Room *room = from->getRoom();
 

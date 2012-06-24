@@ -66,7 +66,7 @@ void QiaobianCard::use(Room *room, ServerPlayer *zhanghe, const QList<ServerPlay
 
         int equip_index = -1;
         const DelayedTrick *trick = NULL;
-        if(place == Player::Equip){
+        if(place == Player::PlaceEquip){
             const EquipCard *equip = qobject_cast<const EquipCard *>(card);
             equip_index = static_cast<int>(equip->location());
         }else{
@@ -340,7 +340,7 @@ public:
         if(event == CardLostOneTime){
             CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
 
-            if((move->from_places.contains(Player::Hand) || move->from_places.contains(Player::Equip))
+            if((move->from_places.contains(Player::PlaceHand) || move->from_places.contains(Player::PlaceEquip))
                     && move->to != move->from
                     && player->getRoom()->getCurrent() != player
                     && player->askForSkillInvoke("tuntian", data)){
@@ -563,7 +563,7 @@ void ZhibaCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *
     if(sunce->getMark("hunzi") > 0 &&
             room->askForChoice(sunce, "zhiba_pindian", "accept+reject") == "reject")
     {
-        room->moveCardTo(this, source, Player::Hand);
+        room->moveCardTo(this, source, Player::PlaceHand);
         room->playSkillEffect("sunce_zhiba", 4);
         return;
     }
@@ -773,7 +773,7 @@ bool ZhijianCard::targetFilter(const QList<const Player *> &targets, const Playe
 
 void ZhijianCard::onEffect(const CardEffectStruct &effect) const{
     ServerPlayer *erzhang = effect.from;
-    erzhang->getRoom()->moveCardTo(this, erzhang, effect.to, Player::Equip,
+    erzhang->getRoom()->moveCardTo(this, erzhang, effect.to, Player::PlaceEquip,
                                    CardMoveReason(CardMoveReason::S_REASON_USE, erzhang->objectName(), "zhijian", QString()));
     erzhang->drawCards(1);
 }
@@ -883,7 +883,7 @@ public:
             CardsMoveStruct move;
             move.card_ids = cards;
             move.to = erzhang;
-            move.to_place = Player::Hand;
+            move.to_place = Player::PlaceHand;
             QList<CardsMoveStruct> moves;
             moves.append(move);
             room->moveCards(moves, true, true);

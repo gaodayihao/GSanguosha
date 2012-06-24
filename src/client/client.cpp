@@ -463,7 +463,7 @@ void Client::getCards(const Json::Value& arg)
         move.to = getPlayer(move.to_player_name);
         Player::Place dstPlace = move.to_place;
 
-        if (dstPlace == Player::Special)
+        if (dstPlace == Player::PlaceSpecial)
             ((ClientPlayer*)move.to)->changePile(move.to_pile_name, true, move.card_ids);
         else{
             foreach (int card_id, move.card_ids)
@@ -487,7 +487,7 @@ void Client::loseCards(const Json::Value& arg)
         move.to = getPlayer(move.to_player_name);
         Player::Place srcPlace = move.from_place;
 
-        if (srcPlace == Player::Special)
+        if (srcPlace == Player::PlaceSpecial)
             ((ClientPlayer*)move.from)->changePile(move.from_pile_name, false, move.card_ids);
         else {
             foreach (int card_id, move.card_ids)
@@ -1415,7 +1415,7 @@ void Client::takeAG(const QString &take_str){
     const Card *card = Sanguosha->getCard(card_id);
     if(taker_name != "."){
         ClientPlayer *taker = getPlayer(taker_name);
-        taker->addCard(card, Player::Hand);
+        taker->addCard(card, Player::PlaceHand);
         emit ag_taken(taker, card_id);
     }else{
         discarded_list.prepend(card);

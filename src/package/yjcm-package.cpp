@@ -66,14 +66,14 @@ public:
 
         CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
 
-        if(move->from_places.contains(Player::Judging) || move->from_places.contains(Player::Special))
+        if(move->from_places.contains(Player::PlaceDelayedTrick) || move->from_places.contains(Player::PlaceSpecial))
             return false;
         if(move->to_place == Player::DiscardPile && move->from && move->from != caozhi &&
                 ((move->reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD)){
             QList<CardsMoveStruct> exchangeMove;
             CardsMoveStruct luoyingget;
             luoyingget.to = caozhi;
-            luoyingget.to_place = Player::Hand;
+            luoyingget.to_place = Player::PlaceHand;
             foreach(int card_id, move->card_ids){
                 if(Sanguosha->getCard(card_id)->getSuit() == Card::Club){
                         luoyingget.card_ids << card_id;
@@ -540,7 +540,7 @@ public:
         else if(event == CardLostOneTime)
         {
             CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-            if(move->from_places.contains(Player::Equip) ||
+            if(move->from_places.contains(Player::PlaceEquip) ||
                     lingtong->tag.value("InvokeXuanfeng", false).toBool())
             {
                 lingtong->tag.remove("InvokeXuanfeng");
@@ -846,11 +846,11 @@ void GanluCard::swapEquip(ServerPlayer *first, ServerPlayer *second) const{
     CardsMoveStruct move1;
     move1.card_ids = equips1;
     move1.to = second;
-    move1.to_place = Player::Equip;
+    move1.to_place = Player::PlaceEquip;
     CardsMoveStruct move2;
     move2.card_ids = equips2;
     move2.to = first;
-    move2.to_place = Player::Equip;
+    move2.to_place = Player::PlaceEquip;
     exchangeMove.push_back(move2);
     exchangeMove.push_back(move1);
     room->moveCards(exchangeMove, false);
@@ -1221,14 +1221,14 @@ public:
         if(event == CardLostOneTime)
         {
             CardsMoveOneTimeStar cards_move = data.value<CardsMoveOneTimeStar>();
-            if(!cards_move->from_places.contains(Player::Hand))
+            if(!cards_move->from_places.contains(Player::PlaceHand))
                 return false;
         }
 
         if(event == CardGotOneTime)
         {
             CardsMoveOneTimeStar cards_move = data.value<CardsMoveOneTimeStar>();
-            if(cards_move->to_place != Player::Hand)
+            if(cards_move->to_place != Player::PlaceHand)
                 return false;
         }
 

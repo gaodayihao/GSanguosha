@@ -137,7 +137,7 @@ public:
                 if(!target->isNude()){
                     int card_id = room->askForCardChosen(zhurong, target, "he", objectName());
                     CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, zhurong->objectName());
-                    room->obtainCard(zhurong, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::Hand);
+                    room->obtainCard(zhurong, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::PlaceHand);
                 }
             }
         }
@@ -337,7 +337,7 @@ void NosXuanhuoCard::onEffect(const CardEffectStruct &effect) const{
 
     int card_id = room->askForCardChosen(effect.from, effect.to, "he", objectName());
     CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
-    room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::Hand);
+    room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::PlaceHand);
 
     QList<ServerPlayer *> targets = room->getOtherPlayers(effect.to);
     ServerPlayer *target = room->askForPlayerChosen(effect.from, targets, "nosxuanhuo");
@@ -383,7 +383,7 @@ public:
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *lingtong, QVariant &data) const{
         if(event == CardLostOneTime){
             CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-            if (move->from_places.contains(Player::Equip))
+            if (move->from_places.contains(Player::PlaceEquip))
             {
 
                 QString choice = room->askForChoice(lingtong, objectName(), "slash+damage+nothing");
@@ -450,7 +450,7 @@ public:
             int equip = room->askForCardChosen(zhonghui, damage.from, "e", objectName());
 
             const Card *card = Sanguosha->getCard(equip);
-            room->moveCardTo(card, zhonghui, Player::Hand);
+            room->moveCardTo(card, zhonghui, Player::PlaceHand);
 
             CardUseStruct card_use;
             card_use.from = zhonghui;
@@ -686,9 +686,9 @@ public:
 class NosPaiyi: public PhaseChangeSkill{
 public:
     NosPaiyi():PhaseChangeSkill("nospaiyi"){
-        _m_place["Judging"] = Player::Judging;
-        _m_place["Equip"] = Player::Equip;
-        _m_place["Hand"] = Player::Hand;
+        _m_place["Judging"] = Player::PlaceDelayedTrick;
+        _m_place["Equip"] = Player::PlaceEquip;
+        _m_place["Hand"] = Player::PlaceHand;
     }
 
     QString getPlace(Room *room, ServerPlayer *player, QStringList places) const{

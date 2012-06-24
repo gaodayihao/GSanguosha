@@ -21,7 +21,7 @@ bool JuaoCard::targetFilter(const QList<const Player *> &targets, const Player *
 
 void JuaoCard::onEffect(const CardEffectStruct &effect) const{
     foreach(int cardid, this->getSubcards()){
-        //source->getRoom()->moveCardTo(Sanguosha->getCard(cardid), targets.first(), Player::Special);
+        //source->getRoom()->moveCardTo(Sanguosha->getCard(cardid), targets.first(), Player::PlaceSpecial);
         effect.to->addToPile("hautain", cardid, false);
     }
     effect.to->addMark("juao");
@@ -193,7 +193,7 @@ public:
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *jiangwei, QVariant &data) const{
         if(jiangwei->isKongcheng()){
             CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-            if(!move->from_places.contains(Player::Hand))
+            if(!move->from_places.contains(Player::PlaceHand))
                 return false;
 
             QList<ServerPlayer *> players;

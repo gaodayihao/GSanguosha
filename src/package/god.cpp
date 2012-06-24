@@ -395,7 +395,7 @@ public:
                     if(!player->isAllNude()){
                         CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, shencc->objectName());
                         int card_id = room->askForCardChosen(shencc, player, "hej", objectName());
-                        room->obtainCard(shencc, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::Hand);
+                        room->obtainCard(shencc, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::PlaceHand);
                     }
                 }
                 can_invoke = false;
@@ -1353,12 +1353,12 @@ public:
 
         }else if(event == CardLostOneTime && player->getPhase() != Player::Discard){
             CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-            if(move->from_places.contains(Player::Hand))
+            if(move->from_places.contains(Player::PlaceHand))
                 dojuejingEx(player, room);
 
         }else if(event == CardGotOneTime){
             CardsMoveOneTimeStar move = data.value<CardsMoveOneTimeStar>();
-            if(move->to_place == Player::Hand)
+            if(move->to_place == Player::PlaceHand)
                 dojuejingEx(player, room);
 
         }else if(player->getPhase() != Player::Discard){

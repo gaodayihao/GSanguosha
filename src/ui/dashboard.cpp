@@ -198,9 +198,9 @@ void Dashboard::setTrust(bool trust){
 
 bool Dashboard::_addCardItems(QList<CardItem*> &card_items, Player::Place place)
 {
-    if (place == Player::Equip)
+    if (place == Player::PlaceEquip)
         _disperseCards(card_items, S_EQUIP_CARD_MOVE_REGION, Qt::AlignCenter, true, false);
-    else if (place == Player::Judging)
+    else if (place == Player::PlaceDelayedTrick)
         _disperseCards(card_items, S_JUDGE_CARD_MOVE_REGION, Qt::AlignCenter, true, false);
     else if (place == Player::PlaceTakeoff)
     {
@@ -212,7 +212,7 @@ bool Dashboard::_addCardItems(QList<CardItem*> &card_items, Player::Place place)
         _disperseCards(card_items, m_cardTakeOffRegion, Qt::AlignCenter, true, false);
         return false;
     }
-    else if (place == Player::Special)
+    else if (place == Player::PlaceSpecial)
     {
         foreach(CardItem* card, card_items)
         {
@@ -224,15 +224,15 @@ bool Dashboard::_addCardItems(QList<CardItem*> &card_items, Player::Place place)
 
     foreach (CardItem* card_item, card_items)
     {
-        if (place == Player::Equip)
+        if (place == Player::PlaceEquip)
             _installEquip(card_item);
-        else if (place == Player::Judging)
+        else if (place == Player::PlaceDelayedTrick)
             _installDelayedTrick(card_item);
-        else if (place == Player::Hand)
+        else if (place == Player::PlaceHand)
             _addHandCard(card_item);
     }
 
-    if (place == Player::Hand)
+    if (place == Player::PlaceHand)
         adjustCards();
     return false;
 }
@@ -471,8 +471,8 @@ void Dashboard::setWidth(int width){
     adjustCards();
 
     m_cardTakeOffRegion = middle->boundingRect();
-    m_cardTakeOffRegion.setY(middle->pos().y() - CardItem::S_NORMAL_CARD_HEIGHT * 1);
-    m_cardTakeOffRegion.setX(middle->boundingRect().center().x());
+    m_cardTakeOffRegion.setY(middle->pos().y() - CardItem::S_NORMAL_CARD_HEIGHT * 0.5);
+	m_cardTakeOffRegion.setX(middle->boundingRect().x());
     m_cardTakeOffRegion.setHeight(CardItem::S_NORMAL_CARD_HEIGHT);
 }
 
@@ -849,13 +849,13 @@ QList<CardItem*> Dashboard::removeCardItems(const QList<int> &card_ids, Player::
     QList<CardItem*> result;
     foreach (int card_id, card_ids)
     {
-        if(place == Player::Hand){
+        if(place == Player::PlaceHand){
             card_item = CardItem::FindItem(m_handCards, card_id);
             if (card_item == selected) selected = NULL;
             m_handCards.removeOne(card_item);
             card_item->hideFrame();
         }
-        else if(place == Player::Equip){
+        else if(place == Player::PlaceEquip){
             foreach(CardItem **equip_ptr, equips){
                 CardItem *equip = *equip_ptr;
                 if(equip && equip->getCard()->getId() == card_id){
@@ -867,7 +867,7 @@ QList<CardItem*> Dashboard::removeCardItems(const QList<int> &card_ids, Player::
                     break;
                 }
             }
-        }else if(place == Player::Judging){
+        }else if(place == Player::PlaceDelayedTrick){
             card_item = CardItem::FindItem(judging_area, card_id);
             if(card_item){
                 card_item->hideFrame();
@@ -896,7 +896,7 @@ QList<CardItem*> Dashboard::removeCardItems(const QList<int> &card_ids, Player::
                 card_item->setCard(card);
             }
             card_item->setOpacity(1.0);
-        }else if (place == Player::Special){
+        }else if (place == Player::PlaceSpecial){
             card_item = _createCard(card_id);
             card_item->setOpacity(0.0);
         }
@@ -906,15 +906,15 @@ QList<CardItem*> Dashboard::removeCardItems(const QList<int> &card_ids, Player::
             result.append(card_item);
         }
     }
-    if (place == Player::Hand)
+    if (place == Player::PlaceHand)
         adjustCards();
-    else if (place == Player::Equip)
+    else if (place == Player::PlaceEquip)
         _disperseCards(result, S_EQUIP_CARD_MOVE_REGION, Qt::AlignCenter, false, false);
-    else if (place == Player::Judging)
+    else if (place == Player::PlaceDelayedTrick)
         _disperseCards(result, S_JUDGE_CARD_MOVE_REGION, Qt::AlignCenter, false, false);
     else if (place == Player::PlaceTakeoff)
         _disperseCards(result, m_cardTakeOffRegion, Qt::AlignCenter, false, false);
-    else if (place == Player::Special)
+    else if (place == Player::PlaceSpecial)
         _disperseCards(result, m_cardSpecialRegion, Qt::AlignCenter, false, false);
     update();
     return result;

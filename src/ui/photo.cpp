@@ -419,9 +419,9 @@ void Photo::installDelayedTrick(CardItem *trick){
 QList<CardItem*> Photo::removeCardItems(const QList<int> &card_ids, Player::Place place)
 {
     QList<CardItem*> result;
-    if(place == Player::Hand || place == Player::Special){
+    if(place == Player::PlaceHand || place == Player::PlaceSpecial){
          result = _createCards(card_ids);
-    }else if(place == Player::Equip){
+    }else if(place == Player::PlaceEquip){
         foreach(CardItem **equip_ptr, equips){
             CardItem *equip = *equip_ptr;
             if(equip && card_ids.contains(equip->getCard()->getId())){
@@ -431,7 +431,7 @@ QList<CardItem*> Photo::removeCardItems(const QList<int> &card_ids, Player::Plac
                 equip_rects[index]->setToolTip(QString());
             }
         }
-    }else if(place == Player::Judging){
+    }else if(place == Player::PlaceDelayedTrick){
         foreach (int card_id, card_ids)
         {
             CardItem* card_item = CardItem::FindItem(judging_area, card_id);
@@ -481,13 +481,13 @@ bool Photo::_addCardItems(QList<CardItem*> &card_items, Player::Place place)
     }
     foreach (CardItem* card_item, card_items)
         card_item->setHomeOpacity(homeOpacity);
-    if (place == Player::Equip)
+    if (place == Player::PlaceEquip)
     {
         foreach (CardItem* card, card_items)
             installEquip(card);
         destroy = false;
     }
-    else if (place == Player::Judging)
+    else if (place == Player::PlaceDelayedTrick)
     {
         foreach (CardItem* card, card_items)
             installDelayedTrick(card);
