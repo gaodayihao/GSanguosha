@@ -99,6 +99,8 @@ public:
     LuaSkillCard *clone() const;
     void setTargetFixed(bool target_fixed);
     void setWillThrow(bool will_throw);
+    void setPindian(bool as_pindian);
+    void setMute(bool mute);
 
     // member functions that do not expose to Lua interpreter
     static LuaSkillCard *Parse(const QString &str);

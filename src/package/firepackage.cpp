@@ -156,9 +156,8 @@ bool QiangxiCard::targetFilter(const QList<const Player *> &targets, const Playe
     if(!targets.isEmpty())
         return false;
 
-    if(!subcards.isEmpty() && Self->getWeapon() == Sanguosha->getCard(subcards.first())
-        && !Self->hasFlag("tianyi_success"))
-        return Self->distanceTo(to_select) <= 1;
+    if(!subcards.isEmpty() && Self->getWeapon() == Sanguosha->getCard(subcards.first()))
+        return Self->distanceTo(to_select) <= (Self->getAttackRange() - Self->getWeapon()->getRange() + 1);
 
     return Self->inMyAttackRange(to_select);
 }

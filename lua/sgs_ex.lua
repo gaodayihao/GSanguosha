@@ -118,6 +118,14 @@ function sgs.CreateSkillCard(spec)
 		card:setWillThrow(spec.will_throw)	
 	end
 
+	if type(spec.as_pindian) == "boolean" then
+		card:setPindian(spec.as_pindian)	
+	end
+	
+	if type(spec.mute) == "boolean" then
+		card:setMute(spec.mute)	
+	end
+	
 	card.filter = spec.filter
 	card.feasible = spec.feasible
 	card.on_use = spec.on_use
