@@ -371,7 +371,7 @@ public:
 class Fuli: public TriggerSkill{
 public:
     Fuli():TriggerSkill("fuli"){
-        events << Dying;
+		events << AskForPeaches;
         frequency = Limited;
     }
 
@@ -388,10 +388,6 @@ public:
     }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *liaohua, QVariant &data) const{
-        DyingStruct dying_data = data.value<DyingStruct>();
-        if(dying_data.who != liaohua)
-            return false;
-
         if(liaohua->askForSkillInvoke(objectName(), data)){
             //room->broadcastInvoke("animate", "lightbox:$fuli");
             room->playSkillEffect(objectName());
@@ -598,6 +594,11 @@ public:
 
             DyingStruct dying = data.value<DyingStruct>();
             forever{
+                if(handang->hasFlag("jiefan_failed")){
+                    room->setPlayerFlag(handang, "-jiefan_failed");
+                    break;
+                }
+
                 if(dying.who->getHp() > 0 || handang->isNude() || room->getCurrent()->isDead() ||
                         !handang->canSlash(room->getCurrent(), false) || !handang->askForSkillInvoke(objectName(), data))
                     break;
@@ -635,6 +636,8 @@ public:
                     && !room->getTag("JiefanTarget").isNull()
                     && damage.card->hasFlag("jiefan-slash")){
 
+                room->setCardFlag(damage.card, "jiefan_success");
+
                 DyingStruct dying = room->getTag("JiefanTarget").value<DyingStruct>();
 
                 if (!dying.savers.contains(handang) || dying.who->getHp() > 0 || dying.who->isDead())
@@ -654,14 +657,15 @@ public:
             return false;
         }
         else if(event == CardFinished){
-            if(room->getTag("JiefanSlash").isNull())
+            if(room->getTag("JiefanTarget").isNull())
                 return false;
             CardUseStruct use = data.value<CardUseStruct>();
             if(use.card->hasFlag("jiefan-slash")){
+                if(!use.card->hasFlag("jiefan_success"))
+                    room->setPlayerFlag(handang, "jiefan_failed");
                 room->removeTag("JiefanTarget");
             }
         }
-
         return false;
     }
 };

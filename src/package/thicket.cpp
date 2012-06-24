@@ -711,7 +711,7 @@ public:
         else if(event == AskForPeachesProceed)
         {
             DyingStruct dying = data.value<DyingStruct>();
-            if(!dying.savers.contains(player))
+			if(!dying.savers.contains(player))
                 return true;
         }
 
