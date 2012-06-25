@@ -2771,8 +2771,10 @@ void Room::damage(const DamageStruct &damage_data){
         thread->trigger(Damaged, this, damage_data.to, data);
 
     }while(false);
+    DamageStruct damage = data.value<DamageStruct>();
 
-    thread->trigger(DamageComplete, this, damage_data.to, data);
+    if(!damage.transfer)
+        thread->trigger(DamageComplete, this, damage_data.to, data);
 }
 
 void Room::sendDamageLog(const DamageStruct &data){

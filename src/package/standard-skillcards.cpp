@@ -175,6 +175,7 @@ bool LijianCard::targetsFeasible(const QList<const Player *> &targets, const Pla
 
 void LijianCard::onUse(Room *room,const CardUseStruct &card_use) const{
     CardMoveReason reason(CardMoveReason::S_REASON_THROW, card_use.from->objectName(), QString(), card_use.card->getSkillName(), QString());
+    reason.m_targetId = card_use.to.at(1)->objectName();
     room->moveCardTo(card_use.card, card_use.from, NULL, Player::DiscardPile, reason, true);
 
     QVariant data = QVariant::fromValue(card_use);

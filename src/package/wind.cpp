@@ -754,7 +754,11 @@ public:
 
             xiaoqiao->tag["TianxiangDamage"] = QVariant::fromValue(damage);
             if(room->askForUseCard(xiaoqiao, "@@tianxiang", "@tianxiang-card"))
+            {
+                damage.transfer = true;
+                data = QVariant::fromValue(damage);
                 return true;
+            }
         }
 
         return false;

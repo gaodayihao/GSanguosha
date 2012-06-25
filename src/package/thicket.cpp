@@ -221,8 +221,7 @@ public:
 class HuoshouDamage: public TriggerSkill{
 public:
     HuoshouDamage():TriggerSkill("#huoshou"){
-        events << Predamage;
-        frequency = Compulsory;
+        events << Predamage << CardFinished;
     }
 
     virtual int getPriority() const{
@@ -233,23 +232,39 @@ public:
         return target && !target->hasSkill(objectName());
     }
 
-    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
-        if (player == NULL) return false;
-        DamageStruct damage = data.value<DamageStruct>();
-        if(damage.card && damage.card->inherits("SavageAssault")){
-            ServerPlayer *menghuo = room->getTag("HuoShouSource").value<PlayerStar>();
-            if(menghuo && menghuo->isAlive()){
-                LogMessage log;
-                log.type = "#HuoshouTransfer";
-                log.from = menghuo;
-                log.to << damage.to;
-                log.arg = player->getGeneralName();
-                log.arg2 = "huoshou";
-                room->sendLog(log);
+    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
+        if(event == Predamage)
+        {
+            DamageStruct damage = data.value<DamageStruct>();
+            if(damage.card && damage.card->inherits("SavageAssault")){
+                ServerPlayer *menghuo = room->getTag("HuoShouSource").value<PlayerStar>();
+                if(menghuo){
+                    if(menghuo->isAlive())
+                    {
+                        LogMessage log;
+                        log.type = "#HuoshouTransfer";
+                        log.from = menghuo;
+                        log.to << damage.to;
+                        log.arg = player->getGeneralName();
+                        log.arg2 = "huoshou";
+                        room->sendLog(log);
 
-                damage.from = menghuo;
-                data = QVariant::fromValue(damage);
+                        damage.from = menghuo;
+                    }
+                    else
+                        damage.from = NULL;
+                    room->damage(damage);
+                    damage.transfer = true;
+                    data = QVariant::fromValue(damage);
+                    return true;
+                }
             }
+        }
+        else
+        {
+            CardUseStruct use = data.value<CardUseStruct>();
+            if(use.card->inherits("SavageAssault") && !room->getTag("HuoShouSource").isNull())
+                room->removeTag("HuoShouSource");
         }
 
         return false;

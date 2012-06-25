@@ -229,7 +229,7 @@ public:
 };
 
 ZhiyuanCard::ZhiyuanCard(){
-
+    will_throw = false;
 }
 
 bool ZhiyuanCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -279,6 +279,18 @@ public:
     }
 };
 
+class CaorenMaxCards: public MaxCardsSkill{
+public:
+    CaorenMaxCards():MaxCardsSkill("#caorenmaxcards"){
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if(!target->hasSkill(objectName()))
+            return 0;
+        return -target->getMark("flood");
+    }
+};
+
 class FanchengRule: public ScenarioRule{
 public:
     FanchengRule(Scenario *scenario)
@@ -293,38 +305,39 @@ public:
             player = room->getLord();
             room->installEquip(player, "chitu");
             room->installEquip(player, "blade");
-            room->acquireSkill(player, "flood");
-            room->acquireSkill(player, "xiansheng");
+            room->acquireSkill(player, "flood", true, false);
+            room->acquireSkill(player, "xiansheng", true, false);
 
-            ServerPlayer *panglingming = room->findPlayer("panglingming");
-            room->acquireSkill(panglingming, "taichen_fight");
+            ServerPlayer *panglingming = room->findPlayer("sp_pangde");
+            room->acquireSkill(panglingming, "taichen_fight", true, false);
 
             ServerPlayer *huatuo = room->findPlayer("huatuo");
             room->installEquip(huatuo, "hualiu");
-            room->acquireSkill(huatuo, "guagu");
+            room->acquireSkill(huatuo, "guagu", true, false);
 
             ServerPlayer *lvmeng = room->findPlayer("lvmeng");
-            room->acquireSkill(lvmeng, "dujiang");
+            room->acquireSkill(lvmeng, "dujiang", true, false);
 
             ServerPlayer *caoren = room->findPlayer("caoren");
             room->installEquip(caoren, "renwang_shield");
-            room->acquireSkill(caoren, "zhiyuan");
+            room->acquireSkill(caoren, "zhiyuan", true, false);
+            room->acquireSkill(caoren, "#caorenmaxcards");
 
 
             break;
         }
 
         case Death:{
-                DamageStar damage = data.value<DamageStar>();
-                if(player->getGeneralName() == "panglingming" &&
-                   damage && damage->from && damage->from->isLord())
-                {
-                    damage = NULL;
-                    data = QVariant::fromValue(damage);
-                }
-
-                break;
+            DamageStar damage = data.value<DamageStar>();
+            if(player->getGeneralName() == "sp_pangde" &&
+                    damage && damage->from && damage->from->isLord())
+            {
+                damage = NULL;
+                data = QVariant::fromValue(damage);
             }
+
+            break;
+        }
 
         default:
             break;
@@ -339,17 +352,18 @@ FanchengScenario::FanchengScenario()
 {
     lord = "guanyu";
     loyalists << "huatuo";
-    rebels << "caoren" << "panglingming" << "xuhuang";
+    rebels << "caoren" << "sp_pangde" << "xuhuang";
     renegades << "lvmeng";
 
     rule = new FanchengRule(this);
 
     skills << new Guagu
-            << new Dujiang
-            << new Flood
-            << new TaichenFight
-            << new Xiansheng
-            << new Zhiyuan;
+           << new Dujiang
+           << new Flood
+           << new TaichenFight
+           << new Xiansheng
+           << new Zhiyuan
+           << new CaorenMaxCards;
 
     addMetaObject<DujiangCard>();
     addMetaObject<FloodCard>();
@@ -367,12 +381,12 @@ void FanchengScenario::onTagSet(Room *room, const QString &key) const{
 
         ServerPlayer *caoren = room->findPlayer("caoren");
         if(caoren)
-            room->setPlayerProperty(caoren, "xueyi", -1);
+            room->setPlayerMark(caoren, "flood", 1);
     }else if(key == "Dujiang"){
         ServerPlayer *caoren = room->findPlayer("caoren");
         if(caoren)
-            room->setPlayerProperty(caoren, "xueyi", 0);
+            room->setPlayerMark(caoren, "flood", 0);
     }
 }
 
-ADD_SCENARIO(Fancheng);
+ADD_SCENARIO(Fancheng)

@@ -330,7 +330,8 @@ public:
                     const Card *card = room->askForCard(source, ".", "@enyuan", QVariant(), NonTrigger);
                     if(card){
                         CardMoveReason reason(CardMoveReason::S_REASON_GIVE, source->objectName());
-                        room->obtainCard(player, card, reason, true);
+                        room->showCard(source, card->getEffectiveId());
+                        room->obtainCard(player, card, reason);
                     }else{
                         room->loseHp(source);
                     }

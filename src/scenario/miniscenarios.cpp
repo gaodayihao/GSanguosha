@@ -60,8 +60,7 @@ bool MiniSceneRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player
             }
         }
 
-        if(player->getPhase()==Player::Start && this->players.first()["beforeNext"] != NULL
-                )
+        if(player->getPhase()==Player::Start && this->players.first()["beforeNext"] != NULL)
         {
             if(player->tag["playerHasPlayed"].toBool())
                 room->gameOver(this->players.first()["beforeNext"]);
@@ -201,7 +200,7 @@ bool MiniSceneRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player
 
         QVariant v;
         foreach(const TriggerSkill *skill, sp->getTriggerSkills()){
-            if(!skill->inherits("SPConvertSkill"))
+            if(!skill->inherits("SPConvertSkill") && !skill->inherits("TransfigureSkill"))
                 room->getThread()->addTriggerSkill(skill);
             else continue;
 
