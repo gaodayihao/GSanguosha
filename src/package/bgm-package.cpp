@@ -692,6 +692,15 @@ public:
     }
 
     virtual int getDrawNum(ServerPlayer *liubei, int n) const{
+        Room *room = liubei->getRoom();
+        QList<ServerPlayer *> victims;
+        foreach(ServerPlayer *p, room->getOtherPlayers(liubei)){
+            if(liubei->inMyAttackRange(p)){
+                victims << p;
+            }
+        }
+        if(victims.isEmpty())
+            return n;
         if(liubei->askForSkillInvoke(objectName()))
         {
             Room *room = liubei->getRoom();
@@ -719,7 +728,7 @@ public:
         QList<int> card_ids;
         int no_basic = 0;
 
-        foreach(ServerPlayer *p, room->getAlivePlayers()){
+        foreach(ServerPlayer *p, room->getOtherPlayers(liubei)){
             if(liubei->inMyAttackRange(p)){
                 victims << p;
             }
@@ -755,7 +764,8 @@ public:
             choice = choicelist.first();
         }
         else{
-            choice = room->askForChoice(victim, "zhaolie", choicelist.join("+"));
+            QVariant data = QVariant::fromValue(no_basic);
+            choice = room->askForChoice(victim, "zhaolie", choicelist.join("+"), data);
         }
         if(choice == "damage"){
             if(no_basic > 0){
@@ -777,7 +787,7 @@ public:
         }
         else{
             if(no_basic > 0){
-                room->askForDiscard(victim, "zhaolie", no_basic, 1, false, true);
+                room->askForDiscard(victim, "zhaolie", no_basic, no_basic, false, true);
             }
             if(!card_ids.isEmpty()){
                 QList<CardsMoveStruct> moves;
@@ -805,31 +815,40 @@ public:
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         switch(event){
         case GameStart:{
-            if(player->hasLordSkill(objectName()))
-                room->setPlayerMark(player, "@hate", 1);
+            foreach(ServerPlayer *lord, room->getAlivePlayers())
+                if(lord->hasLordSkill(objectName()))
+                    room->setPlayerMark(lord, "@hate", 1);
             break;
         }
         case PhaseChange:{
-            if(player->getMark("@hate") == 1 && player->hasLordSkill(objectName())
-                    && player->getPhase() == Player::Start && player->getCards("he").length() > 1)
+            if(player->hasLordSkill(objectName()) && player->getPhase() == Player::Start &&
+                    player->getMark("shichouInvoke") == 0 && player->getCards("he").length() > 1)
             {
+                if(player->getMark("@hate") == 0)
+                    room->setPlayerMark(player, "@hate", 1);
+
                 QList<ServerPlayer *> victims;
 
                 foreach(ServerPlayer *p, room->getAlivePlayers()){
                     if(p->getKingdom() == "shu"){
-                        victims << p;
+                        if(!p->tag.value("ShichouTarget").isNull()
+                                && p->tag.value("ShichouTarget").value<PlayerStar>() == player)
+                            continue;
+                        else
+                            victims << p;
                     }
                 }
                 if(victims.empty())
                     return false;
                 if(player->askForSkillInvoke(objectName())){
                     player->loseMark("@hate", 1);
+                    room->setPlayerMark(player, "shichouInvoke", 1);
                     room->playSkillEffect(objectName());
                     ServerPlayer *victim = room->askForPlayerChosen(player, victims, objectName());
-                    room->setPlayerMark(victim, "hate", 1);
+                    room->setPlayerMark(victim, "@chou", 1);
                     player->tag["ShichouTarget"] = QVariant::fromValue((PlayerStar)victim);
 
-                    const Card *card = room->askForExchange(player, objectName(), 2, true, "ZhaolieGive");
+                    const Card *card = room->askForExchange(player, objectName(), 2, true, "ShichouGive");
                     CardMoveReason reason(CardMoveReason::S_REASON_GIVE, player->objectName());
                     reason.m_playerId = victim->objectName();
                     room->obtainCard(victim, card, reason, false);
@@ -870,9 +889,9 @@ public:
             break;
         }
         case Dying:{
-            if(player->getMark("hate") > 0)
+            if(player->getMark("@chou") > 0)
             {
-                room->setPlayerMark(player, "hate", 0);
+                player->loseMark("@chou");
                 foreach(ServerPlayer *lord, room->getAlivePlayers())
                 {
                     if(lord->hasLordSkill(objectName())
