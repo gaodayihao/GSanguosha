@@ -3,7 +3,7 @@
 
 config = {
 	version = "2012062602",
-	version_name = "¶ËÎç°æ",
+	version_name = "ç«¯åˆç‰ˆ",
 	mod_name = "GDMOD",
 	kingdoms = { "wei", "shu", "wu", "qun", "god"},
 	package_names = {

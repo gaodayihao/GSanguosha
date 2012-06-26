@@ -280,6 +280,10 @@ sgs.zhangjiao_suit_value =
 
 sgs.ai_chaofeng.zhangjiao = 4
 
+function sgs.ai_skill_invoke.buqu(self, data)
+	return true
+end
+
 sgs.ai_skill_askforag.buqu = function(self, card_ids)
 	for i, card_id in ipairs(card_ids) do
 		for j, card_id2 in ipairs(card_ids) do
