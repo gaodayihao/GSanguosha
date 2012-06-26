@@ -10,7 +10,7 @@ return {
 	["chongzhen"] = "冲阵",
 	[":chongzhen"] = "每当你发动“龙胆”使用或打出一张手牌时，你可以立即获得对方的一张手牌。",
 	["$chongzhen1"] = "贼将休走，可敢与我一战!",
-	["$chongzhen2"] = "陷阵杀乱，一马当先!",
+	["$chongzhen2"] = "陷阵杀敌，一马当先!",
 
 	["#bgm_diaochan"] = "暗黑的傀儡师",
 	["bgm_diaochan"] = "SP貂蝉",
