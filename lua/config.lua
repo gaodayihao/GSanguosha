@@ -3,7 +3,7 @@
 -- and it is a little different from config.ini
 
 config = {
-	version = "2012062601",
+	version = "2012062602",
 	version_name = "端午版",
 	mod_name = "GDMOD",
 	kingdoms = { "wei", "shu", "wu", "qun", "god"},
@@ -12,7 +12,6 @@ config = {
         "StandardExCard",
         "Maneuvering",
         "SPCard",
-        "YitianCard",
         "Nostalgia",
         "New3v3Card",
 
@@ -22,7 +21,6 @@ config = {
         "Thicket",
         "Mountain",
         "God",
-		"NGod",
         "SP",
         "YJCM",
         "YJCM2012",

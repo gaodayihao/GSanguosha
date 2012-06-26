@@ -358,8 +358,9 @@ bool TransfigureSkill::triggerable(const ServerPlayer *target) const{
     }
     bool canInvoke = ServerInfo.GameMode.endsWith("p") || ServerInfo.GameMode.endsWith("pd") ||
             ServerInfo.GameMode.endsWith("pz");
-    QString package = Sanguosha->getGeneral(to)->getPackage();
-    if(Sanguosha->getBanPackages().contains(package)) return false;
+	const General *to_general = Sanguosha->getGeneral(to);
+	if(to_general == NULL || Sanguosha->getBanPackages().contains(to_general->getPackage()))
+		return false;
     return GameStartSkill::triggerable(target) && target->getGeneralName() == from && canInvoke;
 }
 

@@ -2,8 +2,8 @@
 -- and it is a little different from config.ini
 
 config = {
-	version = "2012050301",
-	version_name = "Ì¤Çà°æ",
+	version = "2012062602",
+	version_name = "¶ËÎç°æ",
 	mod_name = "GDMOD",
 	kingdoms = { "wei", "shu", "wu", "qun", "god"},
 	package_names = {

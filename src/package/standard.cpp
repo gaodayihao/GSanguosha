@@ -66,17 +66,12 @@ QString EquipCard::getEffectPath(bool is_male) const{
 }
 
 void EquipCard::onUse(Room *room, const CardUseStruct &card_use) const{
-    if(card_use.to.isEmpty()){
-        ServerPlayer *player = card_use.from;
+	QVariant data = QVariant::fromValue(card_use);
+	RoomThread *thread = room->getThread();
 
-        QVariant data = QVariant::fromValue(card_use);
-        RoomThread *thread = room->getThread();
-        thread->trigger(CardUsed, room, player, data);
+	thread->trigger(CardUsed, room, card_use.from, data);
 
-        thread->trigger(CardFinished, room, player, data);
-    }
-    else
-        Card::onUse(room, card_use);
+	thread->trigger(CardFinished, room, card_use.from, data);
 }
 
 void EquipCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
