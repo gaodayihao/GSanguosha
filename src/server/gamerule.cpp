@@ -191,7 +191,7 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
                     room->sendLog(log);
                 }
 
-                if((player->hasSkill("jueqing") || player->hasSkill("shangshi")) && !player->hasSkill("#testgeneral"))
+                if((player->hasSkill("jueqing") || player->hasSkill("shangshi")) && !player->hasSkill("#onlyfortest"))
                     room->killPlayer(player);
             }
             setGameProcess(room);

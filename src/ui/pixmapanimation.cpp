@@ -1,6 +1,5 @@
 #include "pixmapanimation.h"
 #include <QPainter>
-#include <fstream>
 #include <QPixmapCache>
 #include <QDir>
 

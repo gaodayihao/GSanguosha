@@ -9,6 +9,8 @@ return {
 	["designer:bgm_zhaoyun"] = "Danny",
 	["chongzhen"] = "冲阵",
 	[":chongzhen"] = "每当你发动“龙胆”使用或打出一张手牌时，你可以立即获得对方的一张手牌。",
+	["$chongzhen1"] = "贼将休走，可敢与我一战!",
+	["$chongzhen2"] = "陷阵杀乱，一马当先!",
 
 	["#bgm_diaochan"] = "暗黑的傀儡师",
 	["bgm_diaochan"] = "SP貂蝉",
@@ -18,9 +20,12 @@ return {
 	[":lihun"] = "出牌阶段，你可以弃置一张牌并将你的武将牌翻面，若如此做，指定一名男性角色，获得其所有手牌。出牌阶段结束时，你须为该角色每一点体力分配给其一张牌。每回合限一次。",
 	["BGM-Diaochan"] = "桌游志SP貂蝉",
 	["LihunGoBack"] = "请分配给对方 %arg 张牌（包括装备）",
+	["$lihun1"] = "哎唉，大人莫走，再陪陪妾身嘛~",
+	["$lihun2"] = "将军，人家空虚寂寞冷嘛~",
 
 	["#bgm_caoren"] = "险不辞难",
 	["bgm_caoren"] = "SP曹仁",
+	["~bgm_caoren"] = "城在人在，城破人亡~",
 	["illustrator:bgm_caoren"] = "张帅",
 	["designer:bgm_caoren"] = "Danny",
 	["kuiwei"] = "溃围",
@@ -29,6 +34,10 @@ return {
 	[":yanzheng"] = "若你的手牌数大于你的体力值，你可以将你装备区内的牌当【无懈可击】使用。",
 	["@kuiwei"] = "溃围",
 	["#KuiweiDiscard"] = "%from 的【%arg2】技能被触发，需要弃掉 %arg 张牌";
+	["$yanzheng1"] = "任你横行霸道，我自岿然不动",
+	["$yanzheng2"] = "衡武严整，百战不殆！",
+	["$kuiwei1"] = "休整片刻，且待我杀出一条血路。",
+	["$kuiwei2"] = "骑兵列队，准备突围。",
 	
 	["#bgm_pangtong"] = "荆楚之高俊",
 	["bgm_pangtong"] = "SP庞统",

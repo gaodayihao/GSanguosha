@@ -1306,7 +1306,7 @@ YJCMPackage::YJCMPackage():Package("YJCM"){
     addMetaObject<XinzhanCard>();
     addMetaObject<PaiyiCard>();
 
-    skills << new Paiyi << new Jueqing << new Shangshi << new Skill("#testgeneral");
+    skills << new Paiyi << new Jueqing << new Shangshi << new Skill("#onlyfortest");
 }
 
 ADD_PACKAGE(YJCM)
