@@ -864,21 +864,24 @@ public:
                 ServerPlayer *target = player->tag.value("ShichouTarget").value<PlayerStar>();
 
                 LogMessage log;
-                log.type = "#ShichouProtect";
-                log.arg = objectName();
-                log.from = player;
-                log.to << target;
-                room->sendLog(log);
+				log.type = "#ShichouProtect";
+				log.arg = objectName();
+				log.from = player;
+				log.to << target;
+				room->sendLog(log);
+				room->setPlayerFlag(target, "Shichou");
 
-                DamageStruct damage = data.value<DamageStruct>();
-                damage.to = target;
-                damage.chain = true;
-                room->setPlayerFlag(target, "Shichou");
-                room->damage(damage);
+				if(target != player)
+				{
+					DamageStruct damage = data.value<DamageStruct>();
+					damage.to = target;
+					damage.chain = true;
+					room->damage(damage);
 
-                damage.transfer = true;
-                data = QVariant::fromValue(damage);
-                return true;
+					damage.transfer = true;
+					data = QVariant::fromValue(damage);
+					return true;
+				}
             }
             break;
         }
