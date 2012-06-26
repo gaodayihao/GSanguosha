@@ -303,6 +303,7 @@ void BackLoader::run()
              << "armor/eight_diagram"
              << "armor/silver_lion"
              << "armor/vine"
+             << "armor/vineburn"
              << "weapon/axe"
              << "weapon/blade"
              << "weapon/crossbow"
@@ -343,7 +344,7 @@ void MainWindow::enterRoom(){
 
     ui->actionStart_Game->setEnabled(false);
     ui->actionStart_Server->setEnabled(false);
-	ui->actionAI_Melee->setEnabled(false);
+    ui->actionAI_Melee->setEnabled(false);
 
     RoomScene *room_scene = new RoomScene(this);
 
@@ -595,9 +596,9 @@ void MainWindow::on_actionRole_assign_table_triggered()
 
     QStringList rows;
     rows << "2 1 0 1 0" << "3 1 0 1 1" << "4 1 0 2 1"
-            << "5 1 1 2 1" << "6 1 1 3 1" << "6d 1 1 2 2"
-            << "7 1 2 3 1" << "8 1 2 4 1" << "8d 1 2 3 2"
-            << "9 1 3 4 1" << "10 1 3 4 2";
+         << "5 1 1 2 1" << "6 1 1 3 1" << "6d 1 1 2 2"
+         << "7 1 2 3 1" << "8 1 2 4 1" << "8d 1 2 3 2"
+         << "9 1 3 4 1" << "10 1 3 4 2";
 
     foreach(QString row, rows){
         QStringList cells = row.split(" ");
@@ -717,13 +718,13 @@ void MainWindow::on_actionScript_editor_triggered()
 MeleeDialog::MeleeDialog(QWidget *parent)
     :QDialog(parent)
 {
-    server=NULL;    
+    server=NULL;
     room_count=0;
 
     setWindowTitle(tr("AI Melee"));
 
-//    QGroupBox *general_box = createGeneralBox();
-//    QGroupBox *result_box = createResultBox();
+    //    QGroupBox *general_box = createGeneralBox();
+    //    QGroupBox *result_box = createResultBox();
     general_box = createGeneralBox();
     result_box = createResultBox();
     server_log = new QTextEdit;
@@ -895,9 +896,9 @@ void MeleeDialog::onGameOver(const QString &winner){
     }
 
     QString tooltip = tr("Winner(s): %1 <br/> Losers: %2 <br /> Shuffle times: %3")
-                      .arg(winners.join(","))
-                      .arg(losers.join(","))
-                      .arg(room->getTag("SwapPile").toInt());
+            .arg(winners.join(","))
+            .arg(losers.join(","))
+            .arg(room->getTag("SwapPile").toInt());
 
     if(room_item) room_item->setToolTip(tooltip);
     if(loop_checkbox->isChecked()){
@@ -992,9 +993,9 @@ void MainWindow::on_actionAI_Melee_triggered()
 void MainWindow::on_actionReplay_file_convert_triggered()
 {
     QString filename = QFileDialog::getOpenFileName(
-            this, tr("Please select a replay file"),
-            Config.value("LastReplayDir").toString(),
-            tr("Pure text replay file (*.txt);; Image replay file (*.png)"));
+                this, tr("Please select a replay file"),
+                Config.value("LastReplayDir").toString(),
+                tr("Pure text replay file (*.txt);; Image replay file (*.png)"));
 
     if(filename.isEmpty())
         return;

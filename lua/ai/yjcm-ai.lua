@@ -527,7 +527,7 @@ xianzhen_skill.getTurnUseCard=function(self)
 
 	for _, enemy in ipairs(self.enemies) do
 		local enemy_max_card = self:getMaxCard(enemy)
-		if enemy_max_card and max_point and max_point > enemy_max_card:getNumber() and slashNum > 0 then
+		if not enemy:isKongcheng() and enemy_max_card and max_point and max_point > enemy_max_card:getNumber() and slashNum > 0 then
 
 			local slash=self:getCard("Slash")
 			local dummy_use={}
@@ -575,6 +575,7 @@ sgs.ai_skill_use_func.XianzhenCard=function(card,use,self)
 	for _, enemy in ipairs(self.enemies) do
 		local enemy_max_card = self:getMaxCard(enemy)
 		if not (enemy:hasSkill("kongcheng") and enemy:getHandcardNum() == 1)
+			and not enemy:isKongcheng()
 			and (enemy_max_card and max_point > enemy_max_card:getNumber()) then
 			if use.to then
 				use.to:append(enemy)
@@ -585,7 +586,7 @@ sgs.ai_skill_use_func.XianzhenCard=function(card,use,self)
 	end
 	if self:getOverflow()>0	then
 		for _, enemy in ipairs(self.enemies) do
-			if use.to then
+			if use.to and not enemy:isKongcheng() then
 				use.to:append(enemy)
 			end
 			use.card=card

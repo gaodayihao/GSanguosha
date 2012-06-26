@@ -232,7 +232,7 @@ public:
                 damage.damage ++;
                 data = QVariant::fromValue(damage);
 
-                player->getRoom()->setEmotion(player, QString("armor/%1").arg(objectName()));
+                player->getRoom()->setEmotion(player, QString("armor/%1burn").arg(objectName()));
                 player->getRoom()->getThread()->delay(1200);
             }
         }

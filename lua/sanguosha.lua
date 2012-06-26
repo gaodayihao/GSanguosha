@@ -23,6 +23,12 @@ function load_translations()
 	for _, file in ipairs(lang_files) do	
 		load_translation(("%s/%s"):format(lang_dir, file))
 	end
+	
+	local common_dir = "lang/Common/"..lang
+	local common_files = sgs.GetFileNames(common_dir)
+	for _, file in ipairs(common_files) do	
+		load_translation(("%s/%s"):format(common_dir, file))
+	end
 end
 
 function load_extensions(just_require)

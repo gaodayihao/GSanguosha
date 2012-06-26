@@ -279,7 +279,7 @@ public:
 
         QStringList prompt_list;
         prompt_list << "@guicai-card" << judge->who->objectName()
-                << objectName() << judge->reason << judge->card->getEffectIdString();
+                    << objectName() << judge->reason << judge->card->getEffectIdString();
         QString prompt = prompt_list.join(":");
         const Card *card = room->askForCard(player, "@guicai", prompt, data, NonTrigger);
 
@@ -435,8 +435,8 @@ public:
 
     virtual bool viewFilter(const QList<CardItem *> &selected, const CardItem *to_select) const{
         if(ServerInfo.GameMode == "04_1v3"
-           && selected.length() + Self->getMark("rende") >= 2)
-           return false;
+                && selected.length() + Self->getMark("rende") >= 2)
+            return false;
         else
             return !to_select->isEquipped();
     }
@@ -582,17 +582,17 @@ public:
 
         switch(ClientInstance->getStatus()){
         case Client::Playing:{
-                // jink as slash
-                return card->inherits("Jink");
-            }
+            // jink as slash
+            return card->inherits("Jink");
+        }
 
         case Client::Responsing:{
-                QString pattern = ClientInstance->getPattern();
-                if(pattern == "slash")
-                    return card->inherits("Jink");
-                else if(pattern == "jink")
-                    return card->inherits("Slash");
-            }
+            QString pattern = ClientInstance->getPattern();
+            if(pattern == "slash")
+                return card->inherits("Jink");
+            else if(pattern == "jink")
+                return card->inherits("Slash");
+        }
 
         default:
             return false;
@@ -696,7 +696,7 @@ public:
 
     virtual bool onPhaseChange(ServerPlayer *zhuge) const{
         if(zhuge->getPhase() == Player::Start &&
-           zhuge->askForSkillInvoke(objectName()))
+                zhuge->askForSkillInvoke(objectName()))
         {
             Room *room = zhuge->getRoom();
             room->playSkillEffect(objectName());
@@ -932,8 +932,8 @@ public:
             lvmeng->setFlags("-keji_use_slash");
         }else if(lvmeng->getPhase() == Player::Discard){
             if(!lvmeng->hasFlag("keji_use_slash") &&
-               lvmeng->getSlashCount() == 0 &&
-               lvmeng->askForSkillInvoke("keji"))
+                    lvmeng->getSlashCount() == 0 &&
+                    lvmeng->askForSkillInvoke("keji"))
             {
                 lvmeng->getRoom()->playSkillEffect("keji");
 
@@ -1337,6 +1337,17 @@ public:
     }
 };
 
+class Xuehen: public TransfigureSkill{
+public:
+    Xuehen():TransfigureSkill("xuehen", "liubei", "bgm_liubei")
+    {
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return TransfigureSkill::triggerable(target) && !target->isLord();
+    }
+};
+
 void StandardPackage::addGenerals(){
     General *caocao, *zhangliao, *guojia, *xiahoudun, *simayi, *xuchu, *zhenji;
 
@@ -1371,6 +1382,7 @@ void StandardPackage::addGenerals(){
     liubei = new General(this, "liubei$", "shu");
     liubei->addSkill(new Rende);
     liubei->addSkill(new Jijiang);
+    liubei->addSkill(new Xuehen);
 
     guanyu = new General(this, "guanyu", "shu");
     guanyu->addSkill(new Wusheng);
@@ -1486,7 +1498,7 @@ public:
 
     virtual bool onPhaseChange(ServerPlayer *zhuge) const{
         if(zhuge->getPhase() == Player::Start &&
-           zhuge->askForSkillInvoke(objectName()))
+                zhuge->askForSkillInvoke(objectName()))
         {
             Room *room = zhuge->getRoom();
             room->playSkillEffect("guanxing");

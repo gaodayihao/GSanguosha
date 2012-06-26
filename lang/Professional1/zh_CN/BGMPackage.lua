@@ -77,7 +77,7 @@ return {
 	["@wu"] = "武",
 	
 	["#bgm_liubei"] = "汉昭烈帝",
-	["bgm_liubei"] = "☆SP刘备",
+	["bgm_liubei"] = "SP刘备",
 	["illustrator:bgm_liubei"] = "",
 	["designer:bgm_liubei"] = "Danny",
 	["zhaolie"] = "昭烈",

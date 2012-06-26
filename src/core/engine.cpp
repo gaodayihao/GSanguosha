@@ -264,7 +264,7 @@ int Engine::getGeneralCount(bool include_banned) const{
         else if( (ServerInfo.GameMode.endsWith("p") ||
                   ServerInfo.GameMode.endsWith("pd") ||
                   ServerInfo.GameMode.endsWith("pz"))
-                  && Config.value("Banlist/Roles").toStringList().contains(general->objectName()))
+                 && Config.value("Banlist/Roles").toStringList().contains(general->objectName()))
             total--;
 
         else if(ServerInfo.Enable2ndGeneral && BanPair::isBanned(general->objectName()))
@@ -402,10 +402,10 @@ QString Engine::getSetupString() const{
     QString server_name = Config.ServerName.toUtf8().toBase64();
     QStringList setup_items;
     setup_items << server_name
-            << Config.GameMode
-            << QString::number(timeout)
-            << Sanguosha->getBanPackages().join("+")
-            << flags;
+                << Config.GameMode
+                << QString::number(timeout)
+                << Sanguosha->getBanPackages().join("+")
+                << flags;
 
     return setup_items.join(":");
 }
@@ -542,6 +542,9 @@ QStringList Engine::getLords() const{
         lords << lord;
     }
 
+    if(ban_package.contains("BGM") || Config.Enable2ndGeneral && BanPair::isBanned("bgm_liubei"))
+        return lords;
+    lords << "bgm_liubei";
     return lords;
 }
 
@@ -628,7 +631,7 @@ QStringList Engine::getRandomGenerals(int count, const QSet<QString> &ban_set) c
             general_set.subtract(Config.value("Banlist/Hegemony", "").toStringList().toSet());
 
     if(ServerInfo.GameMode.endsWith("p") ||
-                      ServerInfo.GameMode.endsWith("pd"))
+            ServerInfo.GameMode.endsWith("pd"))
         general_set.subtract(Config.value("Banlist/Roles","").toStringList().toSet());
 
     all_generals = general_set.subtract(ban_set).toList();
@@ -648,7 +651,7 @@ QList<int> Engine::getRandomCards() const{
     if(Config.GameMode == "06_3v3"){
         using_new_3v3 = Config.value("3v3/UsingNewMode", false).toBool();
         exclude_disaters = Config.value("3v3/ExcludeDisasters", true).toBool() ||
-                            using_new_3v3;
+                using_new_3v3;
     }
 
     if(Config.GameMode == "04_1v3")

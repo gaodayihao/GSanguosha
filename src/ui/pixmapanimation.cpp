@@ -1,5 +1,6 @@
 #include "pixmapanimation.h"
 #include <QPainter>
+#include <fstream>
 #include <QPixmapCache>
 #include <QDir>
 
@@ -22,6 +23,7 @@ void PixmapAnimation::advance(int phase)
 void PixmapAnimation::setPath(const QString &path)
 {
     frames.clear();
+    current = 0;
 
     int i = 0;
     QString pic_path = QString("%1%2%3").arg(path).arg(i++).arg(".png");
@@ -29,8 +31,6 @@ void PixmapAnimation::setPath(const QString &path)
         frames << GetFrameFromCache(pic_path);
         pic_path = QString("%1%2%3").arg(path).arg(i++).arg(".png");
     }while(!GetFrameFromCache(pic_path).isNull());
-
-    current = 0;
 }
 
 void PixmapAnimation::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
@@ -92,7 +92,7 @@ PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, co
         }
 
         pma->moveBy((parent->boundingRect().width() - pma->boundingRect().width())/2 + x,
-                (parent->boundingRect().height() - pma->boundingRect().height())/2 + y);
+                    (parent->boundingRect().height() - pma->boundingRect().height())/2 + y);
 
         pma->setParentItem(parent);
         pma->setZValue(2.5);
