@@ -35,9 +35,9 @@ return {
 	["@kuiwei"] = "溃围",
 	["#KuiweiDiscard"] = "%from 的【%arg2】技能被触发，需要弃掉 %arg 张牌";
 	["$yanzheng1"] = "任你横行霸道，我自岿然不动",
-	["$yanzheng2"] = "衡武严整，百战不殆！",
+	["$yanzheng2"] = "行伍严整，百战不殆！",
 	["$kuiwei1"] = "休整片刻，且待我杀出一条血路。",
-	["$kuiwei2"] = "骑兵列队，准备突围。",
+	["$kuiwei2"] = "奇兵列队，准备突围。",
 	
 	["#bgm_pangtong"] = "荆楚之高俊",
 	["bgm_pangtong"] = "SP庞统",

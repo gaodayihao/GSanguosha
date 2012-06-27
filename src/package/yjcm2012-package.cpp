@@ -388,6 +388,9 @@ public:
     }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *liaohua, QVariant &data) const{
+        DyingStruct dying = data.value<DyingStruct>();
+        if (dying.who != liaohua)
+            return false;
         if(liaohua->askForSkillInvoke(objectName(), data)){
             //room->broadcastInvoke("animate", "lightbox:$fuli");
             room->playSkillEffect(objectName());
