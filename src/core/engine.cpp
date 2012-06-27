@@ -542,7 +542,7 @@ QStringList Engine::getLords() const{
         lords << lord;
     }
 
-    if(ban_package.contains("BGM") || (Config.Enable2ndGeneral && BanPair::isBanned("bgm_liubei")))
+    if(ban_package.contains("BGM") || Config.Enable2ndGeneral && BanPair::isBanned("bgm_liubei"))
         return lords;
     lords << "bgm_liubei";
     return lords;
