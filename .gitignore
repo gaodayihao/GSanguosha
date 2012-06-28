@@ -22,6 +22,7 @@ etc/customScenes/custom_scenario.txt
 lib/lua.lib
 lib/jsoncpp.lib
 builds/vs2010/*.sdf
+builds/vs2010/*.suo
 builds/vs2010/*.user
 builds/vs2010/QSanguosha.suo
 builds/vs2010/Win32/
