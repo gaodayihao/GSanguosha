@@ -159,7 +159,7 @@ sgs.ai_skill_use["@@yinghun"] = function(self, prompt)
 		for index = #self.enemies, 1, -1 do
 			local enemy = self.enemies[index]
 			if not enemy:isNude() and not (self:hasSkills(sgs.lose_equip_skill, enemy) and
-				not (enemy:getCards("he"):length() < x or sgs.getDefense(enemy) < 3)) then
+			   not (enemy:getCards("he"):length() < x or sgs.getDefense(enemy) < 3)) then
 				self.yinghun = enemy
 				self.yinghunchoice = "d1tx"
 				break
@@ -336,6 +336,8 @@ luanwu_skill.getTurnUseCard=function(self)
 	if good > bad then return sgs.Card_Parse("@LuanwuCard=.") end
 end
 
+sgs.ai_skill_choice.luanwu = sgs.ai_skill_choice.collateral
+
 sgs.ai_skill_use_func.LuanwuCard=function(card,use,self)
 	use.card = card
 end
@@ -378,7 +380,7 @@ sgs.ai_view_as.jiuchi = function(card, player, card_place)
 	local suit = card:getSuitString()
 	local number = card:getNumberString()
 	local card_id = card:getEffectiveId()
-	if card_place ~= sgs.Player_PlaceEquip then
+	if card_place ~= sgs.Player_Equip then
 		if card:getSuit() == sgs.Card_Spade then
 			return ("analeptic:jiuchi[%s:%s]=%d"):format(suit, number, card_id)
 		end

@@ -19,7 +19,7 @@ struct DamageStruct{
     enum Nature{
         Normal, // normal slash, duel and most damage caused by skill
         Fire,  // fire slash, fire attack and few damage skill (Yeyan, etc)
-        Thunder // lightning, thunder slash, and few damage skill (Leiji, etc)
+        Thunder, // lightning, thunder slash, and few damage skill (Leiji, etc)
     };
 
     ServerPlayer *from;
@@ -28,7 +28,6 @@ struct DamageStruct{
     int damage;
     Nature nature;
     bool chain;
-    bool PreChain;
     bool transfer;
 };
 
@@ -125,7 +124,7 @@ public:
     //subcategory of discard
     static const int S_REASON_RULEDISCARD = 0x13;       //  discard at one's Player::Discard for gamerule
     static const int S_REASON_THROW = 0x23;             /*  gamerule(dying or punish)
-                                                                as the cost of some skills   */
+                                                            as the cost of some skills   */
     static const int S_REASON_CHANGE_EQUIP = 0x33;      //  replace existed equip
     static const int S_REASON_JUDGEDONE = 0x43;         //  judge card move into discardpile
     static const int S_REASON_DISMANTLE = 0x53;         //  one throw card of another
@@ -135,13 +134,13 @@ public:
     //subcategory of gotcard
     static const int S_REASON_GIVE = 0x17;              // from one hand to another hand
     static const int S_REASON_EXTRACTION = 0x27;        // from another's place to one's hand
-    static const int S_REASON_GOTBACK = 0x37;           // from dealingerea or topdrawpile to hand
+    static const int S_REASON_GOTBACK = 0x37;           // from placetable to hand
     static const int S_REASON_RECYCLE = 0x47;           // from discardpile to hand
     static const int S_REASON_ROB = 0x57;               // got a definite card from other's hand
 
     //subcategory of show
-    static const int S_REASON_TURNOVER = 0x18;          // show n cards to topdrawpile from drawpile
-    static const int S_REASON_JUDGE = 0x28;             // show a card to topdrawpile from drawpile for judge
+    static const int S_REASON_TURNOVER = 0x18;          // show n cards  from drawpile
+    static const int S_REASON_JUDGE = 0x28;             // show a card  from drawpile for judge
     static const int S_REASON_PREVIEW = 0x38;           // Not done yet, plan for view some cards for self only(guanxing yiji miji)
 
     //subcategory of transfer
@@ -149,16 +148,9 @@ public:
     static const int S_REASON_OVERRIDE = 0x29;          // exchange cards from cards in game
     static const int S_REASON_EXCHANGE_FROM_PILE = 0x39;// exchange cards from cards moved out of game (for qixing only)
 
+
+
     static const int S_MASK_BASIC_REASON = 0x0F;
-};
-
-
-struct CardsMoveOneTimeStruct{
-    QList<int> card_ids;
-    QList<Player::Place> from_places;
-    Player::Place to_place;
-    CardMoveReason reason;
-    Player *from, *to;
 };
 
 struct CardMoveStruct{
@@ -175,7 +167,7 @@ struct CardMoveStruct{
     QString from_pile_name, to_pile_name;
     Player *from, *to;
     CardMoveReason reason;
-    bool open;
+    bool open;    
     bool tryParse(const Json::Value&);
     Json::Value toJsonValue() const;
     inline bool isRelevant(Player* player)
@@ -191,7 +183,15 @@ struct CardMoveStruct{
     {
         return (to == move.to) && (to_place == move.to_place) &&
                (to_player_name == move.to_player_name) && (to_pile_name == move.to_pile_name);
-    }
+    } 
+};
+
+struct CardsMoveOneTimeStruct{
+    QList<int> card_ids;
+    QList<Player::Place> from_places;
+    Player::Place to_place;
+    CardMoveReason reason;
+    Player *from, *to;
 };
 
 struct CardsMoveStruct{
@@ -213,7 +213,6 @@ struct CardsMoveStruct{
         this->to = to;
         this->reason = reason;
     }
-
     inline CardsMoveStruct(const QList<int> &ids, Player* to, Player::Place to_place, CardMoveReason reason)
     {
         this->card_ids = ids;
@@ -250,7 +249,7 @@ struct CardsMoveStruct{
     {
         return (player != NULL && (from == player || to == player));
     }
-    QList<CardMoveStruct> flatten();
+    QList<CardMoveStruct> flatten();    
 };
 
 struct DyingStruct{
@@ -258,7 +257,6 @@ struct DyingStruct{
 
     ServerPlayer *who; // who is ask for help
     DamageStruct *damage; // if it is NULL that means the dying is caused by losing hp
-    QList<ServerPlayer *> savers; // savers are the available players who can use peach for the dying player
 };
 
 struct RecoverStruct{
@@ -312,7 +310,7 @@ struct PhaseChangeStruct{
 };
 
 enum TriggerEvent{
-    NonTrigger, //those two events actually trigger nothing
+    NonTrigger,
 
     GameStart,
     TurnStart,
@@ -321,31 +319,26 @@ enum TriggerEvent{
     HpRecover,
     HpLost,
     HpChanged,
-    MaxHpChanged,
+    MaxHpLost,
 
     StartJudge,
     AskForRetrial,
     FinishJudge,
 
     Pindian,
-    PindianFinished,
-
     TurnedOver,
 
-    Predamage,
-    DamageForseen,
-    DamageCaused,
-    DamageInflicted,
-    PreHpReuced,
-    DamageDone,
-    PostHpReuced,
+    Predamage,        // assure the num of damage,check all buff(ancaletic luoyi...)
+    DamageForseen,       // Damage begun! The first moment when you enter "Real Damage Process" (kuangfeng dawu)
+    DamageCaused,    // The moment you just damage to someone(qianxi kylinbow ice_sword...)
+    DamageInflicted,   // The moment you are just damaged by someone,but can still change(silverlion jilei tianxiang!)
+    DamageDone,       // Always trigger,from this one,the damage is assertain,hp changed.
     Damage,
     Damaged,
     DamageComplete,
 
     Dying,
     AskForPeaches,
-    AskForPeachesProceed,
     AskForPeachesDone,
     Death,
     GameOverJudge,
@@ -367,7 +360,6 @@ enum TriggerEvent{
     CardDrawing,
     CardDrawnDone,
 
-    CardonUse,
     CardUsed,
     TargetConfirming,
     TargetConfirmed,
@@ -409,5 +401,4 @@ Q_DECLARE_METATYPE(JudgeStar)
 Q_DECLARE_METATYPE(DamageStar)
 Q_DECLARE_METATYPE(PindianStar)
 Q_DECLARE_METATYPE(PhaseChangeStruct)
-
 #endif // STRUCTS_H

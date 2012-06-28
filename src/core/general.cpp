@@ -3,7 +3,6 @@
 #include "skill.h"
 #include "package.h"
 #include "client.h"
-#include "settings.h"
 
 #include <QSize>
 #include <QFile>
@@ -61,14 +60,6 @@ bool General::isHidden() const{
 
 bool General::isTotallyHidden() const{
     return never_shown;
-}
-
-QString General::getPixmapPath(const QString &category) const{
-    QString suffix = "png";
-    if(category == "card")
-        suffix = "jpg";
-
-    return QString("image/generals/%1/%2.%3").arg(category).arg(objectName()).arg(suffix);
 }
 
 void General::addSkill(Skill *skill){
@@ -158,20 +149,20 @@ QString General::getSkillDescription() const{
 }
 
 void General::lastWord() const{
-    QString filename = QString("audio/%2/death/%1.ogg").arg(objectName()).arg(Config.SoundEffectMode);
+    QString filename = QString("audio/death/%1.ogg").arg(objectName());
     QFile file(filename);
     if(!file.open(QIODevice::ReadOnly)){
         QStringList origin_generals = objectName().split("_");
         if(origin_generals.length()>1)
-            filename = QString("audio/%2/death/%1.ogg").arg(origin_generals.at(1)).arg(Config.SoundEffectMode);
+            filename = QString("audio/death/%1.ogg").arg(origin_generals.at(1));
     }
     if(!file.open(QIODevice::ReadOnly) && objectName().endsWith("f")){
         QString origin_general = objectName();
         origin_general.chop(1);
         if(Sanguosha->getGeneral(origin_general))
-            filename = QString("audio/%2/death/%1.ogg").arg(origin_general).arg(Config.SoundEffectMode);
+            filename = QString("audio/death/%1.ogg").arg(origin_general);
     }
-    Sanguosha->playEffect(filename);
+    Sanguosha->playAudioEffect(filename);
 }
 
 QSize General::BigIconSize(94, 96);

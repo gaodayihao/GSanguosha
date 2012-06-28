@@ -9,10 +9,11 @@ using namespace QSanProtocol;
 unsigned int QSanProtocol::QSanGeneralPacket::_m_globalSerial = 0;
 const unsigned int QSanProtocol::QSanGeneralPacket::S_MAX_PACKET_SIZE = 1000;
 const string QSanProtocol::Countdown::S_COUNTDOWN_MAGIC = "MG_COUNTDOWN";
+const char* QSanProtocol::S_PLAYER_SELF_REFERENCE_ID = "MG_SELF";
 
 bool QSanProtocol::Countdown::tryParse(Json::Value val)
 {
-    if (!val.isArray() || (val.size() != 2 && val.size() != 3) ||
+    if (!val.isArray() || (val.size() != 2 && val.size() != 3) || 
         !val[0].isString() || val[0].asString() != S_COUNTDOWN_MAGIC)
         return false;
     if (val.size() == 3)
@@ -31,7 +32,7 @@ bool QSanProtocol::Countdown::tryParse(Json::Value val)
         else m_type = type;
         return true;
     }
-    else return false;
+    else return false;            
 
 }
 

@@ -28,7 +28,6 @@ public:
 
     void addTranslationEntry(const char *key, const char *value);
     QString translate(const QString &to_translate) const;
-
     lua_State *getLuaState() const;
 
     void addPackage(Package *package);
@@ -73,7 +72,6 @@ public:
     void addSkills(const QList<const Skill *> &skills);
 
     int getCardCount() const;
-    int getCardCountWithoutSpecial() const;
     const Card *getCard(int index) const;
 
     QStringList getLords() const;
@@ -82,19 +80,14 @@ public:
     QList<int> getRandomCards() const;
     QString getRandomGeneralName() const;
     QStringList getLimitedGeneralNames() const;
-    QStringList getGodGeneralNames() const;
 
-    void playAudio(const QString &name) const;
-    void playEffect(const QString &filename) const;
-    void playSkillEffect(const QString &skill_name, int index) const;
-    void playCardEffect(const QString &card_name, bool is_male) const;
+    void playSystemAudioEffect(const QString &name) const;
+    void playAudioEffect(const QString &filename) const;
+    void playSkillAudioEffect(const QString &skill_name, int index) const;
 
     const ProhibitSkill *isProhibited(const Player *from, const Player *to, const Card *card) const;
     int correctDistance(const Player *from, const Player *to) const;
     int correctMaxCards(const Player *target) const;
-    //
-    void setAIState(bool state);
-    bool getAIState();
 
 private:
     QHash<QString, QString> translations;
@@ -104,9 +97,6 @@ private:
     QMap<QString, QString> modes;
     QMap<QString, const CardPattern *> patterns;
     QMultiMap<QString, QString> related_skills;
-
-    // 3kingdoms
-    int _3KINGDOMS_GENERALS_CARD_COUNT;
 
     // special skills
     QList<const ProhibitSkill *> prohibit_skills;
@@ -120,8 +110,6 @@ private:
     QSet<QString> ban_package;
 
     lua_State *lua;
-    //
-    static bool AI_FREE;
 };
 
 extern Engine *Sanguosha;

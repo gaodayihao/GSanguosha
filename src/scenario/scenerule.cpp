@@ -1,7 +1,5 @@
 #include "engine.h"
 #include "standard-skillcards.h"
-#include "clientplayer.h"
-#include "client.h"
 #include "carditem.h"
 #include "scenerule.h"
 
@@ -511,7 +509,7 @@ bool SceneRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QV
         }
 
         case 20:
-            if((damage.nature == DamageStruct::Thunder) && !damage.chain) {
+            if((damage.nature == DamageStruct::Thunder) && !damage.chain && !damage.transfer) {
                 log.type = "#Scene20Buff";
                 log.from = player;
                 log.to << damage.to;
@@ -525,7 +523,7 @@ bool SceneRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QV
             break;
 
         case 21:
-            if((damage.nature == DamageStruct::Fire) && !damage.chain) {
+            if((damage.nature == DamageStruct::Fire) && !damage.chain && !damage.transfer) {
                 log.type = "#Scene21Buff";
                 log.from = player;
                 log.to << damage.to;
@@ -539,7 +537,8 @@ bool SceneRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QV
             break;
 
         case 22:
-            if((damage.nature == DamageStruct::Thunder || damage.nature == DamageStruct::Fire) && !damage.chain) {
+            if((damage.nature == DamageStruct::Thunder || damage.nature == DamageStruct::Fire)
+                    && !damage.chain && !damage.transfer) {
                 log.type = "#Scene22Buff";
                 log.from = player;
                 log.to << damage.to;

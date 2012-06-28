@@ -8,10 +8,8 @@
 #include "ui_mainwindow.h"
 #include "scenario-overview.h"
 #include "window.h"
-//#include "halldialog.h"
-#include "nativesocket.h"
+#include "halldialog.h"
 #include "pixmapanimation.h"
-#include "time.h"
 
 #include <cmath>
 #include <QGraphicsView>
@@ -39,28 +37,20 @@ public:
     }
 
     virtual void resizeEvent(QResizeEvent *event) {
-        QGraphicsView::resizeEvent(event);
+        QGraphicsView::resizeEvent(event);        
         MainWindow *main_window = qobject_cast<MainWindow *>(parentWidget());
-        if(scene()->inherits("RoomScene")){
-            RoomScene *room_scene = qobject_cast<RoomScene *>(scene());
+        if(scene()->inherits("RoomScene")){            
+            RoomScene *room_scene = qobject_cast<RoomScene *>(scene());            
             QRectF newSceneRect(0, 0, event->size().width(), event->size().height());
-            room_scene->setSceneRect(newSceneRect);
+            room_scene->setSceneRect(newSceneRect);            
             room_scene->adjustItems();
             setSceneRect(room_scene->sceneRect());
             fitInView(room_scene->sceneRect(), Qt::KeepAspectRatio);
             main_window->setBackgroundBrush(false);
             return;
-        }else if(scene()->inherits("StartScene"))
-        {
-            StartScene *start_scene = qobject_cast<StartScene *>(scene());
-            QRectF newSceneRect(-event->size().width() / 2, -event->size().height() / 2,
-                                event->size().width(), event->size().height());
-            start_scene->setSceneRect(newSceneRect);
-            setSceneRect(start_scene->sceneRect());
-            fitInView(start_scene->sceneRect(), Qt::KeepAspectRatio);
         }
         if(main_window)
-            main_window->setBackgroundBrush(true);
+            main_window->setBackgroundBrush(true);           
     }
 };
 
@@ -72,22 +62,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connection_dialog = new ConnectionDialog(this);
     connect(ui->actionStart_Game, SIGNAL(triggered()), connection_dialog, SLOT(exec()));
-
-    //
-    connect(connection_dialog, SIGNAL(qnodelist(QString,int)), this, SLOT(startQNodeList(QString,int)));
-    connect(connection_dialog, SIGNAL(qnodeinfo(QString,int)), this, SLOT(startQNodeInfo(QString,int)));
-    connect(this, SIGNAL(nodelistupdate(QString)), connection_dialog, SLOT(updateNodeListTable(QString)));
-
-    //hall
-    hall_dialog = new HallDialog(this);
-    connect(connection_dialog, SIGNAL(accepted()), this, SLOT(refreshRooms()));
-    connect(hall_dialog, SIGNAL(refresh_rooms()), this, SLOT(refreshRooms()));
-    connect(hall_dialog, SIGNAL(create_room()), this, SLOT(startCreateRoom()));
-    connect(hall_dialog, SIGNAL(join_room(int)), this, SLOT(startJoinRoom(int)));
-    connect(this, SIGNAL(rejoin_room(int)), this, SLOT(startReJoinRoom(int)));
-    connect(this, SIGNAL(roomlistupdate(QString)), hall_dialog, SLOT(updateRoomListTable(QString)));
-    connect(hall_dialog, SIGNAL(accepted()), this, SLOT(startConnection()));
-
+    connect(connection_dialog, SIGNAL(accepted()), this, SLOT(startConnection()));
 
     config_dialog = new ConfigDialog(this);
     connect(ui->actionConfigure, SIGNAL(triggered()), config_dialog, SLOT(show()));
@@ -126,12 +101,15 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void MainWindow::restoreFromConfig(){
-    resize(Config.value("WindowSize", QSize(1206, 767)).toSize());
+    resize(Config.value("WindowSize", QSize(1042, 719)).toSize());
     move(Config.value("WindowPosition", QPoint(20,20)).toPoint());
 
     QFont font;
+    /* @todo: For now, we haven't find a very good solution.
+    According to Qt, everything is overrules by this setting...
+    So just turn it off temporarily
     if(Config.AppFont != font)
-        QApplication::setFont(Config.AppFont);
+        QApplication::setFont(Config.AppFont); */
     if(Config.UIFont != font)
         QApplication::setFont(Config.UIFont, "QTextEdit");
 
@@ -155,6 +133,7 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::gotoScene(QGraphicsScene *scene){
+    
     if(this->scene)
         this->scene->deleteLater();
     this->scene = scene;
@@ -168,7 +147,7 @@ void MainWindow::on_actionExit_triggered()
 {
     QMessageBox::StandardButton result;
     result = QMessageBox::question(this,
-                                   tr("Sanguosha-GUNDAM"),
+                                   tr("Sanguosha"),
                                    tr("Are you sure to exit?"),
                                    QMessageBox::Ok | QMessageBox::Cancel);
     if(result == QMessageBox::Ok){
@@ -179,10 +158,10 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionStart_Server_triggered()
 {
-    Config.CountDownSeconds = Config.value("CountDownSeconds", 3).toInt();
     ServerDialog *dialog = new ServerDialog(this);
     if(!dialog->config())
         return;
+
     Server *server = new Server(this);
     if(! server->listen()){
         QMessageBox::warning(this, tr("Warning"), tr("Can not start server!"));
@@ -218,7 +197,7 @@ void MainWindow::checkVersion(const QString &server_version, const QString &serv
         connect(client, SIGNAL(server_connected()), SLOT(enterRoom()));
 
         if(qApp->arguments().contains("-hall")){
-            HallDialog *dialog = HallDialog::GetInstance(this);
+            HallDialog *dialog = HallDialog::getInstance(this);
             connect(client, SIGNAL(server_connected()), dialog, SLOT(accept()));
         }
 
@@ -276,64 +255,6 @@ void MainWindow::networkError(const QString &error_msg){
         QMessageBox::warning(this, tr("Network error"), error_msg);
 }
 
-//Warning:If you will compiled it for Mac, please remove class Backloader
-BackLoader::BackLoader(QObject * parent)
-    :QThread(parent)
-{
-}
-
-void BackLoader::run()
-{
-    QStringList emotions;
-    emotions << "peach"
-             << "analeptic"
-             << "chain"
-             << "damage"
-             << "duel"
-             << "fire_slash"
-             << "thunder_slash"
-             << "killer"
-             << "jink"
-             << "no-success"
-             << "slash_black"
-             << "slash_red"
-             << "success"
-             << "bloodlost"
-             << "armor/renwang_shield"
-             << "armor/eight_diagram"
-             << "armor/silver_lion"
-             << "armor/vine"
-             << "armor/vineburn"
-             << "weapon/axe"
-             << "weapon/blade"
-             << "weapon/crossbow"
-             << "weapon/double_sword"
-             << "weapon/fan"
-             << "weapon/guding_blade"
-             << "weapon/halberd"
-             << "weapon/ice_sword"
-             << "weapon/kylin_bow"
-             << "weapon/qinggang_sword"
-             << "weapon/sp_moonspear"
-             << "weapon/spear";
-
-    foreach(QString emotion, emotions){
-        int n = PixmapAnimation::GetFrameCount(emotion);
-        for(int i=0; i<n; i++){
-
-            QString filename = QString("image/system/emotion/%1/%2.png").arg(emotion).arg(i);
-            try{
-                PixmapAnimation::GetFrameFromCache(filename);
-            }
-            catch(...){
-                continue;
-            }
-        }
-    }
-
-    emit finished();
-}
-
 void MainWindow::enterRoom(){
     // add current ip to history
     if(!Config.HistoryIPs.contains(Config.HostAddress)){
@@ -347,7 +268,6 @@ void MainWindow::enterRoom(){
     ui->actionAI_Melee->setEnabled(false);
 
     RoomScene *room_scene = new RoomScene(this);
-
     ui->actionView_Discarded->setEnabled(true);
     ui->actionView_distance->setEnabled(true);
     ui->actionServerInformation->setEnabled(true);
@@ -382,14 +302,9 @@ void MainWindow::enterRoom(){
         ui->actionExecute_script_at_server_side->disconnect();
     }
 
-    ui->menuHelp->setEnabled(false);
     connect(room_scene, SIGNAL(restart()), this, SLOT(startConnection()));
     connect(room_scene, SIGNAL(return_to_start()), this, SLOT(gotoStartScene()));
-
-    //Warning:If you will compiled it for Mac, please remove class Backloader
-    BackLoader *loader = new BackLoader(this);
-    loader->start();
-
+    
     gotoScene(room_scene);
 }
 
@@ -415,7 +330,6 @@ void MainWindow::gotoStartScene(){
     restoreFromConfig();
 
     ui->menuCheat->setEnabled(false);
-    ui->menuHelp->setEnabled(true);
     ui->actionGet_card->disconnect();
     ui->actionDeath_note->disconnect();
     ui->actionDamage_maker->disconnect();
@@ -445,7 +359,7 @@ void MainWindow::on_actionGeneral_Overview_triggered()
 
 void MainWindow::on_actionCard_Overview_triggered()
 {
-    CardOverview *overview = CardOverview::GetInstance(this);
+    CardOverview *overview = CardOverview::getInstance(this);
     overview->loadFromAll();
     overview->show();
 }
@@ -515,16 +429,16 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::setBackgroundBrush(bool centerAsOrigin){
     if(scene){
-        QPixmap pixmap(Config.BackgroundImage);
+        QPixmap pixmap(Config.BackgroundImage);        
         QBrush brush(pixmap);
-
         qreal sx = qMax((qreal)width(), scene->width()) / qreal(pixmap.width());
         qreal sy = qMax((qreal)height(), scene->height()) / qreal(pixmap.height());
+               
 
         QTransform transform;
         if (centerAsOrigin)
             transform.translate(-qMax((qreal)width(), scene->width()) / 2,
-                                -qMax((qreal)height(), scene->height()) / 2);
+                -qMax((qreal)height(), scene->height()) / 2);        
         transform.scale(sx, sy);
         brush.setTransform(transform);
         scene->setBackgroundBrush(brush);
@@ -532,11 +446,7 @@ void MainWindow::setBackgroundBrush(bool centerAsOrigin){
 }
 
 void MainWindow::changeBackground(){
-    bool centerAsOrigin = true;
-    if(scene->inherits("RoomScene"))
-        centerAsOrigin = false;
-
-    setBackgroundBrush(centerAsOrigin);
+    setBackgroundBrush(false);
 
     if(scene->inherits("StartScene")){
         StartScene *start_scene = qobject_cast<StartScene *>(scene);
@@ -596,9 +506,9 @@ void MainWindow::on_actionRole_assign_table_triggered()
 
     QStringList rows;
     rows << "2 1 0 1 0" << "3 1 0 1 1" << "4 1 0 2 1"
-         << "5 1 1 2 1" << "6 1 1 3 1" << "6d 1 1 2 2"
-         << "7 1 2 3 1" << "8 1 2 4 1" << "8d 1 2 3 2"
-         << "9 1 3 4 1" << "10 1 3 4 2";
+            << "5 1 1 2 1" << "6 1 1 3 1" << "6d 1 1 2 2"
+            << "7 1 2 3 1" << "8 1 2 4 1" << "8d 1 2 3 2"
+            << "9 1 3 4 1" << "10 1 3 4 2";
 
     foreach(QString row, rows){
         QStringList cells = row.split(" ");
@@ -686,7 +596,6 @@ void MainWindow::on_actionAcknowledgement_triggered()
 
 void MainWindow::on_actionPC_Console_Start_triggered()
 {
-    Config.CountDownSeconds = 0;
     ServerDialog *dialog = new ServerDialog(this);
     dialog->ensureEnableAI();
     if(!dialog->config())
@@ -718,13 +627,13 @@ void MainWindow::on_actionScript_editor_triggered()
 MeleeDialog::MeleeDialog(QWidget *parent)
     :QDialog(parent)
 {
-    server=NULL;
+    server=NULL;    
     room_count=0;
 
     setWindowTitle(tr("AI Melee"));
 
-    //    QGroupBox *general_box = createGeneralBox();
-    //    QGroupBox *result_box = createResultBox();
+//    QGroupBox *general_box = createGeneralBox();
+//    QGroupBox *result_box = createResultBox();
     general_box = createGeneralBox();
     result_box = createResultBox();
     server_log = new QTextEdit;
@@ -790,7 +699,7 @@ QGroupBox *MeleeDialog::createGeneralBox(){
     return box;
 }
 
-class RoomItem: public Pixmap{
+class RoomItem: public QSanSelectableItem{
 public:
     RoomItem(Room *room){
         load("image/system/frog/playing.png");
@@ -811,7 +720,7 @@ public:
             qreal role_y = (radius + 30) * sin(theta) + 5;
 
             QGraphicsPixmapItem *avatar = new QGraphicsPixmapItem(this);
-            avatar->setPixmap(QPixmap(player->getGeneral()->getPixmapPath("tiny")));
+            avatar->setPixmap(G_ROOM_SKIN.getGeneralPixmap(player->getGeneral()->objectName(), QSanRoomSkin::S_GENERAL_ICON_SIZE_TINY));
             avatar->setPos(x, y);
 
             QGraphicsPixmapItem *role = new QGraphicsPixmapItem(this);
@@ -896,9 +805,9 @@ void MeleeDialog::onGameOver(const QString &winner){
     }
 
     QString tooltip = tr("Winner(s): %1 <br/> Losers: %2 <br /> Shuffle times: %3")
-            .arg(winners.join(","))
-            .arg(losers.join(","))
-            .arg(room->getTag("SwapPile").toInt());
+                      .arg(winners.join(","))
+                      .arg(losers.join(","))
+                      .arg(room->getTag("SwapPile").toInt());
 
     if(room_item) room_item->setToolTip(tooltip);
     if(loop_checkbox->isChecked()){
@@ -958,13 +867,9 @@ void MeleeDialog::selectGeneral(){
 }
 
 void MeleeDialog::setGeneral(const QString &general_name){
-    const General *general = Sanguosha->getGeneral(general_name);
-
-    if(general){
-        avatar_button->setIcon(QIcon(general->getPixmapPath("card")));
-        Config.setValue("MeleeGeneral", general_name);
-        avatar_button->setProperty("to_test", general_name);
-    }
+    avatar_button->setIcon(QIcon(G_ROOM_SKIN.getGeneralPixmap(general_name, QSanRoomSkin::S_GENERAL_ICON_SIZE_CARD)));
+    Config.setValue("MeleeGeneral", general_name);
+    avatar_button->setProperty("to_test", general_name);
 }
 
 AcknowledgementScene::AcknowledgementScene(QObject *parent) :
@@ -993,9 +898,9 @@ void MainWindow::on_actionAI_Melee_triggered()
 void MainWindow::on_actionReplay_file_convert_triggered()
 {
     QString filename = QFileDialog::getOpenFileName(
-                this, tr("Please select a replay file"),
-                Config.value("LastReplayDir").toString(),
-                tr("Pure text replay file (*.txt);; Image replay file (*.png)"));
+            this, tr("Please select a replay file"),
+            Config.value("LastReplayDir").toString(),
+            tr("Pure text replay file (*.txt);; Image replay file (*.png)"));
 
     if(filename.isEmpty())
         return;
@@ -1103,112 +1008,4 @@ void MainWindow::on_actionAbout_Lua_triggered()
     window->shift();
 
     window->appear();
-}
-
-
-//
-void MainWindow::startQNodeList(QString addr, int port){
-    NativeClientSocket *socket = new NativeClientSocket;
-    socket->setParent(this);
-    socket->connectToNode(addr,port);
-    socket->send("Qnodelist .");
-    connect(socket, SIGNAL(message_got(char*)), this, SLOT(process_socket_Reply(char*)));
-    connect(socket, SIGNAL(error_message(QString)), this, SLOT(process_socket_error_message(QString)));
-}
-
-void MainWindow::startQNodeInfo(QString addr, int port){
-    NativeClientSocket *socket = new NativeClientSocket;
-    socket->setParent(this);
-    socket->connectToNode(addr,port);
-    socket->send("Qnodeinfo "+QString::number(clock()));
-    connect(socket, SIGNAL(message_got(char*)), this, SLOT(process_socket_Reply(char*)));
-    connect(socket, SIGNAL(error_message(QString)), this, SLOT(process_socket_error_message(QString)));
-}
-
-void MainWindow::process_socket_Reply(char* reply)
-{
-    if(strlen(reply) <= 2) return;
-    QString cmd=QString(reply);
-    cmd=cmd.trimmed();
-    if(cmd.indexOf("nodelist")!=-1)
-    {
-        QStringList tmplist = cmd.split(" ");
-        emit(nodelistupdate(tmplist[1]));
-    }
-    else if(cmd.indexOf("nodeinfo")!=-1)
-    {
-        long end=clock();
-        QStringList tmplist = cmd.split(" ");
-        QStringList tmplist2 = tmplist[1].split(":");
-        if(tmplist2.count()==9)
-        {
-            QString servername=QString::fromUtf8(QByteArray::fromBase64(tmplist2[2].toAscii()));
-            if(tmplist2[5]=="1"){tmplist2[5]="(2)";} else {tmplist2[5]="";} // second general
-            QString info=tmplist2[0]+":"+tmplist2[1]+":"+servername+":"+tmplist2[3]+":"+tmplist2[4]+":"+tmplist2[5]+":"+tmplist2[6]+":"+tmplist2[7]+":"+QString::number(end-tmplist2[8].toInt());
-            emit(nodelistupdate(info));
-        }
-    }
-    else if(cmd.indexOf("room ")!=-1)
-    {
-        if(cmd=="room 0"){
-            // QMessageBox::warning(this, tr("Warning"), tr("NO_ROOM_FOUND! NOW_WILL_AUTO_CREATEROOM!"));
-            // hall_dialog->setVisible(false);
-            emit(hall_dialog->accept());
-        }
-        else
-        {
-            QStringList tmplist = cmd.split(" ");
-            emit(roomlistupdate(tmplist[1]));
-        }
-    }
-    else if(cmd.indexOf("foundRoomID ")!=-1){
-        QStringList tmplist = cmd.split(" ");
-        QString roomid=tmplist[1];
-        emit(rejoin_room(roomid.toInt()));
-        return;
-    }
-}
-
-void MainWindow::process_socket_error_message(){;}
-
-void MainWindow::startReJoinRoom(int roomid){
-    Client *client = new Client(this);
-    client->rejoinroom(roomid);
-    connect(client, SIGNAL(error_message(QString)), SLOT(networkError(QString)));
-    connect(client, SIGNAL(server_connected()), SLOT(enterRoom()));
-}
-
-void MainWindow::refreshRooms(){
-    if(!hall_dialog->isVisible()){
-        hall_dialog->clearRoomListTable();
-        hall_dialog->setVisible(true);
-    }
-    NativeClientSocket *socket = new NativeClientSocket;
-    socket->setParent(this);
-    socket->connectToNode(Config.HostAddress,Config.ServerPort);
-
-    QString base64 = Config.UserName.toUtf8().toBase64();
-
-    if(!Config.LastObjname.isEmpty() && !base64.isEmpty())
-    {
-        socket->send("refreshRooms "+base64+":"+Config.LastObjname);
-    }
-    else
-    {socket->send("refreshRooms .");}
-    connect(socket, SIGNAL(message_got(char*)), this, SLOT(process_socket_Reply(char*)));
-    connect(socket, SIGNAL(error_message(QString)), this, SLOT(process_socket_error_message(QString)));
-}
-
-void MainWindow::startCreateRoom(){
-    Client *client = new Client(this);
-    client->createroom();
-    connect(client, SIGNAL(server_connected()), SLOT(enterRoom()));
-    connect(client, SIGNAL(error_message(QString)), SLOT(networkError(QString)));
-}
-
-void MainWindow::startJoinRoom(int roomid){
-    Client *client = new Client(this);
-    client->joinroom(roomid);
-    connect(client, SIGNAL(error_message(QString)), SLOT(networkError(QString)));
-    connect(client, SIGNAL(server_connected()), SLOT(enterRoom()));
 }

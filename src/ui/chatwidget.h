@@ -52,7 +52,7 @@ public:
     ~ChatWidget();
     virtual QRectF boundingRect() const;
 protected:
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget); 
 private:
     QPixmap base_pixmap;
     QPushButton *returnButton;
@@ -61,9 +61,9 @@ private:
     MyPixmapItem *chat_face_board, *easy_text_board;
     QGraphicsRectItem *base;
 
-    QGraphicsProxyWidget *addWidget(QWidget *widget, int x, int y = 0);
-    QPushButton *addButton(const QString &name, int x, int y = 0);
-    QPushButton *createButton(const QString &name);
+    QGraphicsProxyWidget *addWidget(QWidget *widget, int x);
+    QPushButton *addButton(const QString &name, int x);
+    QPushButton *createButton(const QString &name);    
 private slots:
     void showEasyTextBoard();
     void showFaceBoard();

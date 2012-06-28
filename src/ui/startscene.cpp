@@ -10,7 +10,7 @@
 StartScene::StartScene()
 {
     // game logo
-    logo = new Pixmap("image/logo/logo.png", true);
+    logo = new QSanSelectableItem("image/logo/logo.png", true);
     logo->moveBy(0, -Config.Rect.height()/4);
     addItem(logo);
 
@@ -61,7 +61,7 @@ void StartScene::switchToServer(Server *server){
 
     // performs leaving animation
     QPropertyAnimation *logo_shift = new QPropertyAnimation(logo, "pos");
-    logo_shift->setEndValue(QPointF(Config.Rect.center().rx() - 200, Config.Rect.center().ry() - 175));
+    logo_shift->setEndValue(Config.Rect.topLeft());
 
     QPropertyAnimation *logo_shrink = new QPropertyAnimation(logo, "scale");
     logo_shrink->setEndValue(0.5);
@@ -88,16 +88,7 @@ void StartScene::switchToServer(Server *server){
 
     printServerInfo();
 
-    connect(server, SIGNAL(server_message(QString)), this, SLOT(transBase64(QString)));
-    connect(this, SIGNAL(log_append(QString)), server_log, SLOT(append(QString)));
-
-    // 20111220
-    server_cmdline = new QLineEdit();
-    server_cmdline->move(server_log->x(),server_log->y()+server_log->height()+2);
-    server_cmdline->resize(server_log->width(),20);
-    addWidget(server_cmdline);
-    connect(server_cmdline, SIGNAL(returnPressed()), server, SLOT(processCmdLine()));
-    connect(server, SIGNAL(clearlog()), server_log, SLOT(clear()));
+    connect(server, SIGNAL(server_message(QString)), server_log, SLOT(append(QString)));
 
     update();
 }
@@ -174,34 +165,4 @@ void StartScene::printServerInfo(){
     else
         server_log->append(tr("This server is AI disabled"));
 
-}
-
-void StartScene::transBase64(QString msg)
-{
-    if(msg.indexOf("sgs")!=-1 && msg.indexOf(" speak ")!=-1){
-        QStringList tmplist=msg.split(" ");
-        if(tmplist.count()==3){
-            QString tmp=tmplist[0]+" ";
-            tmp.append(tmplist[1]+" ");
-            QString tmp1=(QString::fromUtf8(QByteArray::fromBase64(tmplist[2].toAscii())));
-            if(tmp1.indexOf("<#")!=-1 && tmp1.indexOf("#>")!=-1){
-                QString prefix="<img src='image/system/chatface/";
-                QString suffix=".png'></img>";
-                tmp1=tmp1.replace("<#",prefix);
-                tmp1=tmp1.replace("#>",suffix);
-                tmp.append(tmp1);
-                tmp= "<font color=#FFFFFF>"+tmp+"</font>";
-            }
-            else
-                tmp.append(tmp1);
-
-            emit(log_append(tmp));
-        }
-        else{
-            emit(log_append(msg));
-        }
-    }
-    else{
-        emit(log_append(msg));
-    }
 }

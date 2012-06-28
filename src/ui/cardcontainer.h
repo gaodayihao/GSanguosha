@@ -4,13 +4,13 @@
 class CardItem;
 class ClientPlayer;
 
-#include "pixmap.h"
+#include "QSanSelectableItem.h"
 #include "carditem.h"
 #include "GeneralCardContainerUI.h"
 
 #include <QStack>
 
-class CloseButton: public Pixmap{
+class CloseButton: public QSanSelectableItem{
     Q_OBJECT
 
 public:
@@ -24,35 +24,35 @@ signals:
     void clicked();
 };
 
-class CardContainer : public PlayerCardContainer
+
+class CardContainer : public GeneralCardContainer
 {
     Q_OBJECT
 
 public:
     explicit CardContainer();
-    virtual QList<CardItem*> removeCardItems(const QList<int> &card_ids, Player::Place place);
+    virtual QList<CardItem*> removeCardItems(const QList<int> &card_ids, Player::Place place);    
     int getFirstEnabled() const;
     void startChoose();
     void startGongxin();
-    void startGongxinwithHongyan();
     void addCloseButton(bool dispose = false);
     void view(const ClientPlayer *player);
-    bool hasCloseButton();
-
+    virtual QRectF boundingRect() const;
     ClientPlayer* m_currentPlayer;
+    virtual void paint(QPainter *,const QStyleOptionGraphicsItem *,QWidget *);
 public slots:
     void fillCards(const QList<int> &card_ids = QList<int>());
     void clear();
     void freezeCards(bool is_disable);
 
 protected:
-
+    QRectF _m_boundingRect;
     virtual bool _addCardItems(QList<CardItem*> &card_items, Player::Place place);
 
 private:
     QList<CardItem *> items;
     CloseButton* close_button;
-
+    QPixmap _m_background;
     QStack<QList<CardItem *> > items_stack;
 
     void _addCardItem(int card_id, const QPointF &pos);
@@ -67,28 +67,13 @@ signals:
     void item_gongxined(int card_id);
 };
 
-class HeroCardContainer : public CardContainer
-{
-    Q_OBJECT
-
-public:
-    HeroCardContainer();
-
-public slots:
-    void fillCards(const QList<int> &card_ids = QList<int>());
-    void clear();
-
-private:
-    QList<CardItem *> items;
-};
-
-class GuanxingBox: public Pixmap{
+class GuanxingBox: public QSanSelectableItem{
     Q_OBJECT
 
 public:
     GuanxingBox();
-    void reply();
     void clear();
+    void reply();
 
 public slots:
     void doGuanxing(const QList<int> &card_ids, bool up_only);
@@ -98,12 +83,11 @@ private:
     QList<CardItem *> up_items, down_items;
     bool up_only;
 
-    static const int start_x = 30;
-    static const int start_y1 = 40;
-    static const int start_y2 = 184;
+    static const int start_x = 76;
+    static const int start_y1 = 105;
+    static const int start_y2 = 249;
     static const int middle_y = 157;
     static const int skip = 102;
-    static const int card_width = 93;
 };
 
 #endif // CARDCONTAINER_H

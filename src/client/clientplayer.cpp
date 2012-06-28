@@ -13,8 +13,6 @@ ClientPlayer::ClientPlayer(Client *client)
     :Player(client), handcard_num(0)
 {
     mark_doc = new QTextDocument(this);
-    mark_doc->setTextWidth(128);
-    mark_doc->setDefaultTextOption(QTextOption(Qt::AlignRight));
 }
 
 void ClientPlayer::handCardChange(int delta){
@@ -58,20 +56,10 @@ void ClientPlayer::addKnownHandCard(const Card *card){
 }
 
 bool ClientPlayer::isLastHandCard(const Card *card) const{
-    if(card->isVirtualCard()){
-        if(card->getSubcards().length() != known_cards.length())
-            return false;
+    if(known_cards.length() != 1)
+        return false;
 
-        foreach(int card_id, card->getSubcards())
-            if(hasEquip(Sanguosha->getCard(card_id)))
-                return false;
-    }else{
-        if(known_cards.length() != 1)
-            return false;
-
-        return card->getEffectiveId() == known_cards.first()->getEffectiveId();
-    }
-    return true;
+    return known_cards.first()->getEffectiveId() == card->getEffectiveId();
 }
 
 void ClientPlayer::removeCard(const Card *card, Place place){
@@ -119,10 +107,7 @@ void ClientPlayer::changePile(const QString &name, bool add, QList<int> card_ids
         piles[name].append(card_ids);
     else
         foreach (int card_id, card_ids)
-            if(piles[name].first() == -1)
-                piles[name].removeOne(-1);
-            else
-                piles[name].removeOne(card_id);
+            piles[name].removeOne(card_id);
 
     if(!name.startsWith("#"))
         emit pile_changed(name);
@@ -173,6 +158,7 @@ void ClientPlayer::setMark(const QString &mark, int value){
     if(!mark.startsWith("@"))
         return;
 
+    // @todo: consider move all the codes below to PlayerCardContainerUI.cpp
     // set mark doc
     QString text = "";
     QMapIterator<QString, int> itor(marks);
@@ -182,15 +168,12 @@ void ClientPlayer::setMark(const QString &mark, int value){
         if(itor.key().startsWith("@") && itor.value() > 0){
             QString mark_text = QString("<img src='image/mark/%1.png' />").arg(itor.key());
             if(itor.value() != 1)
-                mark_text.append(QString("x%1").arg(itor.value()));
+                mark_text.append(QString("%1").arg(itor.value()));
+            // @todo: add an option so that mark can be placed horizontally.
+            mark_text.append("<br>");
             text.append(mark_text);
         }
     }
 
     mark_doc->setHtml(text);
-}
-
-void ClientPlayer::changeReady(){
-    setReady(!isReady());
-    ClientInstance->ready();
 }

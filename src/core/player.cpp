@@ -45,9 +45,9 @@ void Player::setReady(bool ready){
 }
 
 void Player::setHp(int hp){
-    if(hp <= max_hp && this->hp != hp){
+    if (this->hp != hp) {
         this->hp = hp;
-        emit state_changed();
+        emit hp_changed();
     }
 }
 
@@ -62,12 +62,10 @@ int Player::getMaxHp() const{
 void Player::setMaxHp(int max_hp){
     if(this->max_hp == max_hp)
         return;
-
     this->max_hp = max_hp;
     if(hp > max_hp)
         hp = max_hp;
-
-    emit state_changed();
+    emit hp_changed();
 }
 
 int Player::getLostHp() const{
@@ -136,15 +134,12 @@ void Player::clearFlags(){
 }
 
 int Player::getAttackRange() const{
-    if(hasFlag("tianyi_success") || hasFlag("jiangchi_invoke"))
-        return 1000;
-    int extra = getMark("@sword") > 0 ? getMark("@sword") : 0;
     if(weapon)
-        return weapon->getRange() + extra;
+        return weapon->getRange();
     else if(hasSkill("zhengfeng"))
-        return hp + extra;
+        return hp;
     else
-        return 1 + extra;
+        return 1;
 }
 
 bool Player::inMyAttackRange(const Player *other) const{
@@ -158,7 +153,7 @@ void Player::setFixedDistance(const Player *player, int distance){
         fixed_distance.insert(player, distance);
 }
 
-int Player::distanceTo(const Player *other, int fix) const{
+int Player::distanceTo(const Player *other, int distance_fix) const{
     if(this == other)
         return 0;
 
@@ -170,7 +165,7 @@ int Player::distanceTo(const Player *other, int fix) const{
     int distance = qMin(left, right);
 
     distance += Sanguosha->correctDistance(this, other);
-    distance += fix;
+    distance += distance_fix;
 
     // keep the distance >=1
     if(distance < 1)
@@ -215,7 +210,7 @@ QString Player::getGeneral2Name() const{
     if(general2)
         return general2->objectName();
     else
-        return "";
+        return QString();
 }
 
 const General *Player::getGeneral2() const{
@@ -274,28 +269,9 @@ bool Player::isLord() const{
     return getRole() == "lord";
 }
 
-bool Player::SkillCheck(const QString &skill_name) const{
-    const Skill *skill = Sanguosha->getSkill(skill_name);
-    if(skill == NULL)
-        return false;
-
-    if(skill->inherits("TriggerSkill"))
-        return !loseTriggerSkills();
-    else if(skill->inherits("ViewAsSkill"))
-        return !loseViewAsSkills();
-    else if(skill->inherits("ProhibitSkill"))
-        return !loseProhibitSkills();
-    else if(skill->inherits("DistanceSkill"))
-        return !loseDistanceSkills();
-    else
-        return !loseOtherSkills();
-}
-
-bool Player::hasSkill(const QString &skill_name, bool includelost) const{
-    if(hasInnateSkill(skill_name) || acquired_skills.contains(skill_name))
-        return SkillCheck(skill_name) || includelost;
-    else
-        return false;
+bool Player::hasSkill(const QString &skill_name) const{
+    return hasInnateSkill(skill_name)
+            || acquired_skills.contains(skill_name);
 }
 
 bool Player::hasInnateSkill(const QString &skill_name) const{
@@ -308,10 +284,7 @@ bool Player::hasInnateSkill(const QString &skill_name) const{
     return false;
 }
 
-bool Player::hasLordSkill(const QString &skill_name, bool includelost) const{
-    if(!SkillCheck(skill_name) && !includelost)
-        return false;
-
+bool Player::hasLordSkill(const QString &skill_name) const{
     if(acquired_skills.contains(skill_name))
         return true;
 
@@ -319,7 +292,7 @@ bool Player::hasLordSkill(const QString &skill_name, bool includelost) const{
     if(mode == "06_3v3" || mode == "02_1v1")
         return false;
 
-    if(isLord() || ServerInfo.EnableHegemony || mode == "03_3kingdoms")
+    if(isLord() || ServerInfo.EnableHegemony)
         return hasInnateSkill(skill_name);
 
     if(hasSkill("weidi")){
@@ -330,42 +303,6 @@ bool Player::hasLordSkill(const QString &skill_name, bool includelost) const{
     }
 
     return false;
-}
-
-bool Player::loseTriggerSkills() const{
-    return (getMark("@duanchang") + getMark("@huoshui") + getMark("@qingcheng1")) > 0;
-}
-
-bool Player::loseViewAsSkills() const{
-    return (getMark("@duanchang") + getMark("@huoshui") + getMark("@qingcheng2")) > 0;
-}
-
-bool Player::loseProhibitSkills() const{
-    return (getMark("@duanchang") + getMark("@huoshui") + getMark("@qingcheng3")) > 0;
-}
-
-bool Player::loseDistanceSkills() const{
-    return (getMark("@duanchang") + getMark("@huoshui") + getMark("@qingcheng4")) > 0;
-}
-
-bool Player::loseOtherSkills() const{
-    return getMark("@duanchang") > 0;
-}
-
-void Player::addSkill(const QString &skill_name){
-    additional_skills.insert(skill_name);
-}
-
-void Player::deleteSkill(const QString &skill_name){
-    additional_skills.remove(skill_name);
-}
-
-void Player::removeAdditionalSkills(){
-    additional_skills.clear();
-}
-
-QSet<QString> Player::getAdditionalSkills() const{
-    return additional_skills;
 }
 
 void Player::acquireSkill(const QString &skill_name){
@@ -540,14 +477,6 @@ void Player::setKingdom(const QString &kingdom){
     }
 }
 
-QString Player::getKingdomIcon() const{
-    return QString("image/kingdom/icon/%1.png").arg(kingdom);
-}
-
-QString Player::getKingdomFrame() const{
-    return QString("image/kingdom/frame/%1.png").arg(kingdom);
-}
-
 bool Player::isKongcheng() const{
     return getHandcardNum() == 0;
 }
@@ -627,15 +556,16 @@ int Player::getMark(const QString &mark) const{
     return marks.value(mark, 0);
 }
 
-bool Player::canSlash(const Player *other, bool distance_limit, int distance_fix) const{
-    if(other->hasSkill("kongcheng") && other->isKongcheng())
-        return false;
-
+bool Player::canSlash(const Player *other, bool distance_limit, int rangefix) const{
     if(other == this)
         return false;
 
-    if(distance_limit)
-        return distanceTo(other, distance_fix) <= getAttackRange();
+    if(distance_limit){
+        if(rangefix > 1)
+            return distanceTo(other) <= (getAttackRange() - rangefix + 1);
+        else
+            return distanceTo(other,rangefix) <= getAttackRange();
+    }
     else
         return true;
 }

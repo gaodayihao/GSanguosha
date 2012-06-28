@@ -10,7 +10,6 @@
 QuhuCard::QuhuCard(){
     once = true;
     mute = true;
-    as_pindian = true;
     will_throw = false;
 }
 
@@ -30,11 +29,11 @@ bool QuhuCard::targetFilter(const QList<const Player *> &targets, const Player *
 void QuhuCard::use(Room *room, ServerPlayer *xunyu, const QList<ServerPlayer *> &targets) const{
     ServerPlayer *tiger = targets.first();
 
-    room->playSkillEffect("quhu", 1);
+    room->broadcastSkillInvoke("quhu");
 
     bool success = xunyu->pindian(tiger, "quhu", this);
     if(success){
-        room->playSkillEffect("quhu", 2);
+        room->broadcastSkillInvoke("quhu");
 
         QList<ServerPlayer *> players = room->getOtherPlayers(tiger), wolves;
         foreach(ServerPlayer *player, players){
@@ -52,7 +51,7 @@ void QuhuCard::use(Room *room, ServerPlayer *xunyu, const QList<ServerPlayer *> 
             return;
         }
 
-        room->playSkillEffect("#tunlang");
+        room->broadcastSkillInvoke("#tunlang");
         ServerPlayer *wolf = room->askForPlayerChosen(xunyu, wolves, "quhu");
 
         DamageStruct damage;
@@ -150,20 +149,22 @@ public:
 
 QiangxiCard::QiangxiCard(){
     once = true;
+    will_throw = true;
 }
 
 bool QiangxiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
     if(!targets.isEmpty())
         return false;
 
-    if(Self->getWeapon() && subcards.at(0) == Self->getWeapon()->getEffectiveId())
-        return Self->distanceTo(to_select) <= (Self->getAttackRange() - Self->getWeapon()->getRange() + 1);
+    if(!subcards.isEmpty() && Self->getWeapon() == Sanguosha->getCard(subcards.first()))
+        return Self->distanceTo(to_select) <= 1;
 
     return Self->inMyAttackRange(to_select);
 }
 
 void QiangxiCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.to->getRoom();
+    room->throwCard(this, effect.from);
 
     if(subcards.isEmpty())
         room->loseHp(effect.from);
@@ -234,18 +235,22 @@ class Xueyi: public MaxCardsSkill{
 public:
     Xueyi():MaxCardsSkill("xueyi$"){
     }
-
     virtual int getExtra(const Player *target) const{
-        if(!target->hasLordSkill(objectName()))
-            return 0;
-
         int extra = 0;
+        const Player *lord = NULL;
+        if(target->isLord())
+            lord = target;
         QList<const Player *> players = target->getSiblings();
         foreach(const Player *player, players){
             if(player->isAlive() && player->getKingdom() == "qun")
                 extra += 2;
+            if(player->isLord())
+                lord = player;
         }
-        return extra;
+        if(target->hasLordSkill(objectName()))
+            return extra;
+        else
+            return 0;
     }
 };
 
@@ -296,6 +301,7 @@ public:
                 if(shuangxiong->askForSkillInvoke(objectName())){
                     shuangxiong->setFlags("shuangxiong");
 
+                    room->broadcastSkillInvoke("shuangxiong");
                     JudgeStruct judge;
                     judge.pattern = QRegExp("(.*)");
                     judge.good = true;
@@ -314,7 +320,6 @@ public:
             JudgeStar judge = data.value<JudgeStar>();
             if(judge->reason == "shuangxiong"){
                 CardMoveReason reason(CardMoveReason::S_REASON_GOTBACK, judge->who->objectName());
-                room->obtainCard(shuangxiong, judge->card, reason, false);
                 shuangxiong->obtainCard(judge->card);
                 return true;
             }
@@ -337,8 +342,9 @@ public:
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *pangde, QVariant &data) const{
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
         if(!effect.to->isNude()){
+            Room *room = pangde->getRoom();
             if(pangde->askForSkillInvoke(objectName(), data)){
-                room->playSkillEffect(objectName());
+                room->broadcastSkillInvoke(objectName());
                 int to_throw = room->askForCardChosen(pangde, effect.to, "he", objectName());
                 CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, effect.to->objectName());
                 reason.m_playerId = pangde->objectName();
@@ -387,7 +393,7 @@ public:
 
         if(pangtong->askForSkillInvoke(objectName(), data)){
             room->broadcastInvoke("animate", "lightbox:$niepan");
-            room->playSkillEffect(objectName());
+            room->broadcastSkillInvoke(objectName());
 
             pangtong->loseMark("@nirvana");
 
@@ -444,8 +450,6 @@ public:
             return false;
 
         if(wolong->askForSkillInvoke(objectName())){
-            room->setEmotion(wolong, "armor/eight_diagram");
-
             JudgeStruct judge;
             judge.pattern = QRegExp("(.*):(heart|diamond):(.*)");
             judge.good = true;
@@ -455,11 +459,14 @@ public:
             room->judge(judge);
 
             if(judge.isGood()){
+                room->setEmotion(wolong, "armor/eight_diagram");
                 Jink *jink = new Jink(Card::NoSuit, 0);
                 jink->setSkillName(objectName());
                 room->provide(jink);
+                //room->setEmotion(wolong, "good");
                 return true;
-            }
+            }else
+                room->setEmotion(wolong, "bad");
         }
 
         return false;
@@ -496,7 +503,6 @@ public:
 
 TianyiCard::TianyiCard(){
     once = true;
-    as_pindian = true;
     will_throw = false;
 }
 
@@ -557,27 +563,25 @@ public:
 FirePackage::FirePackage()
     :Package("fire")
 {
-    General *xunyu, *dianwei, *wolong, *pangtong, *taishici, *yuanshao, *yanliangwenchou, *pangde;
+    General *dianwei, *xunyu, *pangtong, *wolong, *taishici, *yuanshao, *yanliangwenchou, *pangde;
+
+    dianwei = new General(this, "dianwei", "wei");
+    dianwei->addSkill(new Qiangxi);
 
     xunyu = new General(this, "xunyu", "wei", 3);
     xunyu->addSkill(new Quhu);
     xunyu->addSkill(new Jieming);
 
-    dianwei = new General(this, "dianwei", "wei");
-    dianwei->addSkill(new Qiangxi);
+    pangtong = new General(this, "pangtong", "shu", 3);
+    pangtong->addSkill(new Lianhuan);
+    pangtong->addSkill(new MarkAssignSkill("@nirvana", 1));
+    pangtong->addSkill(new Niepan);
+    related_skills.insertMulti("niepan", "#@nirvana-1");
 
     wolong = new General(this, "wolong", "shu", 3);
     wolong->addSkill(new Huoji);
     wolong->addSkill(new Kanpo);
     wolong->addSkill(new Bazhen);
-
-    pangtong = new General(this, "pangtong", "shu", 3);
-    pangtong->addSkill(new Lianhuan);
-    pangtong->addSkill(new MarkAssignSkill("@nirvana", 1));
-    pangtong->addSkill(new Niepan);
-    pangtong->addSkill(new TransfigureSkill("ptzijian", "pangtong", "bgm_pangtong", "@nirvana"));
-
-    related_skills.insertMulti("niepan", "#@nirvana-1");
 
     taishici = new General(this, "taishici", "wu");
     taishici->addSkill(new Tianyi);

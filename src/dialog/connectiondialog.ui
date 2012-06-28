@@ -158,42 +158,6 @@
      </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="getNodeListButton">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>160</y>
-      <width>121</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Get Node List</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="portLabel">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>190</y>
-      <width>31</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Port</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="portLineEdit">
-    <property name="geometry">
-     <rect>
-      <x>170</x>
-      <y>190</y>
-      <width>91</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
   </widget>
   <widget class="QListWidget" name="avatarList">
    <property name="geometry">
@@ -255,73 +219,6 @@
    <property name="text">
     <string>Reconnection</string>
    </property>
-  </widget>
-  <widget class="QTableWidget" name="nodeListTable">
-   <property name="geometry">
-    <rect>
-     <x>290</x>
-     <y>10</y>
-     <width>531</width>
-     <height>301</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>宋体</family>
-    </font>
-   </property>
-   <property name="sortingEnabled">
-    <bool>true</bool>
-   </property>
-   <attribute name="horizontalHeaderMinimumSectionSize">
-    <number>16</number>
-   </attribute>
-   <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-    <bool>true</bool>
-   </attribute>
-   <attribute name="verticalHeaderMinimumSectionSize">
-    <number>16</number>
-   </attribute>
-   <column>
-    <property name="text">
-     <string>Address</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>Port</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>ServerName</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>Version</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>Mode</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>Rooms</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>PLayers</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>Network</string>
-    </property>
-   </column>
   </widget>
  </widget>
  <tabstops>

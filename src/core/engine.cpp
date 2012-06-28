@@ -20,8 +20,6 @@
 
 Engine *Sanguosha = NULL;
 
-bool Engine::AI_FREE = true;
-
 void Engine::addPackage(const QString &name){
     Package *pack = PackageAdder::packages()[name];
     if(pack)
@@ -42,7 +40,6 @@ static inline QVariant GetConfigFromLuaState(lua_State *L, const char *key){
     return GetValueFromLuaState(L, "config", key);
 }
 
-
 Engine::Engine()
 {
     Sanguosha = this;
@@ -52,10 +49,7 @@ Engine::Engine()
 
     QStringList package_names = GetConfigFromLuaState(lua, "package_names").toStringList();
     foreach(QString name, package_names)
-        if(name != "ThreeKingdoms")
-            addPackage(name);
-
-    addPackage("ThreeKingdoms");
+        addPackage(name);
 
     QStringList scene_names = GetConfigFromLuaState(lua, "scene_names").toStringList();
     foreach(QString name, scene_names)
@@ -68,13 +62,12 @@ Engine::Engine()
     //modes["02pbb"] = tr("2 players (using blance beam)");
     modes["02_1v1"] = tr("2 players (KOF style)");
     modes["03p"] = tr("3 players");
-    modes["03_3kingdoms"] = tr("3 players(3 kingdoms mode)");
     modes["04p"] = tr("4 players");
     modes["04_1v3"] = tr("4 players (Hulao Pass)");
     modes["05p"] = tr("5 players");
     modes["06p"] = tr("6 players");
-    modes["06_3v3"] = tr("6 players (3v3)");
     modes["06pd"] = tr("6 players (2 renegades)");
+    modes["06_3v3"] = tr("6 players (3v3)");
     modes["07p"] = tr("7 players");
     modes["08p"] = tr("8 players");
     modes["08pd"] = tr("8 players (2 renegades)");
@@ -164,10 +157,6 @@ void Engine::addPackage(Package *package){
     package->setParent(this);
 
     QList<Card *> all_cards = package->findChildren<Card *>();
-
-    if (package->objectName() == "ThreeKingdoms")
-        _3KINGDOMS_GENERALS_CARD_COUNT = all_cards.count();
-
     foreach(Card *card, all_cards){
         card->setId(cards.length());
         cards << card;
@@ -221,7 +210,7 @@ QString Engine::translate(const QString &to_translate) const{
 int Engine::getRoleIndex() const{
     if(ServerInfo.GameMode == "06_3v3"){
         return 4;
-    }else if(ServerInfo.EnableHegemony || ServerInfo.GameMode == "03_3kingdoms"){
+    }else if(ServerInfo.EnableHegemony){
         return 5;
     }else
         return 1;
@@ -262,9 +251,8 @@ int Engine::getGeneralCount(bool include_banned) const{
             total--;
 
         else if( (ServerInfo.GameMode.endsWith("p") ||
-                  ServerInfo.GameMode.endsWith("pd") ||
-                  ServerInfo.GameMode.endsWith("pz"))
-                 && Config.value("Banlist/Roles").toStringList().contains(general->objectName()))
+                  ServerInfo.GameMode.endsWith("pd"))
+                  && Config.value("Banlist/Roles").toStringList().contains(general->objectName()))
             total--;
 
         else if(ServerInfo.Enable2ndGeneral && BanPair::isBanned(general->objectName()))
@@ -319,7 +307,7 @@ QString Engine::getVersion() const{
     if(mod_name == "official")
         return version_number;
     else
-        return QString("%1-%2").arg(mod_name).arg(version_number);
+        return QString("%1:%2").arg(version_number).arg(mod_name);
 }
 
 QString Engine::getVersionName() const{
@@ -391,8 +379,6 @@ QString Engine::getSetupString() const{
         flags.append("A");
     if(Config.DisableChat)
         flags.append("M");
-    if(Config.EnableSnatchHero)
-        flags.append("Q");
 
     if(Config.MaxHpScheme == 1)
         flags.append("1");
@@ -402,10 +388,10 @@ QString Engine::getSetupString() const{
     QString server_name = Config.ServerName.toUtf8().toBase64();
     QStringList setup_items;
     setup_items << server_name
-                << Config.GameMode
-                << QString::number(timeout)
-                << Sanguosha->getBanPackages().join("+")
-                << flags;
+            << Config.GameMode
+            << QString::number(timeout)
+            << Sanguosha->getBanPackages().join("+")
+            << flags;
 
     return setup_items.join(":");
 }
@@ -440,11 +426,9 @@ int Engine::getPlayerCount(const QString &mode) const{
 QString Engine::getRoles(const QString &mode) const{
     int n = getPlayerCount(mode);
 
-    if(mode == "02_1v1"){
+    if(mode == "02_1v1"){        
         return "ZN";
-    }else if(mode == "03_3kingdoms"){
-        return "ZCF";
-    }else if(mode == "04_1v3"){
+    }else if(mode == "04_1v3"){        
         return "ZFFF";
     }
 
@@ -525,10 +509,6 @@ int Engine::getCardCount() const{
     return cards.length();
 }
 
-int Engine::getCardCountWithoutSpecial() const{
-    return cards.length() - _3KINGDOMS_GENERALS_CARD_COUNT;
-}
-
 QStringList Engine::getLords() const{
     QStringList lords;
 
@@ -542,9 +522,6 @@ QStringList Engine::getLords() const{
         lords << lord;
     }
 
-    if(ban_package.contains("BGM") || Config.Enable2ndGeneral && BanPair::isBanned("bgm_liubei"))
-        return lords;
-    lords << "bgm_liubei";
     return lords;
 }
 
@@ -603,19 +580,7 @@ QStringList Engine::getLimitedGeneralNames() const{
             general_names << itor.key();
         }
     }
-    return general_names;
-}
 
-QStringList Engine::getGodGeneralNames() const{
-    QStringList general_names;
-    QHashIterator<QString, const General *> itor(generals);
-    while(itor.hasNext()){
-        itor.next();
-        if(!ban_package.contains(itor.value()->getPackage())
-                && itor.value()->getKingdom() == "god"){
-            general_names << itor.key();
-        }
-    }
     return general_names;
 }
 
@@ -631,7 +596,7 @@ QStringList Engine::getRandomGenerals(int count, const QSet<QString> &ban_set) c
             general_set.subtract(Config.value("Banlist/Hegemony", "").toStringList().toSet());
 
     if(ServerInfo.GameMode.endsWith("p") ||
-            ServerInfo.GameMode.endsWith("pd"))
+                      ServerInfo.GameMode.endsWith("pd"))
         general_set.subtract(Config.value("Banlist/Roles","").toStringList().toSet());
 
     all_generals = general_set.subtract(ban_set).toList();
@@ -646,19 +611,16 @@ QStringList Engine::getRandomGenerals(int count, const QSet<QString> &ban_set) c
 }
 
 QList<int> Engine::getRandomCards() const{
-    bool exclude_disaters = false, using_new_3v3 = false, _3kingdoms = false;
+    bool exclude_disaters = false, using_new_3v3 = false;
 
     if(Config.GameMode == "06_3v3"){
         using_new_3v3 = Config.value("3v3/UsingNewMode", false).toBool();
         exclude_disaters = Config.value("3v3/ExcludeDisasters", true).toBool() ||
-                using_new_3v3;
+                            using_new_3v3;
     }
 
     if(Config.GameMode == "04_1v3")
         exclude_disaters = true;
-
-    if(Config.GameMode == "03_3kingdoms")
-        _3kingdoms = true;
 
     QList<int> list;
     foreach(Card *card, cards){
@@ -671,17 +633,9 @@ QList<int> Engine::getRandomCards() const{
             list << card->getId();
             list.removeOne(98);
         }
-
-        if(card->getPackage() == "ThreeKingdoms" && _3kingdoms){
-            list << card->getId();
-        }
-
         else if(!ban_package.contains(card->getPackage()))
             list << card->getId();
     }
-
-    if(list.last() == cards.length() - 1)
-        list.removeLast();
 
     qShuffle(list);
 
@@ -692,11 +646,11 @@ QString Engine::getRandomGeneralName() const{
     return generals.keys().at(qrand() % generals.size());
 }
 
-void Engine::playAudio(const QString &name) const{
-    playEffect(QString("audio/%2/system/%1.ogg").arg(name).arg(Config.SoundEffectMode));
+void Engine::playSystemAudioEffect(const QString &name) const{
+    playAudioEffect(QString("audio/system/%1.ogg").arg(name));
 }
 
-void Engine::playEffect(const QString &filename) const{
+void Engine::playAudioEffect(const QString &filename) const{
 #ifdef AUDIO_SUPPORT
 
     if(!Config.EnableEffects)
@@ -710,24 +664,10 @@ void Engine::playEffect(const QString &filename) const{
 #endif
 }
 
-void Engine::playSkillEffect(const QString &skill_name, int index) const{
+void Engine::playSkillAudioEffect(const QString &skill_name, int index) const{
     const Skill *skill = skills.value(skill_name, NULL);
     if(skill)
-        skill->playEffect(index);
-}
-
-void Engine::playCardEffect(const QString &card_name, bool is_male) const{
-    QString path;
-    if(card_name.startsWith("@")){
-        QString gender = is_male ? "male" : "female";
-        path = QString("audio/%3/card/%1/%2.ogg").arg(gender).arg(card_name).arg(Config.SoundEffectMode);
-    }else{
-        const Card *card = findChild<const Card *>(card_name);
-        if(card)
-            path = card->getEffectPath(is_male);
-    }
-
-    playEffect(path);
+        skill->playAudioEffect(index);
 }
 
 const Skill *Engine::getSkill(const QString &skill_name) const{
@@ -787,12 +727,4 @@ int Engine::correctMaxCards(const Player *target) const{
     }
 
     return extra;
-}
-
-bool Engine::getAIState(){
-    return AI_FREE;
-}
-
-void Engine::setAIState(bool state){
-    AI_FREE=state;
 }

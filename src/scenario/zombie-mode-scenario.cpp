@@ -1,4 +1,3 @@
-
 #include "zombie-mode-scenario.h"
 #include "engine.h"
 #include "standard-skillcards.h"
@@ -33,14 +32,13 @@ public:
         room->sendLog(log);
 
         QString gender = player->getGeneral()->isMale() ? "male" : "female";
-        room->broadcastInvoke("playAudio", QString("zombify-%1").arg(gender));
+        room->broadcastInvoke("playSystemAudioEffect", QString("zombify-%1").arg(gender));
         room->updateStateItem();
 
         player->tag.remove("zombie");
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
-
         switch(event){
         case GameStart:{
             foreach (ServerPlayer* player, room->getPlayers())
@@ -48,7 +46,7 @@ public:
                 room->acquireSkill(player, "peaching");
                 break;
             }
-        }
+            }
 
         case GameOverJudge:{
                 return true;
@@ -231,6 +229,7 @@ public:
         if(event == PhaseChange && zombie->getPhase() == Player::Play){
         int x = getNumDiff(zombie);
         if(x > 0){
+            Room *room = zombie->getRoom();
             LogMessage log;
             log.type = "#ZaibianGood";
             log.from = zombie;
@@ -248,12 +247,12 @@ public:
 class Xunmeng: public TriggerSkill{
 public:
     Xunmeng():TriggerSkill("xunmeng"){
-        events << DamageCaused;
+        events << Predamage;
 
         frequency = Compulsory;
     }
 
-    virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *zombie, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *zombie, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
 
         const Card *reason = damage.card;
@@ -267,7 +266,7 @@ public:
             log.to << damage.to;
             log.arg = QString::number(damage.damage);
             log.arg2 = QString::number(damage.damage + 1);
-            room->sendLog(log);
+            zombie->getRoom()->sendLog(log);
 
             if(zombie->getHp()>1)zombie->getRoom()->loseHp(zombie);
 

@@ -11,6 +11,10 @@
 #include <QTime>
 #include <json/json.h>
 
+#ifdef QSAN_UI_LIBRARY_AVAILABLE
+#pragma message WARN("UI elements detected in server side!!!")
+#endif
+
 using namespace QSanProtocol::Utils;
 
 LogMessage::LogMessage()
@@ -31,8 +35,7 @@ QString LogMessage::toString() const{
 }
 
 DamageStruct::DamageStruct()
-    :from(NULL), to(NULL), card(NULL), damage(1),
-      nature(Normal), chain(false), PreChain(false), transfer(false)
+    :from(NULL), to(NULL), card(NULL), damage(1), nature(Normal), chain(false), transfer(false)
 {
 }
 
@@ -155,18 +158,18 @@ bool CardUseStruct::tryParse(const Json::Value &usage, Room *room){
 
 void CardUseStruct::parse(const QString &str, Room *room){
     QStringList words = str.split("->", QString::KeepEmptyParts);
-
+    
     Q_ASSERT(words.length() == 1 || words.length() == 2);
 
     QString card_str = words.at(0);
     QString target_str = ".";
-
+    
     //@todo: it's observed that when split on "a->."
     // only returns one QString, which is "a". Suspect
     // it's a bug with QT regular expression. Figure out
     // the cause of the issue.
-    if (words.length() == 2 && !words.at(1).isEmpty())
-        target_str = words.at(1);
+    if (words.length() == 2 && !words.at(1).isEmpty()) 
+        target_str = words.at(1);    
 
     card = Card::Parse(card_str);
 
@@ -193,27 +196,25 @@ RoomThread::RoomThread(Room *room)
 }
 
 void RoomThread::addPlayerSkills(ServerPlayer *player, bool invoke_game_start){
-    bool invokeStart = false;
+    QVariant void_data;
 
     foreach(const TriggerSkill *skill, player->getTriggerSkills()){
         addTriggerSkill(skill);
 
         if(invoke_game_start && skill->getTriggerEvents().contains(GameStart))
-            invokeStart = true;
+            skill->trigger(GameStart, room, player, void_data);
     }
-    if (invokeStart)
-        trigger(GameStart, room, player);
 }
 
 void RoomThread::constructTriggerTable(){
     foreach(ServerPlayer *player, room->getPlayers()){
         addPlayerSkills(player, true);
-    }
+    }    
 }
 
 void RoomThread::run3v3(){
     QList<ServerPlayer *> warm, cool;
-    foreach(ServerPlayer *player, room->getPlayers()){
+    foreach(ServerPlayer *player, room->m_players){
         switch(player->getRoleEnum()){
         case Player::Lord: warm.prepend(player); break;
         case Player::Loyalist: warm.append(player); break;
@@ -284,11 +285,9 @@ void RoomThread::action3v3(ServerPlayer *player){
 
 void RoomThread::run(){
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
-
+    
     GameRule *game_rule;
-    if(room->getMode() == "03_3kingdoms")
-        game_rule = new ThreeKingdomsMode(this);
-    else if(room->getMode() == "04_1v3")
+    if(room->getMode() == "04_1v3")
         game_rule = new HulaoPassMode(this);
     else if(Config.EnableScene)	//changjing
         game_rule = new SceneRule(this);	//changjing
@@ -305,7 +304,7 @@ void RoomThread::run(){
     }
 
     // start game, draw initial 4 cards
-    try {
+    try {        
         trigger(GameStart, (Room*)room, NULL);
         constructTriggerTable();
 
@@ -313,7 +312,7 @@ void RoomThread::run(){
             run3v3();
         }else if(room->getMode() == "04_1v3"){
             ServerPlayer *shenlvbu = room->getLord();
-            try {
+            try {            
                 QList<ServerPlayer *> league = room->getPlayers();
                 league.removeOne(shenlvbu);
 
@@ -328,7 +327,7 @@ void RoomThread::run(){
                         trigger(TurnStart, room, room->getCurrent());
 
                         if(!player->hasFlag("actioned"))
-                            room->setPlayerFlag(player, "actioned");
+                            room->setPlayerFlag(player, "actioned");                                       
 
                         if(player->isAlive()){
                             room->setCurrent(shenlvbu);
@@ -366,7 +365,7 @@ void RoomThread::run(){
         }else{
             if(room->getMode() == "02_1v1")
                 room->setCurrent(room->getPlayers().at(1));
-            delay();
+
             forever {
                 trigger(TurnStart, room, room->getCurrent());
                 if (room->isFinished()) break;
@@ -379,15 +378,12 @@ void RoomThread::run(){
     }
 }
 
-
 static bool CompareByPriority(const TriggerSkill *a, const TriggerSkill *b){
-    if(a->getPriority() == b->getPriority())
-        return a->secondPriority() > b->secondPriority();
     return a->getPriority() > b->getPriority();
 }
 
-bool RoomThread::trigger(TriggerEvent event, Room *room, ServerPlayer *target, QVariant &data){
-    //Q_ASSERT(QThread::currentThread() == this);
+bool RoomThread::trigger(TriggerEvent event, Room* room, ServerPlayer *target, QVariant &data){
+    // Q_ASSERT(QThread::currentThread() == this);
 
     // push it to event stack
     EventTriplet triplet(event, room, target, &data);
@@ -404,17 +400,7 @@ bool RoomThread::trigger(TriggerEvent event, Room *room, ServerPlayer *target, Q
 
     if(target){
         foreach(AI *ai, room->ais){
-            mutex.lock();
-            while(!Sanguosha->getAIState()){ // AI FREE?
-                msleep(30);
-            }
-            Sanguosha->setAIState(false);
-            mutex.unlock();
-
-            ai->filterEvent(event, target, data); // 20120321 by highlandz
-            mutex.lock();
-            Sanguosha->setAIState(true);
-            mutex.unlock();
+            ai->filterEvent(event, target, data);
         }
     }
 
@@ -428,7 +414,7 @@ const QList<EventTriplet> *RoomThread::getEventStack() const{
     return &event_stack;
 }
 
-bool RoomThread::trigger(TriggerEvent event, Room *room, ServerPlayer *target){
+bool RoomThread::trigger(TriggerEvent event, Room* room, ServerPlayer *target){
     QVariant data;
     return trigger(event, room, target, data);
 }
@@ -449,11 +435,8 @@ void RoomThread::addTriggerSkill(const TriggerSkill *skill){
 
     if(skill->isVisible()){
         foreach(const Skill *skill, Sanguosha->getRelatedSkills(skill->objectName())){
-            if(skill->inherits("TriggerSkill"))
-            {
-                const TriggerSkill *trigger_skill = qobject_cast<const TriggerSkill *>(skill);
-                addTriggerSkill(trigger_skill);
-            }
+            const TriggerSkill *trigger_skill = qobject_cast<const TriggerSkill *>(skill);
+            addTriggerSkill(trigger_skill);
         }
     }
 }

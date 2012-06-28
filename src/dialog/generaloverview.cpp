@@ -1,7 +1,7 @@
 #include "generaloverview.h"
 #include "ui_generaloverview.h"
 #include "engine.h"
-#include "settings.h"
+#include "SkinBank.h"
 
 #include <QMessageBox>
 #include <QRadioButton>
@@ -94,11 +94,11 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals){
     }
 
     ui->tableWidget->setColumnWidth(0, 80);
-    ui->tableWidget->setColumnWidth(1, 84);
+    ui->tableWidget->setColumnWidth(1, 80);
     ui->tableWidget->setColumnWidth(2, 40);
     ui->tableWidget->setColumnWidth(3, 50);
     ui->tableWidget->setColumnWidth(4, 60);
-    ui->tableWidget->setColumnWidth(5, 90);
+    ui->tableWidget->setColumnWidth(5, 60);
 
     ui->tableWidget->setCurrentItem(ui->tableWidget->item(0,0));
 }
@@ -128,8 +128,7 @@ void GeneralOverview::addLines(const Skill *skill){
         button_layout->addWidget(button);
     }else{
         QRegExp rx(".+/(\\w+\\d?).ogg");
-        int i;
-        for(i=0; i<sources.length(); i++){
+        for(int i = 0; i < sources.length(); i++){
             QString source = sources.at(i);
             if(!rx.exactMatch(source))
                 continue;
@@ -147,7 +146,7 @@ void GeneralOverview::addLines(const Skill *skill){
             QString skill_line = Sanguosha->translate("$" + filename);
             button->setDescription(skill_line);
 
-            connect(button, SIGNAL(clicked()), this, SLOT(playEffect()));
+            connect(button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
 
             addCopyAction(button);
         }
@@ -177,7 +176,7 @@ void GeneralOverview::on_tableWidget_itemSelectionChanged()
     int row = ui->tableWidget->currentRow();
     QString general_name = ui->tableWidget->item(row, 0)->data(Qt::UserRole).toString();
     const General *general = Sanguosha->getGeneral(general_name);
-    ui->generalPhoto->setPixmap(QPixmap(general->getPixmapPath("card")));
+	ui->generalPhoto->setPixmap(G_ROOM_SKIN.getCardMainPixmap(general->objectName()));
     QList<const Skill *> skills = general->getVisibleSkillList();
 
     foreach(QString skill_name, general->getRelatedSkillNames()){
@@ -228,8 +227,8 @@ void GeneralOverview::on_tableWidget_itemSelectionChanged()
         button_layout->addWidget(win_button);
         addCopyAction(win_button);
 
-        win_button->setObjectName(QString("audio/%1/system/win-cc.ogg").arg(Config.SoundEffectMode));
-        connect(win_button, SIGNAL(clicked()), this, SLOT(playEffect()));
+        win_button->setObjectName("audio/system/win-cc.ogg");
+        connect(win_button, SIGNAL(clicked()), this, SLOT(playAudioEffect()));
     }
 
     QString designer_text = Sanguosha->translate("designer:" + general->objectName());
@@ -254,23 +253,22 @@ void GeneralOverview::on_tableWidget_itemSelectionChanged()
     ui->skillTextEdit->append(general->getSkillDescription());
 }
 
-void GeneralOverview::playEffect()
+void GeneralOverview::playAudioEffect()
 {
     QObject *button = sender();
     if(button){
         QString source = button->objectName();
         if(!source.isEmpty())
-            Sanguosha->playEffect(source);
+            Sanguosha->playAudioEffect(source);
     }
 }
 
 #include "clientstruct.h"
 #include "client.h"
-void GeneralOverview::on_tableWidget_itemDoubleClicked(QTableWidgetItem*)
+void GeneralOverview::on_tableWidget_itemDoubleClicked(QTableWidgetItem* item)
 {
     if(ServerInfo.FreeChoose && Self){
-        int row = ui->tableWidget->currentRow();
-        QString general_name = ui->tableWidget->item(row, 0)->data(Qt::UserRole).toString();
+        QString general_name = item->data(Qt::UserRole).toString();
         ClientInstance->requestCheatChangeGeneral(general_name);
     }
 }

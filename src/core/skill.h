@@ -14,8 +14,8 @@ class QDialog;
 class Skill : public QObject
 {
     Q_OBJECT
-    Q_ENUMS(Frequency)
-    Q_ENUMS(Location)
+	Q_ENUMS(Frequency)
+	Q_ENUMS(Location)
 
 public:
     enum Frequency{
@@ -44,7 +44,7 @@ public:
     virtual Location getLocation() const;
 
     void initMediaSource();
-    void playEffect(int index = -1) const;
+    void playAudioEffect(int index = -1) const;
     void setFlag(ServerPlayer *player) const;
     void unsetFlag(ServerPlayer *player) const;
     Frequency getFrequency() const;
@@ -114,7 +114,6 @@ public:
     QList<TriggerEvent> getTriggerEvents() const;
 
     virtual int getPriority() const;
-    virtual int secondPriority() const;
     virtual bool triggerable(const ServerPlayer *target) const;
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const = 0;
 
@@ -192,24 +191,11 @@ class SPConvertSkill: public GameStartSkill{
 public:
     SPConvertSkill(const QString &name, const QString &from, const QString &to);
 
-    virtual bool triggerable(const ServerPlayer *) const;
+    virtual bool triggerable(const ServerPlayer *target) const;
     virtual void onGameStart(ServerPlayer *player) const;
 
 private:
     QString from, to;
-};
-
-class TransfigureSkill: public GameStartSkill{
-    Q_OBJECT
-
-public:
-    TransfigureSkill(const QString &name, const QString &from, const QString &to, const QString &mark_willlose = QString());
-
-    virtual bool triggerable(const ServerPlayer *) const;
-    virtual void onGameStart(ServerPlayer *player) const;
-
-private:
-    QString from, to, mark_willlose;
 };
 
 class ProhibitSkill: public Skill{
@@ -246,7 +232,6 @@ public:
     WeaponSkill(const QString &name);
 
     virtual bool triggerable(const ServerPlayer *target) const;
-    virtual int secondPriority() const;
 };
 
 class ArmorSkill: public TriggerSkill{
@@ -256,7 +241,6 @@ public:
     ArmorSkill(const QString &name);
 
     virtual bool triggerable(const ServerPlayer *target) const;
-    virtual int secondPriority() const;
 };
 
 class MarkAssignSkill: public GameStartSkill{
@@ -265,7 +249,6 @@ class MarkAssignSkill: public GameStartSkill{
 public:
     MarkAssignSkill(const QString &mark, int n);
 
-    virtual int getPriority() const;
     virtual void onGameStart(ServerPlayer *player) const;
 
 private:

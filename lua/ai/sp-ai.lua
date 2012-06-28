@@ -66,8 +66,6 @@ sgs.ai_skill_invoke.guixiang = function(self, data)
 	return self.room:getLord():getKingdom() == "wei"
 end
 
-sgs.ai_skill_invoke.guayin = sgs.ai_skill_invoke.guixiang
-
 sgs.ai_chaofeng.sp_caiwenji = sgs.ai_chaofeng.caiwenji
 
 sgs.ai_skill_invoke.fanqun = function(self, data)

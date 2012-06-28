@@ -422,7 +422,7 @@ QList<int> LuaAI::askForDiscard(const QString &reason, int discard_num, int min_
     pushCallback(L, __FUNCTION__);
     lua_pushstring(L, reason.toAscii());
     lua_pushinteger(L, discard_num);
-	lua_pushinteger(L, min_num);
+    lua_pushinteger(L, min_num);
     lua_pushboolean(L, optional);
     lua_pushboolean(L, include_equip);
 
@@ -457,6 +457,7 @@ bool LuaAI::getTable(lua_State *L, QList<int> &table){
 
     return true;
 }
+
 
 int LuaAI::askForAG(const QList<int> &card_ids, bool refusable, const QString &reason){
     lua_State *L = room->getLuaState();

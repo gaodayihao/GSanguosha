@@ -210,7 +210,7 @@ sgs.ai_view_as.kanpo = function(card, player, card_place)
 	local suit = card:getSuitString()
 	local number = card:getNumberString()
 	local card_id = card:getEffectiveId()
-	if card_place ~= sgs.Player_PlaceEquip then
+	if card_place ~= sgs.Player_Equip then
 		if card:isBlack() then
 			return ("nullification:kanpo[%s:%s]=%d"):format(suit, number, card_id)
 		end
@@ -289,7 +289,7 @@ sgs.ai_skill_use_func.TianyiCard=function(card,use,self)
 		if use.to then use.to:append(zhugeliang) end
 		return
 	end
-
+	
 	self:sort(self.enemies, "handcard")
 	local max_card = self:getMaxCard()
 	local max_point = max_card:getNumber()

@@ -6,6 +6,7 @@
 #include "statistics.h"
 
 #include <QObject>
+#include <QTcpSocket>
 
 class EquipCard;
 class Weapon;
@@ -51,7 +52,7 @@ class Player : public QObject
 
 public:
     enum Phase {RoundStart, Start, Judge, Draw, Play, Discard, Finish, NotActive};
-    enum Place {PlaceHand, PlaceEquip, PlaceDelayedTrick, PlaceSpecial, DiscardPile, DrawPile, TopDrawPile, DealingArea, PlaceTakeoff, PlaceUnknown};
+    enum Place {PlaceHand, PlaceEquip, PlaceDelayedTrick, PlaceSpecial, DiscardPile, DrawPile, PlaceTable, PlaceUnknown};
     enum Role {Lord, Loyalist, Rebel, Renegade};
 
     explicit Player(QObject *parent);
@@ -78,8 +79,6 @@ public:
 
     QString getKingdom() const;
     void setKingdom(const QString &kingdom);
-    QString getKingdomIcon() const;
-    QString getKingdomFrame() const;
 
     void setRole(const QString &role);
     QString getRole() const;
@@ -120,29 +119,18 @@ public:
 
     virtual int aliveCount() const = 0;
     void setFixedDistance(const Player *player, int distance);
-    int distanceTo(const Player *other, int fix = 0) const;
+    int distanceTo(const Player *other, int distance_fix = 0) const;
     const General *getAvatarGeneral() const;
     const General *getGeneral() const;
 
     bool isLord() const;
 
-    void addSkill(const QString &skill_name);
-    void deleteSkill(const QString &skill_name);
-    void removeAdditionalSkills();
-    QSet<QString> getAdditionalSkills() const;
-
     void acquireSkill(const QString &skill_name);
     void loseSkill(const QString &skill_name);
     void loseAllSkills();
-    bool hasSkill(const QString &skill_name, bool includelost = false) const;
-    bool SkillCheck(const QString &skill_name) const;
+    bool hasSkill(const QString &skill_name) const;
     bool hasInnateSkill(const QString &skill_name) const;
-    bool hasLordSkill(const QString &skill_name, bool includelost = false) const;
-    bool loseTriggerSkills() const;
-    bool loseViewAsSkills() const;
-    bool loseProhibitSkills() const;
-    bool loseDistanceSkills() const;
-    bool loseOtherSkills() const;
+    bool hasLordSkill(const QString &skill_name) const;
     virtual QString getGameMode() const = 0;
 
     void setEquip(const EquipCard *card);
@@ -183,7 +171,7 @@ public:
     void setChained(bool chained);
     bool isChained() const;
 
-    bool canSlash(const Player *other, bool distance_limit = true, int distance_fix = 0) const;
+    bool canSlash(const Player *other, bool distance_limit = true, int rangefix = 0) const;
     int getCardCount(bool include_equip) const;
 
     QList<int> getPile(const QString &pile_name) const;
@@ -191,7 +179,7 @@ public:
     QString getPileName(int card_id) const;
 
     void addHistory(const QString &name, int times = 1);
-    virtual void clearHistory();
+    void clearHistory();
     bool hasUsed(const QString &card_class) const;
     int usedTimes(const QString &card_class) const;
     int getSlashCount() const;
@@ -211,6 +199,7 @@ public:
     void setCardLocked(const QString &name);
     bool isLocked(const Card *card) const;
     bool hasCardLock(const QString &card_str) const;
+
     StatisticsStruct *getStatistics() const;
     void setStatistics(StatisticsStruct *statistics);
 
@@ -225,7 +214,6 @@ protected:
     QMap<QString, int> marks;
     QMap<QString, QList<int> > piles;
     QSet<QString> acquired_skills;
-    QSet<QString> additional_skills;
     QSet<QString> flags;
     QHash<QString, int> history;
 
@@ -261,6 +249,7 @@ signals:
     void general2_changed();
     void role_changed(const QString &new_role);
     void state_changed();
+    void hp_changed();
     void kingdom_changed();
     void phase_changed();
     void owner_changed(bool owner);

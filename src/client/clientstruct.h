@@ -2,7 +2,7 @@
 #define CLIENTSTRUCT_H
 
 #include "player.h"
-#include "pixmap.h"
+#include "QSanSelectableItem.h"
 #include "protocol.h"
 #include <QMap>
 #include <QWidget>
@@ -13,7 +13,7 @@ struct ServerInfoStruct{
     //@param command: type of command
     //@return countdown for command in milliseconds.
     time_t getCommandTimeout(QSanProtocol::CommandType command, QSanProtocol::ProcessInstanceType instance);
-
+    
     QString Name;
     QString GameMode;
     int OperationTimeout;
@@ -26,7 +26,6 @@ struct ServerInfoStruct{
     bool EnableHegemony;
     bool EnableAI;
     bool DisableChat;
-    bool EnableSnatchHero;
     int MaxHPScheme;
 };
 
@@ -50,7 +49,6 @@ private:
     QLabel *port_label;
     QLabel *game_mode_label;
     QLabel *player_count_label;
-    QLabel *enable_snatch_hero_label;
     QLabel *two_general_label;
     QLabel *scene_label;
     QLabel *same_label;

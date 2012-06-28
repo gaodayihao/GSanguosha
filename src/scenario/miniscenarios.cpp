@@ -39,6 +39,12 @@ QStringList MiniSceneRule::existedGenerals() const
 
 bool MiniSceneRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const
 {
+       
+    if (player == NULL)
+        room = data.value<RoomStar>();
+    else
+        room = player->getRoom();
+
     if(event == PhaseChange)
     {
         if(player == room->getTag("Starter").value<PlayerStar>()){
@@ -60,7 +66,8 @@ bool MiniSceneRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player
             }
         }
 
-        if(player->getPhase()==Player::Start && this->players.first()["beforeNext"] != NULL)
+        if(player->getPhase()==Player::Start && this->players.first()["beforeNext"] != NULL
+                )
         {
             if(player->tag["playerHasPlayed"].toBool())
                 room->gameOver(this->players.first()["beforeNext"]);
@@ -200,7 +207,7 @@ bool MiniSceneRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player
 
         QVariant v;
         foreach(const TriggerSkill *skill, sp->getTriggerSkills()){
-            if(!skill->inherits("SPConvertSkill") && !skill->inherits("TransfigureSkill"))
+            if(!skill->inherits("SPConvertSkill"))
                 room->getThread()->addTriggerSkill(skill);
             else continue;
 

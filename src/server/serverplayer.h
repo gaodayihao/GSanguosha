@@ -26,23 +26,20 @@ public:
     void invoke(const QSanProtocol::QSanPacket* packet);
     void invoke(const char *method, const QString &arg = ".");
     QString reportHeader() const;
-    void sendProperty(const char *property_name, const Player *player = NULL) const;
     void unicast(const QString &message) const;
     void drawCard(const Card *card);
     Room *getRoom() const;
-    void playCardEffect(const Card *card) const;
-    void playCardEffect(const QString &card_name) const;
+    void broadcastSkillInvoke(const Card *card) const;
+    void broadcastSkillInvoke(const QString &card_name) const;
     int getRandomHandCardId() const;
     const Card *getRandomHandCard() const;
     void obtainCard(const Card *card, bool unhide = true);
     void throwAllEquips();
     void throwAllHandCards();
     void throwAllCards();
-	virtual void clearHistory();
     void bury();
     void throwAllMarks();
     void clearPrivatePiles();
-    void clearPrivatePilesExcept(const QString &except);
     void drawCards(int n, bool set_emotion = true, const QString &reason = QString());
     bool askForSkillInvoke(const QString &skill_name, const QVariant &data = QVariant());
     QList<int> forceToDiscard(int discard_num, bool include_equip);
@@ -59,7 +56,7 @@ public:
     QList<Player::Phase> &getPhases();
     void skip(Player::Phase phase);
     void skip();
-
+    
     void gainMark(const QString &mark, int n = 1);
     void loseMark(const QString &mark, int n = 1);
     void loseAllMarks(const QString &mark_name);
@@ -101,29 +98,24 @@ public:
     void marshal(ServerPlayer *player) const;
 
     void addToPile(const QString &pile_name, const Card *card, bool open = true);
-    void addToPile(const QString &pile_name, QList<int> card_ids, bool open = true);
     void addToPile(const QString &pile_name, int card_id, bool open = true);
+    void addToPile(const QString &pile_name, QList<int> card_ids, bool open = true);
     void gainAnExtraTurn(ServerPlayer *clearflag = NULL);
 
     void copyFrom(ServerPlayer* sp);
-
-    void emitDisconnect();
-
-    void fillHero();
 
     void startNetworkDelayTest();
     qint64 endNetworkDelayTest();
 
     //Synchronization helpers
     enum SemaphoreType {
-        SEMA_MUTEX, // used to protect mutex access to member variables
-        SEMA_COMMAND_INTERACTIVE // used to wait for response from client
+        SEMA_MUTEX, // used to protect mutex access to member variables        
+        SEMA_COMMAND_INTERACTIVE // used to wait for response from client        
     };
-
     inline QSemaphore* getSemaphore(SemaphoreType type){ return semas[type]; }
     inline void acquireLock(SemaphoreType type){ semas[type]->acquire(); }
     inline bool tryAcquireLock(SemaphoreType type, int timeout = 0){
-        return semas[type]->tryAcquire(1, timeout);
+        return semas[type]->tryAcquire(1, timeout); 
     }
     inline void releaseLock(SemaphoreType type){ semas[type]->release(); }
     inline void drainLock(SemaphoreType type){ while ((semas[type]->tryAcquire())) ; }
@@ -135,7 +127,7 @@ public:
     inline QString getClientReplyString(){return m_clientResponseString;}
     inline void setClientReplyString(const QString &val){m_clientResponseString = val;}
     inline Json::Value getClientReply(){return _m_clientResponse;}
-    inline void setClientReply(const Json::Value &val){_m_clientResponse = val;}
+    inline void setClientReply(const Json::Value &val){_m_clientResponse = val;}    
     unsigned int m_expectedReplySerial; // Suggest the acceptable serial number of an expected response.
     bool m_isClientResponseReady; //Suggest whether a valid player's reponse has been received.
     bool m_isWaitingReply; // Suggest if the server player is waiting for client's response.
@@ -143,10 +135,11 @@ public:
     QSanProtocol::CommandType m_expectedReplyCommand; // Store the command to be sent to the client.
     Json::Value m_commandArgs; // Store the command args to be sent to the client.
 
-protected:
+
+protected:    
     //Synchronization helpers
     QSemaphore **semas;
-    static const int S_NUM_SEMAPHORES;
+    static const int S_NUM_SEMAPHORES;    
 
 private:
     ClientSocket *socket;
@@ -162,10 +155,10 @@ private:
     QStringList selected; // 3v3 mode use only
     QDateTime test_time;
     QString m_clientResponseString;
-    Json::Value _m_clientResponse;
+    Json::Value _m_clientResponse;    
 
 private slots:
-    void getMessage(char *message);
+    void getMessage(const char *message);
     void castMessage(const QString &message);
 
 signals:

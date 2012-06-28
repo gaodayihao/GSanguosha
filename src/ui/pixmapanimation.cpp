@@ -1,4 +1,5 @@
 #include "pixmapanimation.h"
+#include <fstream>
 #include <QPainter>
 #include <QPixmapCache>
 #include <QDir>
@@ -24,12 +25,55 @@ void PixmapAnimation::setPath(const QString &path)
     frames.clear();
     current = 0;
 
+    if(QFile(path + "prop").exists())
+    {
+        QPixmap atlas = GetFrameFromCache(path + "atlas.png");
+
+        int width,height,num = 0;
+        std::ifstream fin(QString(path + "prop").toStdString().data());
+        fin >> width >> height >> num;
+
+        for(int i=0;i<num;i++)
+        {
+            QPixmap pic(width,height);
+            pic.fill(Qt::transparent);
+            QPainter pt(&pic);
+            pt.setClipRect(0,0,width,height);
+            pt.drawPixmap( - width * i, 0,atlas);
+
+            frames << pic;
+        }
+        return;
+    }
+
+
+
     int i = 0;
     QString pic_path = QString("%1%2%3").arg(path).arg(i++).arg(".png");
     do{
         frames << GetFrameFromCache(pic_path);
         pic_path = QString("%1%2%3").arg(path).arg(i++).arg(".png");
     }while(!GetFrameFromCache(pic_path).isNull());
+
+    QPixmap atlas(frames.last().size().width() * frames.count(),frames.last().size().height());
+    atlas.fill(Qt::transparent);
+    QPainter pt(&atlas);
+    i = 0;
+
+    foreach(QPixmap map,frames)
+    {
+        pt.drawPixmap((i++)*map.size().width(),0,map);
+    }
+    atlas.save(path + "atlas.png");
+
+    using namespace std;
+    ofstream cfg(QString("%1prop").arg(path).toStdString().data());
+
+    cfg << frames.last().size().width();
+    cfg << ' ' << frames.last().size().height() << ' '
+        << frames.count();
+
+    cfg.close();
 }
 
 void PixmapAnimation::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
@@ -58,43 +102,36 @@ void PixmapAnimation::start(bool permanent,int interval)
     if(!permanent)connect(this,SIGNAL(finished()),this,SLOT(deleteLater()));
 }
 
-PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, const QString &emotion, int x,int y)
+PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, const QString &emotion)
 {
     PixmapAnimation *pma = new PixmapAnimation();
     pma->setPath(QString("image/system/emotion/%1/").arg(emotion));
     if(pma->valid())
     {
-
-        if(emotion == "no-success")
+        if(emotion == "slash_red" ||
+                emotion == "slash_black" ||
+                emotion == "thunder_slash" ||
+                emotion == "peach" ||
+                emotion == "analeptic")
+        {
+            pma->moveBy(pma->boundingRect().width()*0.15,
+                        pma->boundingRect().height()*0.15);
+            pma->setScale(0.7);
+        }
+        else if(emotion == "no-success")
         {
             pma->moveBy(pma->boundingRect().width()*0.15,
                         pma->boundingRect().height()*0.15);
             pma->setScale(0.7);
         }
 
-        else if(emotion.contains("double_sword"))
+        pma->moveBy((parent->boundingRect().width() - pma->boundingRect().width())/2,
+                (parent->boundingRect().height() - pma->boundingRect().height())/2);
+
         {
-            pma->moveBy(13, -85);
-            pma->setScale(1.3);
+            if(emotion == "fire_slash")pma->moveBy(40,0);
         }
-
-        else if(emotion.contains("fan") || emotion.contains("guding_blade"))
-        {
-            pma->moveBy(-30, -80);
-            pma->setScale(1.3);
-        }
-
-        else if(emotion.contains("/spear"))
-        {
-            pma->moveBy(-90, -80);
-            pma->setScale(1.3);
-        }
-
-        pma->moveBy((parent->boundingRect().width() - pma->boundingRect().width())/2 + x,
-                    (parent->boundingRect().height() - pma->boundingRect().height())/2 + y);
-
         pma->setParentItem(parent);
-        pma->setZValue(2.5);
         pma->startTimer(50);
         connect(pma,SIGNAL(finished()),pma,SLOT(deleteLater()));
         return pma;

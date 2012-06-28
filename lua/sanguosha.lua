@@ -16,18 +16,11 @@ end
 
 function load_translations()
 	local lang = sgs.GetConfig("Language", "zh_CN")
-	local mode = sgs.GetConfig("SoundEffectMode", "Professional2") .. "/"
-	local lang_dir = "lang/" .. mode .. lang
+	local lang_dir = "lang/" .. lang
 
 	local lang_files = sgs.GetFileNames(lang_dir)
 	for _, file in ipairs(lang_files) do	
 		load_translation(("%s/%s"):format(lang_dir, file))
-	end
-	
-	local common_dir = "lang/Common/"..lang
-	local common_files = sgs.GetFileNames(common_dir)
-	for _, file in ipairs(common_files) do	
-		load_translation(("%s/%s"):format(common_dir, file))
 	end
 end
 

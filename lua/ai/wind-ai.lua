@@ -139,8 +139,8 @@ function sgs.ai_skill_invoke.jushou(self, data)
 end
 
 sgs.ai_skill_invoke.liegong = function(self, data)
-	local effect = data:toSlashEffect()
-	return not self:isFriend(effect.to)
+	local target = data:toPlayer()
+	return not self:isFriend(target)
 end
 
 sgs.ai_chaofeng.huangzhong = 1
@@ -280,10 +280,6 @@ sgs.zhangjiao_suit_value =
 
 sgs.ai_chaofeng.zhangjiao = 4
 
-function sgs.ai_skill_invoke.buqu(self, data)
-	return true
-end
-
 sgs.ai_skill_askforag.buqu = function(self, card_ids)
 	for i, card_id in ipairs(card_ids) do
 		for j, card_id2 in ipairs(card_ids) do
@@ -294,6 +290,14 @@ sgs.ai_skill_askforag.buqu = function(self, card_ids)
 	end
 
 	return card_ids[1]
+end
+
+function sgs.ai_skill_invoke.buqu(self, data)
+	if #self.enemies == 1 and self.enemies[1]:hasSkill("guhuo") then
+		return false
+	else
+		return true
+	end
 end
 
 sgs.ai_chaofeng.zhoutai = -4
@@ -334,7 +338,7 @@ sgs.ai_skill_use["@@tianxiang"] = function(self, data)
 	for _, enemy in ipairs(self.enemies) do
 		if (enemy:getHp() <= dmg.damage) then
 
-		if (enemy:getHandcardNum() <= 2) or self:hasSkills("guose|leiji|ganglie|enyuan|nosenyuan|qingguo|wuyan|noswuyan|kongcheng", enemy)
+		if (enemy:getHandcardNum() <= 2) or self:hasSkills("guose|leiji|ganglie|enyuan|qingguo|wuyan|kongcheng", enemy)
 			or enemy:containsTrick("indulgence") then return "@TianxiangCard="..card_id.."->"..enemy:objectName() end
 		end
 	end
@@ -355,7 +359,7 @@ sgs.ai_skill_use["@@tianxiang"] = function(self, data)
 		if (enemy:getLostHp() <= 1) or dmg.damage>1 then
 
 		if (enemy:getHandcardNum() <= 2)
-			or enemy:containsTrick("indulgence") or self:hasSkills("guose|leiji|ganglie|nosenyuan|enyuan|qingguo|noswuyan|wuyan|kongcheng", enemy)
+			or enemy:containsTrick("indulgence") or self:hasSkills("guose|leiji|ganglie|enyuan|qingguo|wuyan|kongcheng", enemy)
 			then return "@TianxiangCard="..card_id.."->"..enemy:objectName() end
 		end
 	end

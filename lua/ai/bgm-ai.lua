@@ -13,7 +13,6 @@ sgs.ai_skill_invoke.huantong = function(self, data)
 	elseif math.random(0, 1) == 0 then return true else return false end
 end
 
-sgs.ai_skill_invoke.ptzijian = sgs.ai_skill_invoke.huantong
 --AI for BGM Diaochan
 --code by clarkcyt and William915
 
@@ -89,49 +88,15 @@ sgs.ai_skill_use_func.LihunCard = function(card,use,self)
 	end
 end
 
-sgs.ai_skill_discard.lihun = function(self, discard_num, min_num, optional, include_equip)
-	local to_discard = {}
-	
-	local cards = sgs.QList2Table(self.player:getCards("he"))
+sgs.ai_skill_cardchosen.lihun = function(self)
+	if self:isEquip("SilverLion") and self.player:isWounded() or self:evaluateArmor() < -5 then
+		return self.player:getArmor()
+	end
+	local shit = self:getCard("Shit")
+	if shit then return shit end
+	local cards = sgs.QList2Table(self.player:getHandcards())
 	self:sortByKeepValue(cards)
-	local card_ids = {}
-	for _,card in ipairs(cards) do
-		table.insert(card_ids, card:getEffectiveId())
-	end
-	
-	local temp = table.copyFrom(card_ids)
-	for i = 1, #temp, 1 do
-		local card = sgs.Sanguosha:getCard(temp[i])
-		if (self:isEquip("SilverLion") and self.player:isWounded()) and card:inherits("SilverLion") then
-			table.insert(to_discard, temp[i])
-			table.removeOne(card_ids, temp[i])
-			if #to_discard == discard_num then
-				return to_discard
-			end
-		end
-	end
-	
-	temp = table.copyFrom(card_ids)
-	for i = 1, #temp, 1 do
-		local card = sgs.Sanguosha:getCard(temp[i])
-		if card:inherits("Shit") then
-			table.insert(to_discard, temp[i])
-			table.removeOne(card_ids, temp[i])
-			if #to_discard == discard_num then
-				return to_discard
-			end
-		end
-	end
-	
-	for i = 1, #card_ids, 1 do
-		local card = sgs.Sanguosha:getCard(card_ids[i])
-		table.insert(to_discard, card_ids[i])
-		if #to_discard == discard_num then
-			return to_discard
-		end
-	end
-	
-	if #to_discard < discard_num then return {} end
+	return cards[1]
 end
 
 sgs.ai_use_value.LihunCard = 8.5
@@ -160,7 +125,7 @@ sgs.ai_view_as.yanzheng = function(card, player, card_place)
 	local suit = card:getSuitString()
 	local number = card:getNumberString()
 	local card_id = card:getEffectiveId()
-	if card_place == sgs.Player_PlaceEquip then
+	if card_place == sgs.Player_Equip then
 	    return ("nullification:yanzheng[%s:%s]=%d"):format(suit, number, card_id)
 	end
 end
@@ -248,10 +213,8 @@ sgs.ai_skill_use_func.DaheCard=function(card,use,self)
 end
 
 function sgs.ai_skill_pindian.dahe(minusecard, self, requestor)
-	if requestor:objectName() == self.player:objectName() then
-		return self:getMaxCard(self.player):getId()
-	end
 	if self:isFriend(requestor) then return minusecard end
+	return self:getMaxCard(self.player):getId()
 end
 
 sgs.ai_skill_choice.dahe = function(self, choices)
@@ -308,8 +271,8 @@ sgs.ai_skill_use_func.TanhuCard = function(card, use, self)
 	local ptarget = self:getPriorTarget()
 	local slashcount = self:getCardsNum("Slash")
 	if max_card:inherits("Slash") then slashcount = slashcount - 1 end
-	if not ptarget:isKongcheng() and slashcount > 0 and self.player:canSlash(ptarget, true)
-		and not ptarget:hasSkill("kongcheng") and ptarget:getHandcardNum() == 1 then
+	if not ptarget:isKongcheng() and slashcount > 0 and self.player:canSlash(ptarget, true) 
+	and not ptarget:hasSkill("kongcheng") and ptarget:getHandcardNum() == 1 then
 		local card_id = max_card:getEffectiveId()
 		local card_str = "@TanhuCard=" .. card_id
 		if use.to then
@@ -363,7 +326,6 @@ sgs.ai_skill_use_func.TanhuCard = function(card, use, self)
 		end
 	end
 end
-
 
 sgs.ai_cardneed.tanhuhu = sgs.ai_cardneed.bignumber
 sgs.ai_card_intention.TanhuCard = 30
@@ -430,6 +392,7 @@ sgs.ai_skill_discard.zhaolie = function(self, discard_num, min_num, optional, in
 	end
 end
 
+
 sgs.ai_skill_invoke.shichou = function(self, data)
 	local enemynum = 0
 	local shu = 0
@@ -458,4 +421,4 @@ sgs.ai_skill_playerchosen.shichou = function(self, targets)
 	return targets[1]
 end
 
-sgs.ai_skill_discard.shichou = sgs.ai_skill_discard.lihun
+sgs.ai_skill_cardchosen.shichou = sgs.ai_skill_cardchosen.lihun

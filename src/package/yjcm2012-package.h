@@ -9,7 +9,6 @@
 #include <QGroupBox>
 #include <QAbstractButton>
 
-
 class YJCM2012Package: public Package{
     Q_OBJECT
 
@@ -19,7 +18,6 @@ public:
 
 class QiceCard: public SkillCard{
     Q_OBJECT
-
 
 public:
     Q_INVOKABLE QiceCard();
@@ -53,4 +51,5 @@ public:
 
     virtual void use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const;
 };
+
 #endif // YJCM2012PACKAGE_H

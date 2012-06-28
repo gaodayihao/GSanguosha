@@ -122,10 +122,6 @@ QPushButton#reverse-select:disabled{
     background-image: url(image/system/button/reverse-select-disabled.png);
 }
 
-QPushButton#sort-handcard{
-    background-image: url(image/system/button/sort-handcard.png);
-}
-
 QPushButton#pause{
     background-image: url(image/system/button/pause.png);
 }

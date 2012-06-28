@@ -38,7 +38,7 @@ public:
     virtual void onDamaged(ServerPlayer *guojia, const DamageStruct &damage) const{
         Room *room = guojia->getRoom();
 
-        room->playSkillEffect(objectName());
+        room->broadcastSkillInvoke(objectName());
         int n = damage.damage * 3;
         guojia->drawCards(n);
         QList<int> yiji_cards = guojia->handCards().mid(guojia->getHandcardNum() - n);
@@ -95,7 +95,7 @@ bool SmallTuxiCard::targetFilter(const QList<const Player *> &targets, const Pla
 void SmallTuxiCard::onEffect(const CardEffectStruct &effect) const{
     TuxiCard::onEffect(effect);
 
-    effect.from->getRoom()->playSkillEffect("tuxi");
+    effect.from->getRoom()->broadcastSkillInvoke("tuxi");
 }
 
 class SmallTuxiViewAsSkill: public ZeroCardViewAsSkill{
@@ -188,69 +188,69 @@ public:
 
 
             break;
-        }
+                       }
 
         case PhaseChange:{
-            if(player->getPhase() == Player::Draw){
-                bool burned = room->getTag("BurnWuchao").toBool();
-                if(!burned){
-                    QString name = player->getGeneralName();
-                    if(name == "caocao" || name == "guojia" || name == "guanyu"){
-                        player->drawCards(1, false);
-                        return true;
+                if(player->getPhase() == Player::Draw){
+                    bool burned = room->getTag("BurnWuchao").toBool();
+                    if(!burned){
+                        QString name = player->getGeneralName();
+                        if(name == "caocao" || name == "guojia" || name == "guanyu"){
+                            player->drawCards(1, false);
+                            return true;
+                        }
                     }
                 }
-            }
 
-            break;
-        }
+                break;
+            }
 
         case Damaged:{
-            bool burned = room->getTag("BurnWuchao").toBool();
-            if(burned)
-                return false;
+                bool burned = room->getTag("BurnWuchao").toBool();
+                if(burned)
+                    return false;
 
-            DamageStruct damage = data.value<DamageStruct>();
-            if(player->getGeneralName() == "yuanshao" && damage.nature == DamageStruct::Fire
-                    && damage.from->getRoleEnum() == Player::Rebel){
-                room->setTag("BurnWuchao", true);
+                DamageStruct damage = data.value<DamageStruct>();
+                if(player->getGeneralName() == "yuanshao" && damage.nature == DamageStruct::Fire
+                   && damage.from->getRoleEnum() == Player::Rebel){
+                    room->setTag("BurnWuchao", true);
 
-                QStringList tos;
-                tos << "yuanshao" << "yanliangwenchou" << "zhenji" << "liubei";
+                    QStringList tos;
+                    tos << "yuanshao" << "yanliangwenchou" << "zhenji" << "liubei";
 
-                foreach(QString name, tos){
-                    ServerPlayer *to = room->findPlayer(name);
-                    if(to == NULL || to->containsTrick("supply_shortage"))
-                        continue;
+                    foreach(QString name, tos){
+                        ServerPlayer *to = room->findPlayer(name);
+                        if(to == NULL || to->containsTrick("supply_shortage"))
+                            continue;
 
-                    int card_id = room->getCardFromPile("@duanliang");
-                    if(card_id == -1){
-                        break;
+                        int card_id = room->getCardFromPile("@duanliang");
+                        if(card_id == -1){
+                            break;
+                        }
+
+                        room->moveCardTo(Sanguosha->getCard(card_id), to, Player::PlaceDelayedTrick, true);
                     }
-
-                    room->moveCardTo(Sanguosha->getCard(card_id), to, Player::PlaceDelayedTrick, true);
                 }
-            }
 
-            break;
-        }
+                break;
+            }
 
         case GameOverJudge:{
-            if(player->isLord()){
-                QStringList roles = room->aliveRoles(player);
-                if(roles.length() == 2){
-                    QString first = roles.at(0);
-                    QString second = roles.at(1);
-                    if(first == "renegade" && second == "renegade"){
-                        player->bury();
-                        room->gameOver("renegade");
-                        return true;
+                if(player->isLord()){
+                    QStringList roles = room->aliveRoles(player);
+                    if(roles.length() == 2){
+                        QString first = roles.at(0);
+                        QString second = roles.at(1);
+                        if(first == "renegade" && second == "renegade"){
+                            player->bury();
+                            room->gameOver("renegade");
+                            return true;
+                        }
                     }
                 }
-            }
 
-            break;
-        }
+                break;
+            }
 
         default:
             break;

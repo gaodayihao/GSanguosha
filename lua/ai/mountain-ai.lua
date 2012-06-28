@@ -1,3 +1,5 @@
+sgs.ai_skill_invoke.qiaobian = true
+
 local function card_for_qiaobian(self, who, return_prompt)
 	local card, target
 	if self:isFriend(who) then
@@ -217,9 +219,9 @@ sgs.ai_card_intention.JixiCard = sgs.ai_card_intention.Snatch
 sgs.dynamic_value.control_card.JixiCard = true
 
 sgs.ai_skill_cardask["@xiangle-discard"] = function(self, data)
-	local effect = data:toCardEffect()
-	if self:isFriend(effect.to) and not
-		(effect.to:hasSkill("leiji") and (self:getCardsNum("Jink", effect.to)>0 or (not self:isWeak(effect.to) and self:isEquip("EightDiagram",effect.to))))
+	local target = data:toPlayer()
+	if self:isFriend(target) and not
+		(target:hasSkill("leiji") and (self:getCardsNum("Jink", target)>0 or (not self:isWeak(target) and self:isEquip("EightDiagram",target))))
 		then return "." end
 	local has_peach, has_anal, has_slash, has_jink
 	for _, card in sgs.qlist(self.player:getHandcards()) do
@@ -233,7 +235,7 @@ sgs.ai_skill_cardask["@xiangle-discard"] = function(self, data)
 	if has_slash then return "$" .. has_slash:getEffectiveId()
 	elseif has_jink then return "$" .. has_jink:getEffectiveId()
 	elseif has_anal or has_peach then
-		if self:getCardsNum("Jink", effect.to) == 0 and self.player:hasFlag("drank") and self:getAllPeachNum(effect.to) == 0 then
+		if self:getCardsNum("Jink", target) == 0 and self.player:hasFlag("drank") and self:getAllPeachNum(target) == 0 then
 			if has_anal then return "$" .. has_anal:getEffectiveId()
 			else return "$" .. has_peach:getEffectiveId()
 			end
@@ -255,22 +257,6 @@ sgs.ai_skill_invoke.fangquan = function(self, data)
 	local limit = self.player:getMaxCards()
 	return self.player:getHandcardNum() <= limit and not self.player:isKongcheng()
 end
-
-sgs.ai_skill_playerchosen.fangquan = function(self, targets)
-	for _, target in sgs.qlist(targets) do
-		if self:isFriend(target) and not target:hasSkill("dawu") and
-			self:hasSkills(sgs.priority_skill,target) and not target:containsTrick("indulgence") then
-			return target
-		end
-	end
-	for _, target in sgs.qlist(targets) do
-		if self:isFriend(target) and not target:hasSkill("dawu") then
-			return target
-		end
-	end
-end
-
-sgs.ai_playerchosen_intention.fangquan = -40
 
 sgs.ai_skill_discard.fangquan = function(self, discard_num, min_num, optional, include_equip)
 	local to_discard = {}
@@ -300,6 +286,22 @@ sgs.ai_skill_discard.fangquan = function(self, discard_num, min_num, optional, i
 		return to_discard
 	end
 end
+
+sgs.ai_skill_playerchosen.fangquan = function(self, targets)
+	for _, target in sgs.qlist(targets) do
+		if self:isFriend(target) and not target:hasSkill("dawu") and
+			self:hasSkills(sgs.priority_skill,target) and not target:containsTrick("indulgence") then
+			return target
+		end
+	end
+	for _, target in sgs.qlist(targets) do
+		if self:isFriend(target) and not target:hasSkill("dawu") then
+			return target
+		end
+	end
+end
+
+sgs.ai_playerchosen_intention.fangquan = -40
 
 local tiaoxin_skill={}
 tiaoxin_skill.name="tiaoxin"
@@ -365,6 +367,8 @@ sgs.ai_skill_use_func.TiaoxinCard = function(card,use,self)
 	end
 	use.card = sgs.Card_Parse("@TiaoxinCard=.")
 end
+
+sgs.ai_skill_choice.tiaoxin = sgs.ai_skill_choice.collateral
 
 sgs.ai_card_intention.TiaoxinCard = 80
 sgs.ai_use_priority.TiaoxinCard = 8

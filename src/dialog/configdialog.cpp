@@ -18,13 +18,12 @@ ConfigDialog::ConfigDialog(QWidget *parent) :
     if(!bg_path.startsWith(":"))
         ui->bgPathLineEdit->setText(bg_path);
 
-    ui->bgMusicPathLineEdit->setText(Config.value("BackgroundMusic", "audio/Professional2/system/background.ogg").toString());
+    ui->bgMusicPathLineEdit->setText(Config.value("BackgroundMusic", "audio/system/background.ogg").toString());
 
     ui->enableEffectCheckBox->setChecked(Config.EnableEffects);
     ui->enableLastWordCheckBox->setChecked(Config.EnableLastWord);
     ui->enableBgMusicCheckBox->setChecked(Config.EnableBgMusic);
-    ui->circularViewCheckBox->setChecked(true);
-    ui->circularViewCheckBox->setEnabled(false);
+    ui->circularViewCheckBox->setChecked(Config.value("CircularView", false).toBool());
     ui->noIndicatorCheckBox->setChecked(Config.value("NoIndicator", false).toBool());
     ui->minimizecCheckBox->setChecked(Config.value("EnableMinimizeDialog", false).toBool());
 
@@ -34,14 +33,6 @@ ConfigDialog::ConfigDialog(QWidget *parent) :
     // tab 2
     ui->nullificationSpinBox->setValue(Config.NullificationCountDown);
     ui->neverNullifyMyTrickCheckBox->setChecked(Config.NeverNullifyMyTrick);
-    if(Config.SoundEffectMode == "Qsgs")
-        ui->QsgsradioButton->setChecked(true);
-    if(Config.SoundEffectMode == "Professional1")
-        ui->Professional1radioButton->setChecked(true);
-    if(Config.SoundEffectMode == "Professional2")
-        ui->Professional2radioButton->setChecked(true);
-
-    ui->ex_widthSpinBox->setValue(Config.Avatar_extra_distance);
 
     connect(this, SIGNAL(accepted()), this, SLOT(saveConfig()));
 
@@ -138,20 +129,6 @@ void ConfigDialog::saveConfig()
     Config.EnableMinimizeDialog = ui->minimizecCheckBox->isChecked();
     Config.setValue("EnableMinimizeDialog", Config.EnableMinimizeDialog);
 
-    QString soundmode;
-    if(ui->QsgsradioButton->isChecked())
-        soundmode = "Qsgs";
-    if(ui->Professional1radioButton->isChecked())
-        soundmode = "Professional1";
-    if(ui->Professional2radioButton->isChecked())
-        soundmode = "Professional2";
-    Config.SoundEffectMode = soundmode;
-    Config.setValue("SoundEffectMode", Config.SoundEffectMode);
-
-    int extra_distance = ui->ex_widthSpinBox->value();
-    Config.Avatar_extra_distance = extra_distance;
-    Config.setValue("Avatar_extra_distance", Config.Avatar_extra_distance);
-
     Config.setValue("Contest/SMTPServer", ui->smtpServerLineEdit->text());
     Config.setValue("Contest/Sender", ui->senderLineEdit->text());
     Config.setValue("Contest/Password", ui->passwordLineEdit->text());
@@ -174,7 +151,7 @@ void ConfigDialog::on_browseBgMusicButton_clicked()
 
 void ConfigDialog::on_resetBgMusicButton_clicked()
 {
-    QString default_music = QString("audio/%1/system/background.ogg").arg(Config.SoundEffectMode);
+    QString default_music = "audio/system/background.ogg";
     Config.setValue("BackgroundMusic", default_music);
     ui->bgMusicPathLineEdit->setText(default_music);
 }

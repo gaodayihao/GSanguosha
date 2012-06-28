@@ -29,7 +29,6 @@ public:
     int CountDownSeconds;
     QString GameMode;
     QStringList BanPackages;
-    bool EnableSnatchHero;
     bool ContestMode;
     bool FreeChoose;
     bool ForbidSIMC;
@@ -79,24 +78,6 @@ public:
     static const int S_SERVER_TIMEOUT_GRACIOUS_PERIOD;
     static const int S_MOVE_CARD_ANIMATION_DURAION;
     static const int S_REGULAR_ANIMATION_SLOW_DURAION;
-
-//mode add
-    // client side
-    QString TextColor;
-    QString TextB;
-
-    int Avatar_extra_distance;
-
-    QString SoundEffectMode;
-
-    QString LastObjname;
-
-    // server side
-    QStringList HistoryNodeList;
-    bool ClearServerLog;
-    ushort NodePort;
-    QString NodeAddress;
-    int GodSelectLimited;
 };
 
 extern Settings Config;

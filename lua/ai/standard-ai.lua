@@ -227,7 +227,7 @@ sgs.ai_view_as.qingguo = function(card, player, card_place)
 	local suit = card:getSuitString()
 	local number = card:getNumberString()
 	local card_id = card:getEffectiveId()
-	if card:isBlack() and card_place ~= sgs.Player_PlaceEquip then
+	if card:isBlack() and card_place ~= sgs.Player_Equip then
 		return ("jink:qingguo[%s:%s]=%d"):format(suit, number, card_id)
 	end
 end
@@ -449,7 +449,7 @@ sgs.ai_view_as.longdan = function(card, player, card_place)
 	local suit = card:getSuitString()
 	local number = card:getNumberString()
 	local card_id = card:getEffectiveId()
-	if card_place ~= sgs.Player_PlaceEquip then
+	if card_place ~= sgs.Player_Equip then
 		if card:inherits("Jink") then
 			return ("slash:longdan[%s:%s]=%d"):format(suit, number, card_id)
 		elseif card:inherits("Slash") then
@@ -472,12 +472,12 @@ sgs.zhaoyun_keep_value =
 }
 
 sgs.ai_skill_invoke.tieji = function(self, data)
-	local effect = data:toSlashEffect()
+	local target = data:toPlayer()
 	local zj = self.room:findPlayerBySkillName("guidao")
 	if zj and self:isEnemy(zj) and self:canRetrial(zj) then
 	    return false
 	else
-		return not self:isFriend(effect.to) 
+		return not self:isFriend(target) 
 	end 
 	--return not self:isFriend(effect.to) and (not effect.to:isKongcheng() or effect.to:getArmor())
 end
@@ -949,7 +949,7 @@ end
 
 sgs.ai_skill_use_func.QingnangCard=function(card,use,self)
 	self:sort(self.friends, "defense")
-	if self.player:isWounded() and self:getOverflow()>1 then
+	if self.player:isWounded() and self:getOverflow()>1 then 
 		use.card=card
 		if use.to then use.to:append(self.player) end
 		return
@@ -1069,7 +1069,7 @@ sgs.ai_skill_use_func.LijianCard=function(card,use,self)
 		end
 		if friend_maxSlash then
 			local safe = false
-			if (first:hasSkill("ganglie") or first:hasSkill("fankui") or first:hasSkill("enyuan") or first:hasSkill("nosenyuan")) then
+			if (first:hasSkill("ganglie") or first:hasSkill("fankui") or first:hasSkill("enyuan")) then
 				if (first:getHp()<=1 and first:getHandcardNum()==0) then safe=true end
 			elseif (self:getCardsNum("Slash", friend_maxSlash) >= self:getCardsNum("Slash", first)) then safe=true end
 			if safe then return friend_maxSlash end
@@ -1087,7 +1087,7 @@ sgs.ai_skill_use_func.LijianCard=function(card,use,self)
 		for _, enemy in ipairs(self.enemies) do
 			--if zhugeliang_kongcheng and #males==1 and self:damageIsEffective(zhugeliang_kongcheng, sgs.DamageStruct_Normal, males[1]) 
 				--then table.insert(males, zhugeliang_kongcheng) end
-			if enemy:getGeneral():isMale() and (not enemy:hasSkill("wuyan") and not enemy:hasSkill("noswuyan")) then
+			if enemy:getGeneral():isMale() and not enemy:hasSkill("wuyan") then
 				if enemy:hasSkill("kongcheng") and enemy:isKongcheng() then	zhugeliang_kongcheng=enemy
 				else
 					if #males == 0 and self:hasTrickEffective(duel, enemy) then table.insert(males, enemy)
@@ -1114,11 +1114,11 @@ sgs.ai_skill_use_func.LijianCard=function(card,use,self)
 				if self.player:isLord() or sgs.isRolePredictable() then 
 					local friend_maxSlash = findFriend_maxSlash(self,first)
 					if friend_maxSlash then second=friend_maxSlash end
-				elseif (lord:getGeneral():isMale()) and (not lord:hasSkill("wuyan") and not lord:hasSkill("noswuyan")) then 
+				elseif (lord:getGeneral():isMale()) and (not lord:hasSkill("wuyan")) then 
 					if (self.role=="rebel") and (not first:isLord()) and self:damageIsEffective(lord, sgs.DamageStruct_Normal, first) then
 						second = lord
 					else
-						if ((self.role=="loyalist" or (self.role=="renegade") and not (first:hasSkill("ganglie") and first:hasSkill("enyuan") or first:hasSkill("nosenyuan"))))
+						if ((self.role=="loyalist" or (self.role=="renegade") and not (first:hasSkill("ganglie") and first:hasSkill("enyuan"))))
 							and	( self:getCardsNum("Slash", first)<=self:getCardsNum("Slash", second)) then
 							second = lord
 						end
@@ -1205,7 +1205,7 @@ end
 
 sgs.ai_skill_invoke.shihun = true
 
-sgs.ai_skill_playerchosen.shihun = function(self)	
+sgs.ai_skill_playerchosen.shihun = function(self, targets)	
 	self:sort(self.enemies,"hp")
 	return self.enemies[1]
 end

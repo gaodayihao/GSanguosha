@@ -32,7 +32,6 @@ public:
     NativeClientSocket(QTcpSocket *socket);
 
     virtual void connectToHost();
-    void connectToNode(QString addr, int port);
     virtual void disconnectFromHost();
     virtual void send(const QString &message);
     virtual bool isConnected() const;

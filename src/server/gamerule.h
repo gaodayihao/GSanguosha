@@ -21,21 +21,6 @@ private:
     QString getWinner(ServerPlayer *victim) const;
 };
 
-class ThreeKingdomsMode: public GameRule{
-    Q_OBJECT
-
-public:
-    ThreeKingdomsMode(QObject *parent);
-    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const;
-
-private:
-	bool hasHeroCard(ServerPlayer *player) const;
-    void addHeroCardsToPile(ServerPlayer *player) const;
-    void addHeroCardsFlag(ServerPlayer *player) const;
-    void removeHeroCardsFlag(ServerPlayer *player) const;
-    int getPlayerHero(Room *room, ServerPlayer *player, ServerPlayer *who, const QString &reason, bool open) const;
-};
-
 class HulaoPassMode: public GameRule{
     Q_OBJECT
 

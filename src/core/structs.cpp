@@ -95,21 +95,21 @@ QList<CardMoveStruct> CardsMoveStruct::flatten()
 }
 
 bool CardMoveReason::tryParse(const Json::Value& arg)
-{
+{        
     m_reason = arg[0].asInt();
-    m_playerId = arg[1].asCString();
-    m_skillName = arg[2].asCString();
+    m_playerId = arg[1].asCString(); 
+    m_skillName = arg[2].asCString(); 
     m_eventName = arg[3].asCString();
     m_targetId = arg[4].asCString();
-    return true; // TODO: fix this
+    return true; // @todo: fix this
 }
 
 Json::Value CardMoveReason::toJsonValue() const
 {
     Json::Value result;
     result[0] = m_reason;
-    result[1] = toJsonString(m_playerId);
-    result[2] = toJsonString(m_skillName);
+    result[1] = toJsonString(m_playerId); 
+    result[2] = toJsonString(m_skillName); 
     result[3] = toJsonString(m_eventName);
     result[4] = toJsonString(m_targetId);
     return result;

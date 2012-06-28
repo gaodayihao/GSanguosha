@@ -1,3 +1,4 @@
+
 class LuaTriggerSkill: public TriggerSkill{
 public:
 	LuaTriggerSkill(const char *name, Frequency frequency);
@@ -27,15 +28,6 @@ public:
 	virtual bool isProhibited(const Player *from, const Player *to, const Card *card) const = 0;
 };
 
-class LuaProhibitSkill: public ProhibitSkill{
-public:
-	LuaProhibitSkill(const char *name);
-
-	virtual bool isProhibited(const Player *from, const Player *to, const Card *card) const;
-
-	LuaFunction is_prohibited;
-};
-
 class SPConvertSkill: public GameStartSkill{
 public:
 	SPConvertSkill(const QString &name, const QString &from, const QString &to);
@@ -51,27 +43,13 @@ public:
 	virtual int getCorrect(const Player *from, const Player *to) const = 0;
 };
 
-class MaxCardsSkill: public Skill{
+class LuaProhibitSkill: public ProhibitSkill{
 public:
-    MaxCardsSkill(const QString &name);
-	
-    virtual int getExtra(const Player *target) const = 0;
-};
+	LuaProhibitSkill(const char *name);
 
-class LuaDistanceSkill: public DistanceSkill{
-public:
-	LuaDistanceSkill(const char *name);
-	virtual int getCorrect(const Player *from, const Player *to) const;
+	virtual bool isProhibited(const Player *from, const Player *to, const Card *card) const;
 
-	LuaFunction correct_func;
-};
-
-class LuaMaxCardsSkill: public MaxCardsSkill{
-public:
-    LuaMaxCardsSkill(const char *name);
-    virtual int getExtra(const Player *target) const;
-
-    LuaFunction extra_func;
+	LuaFunction is_prohibited;
 };
 
 class ViewAsSkill:public Skill{
@@ -127,13 +105,19 @@ public:
 	LuaFunction view_as;
 };
 
+class LuaDistanceSkill: public DistanceSkill{
+public:
+	LuaDistanceSkill(const char *name);
+	virtual int getCorrect(const Player *from, const Player *to) const;
+
+	LuaFunction correct_func;
+};
+
 class LuaSkillCard: public SkillCard{
 public:
 	LuaSkillCard(const char *name);
 	void setTargetFixed(bool target_fixed);
 	void setWillThrow(bool will_throw);
-	void setPindian(bool as_pindian);
-	void setMute(bool mute);
 	LuaSkillCard *clone() const;
 
 	LuaFunction filter;    
@@ -190,10 +174,7 @@ bool LuaTriggerSkill::trigger(TriggerEvent event, Room* room, ServerPlayer *play
 	// the first argument: event
 	lua_pushinteger(L, e);	
 	
-	// the second argument: room
-	//SWIG_NewPointerObj(L, room, SWIGTYPE_p_Room, 0);
-	
-	// the third argument: player
+	// the second argument: player
 	SWIG_NewPointerObj(L, player, SWIGTYPE_p_ServerPlayer, 0);
 
 	// the last event: data
@@ -266,29 +247,6 @@ int LuaDistanceSkill::getCorrect(const Player *from, const Player *to) const{
 	lua_pop(L, 1);
 
 	return correct;
-}
-
-int LuaMaxCardsSkill::getExtra(const Player *target) const{
-	if(extra_func == 0)
-		return 0;
-
-	lua_State *L = Sanguosha->getLuaState();
-
-	lua_rawgeti(L, LUA_REGISTRYINDEX, extra_func);
-
-	SWIG_NewPointerObj(L, this, SWIGTYPE_p_LuaMaxCardsSkill, 0);
-	SWIG_NewPointerObj(L, target, SWIGTYPE_p_Player, 0);
-
-	int error = lua_pcall(L, 2, 1, 0);
-	if(error){
-		Error(L);
-		return 0;
-	}
-
-	int extra = lua_tointeger(L, -1);
-	lua_pop(L, 1);
-
-	return extra;
 }
 
 bool LuaFilterSkill::viewFilter(const CardItem *to_select) const{

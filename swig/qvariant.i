@@ -111,20 +111,4 @@ public:
 	void setValue(PhaseChangeStruct *phase){
 		$self->setValue(QVariant::fromValue(*phase));
 	}
-	
-	const CardsMoveStruct *toCardsMove() const{
-		return $self->value<CardsMoveStar>();
-	}
-	
-	void setValue(const CardsMoveStruct *move){
-		$self->setValue(move);
-	}
-	
-	const CardsMoveOneTimeStruct *toCardsMoveOneTime() const{
-		return $self->value<CardsMoveOneTimeStar>();
-	}
-	
-	void setValue(const CardsMoveOneTimeStruct *move){
-		$self->setValue(move);
-	}
 };

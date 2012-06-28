@@ -19,7 +19,7 @@ class General : public QObject
     Q_PROPERTY(int maxhp READ getMaxHp CONSTANT)
     Q_PROPERTY(bool male READ isMale STORED false CONSTANT)
     Q_PROPERTY(bool female READ isFemale STORED false CONSTANT)
-    Q_PROPERTY(Gender gender READ getGender WRITE setGender)
+    Q_PROPERTY(Gender gender READ getGender CONSTANT)
     Q_PROPERTY(bool lord READ isLord CONSTANT)
     Q_PROPERTY(bool hidden READ isHidden CONSTANT)
 
@@ -41,7 +41,7 @@ public:
     void setGender(Gender gender);
 
     void addSkill(Skill* skill);
-    void addSkill(const QString &skill_name);
+    void addSkill(const QString &skill_name);    
     bool hasSkill(const QString &skill_name) const;
     QList<const Skill *> getVisibleSkillList() const;
     QSet<const Skill *> getVisibleSkills() const;
@@ -50,7 +50,6 @@ public:
     void addRelateSkill(const QString &skill_name);
     QStringList getRelatedSkillNames() const;
 
-    QString getPixmapPath(const QString &category) const;
     QString getPackage() const;
     QString getSkillDescription() const;
 

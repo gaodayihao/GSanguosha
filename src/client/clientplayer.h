@@ -41,9 +41,6 @@ signals:
     void pile_changed(const QString &name);
     void drank_changed();
     void action_taken();
-
-public slots:
-    void changeReady();
 };
 
 extern ClientPlayer *Self;

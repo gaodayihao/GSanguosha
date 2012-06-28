@@ -119,13 +119,6 @@ void MyPixmapItem::initFaceBoardPos(){
             faceboardPos << QRect(x,y,icon_w,icon_h);
         }
     }
-    for(int j=0;j<8;j++){
-        y = j*(icon_h+y_offset) + start_y;
-        for(int i=0;i<7;i++){
-            x = i*(icon_w+x_offset) + start_x + 153;
-            faceboardPos << QRect(x,y,icon_w,icon_h);
-        }
-    }
 }
 
 void MyPixmapItem::initEasyTextPos(){
@@ -152,21 +145,21 @@ ChatWidget::ChatWidget():base_pixmap("image/system/chatface/base.png")
     base = new QGraphicsRectItem(QRectF(base_pixmap.rect()), this);
     QPushButton *returnButton, *chatfaceButton, *easytextButton;
 
-    returnButton=addButton("returnBt",3,8);
-    chatfaceButton=addButton("chatfaceBt",28,8);
-    easytextButton=addButton("easytextBt",52+1,8);
+    returnButton=addButton("returnBt",-1);
+    chatfaceButton=addButton("chatfaceBt",24);
+    easytextButton=addButton("easytextBt",48+1);
 
     chat_face_board = new MyPixmapItem(QPixmap("image/system/chatface/faceboard.png"),this);
-    chat_face_board->setSize(314,180);
-    chat_face_board->setPos(-314 + 74 + 7,-180-1);// 24+24+24+2=74
+    chat_face_board->setSize(160,180);
+    chat_face_board->setPos(-160 + 74,-180-1);// 24+24+24+2=74
     chat_face_board->setZValue(1);
     chat_face_board->setVisible(false);
     chat_face_board->itemName="faceboard";
 
     easy_text_board=new MyPixmapItem(QPixmap("image/system/chatface/easytextboard.png"),this);
     easy_text_board->setSize(180, 222);
-    easy_text_board->setPos(-99, -223);
-    easy_text_board->setZValue(10086);
+    easy_text_board->setPos(-106, -223);
+    easy_text_board->setZValue(1);
     easy_text_board->setVisible(false);
     easy_text_board->itemName="easytextboard";
 
@@ -200,8 +193,7 @@ void ChatWidget::sendText()
 }
 
 QRectF ChatWidget::boundingRect() const{
-//    return QRectF(-1, 0, 24 * 3 + 2, 24);
-    return QRectF(-1, 0, 80, 39);
+    return QRectF(-1, 0, 24 * 3 + 2, 24);
 }
 
 void ChatWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
@@ -228,17 +220,17 @@ QPushButton *ChatWidget::createButton(const QString &name){
     return button;
 }
 
-QPushButton *ChatWidget::addButton(const QString &name, int x, int y){
+QPushButton *ChatWidget::addButton(const QString &name, int x){
     QPushButton *button = createButton(name);
-    addWidget(button, x, y);
+    addWidget(button, x);
     return button;
 }
 
-QGraphicsProxyWidget *ChatWidget::addWidget(QWidget *widget, int x, int y){
+QGraphicsProxyWidget *ChatWidget::addWidget(QWidget *widget, int x){
     QGraphicsProxyWidget *proxy_widget = new QGraphicsProxyWidget(this);
     proxy_widget->setWidget(widget);
     proxy_widget->setParentItem(base);
-    proxy_widget->setPos(x, y);
+    proxy_widget->setPos(x, 0);
 
     return proxy_widget;
 }

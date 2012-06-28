@@ -19,7 +19,7 @@ public:
         Room *room = player->getRoom();
         QList<ServerPlayer *> players = room->getOtherPlayers(player);
         bool has_frantic = player->getMark("@frantic")>0;
-        room->playSkillEffect(objectName());
+        room->broadcastSkillInvoke(objectName());
 
         if(has_frantic){
             foreach(ServerPlayer *target, players){
@@ -52,7 +52,7 @@ public:
         if(!room->askForSkillInvoke(player, objectName()))
             return;
 
-        room->playSkillEffect(objectName());
+        room->broadcastSkillInvoke(objectName());
         int n = 0;
         if(has_frantic)
             n = players.length();
@@ -131,7 +131,7 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
-        room->playSkillEffect(objectName());
+        room->broadcastSkillInvoke(objectName());
         QList<ServerPlayer *> players = room->getAlivePlayers();
         bool has_frantic = player->getMark("@frantic")>0;
 
@@ -198,7 +198,7 @@ public:
 
             QList<ServerPlayer *> players = room->getAllPlayers();
             foreach(ServerPlayer *player, players){
-                player->removeMark("qinggang");
+                player->setMark("qinggang", 0);
             }
         }
         else{
@@ -353,7 +353,6 @@ public:
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
-
         switch(event){
         case GameStart:{
             player = room->getLord();
@@ -383,36 +382,35 @@ public:
             }
 
             room->setTag("FirstRound", true);
-            break;
-        }
-
+                break;
+            }
 
         case TurnStart:{
-            if(player->isLord() && player->faceUp()){
-                bool hasLoseMark = false;
-                if(player->getMark("@frantic") > 0){
-                    player->loseMark("@frantic");
-                    hasLoseMark = true;
-                }
+                if(player->isLord() && player->faceUp()){
+                    bool hasLoseMark = false;
+                    if(player->getMark("@frantic") > 0){
+                        player->loseMark("@frantic");
+                        hasLoseMark = true;
+                    }
 
-                if(hasLoseMark && player->getMark("@frantic") == 0){
-                    startDeadJudge(player);
-                    player->addMark("frantic_over");
+                    if(hasLoseMark && player->getMark("@frantic") == 0){
+                        startDeadJudge(player);
+                        player->addMark("frantic_over");
+                    }
                 }
+                break;
             }
-            break;
-        }
 
         case PhaseChange:{
-            if(player->isLord() && player->getMark("frantic_over") > 0 && player->getPhase() == Player::Finish)
-                player->getRoom()->killPlayer(player);
-            break;
-        }
+                if(player->isLord() && player->getMark("frantic_over") > 0 && player->getPhase() == Player::Finish)
+                   player->getRoom()->killPlayer(player);
+                break;
+            }
 
         case GameOverJudge:{
-            return true;
-            break;
-        }
+                return true;
+                break;
+            }
 
         case Death:{
             QList<ServerPlayer *> players = room->getAlivePlayers();

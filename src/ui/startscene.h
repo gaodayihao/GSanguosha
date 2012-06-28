@@ -2,7 +2,7 @@
 #define STARTSCENE_H
 
 #include "button.h"
-#include "pixmap.h"
+#include "QSanSelectableItem.h"
 #include "server.h"
 
 #include <QGraphicsScene>
@@ -21,15 +21,9 @@ public:
 private:
     void printServerInfo();
 
-    Pixmap *logo;
+    QSanSelectableItem *logo;
     QTextEdit *server_log;
     QList<Button*> buttons;
-
-    QLineEdit *server_cmdline;
-private slots:
-    void transBase64(QString msg);
-signals:
-    void log_append(QString);
 };
 
 #endif // STARTSCENE_H

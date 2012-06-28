@@ -84,12 +84,10 @@ private:
 
     QGroupBox *createGameModeBox();
     QGroupBox *create3v3Box();
-    QGroupBox *create3kingdomsBox();
 
     QLineEdit *server_name_edit;
-    QSpinBox *timeout_spinbox, *god_selectlimited_spinbox;
+    QSpinBox *timeout_spinbox;
     QCheckBox *nolimit_checkbox;
-    QCheckBox *enable_snatch_hero;
     QCheckBox *contest_mode_checkbox;
     QCheckBox *free_choose_checkbox;
     QCheckBox *free_assign_checkbox;
@@ -103,10 +101,10 @@ private:
     QCheckBox *basara_checkbox;
     QCheckBox *hegemony_checkbox;
     QLabel *max_hp_label;
-    QComboBox *max_hp_scheme_combobox;
+    QComboBox *max_hp_scheme_ComboBox;
     QCheckBox *announce_ip_checkbox;
-    QComboBox *scenario_combobox;
-    QComboBox *mini_scene_combobox;
+    QComboBox *scenario_ComboBox;
+    QComboBox *mini_scene_ComboBox;
     QPushButton *mini_scene_button;
     QLineEdit *address_edit;
     QLineEdit *port_edit;
@@ -116,16 +114,12 @@ private:
     QSpinBox *ai_delay_spinbox;
     QRadioButton *standard_3v3_radiobutton;
     QRadioButton *new_3v3_radiobutton;
-    QComboBox *role_choose_combobox;
+    QComboBox *role_choose_ComboBox;
     QCheckBox *exclude_disaster_checkbox;
 
     QButtonGroup *extension_group;
     QButtonGroup *mode_group;
 
-    //
-    QLineEdit *node_address_edit;
-    QLineEdit *node_port_edit;
-    QCheckBox *clearserverlog_checkbox;
 private slots:
     void onOkButtonClicked();
     void onDetectButtonClicked();
@@ -155,33 +149,21 @@ public:
     void gamesOver();
 
 private:
-    QHash<QString, long> nodeList;
-    ClientSocket *ssclient;
-
     ServerSocket *server;
     Room *current;
     QSet<Room *> rooms;
     QHash<QString, ServerPlayer*> players;
     QSet<QString> addresses;
     QMultiHash<QString, QString> name2objname;
-    static int TimerCounts;
-    bool delRoom(int roomid);
 
 private slots:
     void processNewConnection(ClientSocket *socket);
-    void processRequest(char *request);
+    void processRequest(const char *request);
     void cleanup();
     void gameOver();
 
-    void process_SS_Reply(char *reply);
-    void process_SS_error_message(QString);
-    void timerTrigger();
-    void roomFinished();
-    void processCmdLine();
-
 signals:
     void server_message(const QString &);
-    void clearlog();
 };
 
 #endif // SERVER_H

@@ -1,34 +1,20 @@
 #ifndef PHOTO_H
 #define PHOTO_H
 
-#include "pixmap.h"
+#include "QSanSelectableItem.h"
 #include "player.h"
 #include "carditem.h"
 #include "protocol.h"
-#include "TimedProgressBar.h"
-#include "GeneralCardContainerUI.h"
-#include "SkinBank.h"
 
+#include "GeneralCardContainerUI.h"
 #include <QGraphicsObject>
 #include <QPixmap>
 #include <QComboBox>
-#include <QProgressBar>
+
 
 class ClientPlayer;
-class RoleCombobox;
+class RoleComboBox;
 class QPushButton;
-
-class PhasePixmap : public Pixmap
-{
-    Q_OBJECT
-public:
-    explicit PhasePixmap(QGraphicsItem *parent, const QRect &Area);
-    void setPhase(const char* typeofPhase, int index);
-
-private:
-    QRect _m_Area;
-    const QSanRoomSkin* _m_roomSkin;
-};
 
 class Photo : public PlayerCardContainer
 {
@@ -36,95 +22,64 @@ class Photo : public PlayerCardContainer
 
 public:
     explicit Photo();
-    void setPlayer(const ClientPlayer *player);
     const ClientPlayer *getPlayer() const;
     void speak(const QString &content);
-    QList<CardItem*> removeCardItems(const QList<int> &card_id, Player::Place place);
-    void installEquip(CardItem *equip);
-    void installDelayedTrick(CardItem *trick);
-    void hideAvatar();
+    QList<CardItem*> removeCardItems(const QList<int> &card_id, Player::Place place);    
     void showCard(int card_id);
-    void showProgressBar(QSanProtocol::Countdown countdown);
-    void hideProgressBar();
+    
     void setEmotion(const QString &emotion, bool permanent = false);
     void tremble();
     void showSkillName(const QString &skill_name);
-    void createRoleCombobox();
-    void setOrder(int order);
-    void revivePlayer();
+    void setOrder();
+    inline int getOrder(){ return order;}
+    void setOrderLimit(int order_limit);
 
     enum FrameType{
-        Playing,
-        Responsing,
-        SOS,
-        NoFrame,
-        SOSR,
-        Selected
+        S_FRAME_PLAYING,
+        S_FRAME_RESPONSING,
+        S_FRAME_SOS,
+        S_FRAME_NO_FRAME
     };
 
     void setFrame(FrameType type);
     virtual QRectF boundingRect() const;
+    QGraphicsItem* getMouseClickReceiver();
 public slots:
-    void updateAvatar();    
-    void updateSmallAvatar();
-    void updateReadyItem(bool visible);
     void updatePhase();
-    void updatePile(const QString &pile_name);
-    void refresh();
     void hideEmotion();
     void hideSkillName();
-    void setDrankState();
-    void setActionState();
-    void killPlayer();
+    virtual void refresh();
 
 protected:
+    inline virtual QGraphicsItem* _getEquipParent() { return this; }
+    inline virtual QGraphicsItem* _getDelayedTrickParent() { return this; }
+    inline virtual QGraphicsItem* _getAvatarParent() { return this; }
+    inline virtual QGraphicsItem* _getMarkParent() { return _m_floatingArea; }
+    inline virtual QGraphicsItem* _getPhaseParent() { return this; }
+    inline virtual QGraphicsItem* _getRoleComboBoxParent() { return this; }
+    inline virtual QGraphicsItem* _getProgressBarParent() { return this;}
+    inline virtual QGraphicsItem* _getFocusFrameParent() { return this; }
+    virtual QGraphicsItem* _getPileParent() { return this; }
+    inline virtual QString getResourceKeyName() { return QSanRoomSkin::S_SKIN_KEY_PHOTO; }
+    virtual void _adjustComponentZValues();
     bool _addCardItems(QList<CardItem*> &card_items, Player::Place place);
+
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
-    QList<CardItem*> m_takenOffCards;
-private:
-    const QSanRoomSkin* _m_roomSkin;
-    const QSanRoomSkin::CommonLayout* _m_commonLayout;
-    const QSanRoomSkin::PhotoLayout* _m_photoLayout;
-    const ClientPlayer *player;
-    QPixmap avatar, small_avatar;
-    QGraphicsPixmapItem *ready_item, *lord_frame;
-    QPixmap _m_mainFrame;
-    QPixmap _m_handCardIcon;
-    QGraphicsPixmapItem *_m_kingdomIcon;
-    QPixmap _m_kindomColorMaskIcon;
-    RoleCombobox *role_combobox;
-    QGraphicsProxyWidget  *pile_button;
-    QGraphicsPixmapItem *action_item, *save_me_item;
-    bool permanent;
-
-    QGraphicsTextItem *mark_item;
-
-    CardItem *weapon, *armor, *defensive_horse, *offensive_horse;
-    QList<CardItem **> equips;
-    QGraphicsRectItem *equip_rects[4];
-
-    QList<QGraphicsPixmapItem *> judging_pixmaps;    
-    QList<CardItem *> judging_area;
-
-    QMap<QString, QGraphicsPixmapItem *> mark_items;
-    QMap<QString, QGraphicsSimpleTextItem *> mark_texts;
-
+    bool _m_isReadyIconVisible;
+    int order,order_limit;
+    QGraphicsPixmapItem *_m_mainFrame;
     QGraphicsPixmapItem *order_item;
-    bool hide_avatar, game_start;
-    QPixmap death_pixmap;
-    QPixmap back_icon, chain_icon;
-    PhasePixmap *phase;
-    QSanCommandProgressBar *progress_bar;
-    QGraphicsPixmapItem *emotion_item, *frame_item;
-    QGraphicsSimpleTextItem *skill_name_item;
-    QGraphicsRectItem *avatar_area, *small_avatar_area;
-    FrameType _m_old_frame;
+    QGraphicsPixmapItem *emotion_item, *_m_skillNameItem;
+    QGraphicsPixmapItem *_m_focusFrame;
+    QGraphicsPixmapItem *_m_onlineStatusItem;
 
-    void drawEquip(QPainter *painter, CardItem *equip, int order);
-    void drawHp(QPainter *painter);
-    void drawMagatama(QPainter *painter, int index, const QPixmap &pixmap);
+private slots:
+    inline void resetOrder(){ if(canReset)order = isSelected(); setOrder();}
+private:
+    bool canReset;
 };
 
 #endif // PHOTOBACK_H

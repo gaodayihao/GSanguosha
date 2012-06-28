@@ -18,7 +18,7 @@ typedef int LuaFunction;
 
 class AI: public QObject{
     Q_OBJECT
-    Q_ENUMS(Relation)
+    Q_ENUMS(Relation);
 
 public:
     AI(ServerPlayer *player);

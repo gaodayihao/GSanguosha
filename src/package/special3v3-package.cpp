@@ -21,11 +21,6 @@ void HongyuanCard::onEffect(const CardEffectStruct &effect) const{
    effect.to->drawCards(1);
 }
 
-void HongyuanCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
-    source->drawCards(1);
-    SkillCard::use(room, source, targets);
-}
-
 class HongyuanViewAsSkill: public ZeroCardViewAsSkill{
 public:
     HongyuanViewAsSkill():ZeroCardViewAsSkill("hongyuan"){
@@ -55,7 +50,7 @@ public:
     virtual int getDrawNum(ServerPlayer *zhugejin, int n) const{
         Room *room = zhugejin->getRoom();
         if(room->askForSkillInvoke(zhugejin, objectName())){
-            room->playSkillEffect(objectName());
+            room->broadcastSkillInvoke(objectName());
             room->setPlayerFlag(zhugejin, "Invoked");
             return n - 1;
         }else
@@ -143,7 +138,7 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return TriggerSkill::triggerable(target) && !target->isKongcheng();
+        return TriggerSkill::triggerable(target) && !target->isNude();
     }
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
@@ -173,15 +168,18 @@ public:
         QString prompt = prompt_list.join(":");
 
         player->tag["Judge"] = data;
-        const Card *card = room->askForCard(player, "@huanshi", prompt, data, NonTrigger);
+        const Card *card = room->askForCard(player, "@huanshi", prompt, data);
 
         if(card){
-            if(room->getCardPlace(judge->card->getEffectiveId()) == Player::TopDrawPile)
-                room->throwCard(judge->card, judge->who);
+            // the only difference for Guicai & Guidao
+            CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, QString());
+            if(room->getCardPlace(judge->card->getEffectiveId()) != Player::DiscardPile
+                || room->getCardPlace(judge->card->getEffectiveId()) != Player::PlaceHand)
+                room->throwCard(judge->card, reason, judge->who);
 
-            player->playCardEffect(card);
             judge->card = Sanguosha->getCard(card->getEffectiveId());
-            room->moveCardTo(judge->card, player, NULL, Player::TopDrawPile,
+
+            room->moveCardTo(judge->card, player, NULL, Player::PlaceTable,
                 CardMoveReason(CardMoveReason::S_REASON_RETRIAL, player->objectName(), "huanshi", QString()), true);
             LogMessage log;
             log.type = "$ChangedJudge";
@@ -225,7 +223,8 @@ public:
             card = Sanguosha->getCard(move->card_id);
         }
 
-        int n = card->isRed() ? 1 : 0;
+        int n = 0;
+        n = card->isRed() ? 1 : 0;
 
         if(n>0 && player->askForSkillInvoke(objectName(), data))
             player->drawCards(n);

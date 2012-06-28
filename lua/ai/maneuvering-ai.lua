@@ -22,8 +22,9 @@ sgs.weapon_range.Fan = 4
 sgs.ai_use_priority.Fan = 2.655
 sgs.ai_use_priority.Vine = 0.6
 
+	
 sgs.ai_skill_invoke.fan = function(self, data)
-    local target = data:toCardUse().to:first()
+    local target = data:toSlashEffect().to
     if self:isFriend(target) then
       return target:isChained() and self:isGoodChainTarget(target)
     else
@@ -134,7 +135,7 @@ function SmartAI:searchForAnaleptic(use,enemy,slash)
         
 	for _, anal in ipairs(cards) do
 		if (anal:className() == "Analeptic") and not (anal:getEffectiveId() == slash:getEffectiveId()) and
-			not isCompulsoryView(anal, "Slash", self.player, sgs.Player_PlaceHand) then
+			not isCompulsoryView(anal, "Slash", self.player, sgs.Player_Hand) then
 			return anal
 		end
 	end
@@ -314,7 +315,8 @@ sgs.ai_use_priority.IronChain = 2.8
 sgs.dynamic_value.benefit.IronChain = true
 
 function SmartAI:useCardFireAttack(fire_attack, use)  
-	if self.player:hasSkill("wuyan") or self.player:hasSkill("noswuyan") then return end
+	if self.player:hasSkill("wuyan") then return end
+	if self.player:hasSkill("noswuyan") then return end
 	local lack = {
 		spade = true,
 		club = true,
@@ -367,7 +369,7 @@ function SmartAI:useCardFireAttack(fire_attack, use)
 	if #targets_succ > 0 then
 		use.card = fire_attack
 		if use.to then use.to:append(targets_succ[1]) end
-	elseif self.player:isChained() and self:isGoodChainTarget(self.player) and (self:isGoodChainPartner(self.player)
+	elseif self.player:isChained() and self:isGoodChainTarget(self.player) and (self:isGoodChainPartner(self.player) 
 	or (self:isEquip("SilverLion") and self:hasSkill("fankui"))) and self.player:getHandcardNum() > 1 then
 		use.card = fire_attack
 		if use.to then use.to:append(self.player) end

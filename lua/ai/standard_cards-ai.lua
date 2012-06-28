@@ -319,7 +319,7 @@ sgs.ai_use_priority.Slash = 2.4
 function SmartAI:useCardPeach(card, use)
 	local mustusepeach = false
 	if not self.player:isWounded() then return end
-	if (self.player:hasSkill("longhun") or self.player:hasSkill("longhunEx")) and not self.player:isLord() and
+	if self.player:hasSkill("longhun") and not self.player:isLord() and
 		math.min(self.player:getMaxCards(), self.player:getHandcardNum()) + self.player:getCards("e"):length() > 3 then return end
 	local peaches = 0
 	local cards = self.player:getHandcards()
@@ -378,6 +378,17 @@ sgs.weapon_range.Blade = 3
 sgs.weapon_range.Spear = 3
 sgs.weapon_range.Halberd = 4
 sgs.weapon_range.KylinBow = 5
+
+
+sgs.ai_skill_playerchosen.halberd = function(self, targets)	
+	targets = sgs.QList2Table(targets)
+	self:sort(targets,"defense")
+	for _, enemy in ipairs(targets) do
+		if self:isEnemy(enemy) then
+			return enemy
+		end
+	end
+end
 
 sgs.ai_skill_invoke.double_sword = true
 
@@ -696,12 +707,11 @@ sgs.ai_use_priority.AmazingGrace = 1
 
 function SmartAI:useCardGodSalvation(card, use)
 	local good, bad = 0, 0
-
 	if self.player:hasSkill("noswuyan") and self.player:isWounded() then
 		use.card = card
 		return
 	end
-	
+
 	for _, friend in ipairs(self.friends) do
 		if friend:isWounded() then
 			good = good + 10/(friend:getHp())
@@ -732,7 +742,8 @@ local function factorial(n)
 end
 
 function SmartAI:useCardDuel(duel, use)
-	if self.player:hasSkill("wuyan") or self.player:hasSkill("noswuyan") then return end
+	if self.player:hasSkill("wuyan") then return end
+	if self.player:hasSkill("noswuyan") then return end
 	self:sort(self.enemies,"handcard")
 	local enemies = self:exclude(self.enemies, duel)
 	local friends = self:exclude(self.friends_noself, duel)
@@ -791,7 +802,7 @@ function SmartAI:useCardDuel(duel, use)
 	local useduel
 	if target and self:objectiveLevel(target) > 3 and self:hasTrickEffective(duel, target) 
 		and not self.room:isProhibited(self.player, target, duel)
-		and not self:cantbeHurt(target) then
+			and not self:cantbeHurt(target) then
 		if n1 >= n2 then
 			useduel = true
 		elseif n2 > n1*2 + 1 then
@@ -895,7 +906,7 @@ function SmartAI:getValuableCard(who)
 	local equips = sgs.QList2Table(who:getEquips())
 	for _,equip in ipairs(equips) do
 		if who:hasSkill("shensu") then return equip:getEffectiveId() end
-		if (who:hasSkill("longhun") or who:hasSkill("longhunEx")) and not equip:getSuit() == sgs.Card_Diamond then  return equip:getEffectiveId() end
+		if who:hasSkill("longhun") and not equip:getSuit() == sgs.Card_Diamond then  return equip:getEffectiveId() end
 		if who:hasSkill("qixi") and equip:isBlack() then  return equip:getEffectiveId() end
 		if who:hasSkill("guidao") and equip:isBlack() then  return equip:getEffectiveId() end
 		if who:hasSkill("guose") and equip:getSuit() == sgs.Card_Diamond then  return equip:getEffectiveId() end
@@ -1100,15 +1111,14 @@ function SmartAI:useCardCollateral(card, use)
 
 	for _, friend in ipairs(self.friends_noself) do
 		if friend:getWeapon() and self:hasSkills(sgs.lose_equip_skill, friend) 
-			and not self.room:isProhibited(self.player, friend, card) 
-			and not friend:hasSkill("weimu") then
+			and not self.room:isProhibited(self.player, friend, card) then
 
 			for _, enemy in ipairs(self.enemies) do
 				if friend:canSlash(enemy) then
 					use.card = card
 				end
 				if use.to then use.to:append(friend) end
-				if use.to then use.to:append(enemy) end
+				--if use.to then use.to:append(enemy) end
 				return
 			end
 		end
@@ -1138,7 +1148,7 @@ function SmartAI:useCardCollateral(card, use)
 			end
 			if n then use.card = card end
 			if use.to then use.to:append(enemy) end
-			if use.to then use.to:append(final_enemy) end
+			--if use.to then use.to:append(final_enemy) end
 			return
 
 		end
@@ -1146,11 +1156,31 @@ function SmartAI:useCardCollateral(card, use)
 	end
 end
 
+sgs.ai_skill_playerchosen.collateral = function(self, targets)	
+	targets = sgs.QList2Table(targets)
+	self:sort(targets,"defense")
+	for _, enemy in ipairs(targets) do
+		if self:isEnemy(enemy) then
+			return enemy
+		end
+	end
+end
+
+sgs.ai_skill_choice.collateral = function(self, choices)
+	local enemynum = 0
+	for _,enemy in ipairs(self.enemies) do
+		if self.player:canSlash(emeny,true) then
+			enemynum = enemynum + 1
+		end
+	end
+	return enemynum > 1
+end
+
 sgs.ai_use_value.Collateral = 8.8
 sgs.ai_use_priority.Collateral = 2.75
 
-sgs.ai_card_intention.Collateral = function(card, from, tos)
-	assert(#tos == 2)
+sgs.ai_card_intention.Collateral = sgs.ai_card_intention.FireAttack
+--[[	assert(#tos == 1)
 	if tos[2]:objectName() == from:objectName() then
 		sgs.updateIntention(from, tos[1], 80)
 	elseif sgs.compareRoleEvaluation(tos[1], "rebel", "loyalist") == sgs.compareRoleEvaluation(tos[2], "rebel", "loyalist") then
@@ -1161,7 +1191,7 @@ sgs.ai_card_intention.Collateral = function(card, from, tos)
 		sgs.updateIntention(from, tos[1], 80)
 	end
 	sgs.ai_collateral = false
-end
+end]]
 
 sgs.dynamic_value.control_card.Collateral = true
 
@@ -1202,7 +1232,7 @@ function SmartAI:useCardIndulgence(card, use)
 	
 	local enemies = self:exclude(self.enemies, card)
 	for _, enemy in ipairs(enemies) do
-		if self:hasSkills("lijian|fanjian|nosfanjian",enemy) and not enemy:containsTrick("indulgence") and not enemy:isKongcheng() and enemy:faceUp() and self:objectiveLevel(enemy) > 3 then
+		if self:hasSkills("lijian|fanjian",enemy) and not enemy:containsTrick("indulgence") and not enemy:isKongcheng() and enemy:faceUp() and self:objectiveLevel(enemy) > 3 then
 			use.card = card
 			if use.to then use.to:append(enemy) end
 			return

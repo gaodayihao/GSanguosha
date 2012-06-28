@@ -33,75 +33,75 @@ public:
                 }
             }
             break;
-        }
+            }
 
         case GameOverJudge:{
-            if(player->isLord()){
-                scenario->marryAll(room);
-            }else if(player->getGeneral()->isMale()){
-                ServerPlayer *loyalist = NULL;
-                foreach(ServerPlayer *player, room->getAlivePlayers()){
-                    if(player->getRoleEnum() == Player::Loyalist){
-                        loyalist = player;
-                        break;
+                if(player->isLord()){
+                    scenario->marryAll(room);
+                }else if(player->getGeneral()->isMale()){
+                    ServerPlayer *loyalist = NULL;
+                    foreach(ServerPlayer *player, room->getAlivePlayers()){
+                        if(player->getRoleEnum() == Player::Loyalist){
+                            loyalist = player;
+                            break;
+                        }
+                    }
+                    ServerPlayer *widow = scenario->getSpouse(player);
+                    if(widow && widow->isAlive() && widow->getGeneral()->isFemale() && room->getLord()->isAlive() && loyalist == NULL)
+                        scenario->remarry(room->getLord(), widow);
+                }else if(player->getRoleEnum() == Player::Loyalist){
+                    room->setPlayerProperty(player, "role", "renegade");
+
+                    QList<ServerPlayer *> players = room->getAllPlayers();
+                    QList<ServerPlayer *> widows;
+                    foreach(ServerPlayer *player, players){
+                        if(scenario->isWidow(player))
+                            widows << player;
+                    }
+
+                    ServerPlayer *new_wife = room->askForPlayerChosen(room->getLord(), widows, "remarry");
+                    if(new_wife){
+                        scenario->remarry(room->getLord(), new_wife);
                     }
                 }
-                ServerPlayer *widow = scenario->getSpouse(player);
-                if(widow && widow->isAlive() && widow->getGeneral()->isFemale() && room->getLord()->isAlive() && loyalist == NULL)
-                    scenario->remarry(room->getLord(), widow);
-            }else if(player->getRoleEnum() == Player::Loyalist){
-                room->setPlayerProperty(player, "role", "renegade");
 
-                QList<ServerPlayer *> players = room->getAllPlayers();
-                QList<ServerPlayer *> widows;
-                foreach(ServerPlayer *player, players){
-                    if(scenario->isWidow(player))
-                        widows << player;
+                QList<ServerPlayer *> players = room->getAlivePlayers();
+                if(players.length() == 1){
+                    ServerPlayer *survivor = players.first();
+                    ServerPlayer *spouse = scenario->getSpouse(survivor);
+                    if(spouse)
+                        room->gameOver(QString("%1+%2").arg(survivor->objectName()).arg(spouse->objectName()));
+                    else
+                        room->gameOver(survivor->objectName());
+
+                    return true;
+                }else if(players.length() == 2){
+                    ServerPlayer *first = players.at(0);
+                    ServerPlayer *second = players.at(1);
+                    if(scenario->getSpouse(first) == second){
+                        room->gameOver(QString("%1+%2").arg(first->objectName()).arg(second->objectName()));
+                        return true;
+                    }
                 }
-
-                ServerPlayer *new_wife = room->askForPlayerChosen(room->getLord(), widows, "remarry");
-                if(new_wife){
-                    scenario->remarry(room->getLord(), new_wife);
-                }
-            }
-
-            QList<ServerPlayer *> players = room->getAlivePlayers();
-            if(players.length() == 1){
-                ServerPlayer *survivor = players.first();
-                ServerPlayer *spouse = scenario->getSpouse(survivor);
-                if(spouse)
-                    room->gameOver(QString("%1+%2").arg(survivor->objectName()).arg(spouse->objectName()));
-                else
-                    room->gameOver(survivor->objectName());
 
                 return true;
-            }else if(players.length() == 2){
-                ServerPlayer *first = players.at(0);
-                ServerPlayer *second = players.at(1);
-                if(scenario->getSpouse(first) == second){
-                    room->gameOver(QString("%1+%2").arg(first->objectName()).arg(second->objectName()));
-                    return true;
-                }
             }
-
-            return true;
-        }
 
         case Death:{
-            // reward and punishment
-            DamageStar damage = data.value<DamageStar>();
-            if(damage && damage->from){
-                ServerPlayer *killer = damage->from;
+                // reward and punishment
+                DamageStar damage = data.value<DamageStar>();
+                if(damage && damage->from){
+                    ServerPlayer *killer = damage->from;
 
-                if(killer == player)
-                    return false;
+                    if(killer == player)
+                        return false;
 
-                if(scenario->getSpouse(killer) == player)
-                    killer->throwAllCards();
-                else
-                    killer->drawCards(3);
+                    if(scenario->getSpouse(killer) == player)
+                        killer->throwAllCards();
+                    else
+                        killer->drawCards(3);
+                }
             }
-        }
 
         default:
             break;

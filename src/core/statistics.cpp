@@ -21,3 +21,4 @@ bool StatisticsStruct::setStatistics(const QString &name, const QVariant &value)
 
     return true;
 }
+

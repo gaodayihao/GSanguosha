@@ -6,7 +6,7 @@ sgs.ai_skill_invoke.qianxi = function(self, data)
 	local damage = data:toDamage()
 	local target = damage.to
 	if self:isFriend(target) then return false end
-	if self:hasSkills(sgs.masochism_skill,target) or self:hasSkills(sgs.recover_skill,target) or self:hasSkills("longhun|longhunEx|buqu",target) then return true end
+	if self:hasSkills(sgs.masochism_skill,target) or self:hasSkills(sgs.recover_skill,target) or self:hasSkills("longhun|buqu",target) then return true end
 	if damage.card:hasFlag("drank") then return false end
 	return (target:getMaxHp() - target:getHp()) < 2 
 end
@@ -153,6 +153,8 @@ sgs.ai_skill_cardask["jiefan-slash"] = function(self, data, pattern, target)
 	end
 	return "."
 end
+
+sgs.ai_skill_choice.jiefan = sgs.ai_skill_choice.collateral
 
 anxu_skill={}
 anxu_skill.name="anxu"
@@ -301,7 +303,10 @@ sgs.ai_skill_use["@@chunlao"] = function(self, prompt)
 	return "."
 end
 
-sgs.ai_skill_invoke.chunlao = sgs.ai_skill_invoke.buyi
+sgs.ai_skill_invoke.chunlao = function(self, data)
+	local dying = data:toDying()
+	return self:isFriend(dying.who) and self.player:getPile("wine"):length() > 0
+end
 
 sgs.chengpu_keep_value = 
 {

@@ -88,10 +88,18 @@ namespace QSanProtocol
         S_COMMAND_SET_MAXHP,
         S_COMMAND_CHEAT,
         S_COMMAND_SURRENDER,
-        S_COMMAND_GAME_OVER,
+        S_COMMAND_GAME_OVER, 
         S_COMMAND_MOVE_CARD,
         S_COMMAND_GET_CARD,
-        S_COMMAND_LOSE_CARD
+        S_COMMAND_LOSE_CARD,
+        S_COMMAND_LOG_EVENT,
+        S_COMMAND_LOG_SKILL
+    };
+
+    enum GameEventType
+    {
+        S_GAME_EVENT_PLAYER_DYING,
+        S_GAME_EVENT_SKILL_INVOKED
     };
 
     enum Game3v3ChooseOrderCommand
@@ -106,21 +114,24 @@ namespace QSanProtocol
         S_CAMP_COOL = 1
     };
 
+    //static consts
+    extern const char* S_PLAYER_SELF_REFERENCE_ID;
+
     class Countdown
     {
     public:
         enum CountdownType
-        {
+        {            
             S_COUNTDOWN_NO_LIMIT,
             S_COUNTDOWN_USE_SPECIFIED,
-            S_COUNTDOWN_USE_DEFAULT
+            S_COUNTDOWN_USE_DEFAULT           
         } m_type;
         static const std::string S_COUNTDOWN_MAGIC;
         time_t m_current;
         time_t m_max;
         inline Countdown(CountdownType type = S_COUNTDOWN_NO_LIMIT, time_t current = 0, time_t max = 0):
             m_type(type), m_current(current), m_max(max) {}
-        bool tryParse(Json::Value val);
+        bool tryParse(Json::Value val);        
         inline Json::Value toJsonValue()
         {
             if (m_type == S_COUNTDOWN_NO_LIMIT
@@ -128,8 +139,8 @@ namespace QSanProtocol
             {
                 Json::Value val(Json::arrayValue);
                 val[0] = S_COUNTDOWN_MAGIC;
-                val[1] = (int)m_type;
-                return val;
+                val[1] = (int)m_type;                
+                return val;                
             }
             else
             {
@@ -163,7 +174,7 @@ namespace QSanProtocol
     public:
         //format: [global_serial,local_serial,packet_type,command_name,command_body]
         unsigned int m_globalSerial;
-        unsigned int m_localSerial;
+        unsigned int m_localSerial;        
         inline QSanGeneralPacket(PacketType packetType = S_UNKNOWN_PACKET, CommandType command = S_COMMAND_UNKNOWN)
         {
             _m_globalSerial++;

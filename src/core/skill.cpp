@@ -5,7 +5,6 @@
 #include "client.h"
 #include "standard.h"
 #include "scenario.h"
-#include "settings.h"
 
 #include <QFile>
 
@@ -60,19 +59,17 @@ int Skill::getEffectIndex(const ServerPlayer *, const Card *) const{
 }
 
 void Skill::initMediaSource(){
-    sources.clear();
-
-    int i;
+    sources.clear();int i;
     for(i=1; ;i++){
-        QString effect_file = QString("audio/%3/skill/%1%2.ogg").arg(objectName()).arg(i).arg(Config.SoundEffectMode);
+		QString effect_file = QString("audio/skill/%1%2.ogg").arg(objectName()).arg(i);
         if(QFile::exists(effect_file))
-            sources << effect_file;
+			sources << effect_file;
         else
             break;
     }
 
     if(sources.isEmpty()){
-        QString effect_file = QString("audio/%2/skill/%1.ogg").arg(objectName()).arg(Config.SoundEffectMode);
+		QString effect_file = QString("audio/skill/%1.ogg").arg(objectName());
         if(QFile::exists(effect_file))
             sources << effect_file;
     }
@@ -82,7 +79,7 @@ Skill::Location Skill::getLocation() const{
     return parent() ? Right : Left;
 }
 
-void Skill::playEffect(int index) const{
+void Skill::playAudioEffect(int index) const{
     if(!sources.isEmpty()){
         if(index == -1)
             index = qrand() % sources.length();
@@ -96,7 +93,7 @@ void Skill::playEffect(int index) const{
         else
             filename = sources.first();
 
-        Sanguosha->playEffect(filename);
+        Sanguosha->playAudioEffect(filename);
         if(ClientInstance)
             ClientInstance->setLines(filename);
     }
@@ -130,17 +127,8 @@ ViewAsSkill::ViewAsSkill(const QString &name)
 
 bool ViewAsSkill::isAvailable() const{
     switch(ClientInstance->getStatus()){
-    case Client::Playing: return isEnabledAtPlay(Self) && (!Self->loseViewAsSkills()
-                                                           || this->objectName() == "free-discard"
-                                                           || this->objectName() == "fan"
-                                                           || this->objectName() == "spear"
-                                                           || this->objectName() == "huangtianv"
-                                                           || this->objectName() == "zhiba_pindian"
-                                                           || this->objectName() == "liangshangjunzi"
-                                                           || this->objectName() == "peaching");
-    case Client::Responsing: return isEnabledAtResponse(Self, ClientInstance->getPattern())
-                && (!Self->loseViewAsSkills()
-                    || this->objectName() == "wuliu_sword");
+    case Client::Playing: return isEnabledAtPlay(Self);
+    case Client::Responsing: return isEnabledAtResponse(Self, ClientInstance->getPattern());
     default:
         return false;
     }
@@ -215,10 +203,6 @@ int TriggerSkill::getPriority() const{
     default:
         return 1;
     }
-}
-
-int TriggerSkill::secondPriority() const{
-    return 1;
 }
 
 bool TriggerSkill::triggerable(const ServerPlayer *target) const{
@@ -320,11 +304,9 @@ SPConvertSkill::SPConvertSkill(const QString &name, const QString &from, const Q
 
 bool SPConvertSkill::triggerable(const ServerPlayer *target) const{
     if (target == NULL) return false;
-    bool canInvoke = ServerInfo.GameMode.endsWith("p") || ServerInfo.GameMode.endsWith("pd") ||
-            ServerInfo.GameMode.endsWith("pz");
     QString package = Sanguosha->getGeneral(to)->getPackage();
     if(Sanguosha->getBanPackages().contains(package)) return false;
-    return GameStartSkill::triggerable(target) && target->getGeneralName() == from && canInvoke;
+    return GameStartSkill::triggerable(target) && target->getGeneralName() == from;
 }
 
 void SPConvertSkill::onGameStart(ServerPlayer *player) const{
@@ -340,46 +322,6 @@ void SPConvertSkill::onGameStart(ServerPlayer *player) const{
     }
 }
 
-TransfigureSkill::TransfigureSkill(const QString &name, const QString &from, const QString &to, const QString &mark_willlose)
-    :GameStartSkill(name), from(from), to(to), mark_willlose(mark_willlose)
-{
-    frequency = Limited;
-}
-
-bool TransfigureSkill::triggerable(const ServerPlayer *target) const{
-    if (target == NULL) return false;
-    if(ServerInfo.Enable2ndGeneral)
-    {
-        QStringList ban_list = Config.value("Banlist/Pairs").toStringList();
-        QString ban1(QString("%1+%2").arg(to).arg(target->getGeneral2Name()));
-        QString ban2(QString("%1+%2").arg(target->getGeneral2Name()).arg(to));
-        if(ban_list.contains(ban1) || ban_list.contains(ban2) || ban_list.contains(to))
-            return false;
-    }
-    bool canInvoke = ServerInfo.GameMode.endsWith("p") || ServerInfo.GameMode.endsWith("pd") ||
-            ServerInfo.GameMode.endsWith("pz");
-	const General *to_general = Sanguosha->getGeneral(to);
-	if(to_general == NULL || Sanguosha->getBanPackages().contains(to_general->getPackage()))
-		return false;
-    return GameStartSkill::triggerable(target) && target->getGeneralName() == from && canInvoke;
-}
-
-void TransfigureSkill::onGameStart(ServerPlayer *player) const{
-    if(player->askForSkillInvoke(objectName())){
-        Room *room = player->getRoom();
-
-        if(!mark_willlose.isEmpty())
-            player->loseAllMarks(mark_willlose);
-
-        room->transfigure(player, to, true);
-
-        const General *general = Sanguosha->getGeneral(to);
-        const QString kingdom = general->getKingdom();
-        if(kingdom != player->getKingdom() && kingdom != "god")
-            room->setPlayerProperty(player, "kingdom", kingdom);
-    }
-}
-
 ProhibitSkill::ProhibitSkill(const QString &name)
     :Skill(name, Skill::Compulsory)
 {
@@ -388,13 +330,11 @@ ProhibitSkill::ProhibitSkill(const QString &name)
 DistanceSkill::DistanceSkill(const QString &name)
     :Skill(name, Skill::Compulsory)
 {
-
 }
 
 MaxCardsSkill::MaxCardsSkill(const QString &name)
     :Skill(name, Skill::Compulsory)
 {
-
 }
 
 WeaponSkill::WeaponSkill(const QString &name)
@@ -405,10 +345,6 @@ WeaponSkill::WeaponSkill(const QString &name)
 bool WeaponSkill::triggerable(const ServerPlayer *target) const{
     if (target == NULL) return false;
     return target->hasWeapon(objectName());
-}
-
-int WeaponSkill::secondPriority() const{
-    return 0;
 }
 
 ArmorSkill::ArmorSkill(const QString &name)
@@ -422,19 +358,11 @@ bool ArmorSkill::triggerable(const ServerPlayer *target) const{
     return target->hasArmorEffect(objectName()) && target->getArmor()->getSkill() == this;
 }
 
-int ArmorSkill::secondPriority() const{
-    return 0;
-}
-
 MarkAssignSkill::MarkAssignSkill(const QString &mark, int n)
     :GameStartSkill(QString("#%1-%2").arg(mark).arg(n)), mark_name(mark), n(n)
 {
 }
 
-int MarkAssignSkill::getPriority() const{
-    return 3;
-}
-
 void MarkAssignSkill::onGameStart(ServerPlayer *player) const{
-    player->getRoom()->setPlayerMark(player, mark_name, n);
+    player->gainMark(mark_name, n);
 }

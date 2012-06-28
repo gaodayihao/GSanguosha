@@ -4,7 +4,6 @@
 #include "engine.h"
 #include "connectiondialog.h"
 #include "configdialog.h"
-#include "halldialog.h"
 
 #include <QMainWindow>
 #include <QSettings>
@@ -75,16 +74,6 @@ private:
     QList<RoomItem*> room_items;
 };
 
-//Warning:If you will compiled it for Mac, please remove class Backloader
-class BackLoader: public QThread
-{
-    Q_OBJECT
-public:
-    BackLoader(QObject *parent =0 );
-protected:
-    virtual void run();
-};
-
 class AcknowledgementScene : public QGraphicsScene
 {
     Q_OBJECT
@@ -115,7 +104,6 @@ private:
     ConnectionDialog *connection_dialog;
     ConfigDialog *config_dialog;
     QSystemTrayIcon *systray;
-    HallDialog *hall_dialog;
 
     void restoreFromConfig();
 
@@ -155,20 +143,6 @@ private slots:
     void startGameInAnotherInstance();
     void changeBackground();
     void on_actionView_ban_list_triggered();
-
-    //
-    void startQNodeList(QString addr, int port);
-    void startQNodeInfo(QString addr, int port);
-    void process_socket_Reply(char*);
-    void process_socket_error_message();
-    void startReJoinRoom(int roomid);
-    void refreshRooms();
-    void startCreateRoom();
-    void startJoinRoom(int roomid);
-signals:
-    void nodelistupdate(QString);
-    void roomlistupdate(QString);
-    void rejoin_room(int); // 20111220
 };
 
 #endif // MAINWINDOW_H

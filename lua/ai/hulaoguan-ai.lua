@@ -1,6 +1,5 @@
 sgs.ai_skill_invoke["weapon_recast"] = function(self, data)
 	if self.player:isLord() then 
-		if data == nil then return true end
 		local card_use = data:toCardUse()
 		if card_use.card:objectName() ~= "crossbow" then return true else return false end 
 	else

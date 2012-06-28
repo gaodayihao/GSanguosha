@@ -33,7 +33,7 @@ end
 function SmartAI:useCardGaleShell(card, use)
 	use.broken = true
 	for _, enemy in ipairs(self.enemies) do
-		if self.player:distanceTo(enemy) <=1 and not self:hasSkills("jijiu|wusheng|longhun|longhunEx",enemy) then
+		if self.player:distanceTo(enemy) <=1 and not self:hasSkills("jijiu|wusheng|longhun",enemy) then
 			use.card = card
 			if use.to then
 				use.to:append(enemy)

@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QMap>
 #include <QIcon>
-#include <QTcpSocket>
 
 class Room;
 class Player;
@@ -27,7 +26,6 @@ class Card : public QObject
     Q_PROPERTY(int number READ getNumber WRITE setNumber)
     Q_PROPERTY(QString number_string READ getNumberString CONSTANT)
     Q_PROPERTY(QString type READ getType CONSTANT)
-    Q_PROPERTY(QString pixmap_path READ getPixmapPath)
     Q_PROPERTY(bool target_fixed READ targetFixed)
     Q_PROPERTY(bool once READ isOnce CONSTANT)
     Q_PROPERTY(bool mute READ isMute CONSTANT)
@@ -50,7 +48,6 @@ public:
         Basic,
         Trick,
         Equip,
-        Generals
     };
 
     // constructor
@@ -76,17 +73,13 @@ public:
     Color getColor() const;
     bool isEquipped() const;
 
-    virtual QString getPixmapPath() const;
-    QString getIconPath() const;
     QString getPackage() const;
-    QIcon getSuitIcon() const;
     QString getFullName(bool include_suit = false) const;
     QString getLogName() const;
     QString getName() const;
     QString getSkillName() const;
     void setSkillName(const QString &skill_name);
-    virtual QString getDescription() const;
-    QString getEffectPath() const;
+    QString getDescription() const;
 
     bool isVirtualCard() const;
     virtual bool match(const QString &pattern) const;
@@ -103,13 +96,13 @@ public:
     virtual QString getSubtype() const = 0;
     virtual CardType getTypeId() const = 0;
     virtual QString toString() const;
-    virtual QString getEffectPath(bool is_male) const;
     bool isNDTrick() const;
 
     // card target selection
     virtual bool targetFixed() const;
     virtual bool targetsFeasible(const QList<const Player *> &targets, const Player *Self) const;
     virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    virtual int targetFilterMultiple(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
     virtual bool isAvailable(const Player *player) const;
     virtual const Card *validate(const CardUseStruct *card_use) const;
     virtual const Card *validateInResposing(ServerPlayer *user, bool *continuable) const;
@@ -119,7 +112,6 @@ public:
     bool willThrow() const;
     bool canJilei() const;
     bool hasPreAction() const;
-    bool asPindian() const;
 
     void setFlags(const QString &flag) const;
     bool hasFlag(const QString &flag) const;
@@ -137,7 +129,6 @@ public:
     static bool CompareByColor(const Card *a, const Card *b);
     static bool CompareBySuitNumber(const Card *a, const Card *b);
     static bool CompareByType(const Card *a, const Card *b);
-    static bool CompareByActionOrder(ServerPlayer *a, ServerPlayer *b);
     static const Card *Parse(const QString &str);
     static Card * Clone(const Card *card);
     static QString Suit2String(Suit suit);
@@ -154,7 +145,6 @@ protected:
     bool will_throw;
     bool can_jilei;
     bool has_preact;
-    bool as_pindian;
 
 private:
     Suit suit;

@@ -18,9 +18,7 @@ const Card::Suit Card::AllSuits[4] = {
 };
 
 Card::Card(Suit suit, int number, bool target_fixed)
-    :target_fixed(target_fixed), once(false), mute(false), will_throw(true)
-    , has_preact(false), as_pindian(false)
-    , suit(suit), number(number), id(-1)
+    :target_fixed(target_fixed), once(false), mute(false), will_throw(true), has_preact(false), suit(suit), number(number), id(-1)
 {
     can_jilei = will_throw;
 
@@ -172,13 +170,8 @@ bool Card::CompareByType(const Card *a, const Card *b){
         return CompareBySuitNumber(a,b);
 }
 
-QString Card::getPixmapPath() const{
-    QString path = QString("image/card/%1.jpg").arg(objectName());
-    return QFile::exists(path) ? path : "image/card/unknown.jpg";
-}
-
-QString Card::getIconPath() const{
-    return QString("image/icon/%1.png").arg(objectName());
+bool Card::isNDTrick() const{
+    return getTypeId() == Trick && !inherits("DelayedTrick");
 }
 
 QString Card::getPackage() const{
@@ -186,23 +179,6 @@ QString Card::getPackage() const{
         return parent()->objectName();
     else
         return "";
-}
-
-QString Card::getEffectPath(bool is_male) const{
-    QString gender = is_male ? "male" : "female";
-    return QString("audio/%3/card/%1/%2.ogg").arg(gender).arg(objectName()).arg(Config.SoundEffectMode);
-}
-
-bool Card::isNDTrick() const{
-    return getTypeId() == Trick && !inherits("DelayedTrick");
-}
-
-QString Card::getEffectPath() const{
-    return QString("audio/%2/card/common/%1.ogg").arg(objectName()).arg(Config.SoundEffectMode);
-}
-
-QIcon Card::getSuitIcon() const{
-    return QIcon(QString("image/system/suit/%1.png").arg(getSuitString()));
 }
 
 QString Card::getFullName(bool include_suit) const{
@@ -242,9 +218,9 @@ void Card::setSkillName(const QString &name){
 }
 
 QString Card::getDescription() const{
-    QString desc = Sanguosha->translate(":" + this->objectName());
+    QString desc = Sanguosha->translate(":" + objectName());
     desc.replace("\n", "<br/>");
-    return tr("<b>[%1]</b> %2").arg(this->getName()).arg(desc);
+    return tr("<b>[%1]</b> %2").arg(getName()).arg(desc);
 }
 
 QString Card::toString() const{
@@ -319,7 +295,7 @@ const Card *Card::Parse(const QString &str){
             return NULL;
 
         if(subcard_str != ".")
-            subcard_ids = subcard_str.split("+");
+           subcard_ids = subcard_str.split("+");
 
         SkillCard *card = Sanguosha->cloneSkillCard(card_name);
 
@@ -421,7 +397,7 @@ Card *Card::Clone(const Card *card){
     const QMetaObject *meta = card->metaObject();
     Card::Suit suit = card->getSuit();
     int number = card->getNumber();
-
+    
     QObject *card_obj = meta->newInstance(Q_ARG(Card::Suit, suit), Q_ARG(int, number));
     if(card_obj){
         Card *new_card = qobject_cast<Card *>(card_obj);
@@ -448,7 +424,11 @@ bool Card::targetFilter(const QList<const Player *> &targets, const Player *to_s
     return targets.isEmpty() && to_select != Self;
 }
 
-bool Card::CompareByActionOrder(ServerPlayer *a, ServerPlayer *b){
+int Card::targetFilterMultiple(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return targetFilter(targets,to_select,Self);
+}
+
+static bool CompareByActionOrder(ServerPlayer *a, ServerPlayer *b){
     Room *room = a->getRoom();
 
     return room->getFront(a, b) == a;
@@ -460,68 +440,38 @@ void Card::doPreAction(Room *, const CardUseStruct &) const{
 
 void Card::onUse(Room *room, const CardUseStruct &card_use) const{
     ServerPlayer *player = card_use.from;
-    QVariant data = QVariant::fromValue(card_use);
-    RoomThread *thread = room->getThread();
-
-    thread->trigger(CardonUse, room, player, data);
-    CardUseStruct use = data.value<CardUseStruct>();
 
     LogMessage log;
-    log.from = use.from;
-    log.to = use.to;
+    log.from = player;
+    log.to = card_use.to;
     log.type = "#UseCard";
-    log.card_str = use.card->toString();
+    log.card_str = toString();
     room->sendLog(log);
 
     QList<int> used_cards;
     QList<CardsMoveStruct> moves;
-    if(use.card->isVirtualCard()){
-        foreach(int card_id, use.card->getSubcards()){
+    if(card_use.card->isVirtualCard()){
+        foreach(int card_id, card_use.card->getSubcards()){
             used_cards << card_id;
         }
     }
     else{
-        used_cards << use.card->getEffectiveId();
+        used_cards << card_use.card->getEffectiveId();
     }
-
-    if(!used_cards.isEmpty() && use.card->getEffectiveId() != -1 && room->getCardPlace(use.card->getEffectiveId()) != Player::DealingArea)
-    {
-        if(use.card->isVirtualCard()){
-            if(use.card->asPindian()){
-                CardMoveReason reason(CardMoveReason::S_REASON_PINDIAN, player->objectName(), QString(), use.card->getSkillName(), QString());
-                CardsMoveStruct move(used_cards, use.from, use.from, Player::PlaceTakeoff, reason);
-                moves.append(move);
-                room->moveCardsAtomic(moves, false);
-            }
-            else if(use.card->subcardsLength() > 0 && use.card->getTypeId() != Skill){
-                CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), use.card->getSkillName(), QString());
-                if (use.to.size() == 1)
-                    reason.m_targetId = use.to.first()->objectName();
-                CardsMoveStruct move(used_cards, room->getCardOwner(use.card->getEffectiveId()), NULL, Player::DealingArea, reason);
-                moves.append(move);
-                room->moveCardsAtomic(moves, true);
-            }
-            else if(use.card->willThrow())
-            {
-                CardMoveReason reason(CardMoveReason::S_REASON_THROW, use.from->objectName(), QString(), use.card->getSkillName(), QString());
-                if (use.to.size() == 1) reason.m_targetId = use.to.first()->objectName();
-                if(room->getCardPlace(getEffectiveId()) != Player::DiscardPile)
-                    room->moveCardTo(use.card, use.from, NULL, Player::DiscardPile, reason, true);
-            }
-        }
-        else{
-            CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), use.card->getSkillName(), QString());
-            if (use.to.size() == 1)
-                reason.m_targetId = use.to.first()->objectName();
-            CardsMoveStruct move(used_cards, room->getCardOwner(use.card->getEffectiveId()), NULL, Player::DealingArea, reason);
-            moves.append(move);
-            room->moveCardsAtomic(moves, true);
-        }
+    QVariant data = QVariant::fromValue(card_use);
+    RoomThread *thread = room->getThread();
+ 
+    if(getTypeId() != Card::Skill){
+        CardMoveReason reason(CardMoveReason::S_REASON_USE, player->objectName(), QString(), this->getSkillName(), QString());
+        if (card_use.to.size() == 1)
+            reason.m_targetId = card_use.to.first()->objectName();
+        CardsMoveStruct move(used_cards, card_use.from, NULL, Player::PlaceTable, reason);
+        moves.append(move);
+        room->moveCardsAtomic(moves, true);
     }
+    thread->trigger(CardUsed, room, player, data);
 
-    thread->trigger(CardUsed, room, use.from, data);
-
-    thread->trigger(CardFinished, room, use.from, data);
+    thread->trigger(CardFinished, room, player, data);
 }
 
 void Card::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
@@ -529,13 +479,11 @@ void Card::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &ta
         room->cardEffect(this, source, targets.first());
     }else{
         QList<ServerPlayer *> players = targets;
-
-        if(!this->inherits("Slash"))
-            qSort(players.begin(), players.end(), CompareByActionOrder);
+        qSort(players.begin(), players.end(), CompareByActionOrder);
 
         if(room->getMode() == "06_3v3"){
-            if(inherits("AOE") || inherits("GlobalEffect"))
-                room->reverseFor3v3(this, source, players);
+           if(inherits("AOE") || inherits("GlobalEffect"))
+               room->reverseFor3v3(this, source, players);
         }
 
         foreach(ServerPlayer *target, players){
@@ -548,13 +496,13 @@ void Card::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &ta
             room->cardEffect(effect);
         }
     }
-
-    if(room->getCardPlace(getEffectiveId()) == Player::DealingArea)
-    {
-        CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName(), QString(), this->getSkillName(), QString());
+    if(willThrow() && isVirtualCard()){
+        CardMoveReason reason(CardMoveReason::S_REASON_THROW, source->objectName(), QString(), this->getSkillName(), QString());
         if (targets.size() == 1) reason.m_targetId = targets.first()->objectName();
-        room->moveCardTo(this, source, NULL, Player::DiscardPile, reason, true);
+        if(room->getCardPlace(getEffectiveId()) == Player::PlaceTable || this->inherits("DummyCard"))
+            room->moveCardTo(this, source, NULL, Player::DiscardPile, reason, true);
     }
+    room->removeTag("Huoshou");
 }
 
 void Card::onEffect(const CardEffectStruct &) const{
@@ -622,10 +570,6 @@ bool Card::hasPreAction() const{
     return has_preact;
 }
 
-bool Card::asPindian() const{
-    return as_pindian;
-}
-
 void Card::setFlags(const QString &flag) const{
     static char symbol_c = '-';
 
@@ -633,8 +577,11 @@ void Card::setFlags(const QString &flag) const{
         return;
     else if(flag == ".")
         flags.clear();
-    else if(flag.startsWith(symbol_c))
-        flags.removeOne(flag.split('-').at(1));
+    else if(flag.startsWith(symbol_c)){
+        QString copy = flag;
+        copy.remove(symbol_c);
+        flags.removeOne(copy);
+    }
     else
         flags << flag;
 }

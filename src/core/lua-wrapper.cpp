@@ -43,12 +43,6 @@ LuaDistanceSkill::LuaDistanceSkill(const char *name)
 
 }
 
-LuaMaxCardsSkill::LuaMaxCardsSkill(const char *name)
-    :MaxCardsSkill(name), extra_func(0)
-{
-
-}
-
 static QHash<QString, const LuaSkillCard *> LuaSkillCards;
 
 LuaSkillCard::LuaSkillCard(const char *name)
@@ -67,8 +61,6 @@ LuaSkillCard *LuaSkillCard::clone() const{
 
     new_card->target_fixed = target_fixed;
     new_card->will_throw = will_throw;
-    new_card->as_pindian = as_pindian;
-    new_card->mute = mute;
 
     new_card->filter = filter;
     new_card->feasible = feasible;
@@ -83,15 +75,7 @@ void LuaSkillCard::setTargetFixed(bool target_fixed){
 }
 
 void LuaSkillCard::setWillThrow(bool will_throw){
-    this->will_throw = will_throw;
-}
-
-void LuaSkillCard::setPindian(bool as_pindian){
-    this->as_pindian = as_pindian;
-}
-
-void LuaSkillCard::setMute(bool mute){
-    this->mute = mute;
+    this->will_throw = will_throw;;
 }
 
 LuaSkillCard *LuaSkillCard::Parse(const QString &str){

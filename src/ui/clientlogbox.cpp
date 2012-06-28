@@ -49,7 +49,6 @@ void ClientLogBox::appendLog(
             else
                 log_name += ", " + card->getLogName();
         }
-
         log_name = bold(log_name, Qt::yellow);
 
         log = Sanguosha->translate(type);
@@ -142,7 +141,7 @@ QString ClientLogBox::bold(const QString &str, QColor color) const{
 }
 
 void ClientLogBox::appendLog(const QString &log_str){
-    QRegExp rx("([#$]\\w+):(\\w*)->([+\\w]*):(.*):(@?\\w*):(-?\\w*)");
+    QRegExp rx("([#$]\\w+):(\\w*)->([+\\w]*):(.*):(@?\\w*):(\\w*)");
 
     if(!rx.exactMatch(log_str)){
         append(tr("Log string is not well formatted: %1").arg(log_str));

@@ -20,3 +20,5 @@ How to build QSanguosha with VS2010
 8. In "Solution Explorer", select "Translation Files", right click "sanguosha.ts" and then "lrelease"
 
 9. You are now able to build and run the solution.
+
+

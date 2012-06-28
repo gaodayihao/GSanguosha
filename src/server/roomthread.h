@@ -4,7 +4,6 @@
 #include <QThread>
 #include <QSemaphore>
 #include <QVariant>
-#include <QMutex>
 
 #include <csetjmp>
 
@@ -53,15 +52,11 @@ public:
 
     const QList<EventTriplet> *getEventStack() const;
 
-    // QReadWriteLock rwlock;
-    QMutex mutex;
-
 protected:
     virtual void run();
 
 private:
     Room *room;
-    jmp_buf env;
     QString order;
 
     QList<const TriggerSkill *> skill_table[NumOfEvents];

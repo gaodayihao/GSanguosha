@@ -7,7 +7,7 @@ function sgs.CreateTriggerSkill(spec)
 
 	local frequency = spec.frequency or sgs.Skill_NotFrequent
 	local skill = sgs.LuaTriggerSkill(spec.name, frequency)
-
+	
 	if(type(spec.events) == "number") then
 		skill:addEvent(spec.events)
 	elseif(type(spec.events) == "table") then
@@ -15,13 +15,13 @@ function sgs.CreateTriggerSkill(spec)
 			skill:addEvent(event)
 		end
 	end
-
+	
 	skill.on_trigger = spec.on_trigger
-
+	
 	if spec.can_trigger then
 		skill.can_trigger = spec.can_trigger
 	end
-
+	
 	if spec.view_as_skill then
 		skill:setViewAsSkill(spec.view_as_skill)
 	end
@@ -35,24 +35,24 @@ end
 
 function sgs.CreateGameStartSkill(spec)
 	assert(type(spec.on_gamestart) == "function")
-
+	
 	spec.events = sgs.GameStart
-
+	
 	function spec.on_trigger(skill, event, player, data)
 		spec.on_gamestart(skill, player)
 		return false
 	end
-
+	
 	return sgs.CreateTriggerSkill(spec)
 end
 
 function sgs.CreateProhibitSkill(spec)
 	assert(type(spec.name) == "string")
 	assert(type(spec.is_prohibited) == "function")
-
+	
 	local skill = sgs.LuaProhibitSkill(spec.name)	
 	skill.is_prohibited = spec.is_prohibited
-
+	
 	return skill
 end
 
@@ -78,26 +78,16 @@ function sgs.CreateDistanceSkill(spec)
 	return skill
 end
 
-function sgs.CreateMaxCardsSkill(spec)
-	assert(type(spec.name) == "string")
-	assert(type(spec.extra_func) == "function")
-
-	local skill = sgs.LuaMaxCardsSkill(spec.name)
-	skill.extra_func = spec.extra_func
-
-	return skill
-end
-
 function sgs.CreateMasochismSkill(spec)
 	assert(type(spec.on_damaged) == "function")
-
+	
 	spec.events = sgs.Damaged
-
+	
 	function spec.on_trigger(skill, event, player, data)
 		spec.on_damaged(skill, player)
 		return false		
 	end
-
+	
 	return sgs.CreateTriggerSkill(spec)
 end
 
@@ -107,9 +97,9 @@ end
 
 function sgs.CreateSkillCard(spec)
 	assert(spec.name)
-
+	
 	local card = sgs.LuaSkillCard(spec.name)
-
+	
 	if type(spec.target_fixed) == "boolean" then
 		card:setTargetFixed(spec.target_fixed)
 	end
@@ -117,45 +107,37 @@ function sgs.CreateSkillCard(spec)
 	if type(spec.will_throw) == "boolean" then
 		card:setWillThrow(spec.will_throw)	
 	end
-
-	if type(spec.as_pindian) == "boolean" then
-		card:setPindian(spec.as_pindian)	
-	end
-	
-	if type(spec.mute) == "boolean" then
-		card:setMute(spec.mute)	
-	end
 	
 	card.filter = spec.filter
 	card.feasible = spec.feasible
 	card.on_use = spec.on_use
 	card.on_effect = spec.on_effect
-
+	
 	return card
 end
 
 function sgs.CreateViewAsSkill(spec)
 	assert(spec.name)
-
+	
 	local skill = sgs.LuaViewAsSkill(spec.name)
 	local n = spec.n or 0
-
+	
 	function skill:view_as(cards)
 			return spec.view_as(self,cards)
 	end
-
+	
 	function skill:view_filter(selected, to_select)
 			if #selected>=n then
 				return false
 			end
-
+			
 			return spec.view_filter(self, selected, to_select)
 	end
-
+	
 	skill.enabled_at_play = spec.enabled_at_play
 	skill.enabled_at_response = spec.enabled_at_response
 	skill.enabled_at_nullification = spec.enabled_at_nullification
-
+	
 	return skill
 end
 
@@ -200,7 +182,7 @@ function sgs.reverse(list)
 	for i=#list, 1, -1 do
 		table.insert(new, list[i])
 	end
-
+	
 	return new
 end
 
@@ -222,7 +204,7 @@ end
 function table:contains(element)
 	if #self == 0 or type(self[1]) ~= type(element) then return false
 	end
-
+	
 	for _, e in ipairs(self) do
 		if e == element then return true end
 	end
@@ -230,7 +212,7 @@ end
 
 function table:removeOne(element)
 	if #self == 0 or type(self[1]) ~= type(element) then return false end
-
+	
 	for i=1, #self do
 		if self[i] == element then 
 			table.remove(self, i)
