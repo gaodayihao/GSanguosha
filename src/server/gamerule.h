@@ -29,9 +29,7 @@ public:
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const;
 
 private:
-    bool hasHeroCard(ServerPlayer *player) const;
-    void sendHeroCardsToPileLog(int card, ServerPlayer *player) const;
-    void sendHeroCardsToPileLog(const QList<int> &cards, ServerPlayer* player) const;
+	bool hasHeroCard(ServerPlayer *player) const;
     void addHeroCardsToPile(ServerPlayer *player) const;
     void addHeroCardsFlag(ServerPlayer *player) const;
     void removeHeroCardsFlag(ServerPlayer *player) const;

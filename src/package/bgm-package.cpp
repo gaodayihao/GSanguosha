@@ -786,10 +786,8 @@ public:
             }
         }
         else{
-            while(no_basic > 0){
-                int num;
-                room->askForDiscardEx(victim, "zhaolie", no_basic, 1, num, false, true);
-                no_basic -= num;
+			for(int i = 0; i < no_basic; i++){
+				room->askForDiscard(victim, "zhaolie", 1, 1, false, true);
             }
             if(!card_ids.isEmpty()){
                 QList<CardsMoveStruct> moves;
