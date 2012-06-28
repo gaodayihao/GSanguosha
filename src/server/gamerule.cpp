@@ -933,7 +933,6 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
                 player->addToPile("heros", heroCard, false);
                 player->fillHero();
 
-                sendHeroCardsToPileLog(hero, player);
                 LogMessage log;
                 log.from = player;
                 log.type = "#EquipedHeroCard";
@@ -957,8 +956,7 @@ bool ThreeKingdomsMode::trigger(TriggerEvent event, Room* room, ServerPlayer *pl
         CardMoveStar move = data.value<CardMoveStar>();
         const Card *card = Sanguosha->getCard(move->card_id);
         if(card->inherits("HeroCard"))
-        {
-            sendHeroCardsToPileLog(move->card_id, player);
+		{
             player->addToPile("heros", card, false);
             player->fillHero();
         }
@@ -1069,24 +1067,6 @@ bool ThreeKingdomsMode::hasHeroCard(ServerPlayer *player) const{
     return false;
 }
 
-void ThreeKingdomsMode::sendHeroCardsToPileLog(int card, ServerPlayer* player) const{
-    QList<int> cards;
-    cards << card;
-    sendHeroCardsToPileLog(cards, player);
-}
-
-void ThreeKingdomsMode::sendHeroCardsToPileLog(const QList<int> &cards, ServerPlayer *player) const{
-    LogMessage log;
-    log.from = player;
-    log.type = "$AddHeroCardsToPile";
-    foreach(int card, cards)
-        if(log.card_str.isEmpty())
-            log.card_str = QString::number(card);
-        else
-            log.card_str += "+" + QString::number(card);
-    player->getRoom()->sendLog(log);
-}
-
 void ThreeKingdomsMode::addHeroCardsToPile(ServerPlayer *player) const{
     QList<int> hero_card_ids;
 
@@ -1100,8 +1080,7 @@ void ThreeKingdomsMode::addHeroCardsToPile(ServerPlayer *player) const{
             hero_card_ids << id;
     }
     if(!hero_card_ids.isEmpty())
-    {
-        sendHeroCardsToPileLog(hero_card_ids, player);
+	{
         player->addToPile("heros", hero_card_ids, false);
     }
     player->fillHero();
