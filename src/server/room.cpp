@@ -3812,58 +3812,6 @@ bool Room::askForDiscard(ServerPlayer *player, const QString &reason, int discar
     return true;
 }
 
-//only for bgm_liubei now, I think if should be write in askForDiscard, but I don't want to fix too much code.
-bool Room::askForDiscardEx(ServerPlayer *player, const QString &reason, int discard_num, int min_num,
-                         int &num, bool optional, bool include_equip){
-    notifyMoveFocus(player, S_COMMAND_DISCARD_CARD);
-    AI *ai = player->getAI();
-    QList<int> to_discard;
-    if (ai) {
-        to_discard = ai->askForDiscard(reason, discard_num, min_num, optional, include_equip);
-    }else{
-        Json::Value ask_str(Json::arrayValue);
-        ask_str[0] = discard_num;
-        ask_str[1] = min_num;
-        ask_str[2] = optional;
-        ask_str[3] = include_equip;
-        bool success = doRequest(player, S_COMMAND_DISCARD_CARD, ask_str, true);
-
-        Json::Value clientReply = player->getClientReply();
-        if(!success || !clientReply.isArray() || ((int)clientReply.size() > discard_num || (int)clientReply.size() < min_num)
-            || !tryParse(clientReply, to_discard))
-        {
-            if(optional) return false;
-            to_discard = player->forceToDiscard(discard_num, include_equip);
-        }
-    }
-
-    if (to_discard.isEmpty()) return false;
-
-    num = to_discard.length();
-
-    DummyCard *dummy_card = new DummyCard;
-    foreach(int card_id, to_discard)
-        dummy_card->addSubcard(card_id);
-
-    if(reason == "gamerule"){
-        CardMoveReason reason(CardMoveReason::S_REASON_RULEDISCARD, player->objectName(), QString(), dummy_card->getSkillName(), QString());
-        throwCard(dummy_card, reason, player);
-    }
-    else
-    {
-        CardMoveReason reason(CardMoveReason::S_REASON_THROW, player->objectName(), QString(), dummy_card->getSkillName(), QString());
-        throwCard(dummy_card, reason, player);
-    }
-
-    QVariant data;
-    data = QString("%1:%2").arg("cardDiscard").arg(dummy_card->toString());
-    thread->trigger(ChoiceMade, this, player, data);
-
-    dummy_card->deleteLater();
-
-    return true;
-}
-
 const Card *Room::askForExchange(ServerPlayer *player, const QString &reason, int discard_num, bool include_equip, const QString &prompt){
     notifyMoveFocus(player, S_COMMAND_EXCHANGE_CARD);
     AI *ai = player->getAI();
