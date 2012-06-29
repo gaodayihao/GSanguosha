@@ -208,7 +208,7 @@ public:
     virtual bool triggerable(const ServerPlayer *) const;
     virtual void onGameStart(ServerPlayer *player) const;
 
-private:
+protected:
     QString from, to, mark_willlose;
 };
 

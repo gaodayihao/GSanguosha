@@ -197,7 +197,7 @@ void LijianCard::onUse(Room *room,const CardUseStruct &card_use) const{
     thread->trigger(CardFinished, room, card_use.from, data);
 }
 
-void LijianCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
+void LijianCard::use(Room *room, ServerPlayer *, const QList<ServerPlayer *> &targets) const{
     room->playSkillEffect("lijian");
 
     ServerPlayer *to = targets.at(0);
@@ -250,7 +250,7 @@ GuicaiCard::GuicaiCard(){
     can_jilei = true;
 }
 
-void GuicaiCard::use(Room *room, ServerPlayer *source, const QList<ServerPlayer *> &targets) const{
+void GuicaiCard::use(Room *, ServerPlayer *, const QList<ServerPlayer *> &) const{
 
 }
 

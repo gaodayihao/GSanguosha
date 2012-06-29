@@ -1071,7 +1071,7 @@ public:
     }
 
     static void PlayEffect(ServerPlayer *zuoci, const QString &skill_name){
-        int r = qrand() % 2;
+        int r = qrand() % 2 + 1;
         if(zuoci->getGender() == General::Female)
             r += 2;
 

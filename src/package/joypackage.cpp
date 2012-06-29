@@ -11,44 +11,49 @@ QString Shit::getSubtype() const{
     return "disgusting_card";
 }
 
+void Shit::doDamage(ServerPlayer *victim) const{
+    if(victim->isDead())
+        return;
+
+    LogMessage log;
+    log.card_str = getEffectIdString();
+    log.from = victim;
+
+    Room *room = victim->getRoom();
+
+    if(getSuit() == Spade){
+        log.type = "$ShitLostHp";
+        room->sendLog(log);
+
+        room->loseHp(victim);
+
+        return;
+    }
+
+    DamageStruct damage;
+    damage.from = damage.to = victim;
+    damage.card = this;
+
+    switch(getSuit()){
+    case Club: damage.nature = DamageStruct::Thunder; break;
+    case Heart: damage.nature = DamageStruct::Fire; break;
+    default:
+        damage.nature = DamageStruct::Normal;
+    }
+
+    log.type = "$ShitDamage";
+    room->sendLog(log);
+
+    room->damage(damage);
+}
+
 void Shit::onMove(const CardMoveStruct &move) const{
     ServerPlayer *from = (ServerPlayer*)move.from;
     if(from && move.from_place == Player::PlaceHand &&
        from->getRoom()->getCurrent() == move.from
-       && (move.to_place == Player::DiscardPile || move.to_place == Player::PlaceSpecial)
-       && move.to == NULL
-       && from->isAlive()){
-
-        LogMessage log;
-        log.card_str = getEffectIdString();
-        log.from = from;
-
-        Room *room = from->getRoom();
-
-        if(getSuit() == Spade){            
-            log.type = "$ShitLostHp";
-            room->sendLog(log);
-
-            room->loseHp(from);
-
-            return;
-        }
-
-        DamageStruct damage;
-        damage.from = damage.to = from;
-        damage.card = this;
-
-        switch(getSuit()){
-        case Club: damage.nature = DamageStruct::Thunder; break;
-        case Heart: damage.nature = DamageStruct::Fire; break;
-        default:
-            damage.nature = DamageStruct::Normal;
-        }
-
-        log.type = "$ShitDamage";
-        room->sendLog(log);
-
-        room->damage(damage);
+       && (move.to_place == Player::DiscardPile || move.to_place == Player::TopDrawPile || move.to_place == Player::DealingArea)
+       && move.to == NULL){
+        doDamage((ServerPlayer*)move.from);
     }
 }
 

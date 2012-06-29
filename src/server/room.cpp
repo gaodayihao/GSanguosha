@@ -298,7 +298,7 @@ void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason){
     if(Config.EnableAI){
         bool expose_roles = true;
         foreach(ServerPlayer *player, m_alivePlayers){
-            if(player->isOffline()){
+            if(player->isOnline()){
                 expose_roles = false;
                 break;
             }

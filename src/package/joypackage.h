@@ -34,6 +34,9 @@ public:
     virtual void onMove(const CardMoveStruct &move) const;
 
     static bool HasShit(const Card *card);
+
+private:
+    void doDamage(ServerPlayer *victim) const;
 };
 
 

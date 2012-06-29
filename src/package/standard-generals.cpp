@@ -499,7 +499,6 @@ public:
     }
 
     virtual bool trigger(TriggerEvent , Room* room, ServerPlayer *liubei, QVariant &data) const{
-        if (liubei == NULL) return false;
         QString pattern = data.toString();
         if(pattern != "slash")
             return false;
@@ -694,12 +693,19 @@ public:
         frequency = Frequent;
     }
 
+    void playSkillEffect(ServerPlayer *zhuge, Room *room, const QString &skill_name) const{
+        int index = 1 + qrand() % 2;
+        if(zhuge->getMark("zhiji") > 0)
+            index += 2;
+        room->playSkillEffect(skill_name, index);
+    }
+
     virtual bool onPhaseChange(ServerPlayer *zhuge) const{
         if(zhuge->getPhase() == Player::Start &&
                 zhuge->askForSkillInvoke(objectName()))
         {
             Room *room = zhuge->getRoom();
-            room->playSkillEffect(objectName());
+            playSkillEffect(zhuge, room, objectName());
 
             int n = qMin(5, room->alivePlayerCount());
             room->askForGuanxing(zhuge, room->getNCards(n, false), false);
@@ -1344,7 +1350,8 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return TransfigureSkill::triggerable(target) && !target->isLord();
+        return TransfigureSkill::triggerable(target) && !target->isLord()
+                && target->getRoom()->getLord()->getGeneralName() != to;
     }
 };
 
