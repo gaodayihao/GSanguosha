@@ -1,7 +1,7 @@
 sgs.ai_skill_invoke.chongzhen = function(self, data)
-	local target = self.player:getTag("ChongZhenTarget"):toPlayer()
+	local target = data:toPlayer()
 	if self:isFriend(target) then
-		return target:hasSkill("kongcheng") and target:getHandcardNum() == 1
+		return (target:hasSkill("kongcheng") or target:hasSkill("zhiji") and target:getMark("zhiji") == 0) and target:getHandcardNum() == 1
 	else
 		return not (target:hasSkill("kongcheng") and target:getHandcardNum() == 1 and target:getEquips():isEmpty())
 	end
