@@ -171,10 +171,8 @@ public:
             if(use.from != jiangwei)
                 return false;
             card = use.card;
-        }else if(event == CardResponsed){
-            ResponsedStar resp = data.value<ResponsedStar>();
-            card = resp->card;
-        }
+        }else if(event == CardResponsed)
+            card = data.value<CardStar>();
 
         if(card->inherits("TrickCard") && !card->inherits("DelayedTrick")){
             if(!room->askForSkillInvoke(jiangwei, objectName(), data))
@@ -679,10 +677,8 @@ public:
         if(event == CardUsed){
             CardUseStruct use = data.value<CardUseStruct>();
             card = use.card;
-        }else if(event == CardResponsed){
-            ResponsedStar resp = data.value<ResponsedStar>();
-            card = resp->card;
-        }
+        }else if(event == CardResponsed)
+            card = data.value<CardStar>();
 
         if(card->inherits("BasicCard")){
             if(room->askForSkillInvoke(tianfeng, objectName(), data)){
@@ -828,10 +824,8 @@ public:
         if(event == CardUsed){
             CardUseStruct use = data.value<CardUseStruct>();
             card = use.card;
-        }else if(event == CardResponsed){
-            ResponsedStar resp = data.value<ResponsedStar>();
-            card = resp->card;
-        }
+        }else if(event == CardResponsed)
+            card = data.value<CardStar>();
 
         if(card->isNDTrick()){
             ServerPlayer *shuijing = room->findPlayerBySkillName(objectName());

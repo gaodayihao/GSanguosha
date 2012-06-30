@@ -646,7 +646,7 @@ SavageAssault::SavageAssault(Suit suit, int number)
 
 void SavageAssault::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.to->getRoom();
-    const Card *slash = room->askForCard(effect.to, "slash", "savage-assault-slash:" + effect.from->objectName(), QVariant(), CardResponsed, effect.from);
+    const Card *slash = room->askForCard(effect.to, "slash", "savage-assault-slash:" + effect.from->objectName());
     if(slash)
         room->setEmotion(effect.to, "killer");
     else{
@@ -673,7 +673,7 @@ ArcheryAttack::ArcheryAttack(Card::Suit suit, int number)
 
 void ArcheryAttack::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.to->getRoom();
-    const Card *jink = room->askForCard(effect.to, "jink", "archery-attack-jink:" + effect.from->objectName(), QVariant(), CardResponsed, effect.from);
+    const Card *jink = room->askForCard(effect.to, "jink", "archery-attack-jink:" + effect.from->objectName());
     if(jink)
         room->setEmotion(effect.to, "jink");
     else{
@@ -946,16 +946,16 @@ void Duel::onEffect(const CardEffectStruct &effect) const{
     {
         if(second->hasSkill("wushuang")){
             room->playSkillEffect("wushuang");
-            const Card *slash = room->askForCard(first, "slash", "@wushuang-slash-1:" + second->objectName(), QVariant(), CardResponsed, second);
+            const Card *slash = room->askForCard(first, "slash", "@wushuang-slash-1:" + second->objectName());
             if(slash == NULL)
                 break;
 
-            slash = room->askForCard(first, "slash", "@wushuang-slash-2:" + second->objectName(), QVariant(), CardResponsed, second);
+            slash = room->askForCard(first, "slash", "@wushuang-slash-2:" + second->objectName());
             if(slash == NULL)
                 break;
 
         }else{
-            const Card *slash = room->askForCard(first, "slash", "duel-slash:" + second->objectName(), QVariant(), CardResponsed, second);
+            const Card *slash = room->askForCard(first, "slash", "duel-slash:" + second->objectName());
             if(slash == NULL)
                 break;
         }

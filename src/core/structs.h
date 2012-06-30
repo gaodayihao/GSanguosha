@@ -311,29 +311,6 @@ struct PhaseChangeStruct{
     Player::Phase to;
 };
 
-struct ResponsedStruct{
-    inline ResponsedStruct()
-    {
-        who = NULL;
-        card = NULL;
-    }
-
-    inline ResponsedStruct(const Card* card)
-    {
-        who = NULL;
-        this->card = card;
-    }
-
-    inline ResponsedStruct(const Card* card, ServerPlayer *who)
-    {
-        this->who = who;
-        this->card = card;
-    }
-
-    ServerPlayer *who;
-    const Card *card;
-};
-
 enum TriggerEvent{
     NonTrigger, //those two events actually trigger nothing
 
@@ -414,7 +391,6 @@ typedef PindianStruct *PindianStar;
 typedef const CardMoveStruct *CardMoveStar;
 typedef const CardsMoveOneTimeStruct *CardsMoveOneTimeStar;
 typedef const CardsMoveStruct *CardsMoveStar;
-typedef const ResponsedStruct *ResponsedStar;
 
 Q_DECLARE_METATYPE(DamageStruct)
 Q_DECLARE_METATYPE(CardEffectStruct)
@@ -433,7 +409,5 @@ Q_DECLARE_METATYPE(JudgeStar)
 Q_DECLARE_METATYPE(DamageStar)
 Q_DECLARE_METATYPE(PindianStar)
 Q_DECLARE_METATYPE(PhaseChangeStruct)
-Q_DECLARE_METATYPE(ResponsedStruct)
-Q_DECLARE_METATYPE(ResponsedStar)
 
 #endif // STRUCTS_H

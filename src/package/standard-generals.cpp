@@ -477,13 +477,7 @@ public:
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
-        if(player->hasLordSkill("jijiang") && Slash::IsAvailable(player))
-        {
-            foreach(const Player *p, player->getSiblings())
-                if(p->getKingdom() == "shu")
-                    return true;
-        }
-        return false;
+        return player->hasLordSkill("jijiang") && Slash::IsAvailable(player);
     }
 
     virtual const Card *viewAs() const{
@@ -767,10 +761,8 @@ public:
         if(event == CardonUse){
             CardUseStruct use = data.value<CardUseStruct>();
             card = use.card;
-        }else if(event == CardResponsed){
-            ResponsedStar resp = data.value<ResponsedStar>();
-            card = resp->card;
-        }
+        }else if(event == CardResponsed)
+            card = data.value<CardStar>();
 
         if(card->isNDTrick()){
             if(room->askForSkillInvoke(yueying, objectName(), data)){
@@ -924,9 +916,8 @@ public:
     }
 
     virtual bool trigger(TriggerEvent , Room*, ServerPlayer *lvmeng, QVariant &data) const{
-        ResponsedStar resp = data.value<ResponsedStar>();
-        const Card *card = resp->card;
-        if(card->inherits("Slash"))
+        CardStar card_star = data.value<CardStar>();
+        if(card_star->inherits("Slash"))
             lvmeng->setFlags("keji_use_slash");
 
         return false;
@@ -1169,9 +1160,9 @@ public:
         QString slasher = lvbu->objectName();
 
         const Card *first_jink = NULL, *second_jink = NULL;
-        first_jink = room->askForCard(effect.to, "jink", "@wushuang-jink-1:" + slasher, QVariant(), CardUsed, lvbu);
+        first_jink = room->askForCard(effect.to, "jink", "@wushuang-jink-1:" + slasher, QVariant(), CardUsed);
         if(first_jink)
-            second_jink = room->askForCard(effect.to, "jink", "@wushuang-jink-2:" + slasher, QVariant(), CardUsed, lvbu);
+            second_jink = room->askForCard(effect.to, "jink", "@wushuang-jink-2:" + slasher, QVariant(), CardUsed);
 
         Card *jink = NULL;
         if(first_jink && second_jink){

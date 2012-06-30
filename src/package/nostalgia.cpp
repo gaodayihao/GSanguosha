@@ -25,9 +25,8 @@ public:
                 card = NULL;
             }
         }else if(event == CardResponsed){
-            ResponsedStar resp = data.value<ResponsedStar>();
-            card = resp->card;
-            player->tag["MoonSpearSlash"] = QVariant::fromValue((CardStar)card);
+            card = data.value<CardStar>();
+            player->tag["MoonSpearSlash"] = data;
         }
 
         if(card == NULL || !card->isBlack())

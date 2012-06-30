@@ -34,8 +34,6 @@ class YeyanCard: public SkillCard{
     Q_OBJECT
 
 public:
-    Q_INVOKABLE YeyanCard();
-
     void damage(ServerPlayer *shenzhouyu, ServerPlayer *target, int point) const;
 };
 

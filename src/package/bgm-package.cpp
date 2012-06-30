@@ -14,36 +14,41 @@ public:
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
         if(event == CardResponsed){
-            ResponsedStar resp = data.value<ResponsedStar>();
-            const Card *card = resp->card;
-            ServerPlayer *who = resp->who;
-            if(card->getSkillName() == "longdan" && who)
-            {
-                QVariant to = QVariant::fromValue((PlayerStar)who);
-                if(!who->isKongcheng() && player->askForSkillInvoke(objectName(), to)){
-                    int card_id = room->askForCardChosen(player, who, "h", objectName());
+            CardStar card = data.value<CardStar>();
+            if(card->getSkillName() == "longdan"){
+                ServerPlayer *target = NULL;
+                if(!room->getTag("ChongzhenSource").isNull())
+                {
+                    target = room->getTag("ChongzhenSource").value<PlayerStar>();
+                    room->removeTag("ChongzhenSource");
+                }
+
+                if(target && !target->isKongcheng() && player->askForSkillInvoke(objectName())){
+                    int card_id = room->askForCardChosen(player, target, "h", objectName());
                     CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, player->objectName());
-                    room->playSkillEffect("chongzhen");
                     room->obtainCard(player, Sanguosha->getCard(card_id), reason, false);
+                    room->playSkillEffect("chongzhen");
                 }
             }
         }
         else{
             CardUseStruct use = data.value<CardUseStruct>();
-            if(use.from == player && use.card->getSkillName() == "longdan"){
+            if(use.from->objectName() == player->objectName() && use.card->getSkillName() == "longdan"){
                 foreach(ServerPlayer *p, use.to){
                     if(p->isKongcheng())
                         continue;
 
-                    QVariant to = QVariant::fromValue((PlayerStar)p);
-                    if(!player->askForSkillInvoke(objectName(), to))
+                    if(!player->askForSkillInvoke(objectName()))
                         continue;
 
                     int card_id = room->askForCardChosen(player, p, "h", objectName());
                     CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, player->objectName());
-                    room->playSkillEffect("chongzhen");
                     room->obtainCard(player, Sanguosha->getCard(card_id), reason, false);
+                    room->playSkillEffect("chongzhen");
                 }
+            }
+            else if(use.to.contains(player)){
+                room->setTag("ChongzhenSource", QVariant::fromValue((PlayerStar)use.from));
             }
         }
         return false;

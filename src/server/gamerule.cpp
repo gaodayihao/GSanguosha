@@ -466,10 +466,10 @@ bool GameRule::trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVa
                                         .arg(bgm_zhangfei->objectName())
                                         .arg("dahe"),
                                         data,
-                                        CardUsed, effect.from);
+                                        CardUsed);
             }
             else
-                jink = room->askForCard(effect.to, "jink", "slash-jink:" + slasher, data, CardUsed, effect.from);
+                jink = room->askForCard(effect.to, "jink", "slash-jink:" + slasher, data, CardUsed);
             room->slashResult(effect, jink);
 
             break;
