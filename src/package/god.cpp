@@ -461,8 +461,10 @@ public:
         if(event == CardUsed){
             CardUseStruct use = data.value<CardUseStruct>();
             card = use.card;
-        }else if(event == CardResponsed)
-            card = data.value<CardStar>();
+        }else if(event == CardResponsed){
+            ResponsedStar resp = data.value<ResponsedStar>();
+            card = resp->card;
+        }
 
         if(card->inherits("TrickCard") && !card->inherits("DelayedTrick")){
             room->playSkillEffect(objectName());
@@ -1067,8 +1069,10 @@ public:
             CardStar card = NULL;
             if(event == CardUsed)
                 card = data.value<CardUseStruct>().card;
-            else
-                card = data.value<CardStar>();
+            else{
+                ResponsedStar resp = data.value<ResponsedStar>();
+                card = resp->card;
+            }
 
             if(card->isNDTrick() && player->askForSkillInvoke("jilve", data)){
                 player->loseMark("@bear");
@@ -1583,7 +1587,7 @@ GodPackage::GodPackage()
     related_skills.insertMulti("lianpo", "#lianpo-get");
 
     addMetaObject<GongxinCard>();
-    addMetaObject<GreatYeyanCard>();
+    addMetaObject<YeyanCard>();
     addMetaObject<ShenfenCard>();
     addMetaObject<GreatYeyanCard>();
     addMetaObject<MediumYeyanCard>();

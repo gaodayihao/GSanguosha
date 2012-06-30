@@ -988,7 +988,7 @@ int Room::askForCardChosen(ServerPlayer *player, ServerPlayer *who, const QStrin
 }
 
 const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const QString &prompt,
-                             const QVariant &data, TriggerEvent trigger_event)
+                             const QVariant &data, TriggerEvent trigger_event, ServerPlayer *from)
 {
     const Card *card = NULL;
 
@@ -1040,8 +1040,9 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
         QList<CardsMoveStruct> moves;
 
         if(trigger_event == CardUsed){
-            CardMoveReason reason(CardMoveReason::S_REASON_LETUSE, player->objectName());
-            reason.m_skillName = card->getSkillName();
+            CardMoveReason reason(CardMoveReason::S_REASON_LETUSE, player->objectName(), card->getSkillName(), QString());
+            if(from)
+                reason.m_targetId = from->objectName();
             CardsMoveStruct move(card_ids, getCardOwner(card->getEffectiveId()), NULL, Player::DiscardPile, reason);
             moves.append(move);
             moveCardsAtomic(moves, false);
@@ -1052,8 +1053,10 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
             moveCardTo(card, player, NULL, Player::DiscardPile, reason);
         }
         else if(trigger_event != NonTrigger){
-            CardMoveReason reason(CardMoveReason::S_REASON_RESPONSE, player->objectName());
+            CardMoveReason reason(CardMoveReason::S_REASON_RESPONSE, player->objectName(), card->getSkillName(), QString());
             reason.m_skillName = card->getSkillName();
+            if(from)
+                reason.m_targetId = from->objectName();
             CardsMoveStruct move(card_ids, getCardOwner(card->getEffectiveId()), NULL, Player::DiscardPile, reason);
             moves.append(move);
             moveCardsAtomic(moves, false);
@@ -1061,9 +1064,6 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
 
         QVariant decisionData = QVariant::fromValue("cardResponsed:"+pattern+":"+prompt+":_"+card->toString()+"_");
         thread->trigger(ChoiceMade, this, player, decisionData);
-
-        CardStar card_ptr = card;
-        QVariant card_star = QVariant::fromValue(card_ptr);
 
         if(trigger_event == CardResponsed || trigger_event == CardUsed){
             LogMessage log;
@@ -1075,7 +1075,10 @@ const Card *Room::askForCard(ServerPlayer *player, const QString &pattern, const
             player->playCardEffect(card);
             /* the first is the right one,but for convenient, we use the second one
             thread->trigger(trigger_event, this, player, card_star);   */
-            thread->trigger(CardResponsed, this, player, card_star);
+            ResponsedStruct resp = ResponsedStruct(card, from);
+            ResponsedStar resp_star = &resp;
+            QVariant data = QVariant::fromValue(resp_star);
+            thread->trigger(CardResponsed, this, player, data);
         }
     }else if(continuable)
         return askForCard(player, pattern, prompt);

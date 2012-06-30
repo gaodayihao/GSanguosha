@@ -736,7 +736,11 @@ void MingceCard::onEffect(const CardEffectStruct &effect) const{
 
         if(!targets.isEmpty()){
             ServerPlayer *target = room->askForPlayerChosen(effect.from, targets, "mingce");
-            room->cardEffect(new Slash(Card::NoSuit, 0), effect.to, target);
+            CardUseStruct use;
+            use.card = new Slash(Card::NoSuit, 0);
+            use.from = effect.to;
+            use.to << target;
+            room->useCard(use, false);
         }
     }else if(choice == "draw"){
         effect.to->drawCards(1, true);

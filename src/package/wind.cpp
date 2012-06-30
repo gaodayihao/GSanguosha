@@ -276,7 +276,8 @@ public:
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *zhangjiao, QVariant &data) const{
         if (zhangjiao == NULL) return false;
-        CardStar card_star = data.value<CardStar>();
+        ResponsedStar resp = data.value<ResponsedStar>();
+        CardStar card_star = resp->card;
         if(!card_star->inherits("Jink"))
             return false;
         room->askForUseCard(zhangjiao, "@@leiji", "@leiji");

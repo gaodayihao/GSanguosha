@@ -204,7 +204,7 @@ public:
         frequency = Frequent;
     }
 
-    virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent event, Room* , ServerPlayer *player, QVariant &data) const{
         if(player->getPhase() != Player::NotActive)
             return false;
 
@@ -214,7 +214,8 @@ public:
             card = use.card;
         }
         else if(event == CardResponsed){
-            card = data.value<CardStar>();
+            ResponsedStar resp = data.value<ResponsedStar>();
+            card = resp->card;
         }
         else{
             CardMoveStar move = data.value<CardMoveStar>();
