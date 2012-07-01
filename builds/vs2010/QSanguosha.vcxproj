@@ -745,7 +745,6 @@
     <ClCompile Include="..\..\src\server\serverplayer.cpp" />
     <ClCompile Include="..\..\src\core\settings.cpp" />
     <ClCompile Include="..\..\src\package\lingpackage.cpp" />
-    <ClCompile Include="..\..\src\package\threekingdoms.cpp" />
     <ClCompile Include="..\..\src\core\skill.cpp" />
     <ClCompile Include="..\..\src\package\sp-package.cpp" />
     <ClCompile Include="..\..\src\package\special3v3-package.cpp" />
@@ -764,6 +763,7 @@
     <ClCompile Include="..\..\src\package\yjcm-package.cpp" />
     <ClCompile Include="..\..\src\package\yjcm2012-package.cpp" />
     <ClCompile Include="..\..\src\scenario\zombie-mode-scenario.cpp" />
+    <ClCompile Include="..\..\src\package\threekingdoms.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\ui\TimedProgressBar.h">
