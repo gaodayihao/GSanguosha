@@ -722,12 +722,15 @@ Collateral::Collateral(Card::Suit suit, int number)
 }
 
 bool Collateral::isAvailable(const Player *player) const{
+    bool canUse = false;
     foreach(const Player *p, player->getSiblings()){
-        if(p->getWeapon() && p->isAlive())
-            return true;
+        if(p->getWeapon() && p->isAlive()){
+            canUse = true;
+            break;
+        }
     }
 
-    return false;
+    return canUse && SingleTargetTrick::isAvailable(player);
 }
 
 bool Collateral::targetsFeasible(const QList<const Player *> &targets, const Player *) const{

@@ -160,8 +160,8 @@ public:
         }else if(event == DamageDone){
             player->tag["DamageDoneFace"] = player->faceUp();
         }else if(event == DamageComplete){
-            bool faceup = player->tag.value("DamageDoneFace").toBool();
-            if(!faceup && player->askForSkillInvoke("jiushi", data)){
+            bool faceup = player->tag.value("DamageDoneFace", true).toBool();
+            if(!faceup && !player->faceUp() && player->askForSkillInvoke("jiushi", data)){
                 room->playSkillEffect("jiushi", 3);
                 player->turnOver();
             }

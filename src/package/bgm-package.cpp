@@ -824,7 +824,7 @@ public:
 
                 QList<ServerPlayer *> victims;
 
-                foreach(ServerPlayer *p, room->getAlivePlayers()){
+                foreach(ServerPlayer *p, room->getOtherPlayers(player)){
                     if(p->getKingdom() == "shu"){
                         if(!p->tag.value("ShichouTarget").isNull()
                                 && p->tag.value("ShichouTarget").value<PlayerStar>() == player)
@@ -852,7 +852,7 @@ public:
             break;
         }
         case DamageInflicted:{
-            if(player->hasLordSkill("shichou") && !player->tag.value("ShichouTarget").isNull())
+            if(player->hasLordSkill("shichou", true) && !player->tag.value("ShichouTarget").isNull())
             {
                 ServerPlayer *target = player->tag.value("ShichouTarget").value<PlayerStar>();
 
@@ -869,10 +869,10 @@ public:
 					DamageStruct damage = data.value<DamageStruct>();
 					damage.to = target;
 					damage.chain = true;
-					room->damage(damage);
+                    room->damage(damage);
 
-					damage.transfer = true;
-					data = QVariant::fromValue(damage);
+                    damage.transfer = true;
+                    data = QVariant::fromValue(damage);
 					return true;
 				}
             }

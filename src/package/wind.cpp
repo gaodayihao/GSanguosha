@@ -703,7 +703,7 @@ void TianxiangCard::onEffect(const CardEffectStruct &effect) const{
     DamageStruct damage = effect.from->tag["TianxiangDamage"].value<DamageStruct>();
     damage.to = effect.to;
     damage.chain = true;
-    room->setPlayerFlag(damage.to, "TianxiangTarget");
+    room->setTag("TianxiangTarget", QVariant::fromValue((PlayerStar)damage.to));
     room->damage(damage);
 }
 
@@ -742,13 +742,17 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return target->hasFlag("TianxiangTarget") || TriggerSkill::triggerable(target);
+        return target != NULL;
     }
 
     virtual bool trigger(TriggerEvent event, Room* room, ServerPlayer *xiaoqiao, QVariant &data) const{
-        if(event == DamageComplete && xiaoqiao->isAlive() && xiaoqiao->hasFlag("TianxiangTarget")){
-            xiaoqiao->drawCards(xiaoqiao->getLostHp());
-            room->setPlayerFlag(xiaoqiao, "-TianxiangTarget");
+        if(event == DamageComplete){
+            if(!room->getTag("TianxiangTarget").isNull())
+            {
+                ServerPlayer *player = room->getTag("TianxiangTarget").value<PlayerStar>();
+                player->drawCards(player->getLostHp());
+                room->removeTag("TianxiangTarget");
+            }
         }
         else if(event == DamageInflicted && xiaoqiao->hasSkill(objectName()) && !xiaoqiao->isKongcheng()){
             DamageStruct damage = data.value<DamageStruct>();
