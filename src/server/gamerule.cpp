@@ -663,8 +663,8 @@ void GameRule::changeGeneral1v1(ServerPlayer *player) const{
         foreach(QString skill, skills.toList())
             room->detachSkillFromPlayer(player, skill);
 
-    room->transfigure(player, new_general, true, true);
     room->revivePlayer(player);
+    room->transfigure(player, new_general, true, true);
     if(player->getKingdom() != player->getGeneral()->getKingdom())
         room->setPlayerProperty(player, "kingdom", player->getGeneral()->getKingdom());
 
