@@ -595,6 +595,8 @@ public:
     }
 
     virtual void onGameStart(ServerPlayer *lvmeng) const{
+        if(lvmeng->getMark("@wen") > 0 || lvmeng->getMark("@wu") > 0)
+            return;
         Room *room = lvmeng->getRoom();
         room->setPlayerMark(lvmeng, "@wu", 1);
         room->acquireSkill(lvmeng, "jiang", true);

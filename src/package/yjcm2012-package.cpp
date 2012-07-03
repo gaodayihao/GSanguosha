@@ -626,6 +626,7 @@ public:
                     {
                         room->setPlayerFlag(handang, "-jiefanUsed");
                         room->removeTag("JiefanTarget");
+                        break;
                     }
                 }
             }
