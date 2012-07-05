@@ -210,9 +210,7 @@ public:
             room->playSkillEffect("yongsi");
 
         }else if(event == PhaseChange){
-            PhaseChangeStruct phase_change = data.value<PhaseChangeStruct>();
-
-            if(phase_change.from == Player::Play){
+            if(yuanshu->getPhase() == Player::Discard){
                 int x = getKingdoms(yuanshu);
                 int total = yuanshu->getEquips().length() + yuanshu->getHandcardNum();
                 Room *room = yuanshu->getRoom();
