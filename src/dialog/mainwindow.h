@@ -75,14 +75,10 @@ private:
     QList<RoomItem*> room_items;
 };
 
-//Warning:If you will compiled it for Mac, please remove class Backloader
-class BackLoader: public QThread
+class BackLoader
 {
-    Q_OBJECT
 public:
-    BackLoader(QObject *parent =0 );
-protected:
-    virtual void run();
+    static void preload();
 };
 
 class AcknowledgementScene : public QGraphicsScene

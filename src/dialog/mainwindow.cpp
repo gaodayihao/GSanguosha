@@ -47,7 +47,8 @@ public:
             room_scene->setSceneRect(newSceneRect);
             room_scene->adjustItems();
             setSceneRect(room_scene->sceneRect());
-            fitInView(room_scene->sceneRect(), Qt::KeepAspectRatio);
+            if (newSceneRect != room_scene->sceneRect())
+                fitInView(room_scene->sceneRect(), Qt::KeepAspectRatio);
             main_window->setBackgroundBrush(false);
             return;
         }else if(scene()->inherits("StartScene"))
@@ -57,7 +58,8 @@ public:
                                 event->size().width(), event->size().height());
             start_scene->setSceneRect(newSceneRect);
             setSceneRect(start_scene->sceneRect());
-            fitInView(start_scene->sceneRect(), Qt::KeepAspectRatio);
+            if (newSceneRect != start_scene->sceneRect())
+                fitInView(start_scene->sceneRect(), Qt::KeepAspectRatio);
         }
         if(main_window)
             main_window->setBackgroundBrush(true);
@@ -116,6 +118,7 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(view);
     restoreFromConfig();
 
+    BackLoader::preload();
     gotoScene(start_scene);
 
     addAction(ui->actionShow_Hide_Menu);
@@ -276,13 +279,7 @@ void MainWindow::networkError(const QString &error_msg){
         QMessageBox::warning(this, tr("Network error"), error_msg);
 }
 
-//Warning:If you will compiled it for Mac, please remove class Backloader
-BackLoader::BackLoader(QObject * parent)
-    :QThread(parent)
-{
-}
-
-void BackLoader::run()
+void BackLoader::preload()
 {
     QStringList emotions;
     emotions << "peach"
@@ -319,19 +316,12 @@ void BackLoader::run()
 
     foreach(QString emotion, emotions){
         int n = PixmapAnimation::GetFrameCount(emotion);
-        for(int i=0; i<n; i++){
+        for(int i = 0; i < n; i++){
 
             QString filename = QString("image/system/emotion/%1/%2.png").arg(emotion).arg(i);
-            try{
-                PixmapAnimation::GetFrameFromCache(filename);
-            }
-            catch(...){
-                continue;
-            }
+            PixmapAnimation::GetFrameFromCache(filename);
         }
     }
-
-    emit finished();
 }
 
 void MainWindow::enterRoom(){

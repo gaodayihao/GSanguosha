@@ -2,6 +2,9 @@
 #include <QPainter>
 #include <QPixmapCache>
 #include <QDir>
+#include <QTimer>
+
+const int PixmapAnimation::S_DEFAULT_INTERVAL = 50;
 
 PixmapAnimation::PixmapAnimation(QGraphicsScene *scene) :
     QGraphicsItem(0,scene)
@@ -54,13 +57,24 @@ void PixmapAnimation::timerEvent(QTimerEvent *)
 
 void PixmapAnimation::start(bool permanent,int interval)
 {
-    startTimer(interval);
-    if(!permanent)connect(this,SIGNAL(finished()),this,SLOT(deleteLater()));
+    _m_timerId = startTimer(interval);
+    if (!permanent) connect(this,SIGNAL(finished()),this,SLOT(deleteLater()));
+}
+
+void PixmapAnimation::stop()
+{
+    killTimer(_m_timerId);
+}
+
+void PixmapAnimation::preStart(){
+    this->show();
+    this->startTimer(S_DEFAULT_INTERVAL);
 }
 
 PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, const QString &emotion, int x,int y)
 {
     PixmapAnimation *pma = new PixmapAnimation();
+    pma->hide();
     pma->setPath(QString("image/system/emotion/%1/").arg(emotion));
     if(pma->valid())
     {
@@ -95,7 +109,9 @@ PixmapAnimation* PixmapAnimation::GetPixmapAnimation(QGraphicsObject *parent, co
 
         pma->setParentItem(parent);
         pma->setZValue(2.5);
-        pma->startTimer(50);
+
+        pma->startTimer(S_DEFAULT_INTERVAL);
+
         connect(pma,SIGNAL(finished()),pma,SLOT(deleteLater()));
         return pma;
     }
@@ -120,5 +136,6 @@ QPixmap PixmapAnimation::GetFrameFromCache(const QString &filename){
 int PixmapAnimation::GetFrameCount(const QString &emotion){
     QString path = QString("image/system/emotion/%1/").arg(emotion);
     QDir dir(path);
+    dir.setNameFilters(QStringList("*.png"));
     return dir.entryList(QDir::Files | QDir::NoDotAndDotDot).count();
 }

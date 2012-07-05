@@ -209,6 +209,10 @@ public:
             return NULL;
     }
 
+    virtual int getEffectIndex(const ServerPlayer *, const Card *) const{
+        return 0;
+    }
+
 protected:
     virtual bool isEnabledAtPlay(const Player *player) const{
         if(player->isKongcheng())
